@@ -1,0 +1,366 @@
+{
+  "nav": {
+    "home": "Home",
+    "builder": "AI Builder",
+    "offers": "Offers",
+    "experiences": "Experiences",
+    "events": "Events",
+    "partners": "Partners",
+    "media": "Media",
+    "contact": "Contact",
+    "admin": "Admin",
+    "reserve": "Book my experience"
+  },
+  "footer": {
+    "tagline": "\"The confidential ecosystem where travel becomes capital, and every encounter an opportunity.\"",
+    "navigation": "Navigation",
+    "contact": "Contact",
+    "rights": "All rights reserved",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "charter": "Circle Charter"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "By invitation · Since 2019",
+      "title1": "Travel",
+      "title2": "as capital.",
+      "title3": "Encounter,",
+      "title4": "as strategy.",
+      "desc": "A confidential ecosystem for entrepreneurs, investors, and leaders. Tailor-made experiences, AI-orchestrated encounters, verified opportunities.",
+      "btn1": "Design my experience",
+      "btn2": "Explore events",
+      "stat1_val": "1,200+",
+      "stat1_label": "Members",
+      "stat2_val": "47",
+      "stat2_label": "Countries",
+      "stat3_val": "94%",
+      "stat3_label": "Satisfaction"
+    },
+    "hero_live": {
+      "eyebrow": "Tonight · Live",
+      "title": "Founders Dinner #14",
+      "desc": "Paris · 24 founders · Sold out",
+      "status": "Private streaming live",
+      "upcoming": "Upcoming event",
+      "reserve_btn": "Reserve a seat",
+      "reserving": "Processing...",
+      "reserved": "Seat reserved",
+      "ai_reco_title": "AI Recommendation",
+      "ai_reco_desc": "\"Based on similar profiles, Aria has selected 3 experiences.\"",
+      "ai_reco_btn": "Activate Aria"
+    },
+    "scroll": "Scroll",
+    "promises": {
+      "eyebrow": "The Commitment",
+      "title": "Four promises, no compromises.",
+      "sub": "Everything that distinguishes a private circle from a mere luxury service.",
+      "p1_title": "By invitation",
+      "p1_desc": "Every member is introduced. Scarcity preserves value.",
+      "p2_title": "AI Intelligence",
+      "p2_desc": "Aria orchestrates encounters and programs in real time.",
+      "p3_title": "Qualified network",
+      "p3_desc": "Family offices, Series A+ founders, international operators.",
+      "p4_title": "Measurable ROI",
+      "p4_desc": "84% of our members sign a deal within 6 months."
+    },
+    "offers": {
+      "eyebrow": "Experiences",
+      "title": "Three doors. One circle.",
+      "all": "All offers",
+      "from": "From",
+      "price_unit": "€"
+    },
+    "video": {
+      "eyebrow": "Original Web Series",
+      "title1": "Inside",
+      "title2": "the Circle.",
+      "desc": "Six immersive episodes. Six cities. One encounter per night that changes everything.",
+      "close": "Close"
+    },
+    "event": {
+      "eyebrow": "Next Private Event",
+      "stat1_val": "80",
+      "stat1_label": "Family offices",
+      "stat2_val": "1 day",
+      "stat2_label": "Summit",
+      "stat3_val": "12",
+      "stat3_label": "Pitches",
+      "btn": "Request an invitation"
+    },
+    "testimonials": {
+      "eyebrow": "Member voices",
+      "title": "The circle speaks for itself."
+    },
+    "cta": {
+      "title1": "Your next deal starts with",
+      "title2": "a single encounter.",
+      "desc": "By invitation. Absolute discretion. Response within 48h.",
+      "btn": "Start my experience"
+    }
+  },
+  "offers": {
+    "banner": {
+      "badge": "New",
+      "title1": "Business",
+      "title2": "Experience",
+      "subtitle": "— International —",
+      "p1_label": "Connect",
+      "p1_sub": "leaders",
+      "p2_label": "Enhance",
+      "p2_sub": "territories",
+      "p3_label": "Create",
+      "p3_sub": "opportunities",
+      "hook1": "4 EXCEPTIONAL DESTINATIONS.",
+      "hook2": "ONE GOAL: ENCOUNTERS THAT",
+      "hook3": "TRANSFORM YOUR AMBITIONS INTO OPPORTUNITIES.",
+      "services_title": "Turnkey premium weekends",
+      "s1_label": "Networking",
+      "s1_sub": "qualified",
+      "s2_label": "Experiences",
+      "s2_sub": "gastronomic",
+      "s3_label": "Encounters",
+      "s3_sub": "exclusive business",
+      "s4_label": "Development",
+      "s4_sub": "partnerships",
+      "s5_label": "Discovery",
+      "s5_sub": "territories",
+      "s6_label": "Support",
+      "s6_sub": "personalized",
+      "footer_desc": "An experience designed for entrepreneurs, executives, investors and decision-makers.",
+      "footer_quote1": "Your gateway to",
+      "footer_quote2": "new business ecosystems.",
+      "btn": "Pre-registrations open",
+      "f1": "Networking",
+      "f2": "Discovery",
+      "f3": "Sharing",
+      "f4": "Growth"
+    },
+    "formulas": {
+      "eyebrow": "Our formulas",
+      "title1": "Three doors.",
+      "title2": "One circle.",
+      "sub": "Each experience is tailor-made. Here are our reference frameworks."
+    }
+  },
+  "events": {
+    "hero": {
+      "eyebrow": "Private Calendar",
+      "title1": "Meetings",
+      "title2": "that matter."
+    },
+    "upcoming": {
+      "title": "Upcoming",
+      "subtitle": "open events",
+      "badge": "Open",
+      "btn": "Request an invitation"
+    },
+    "past": {
+      "title": "Past editions",
+      "subtitle": "Confidential archives"
+    }
+  },
+  "experiences": {
+    "hero": {
+      "eyebrow": "The Catalog",
+      "title1": "Meticulous",
+      "title2": "curation.",
+      "sub": "Verified addresses, long-standing partners, private access."
+    },
+    "cats": {
+      "Tout": "All",
+      "Hôtels": "Hotels",
+      "Gastronomie": "Gastronomy",
+      "Expériences": "Experiences",
+      "Business": "Business"
+    }
+  },
+  "contact": {
+    "hero": {
+      "eyebrow": "Concierge",
+      "title1": "A discreet",
+      "title2": "conversation."
+    },
+    "info": {
+      "mail": "Concierge",
+      "phone": "Private line",
+      "address": "Private House",
+      "commitment_title": "Commitment",
+      "commitment_desc": "\"Every request receives a personalized response from a dedicated concierge within 24 hours, including holidays.\""
+    },
+    "form": {
+      "title": "Request a private call",
+      "sub": "We will call you back within 24 hours.",
+      "fn": "First Name",
+      "ln": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "profile": "You are",
+      "p1": "Entrepreneur",
+      "p2": "Investor",
+      "p3": "Family office",
+      "p4": "Other",
+      "msg": "Message",
+      "submit": "Send my request",
+      "sent": "Request sent"
+    }
+  },
+  "partners": {
+    "hero": {
+      "eyebrow": "The ecosystem",
+      "title1": "Our",
+      "title2": "accomplices.",
+      "sub": "Exceptional houses that share our demand for detail."
+    }
+  },
+  "media": {
+    "hero": {
+      "eyebrow": "Original Media",
+      "title1": "Inside",
+      "title2": "the Circle.",
+      "sub": "Web series, reels, documentaries. The art of telling the invisible."
+    },
+    "close": "Close"
+  },
+  "builder": {
+    "hero": {
+      "eyebrow": "Aria · AI Concierge",
+      "title1": "Let's compose your",
+      "title2": "experience.",
+      "sub": "6 questions. An exclusive program generated in 12 seconds."
+    },
+    "step": "Step",
+    "steps": {
+      "s1": "Profile",
+      "s2": "Objective",
+      "s3": "Budget",
+      "s4": "Interests",
+      "s5": "Duration",
+      "s6": "Destination"
+    },
+    "q1": {
+      "title": "Who are you?",
+      "sub": "To personalize each interaction.",
+      "opts": {
+        "entrepreneur": "Entrepreneur",
+        "entrepreneur_desc": "Founder or growing operator",
+        "investor": "Investor",
+        "investor_desc": "VC, family office, business angel",
+        "freelancer": "Independent",
+        "freelancer_desc": "Consultant, expert, advisor"
+      }
+    },
+    "q2": {
+      "title": "What is your objective?",
+      "sub": "Aria will orchestrate around this goal.",
+      "opts": {
+        "networking": "Networking",
+        "networking_desc": "Expand my circle of peers and clients",
+        "investment": "Investment",
+        "investment_desc": "Source or raise capital",
+        "discovery": "Discovery",
+        "premium_desc": "Premium travel & inspiration"
+      }
+    },
+    "q3": {
+      "title": "Your envelope.",
+      "sub": "No offer is imposed. You stay in control.",
+      "unit": "per person"
+    },
+    "q4": {
+      "title": "Your interests.",
+      "sub": "Select what drives you.",
+      "opts": [
+        "Exceptional hotels", "Starred gastronomy", "Yacht & sea", "Art & culture", "Wellness", "Startup pitches", "Family offices", "Crypto & Web3"
+      ]
+    },
+    "q5": {
+      "title": "How many days?",
+      "sub": "The ideal is between 2 and 5 days."
+    },
+    "q6": {
+      "title": "Which destination?",
+      "sub": "We operate in 47 countries.",
+      "opts": [
+        "France", "Switzerland", "Monaco", "UAE", "United Kingdom", "Morocco", "United States", "Japan"
+      ]
+    },
+    "nav": {
+      "back": "Back",
+      "next": "Continue",
+      "finish": "Generate my exclusive experience"
+    }
+  },
+  "result": {
+    "hero": {
+      "eyebrow": "Personalized program by Aria",
+      "title1": "Your experience",
+      "days": "days",
+      "profile": "profile",
+      "objective": "objective"
+    },
+    "score": {
+      "title": "Member Score",
+      "v1": "VIP Profile · priority access",
+      "v2": "Qualified profile · 24h response",
+      "v3": "Interesting profile · nurturing"
+    },
+    "price": {
+      "title": "Price incl. tax",
+      "sub": "per person",
+      "hotel": "Hotels",
+      "dining": "Gastronomy",
+      "activity": "Activities",
+      "margin": "Concierge margin"
+    },
+    "match": {
+      "title": "AI Compatibility",
+      "network": "Network",
+      "budget": "Budget",
+      "destination": "Destination",
+      "calendar": "Calendar"
+    },
+    "program": {
+      "eyebrow": "Day by day program",
+      "title1": "A flawlessly",
+      "title2": "orchestrated flow.",
+      "day": "Day"
+    },
+    "contacts": {
+      "eyebrow": "Aria selected for you",
+      "title1": "3 contacts",
+      "title2": "to meet.",
+      "match": "Match"
+    },
+    "upsells": {
+      "eyebrow": "Suggested upgrades",
+      "title1": "Add the",
+      "title2": "final touch."
+    },
+    "cta": {
+      "title": "Ready to bring this program to life?",
+      "sub": "Immediate booking or private call with a dedicated concierge.",
+      "reserve": "Book now",
+      "call": "Request a private call"
+    }
+  },
+  "chatbot": {
+    "greeting": "Good evening. I am Aria, your AI concierge. How can I orchestrate your experience?",
+    "invest_reply": "Our Investor Experience (3,890 €) includes a private pitch from 5 startups and a yacht dinner. Would you like the detailed program?",
+    "monaco_reply": "The Private Capital Summit is held on September 12 in Monaco. 80 European family offices expected. Shall I get you an invitation?",
+    "call_reply": "With pleasure. A 20-min private call can be scheduled within 24h. What is your availability?",
+    "default_reply": "I am forwarding this immediately to a dedicated concierge. Could you specify your objective and your budget?",
+    "status": "Concierge · Online",
+    "suggestions": "Suggestions",
+    "q1": "Which offer for an investor?",
+    "q2": "Next event in Monaco?",
+    "q3": "Schedule a private call",
+    "placeholder": "Your message…"
+  },
+  "notfound": {
+    "title": "404",
+    "sub": "Page not found",
+    "desc": "The route does not exist.",
+    "btn": "Back to home"
+  }
+}
