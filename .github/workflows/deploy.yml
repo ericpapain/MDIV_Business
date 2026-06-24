@@ -25,15 +25,6 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Remove OVH default index.php via FTP
-        uses: StephanThiworworr/ftp-delete-action@v1
-        continue-on-error: true
-        with:
-          host: ${{ secrets.FTP_SERVER }}
-          user: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          remoteFiles: ./www/index.php
-
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
