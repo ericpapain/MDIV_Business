@@ -52,7 +52,7 @@ export default function Home() {
 
   return (
     <div className="overflow-x-hidden">
-      {/* HERO */}
+      {/* HEROs */}
       <section className="relative min-h-screen flex items-center pt-24 pb-16">
         <div className="absolute inset-0">
           <img src={images.hero} alt="Cercle privé d'affaires" className="w-full h-full object-cover" />
