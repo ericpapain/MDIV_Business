@@ -102,15 +102,15 @@ export const events = {
 };
 
 export const partners = [
-  { name: "Ritz-Carlton", category: "Hôtellerie", country: "International" },
-  { name: "Hôtel de Crillon", category: "Hôtellerie", country: "France" },
-  { name: "Aman Resorts", category: "Hôtellerie", country: "International" },
-  { name: "Guy Savoy", category: "Gastronomie", country: "France" },
-  { name: "Alain Ducasse Collection", category: "Gastronomie", country: "International" },
-  { name: "Cheval Blanc", category: "Hôtellerie", country: "France" },
-  { name: "Family Office Geneva", category: "Investissement", country: "Suisse" },
-  { name: "Atomico Partners", category: "Investissement", country: "UK" },
-  { name: "Mubadala Capital", category: "Investissement", country: "UAE" },
+  { name: "Immobilier", category: "Investissement", country: "France & International" },
+  { name: "Finance & Banque", category: "Investissement", country: "International" },
+  { name: "Technologies & IA", category: "Innovation", country: "International" },
+  { name: "Hôtellerie & Tourisme", category: "Hôtellerie", country: "France & International" },
+  { name: "Santé & Bien-être", category: "Innovation", country: "France" },
+  { name: "Luxe & Mode", category: "Hôtellerie", country: "International" },
+  { name: "Énergie & Environnement", category: "Innovation", country: "International" },
+  { name: "Restauration & Gastronomie", category: "Gastronomie", country: "France & International" },
+  { name: "Transport & Logistique", category: "Investissement", country: "International" },
 ];
 
 export const media = [

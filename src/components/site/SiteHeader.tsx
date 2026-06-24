@@ -9,7 +9,7 @@ const navKeys = [
   { to: "/offres", key: "nav.offers" },
   //{ to: "/experiences", key: "nav.experiences" },
   { to: "/evenements", key: "nav.events" },
-  //{ to: "/partenaires", key: "nav.partners" },
+  { to: "/partenaires", key: "nav.partners" },
   //{ to: "/media", key: "nav.media" },
   { to: "/contact", key: "nav.contact" },
 ];

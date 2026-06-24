@@ -1,14 +1,14 @@
 import { partners, images } from "@/data/mockData";
-import { Crown, Wine, Briefcase, MapPin } from "lucide-react";
+import { Crown, Wine, Briefcase, MapPin, Lightbulb } from "lucide-react";
 
 export default function Partners() {
-  const groups = ["Hôtellerie", "Gastronomie", "Investissement"];
+  const groups = ["Hôtellerie", "Gastronomie", "Investissement", "Innovation"];
   return (
     <div className="pt-32 pb-20 container">
       <div className="text-center mb-16 animate-fade-up">
-        <div className="eyebrow mb-4">L'écosystème</div>
-        <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">Nos <em className="italic gold-text">complices</em>.</h1>
-        <p className="mt-6 text-muted-foreground font-serif italic max-w-xl mx-auto">Maisons d'exception qui partagent notre exigence du détail.</p>
+        <div className="eyebrow mb-4">Recherche de partenaires</div>
+        <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">Nos <em className="italic gold-text">secteurs</em>.</h1>
+        <p className="mt-6 text-muted-foreground font-serif italic max-w-xl mx-auto">Nous recherchons des partenaires d'exception dans ces secteurs clés pour enrichir notre écosystème.</p>
       </div>
 
       {/* Marquee */}
@@ -43,6 +43,9 @@ export default function Partners() {
               } else if (p.category === "Investissement") {
                 coverImage = images.eventNetworking;
                 CategoryIcon = Briefcase;
+              } else if (p.category === "Innovation") {
+                coverImage = images.eventSummit;
+                CategoryIcon = Lightbulb;
               }
 
               return (

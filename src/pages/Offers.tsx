@@ -93,12 +93,12 @@ function FlagCSS({ type }: { type: string }) {
 
 /* ─── Services inclus ─── */
 const services = [
-  { icon: Network,   label: "Networking",           sub: "qualifié" },
-  { icon: Utensils,  label: "Expériences",           sub: "gastronomiques" },
-  { icon: Handshake, label: "Rencontres",            sub: "d'affaires exclusives" },
-  { icon: TrendingUp,label: "Développement",         sub: "de partenariats" },
-  { icon: Camera,    label: "Découverte",            sub: "des territoires" },
-  { icon: UserCheck, label: "Accompagnement",        sub: "personnalisé" },
+  { icon: Network, label: "Networking", sub: "qualifié" },
+  { icon: Utensils, label: "Expériences", sub: "gastronomiques" },
+  { icon: Handshake, label: "Rencontres", sub: "d'affaires exclusives" },
+  { icon: TrendingUp, label: "Développement", sub: "de partenariats" },
+  { icon: Camera, label: "Découverte", sub: "des territoires" },
+  { icon: UserCheck, label: "Accompagnement", sub: "personnalisé" },
 ];
 
 export default function Offers() {
@@ -137,13 +137,13 @@ export default function Offers() {
             {/* 3 Piliers cliquables */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { icon: Users,   label: "Connecter",  sub: "les dirigeants" },
-                { icon: Diamond, label: "Valoriser",  sub: "les territoires" },
-                { icon: Handshake,label:"Créer",      sub: "des opportunités" },
+                { icon: Users, label: "Connecter", sub: "les dirigeants" },
+                { icon: Diamond, label: "Valoriser", sub: "les territoires" },
+                { icon: Handshake, label: "Créer", sub: "des opportunités" },
               ].map(({ icon: Icon, label, sub }) => (
                 <button
                   key={label}
-                  onClick={() => {/* TODO: redirection */}}
+                  onClick={() => {/* TODO: redirection */ }}
                   className="flex flex-col items-center gap-2 p-3 rounded-sm border border-gold/10 bg-gold/5 hover:border-gold/40 hover:bg-gold/10 transition-all duration-300 group text-center"
                 >
                   <div className="w-10 h-10 rounded-full border border-gold/30 flex items-center justify-center group-hover:border-gold/60 transition-colors">
@@ -173,7 +173,7 @@ export default function Offers() {
                 {services.map(({ icon: Icon, label, sub }) => (
                   <button
                     key={label}
-                    onClick={() => {/* TODO: redirection */}}
+                    onClick={() => {/* TODO: redirection */ }}
                     className="flex items-start gap-2.5 text-left hover:opacity-80 transition-opacity group"
                   >
                     <div className="w-8 h-8 shrink-0 rounded-sm border border-gold/20 bg-gold/5 flex items-center justify-center group-hover:border-gold/50 transition-colors mt-0.5">
@@ -294,7 +294,7 @@ export default function Offers() {
       */}
 
       {/* ── Cartes formules ── */}
-      {/* 
+
       <div className="grid lg:grid-cols-3 gap-6">
         {offers.map((o, i) => {
           const price = computeFinalPrice(o);
@@ -304,10 +304,10 @@ export default function Offers() {
               {o.badge && <div className="self-start px-3 py-1 mb-4 text-[10px] uppercase tracking-[0.22em] gold-border rounded-sm text-gold-light">{o.badge}</div>}
               <div className="font-display text-3xl mb-2">{o.name}</div>
               <div className="text-sm text-muted-foreground font-serif italic mb-6">{o.tagline}</div>
-              <div className="mb-6">
+              {/* <div className="mb-6">
                 <div className="font-display text-5xl gold-text">{price.toLocaleString("fr-FR")} €</div>
                 <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mt-1">par personne · TTC</div>
-              </div>
+              </div> */}
               <div className="hairline mb-6" />
               <ul className="space-y-3 mb-8 flex-1">
                 {o.features.map((f) => (
@@ -319,7 +319,7 @@ export default function Offers() {
               <Link to="/experience" className={`${featured ? "btn-gold" : "btn-ghost-gold"} text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3`}>
                 Choisir <ArrowRight size={14} />
               </Link>
-              <details className="mt-6 group">
+              {/* <details className="mt-6 group">
                 <summary className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground cursor-pointer hover:text-primary">Détail des coûts</summary>
                 <div className="mt-3 space-y-1 text-xs text-muted-foreground font-mono">
                   <div className="flex justify-between"><span>Hôtellerie</span><span>{o.costBreakdown.hotel} €</span></div>
@@ -328,12 +328,12 @@ export default function Offers() {
                   <div className="flex justify-between"><span>Commissions</span><span>{o.costBreakdown.commission} €</span></div>
                   <div className="flex justify-between border-t border-border pt-1 mt-1"><span>Marge ({Math.round(o.margin * 100)}%)</span><span className="text-gold">+{price - (o.costBreakdown.hotel + o.costBreakdown.dining + o.costBreakdown.activity + o.costBreakdown.commission)} €</span></div>
                 </div>
-              </details>
+              </details> */}
             </div>
           );
         })}
       </div>
-      */}
+
 
       <div className="mt-20 text-center">
         <Crown size={28} className="mx-auto text-primary mb-4" />
