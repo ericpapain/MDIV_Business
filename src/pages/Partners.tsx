@@ -7,7 +7,7 @@ export default function Partners() {
     <div className="pt-32 pb-20 container">
       <div className="text-center mb-16 animate-fade-up">
         <div className="eyebrow mb-4">Recherche de partenaires</div>
-        <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">Nos <em className="italic gold-text">secteurs</em>.</h1>
+        <h1 className="font-display text-5xl md:text-7xl leading-[0.95]"><DEVENEZ></DEVENEZ> <em className="italic gold-text"><Partenaires></Partenaires></em>.</h1>
         <p className="mt-6 text-muted-foreground font-serif italic max-w-xl mx-auto">Nous recherchons des partenaires d'exception dans ces secteurs clés pour enrichir notre écosystème.</p>
       </div>
 
@@ -52,13 +52,13 @@ export default function Partners() {
                 <div key={p.name} className="luxe-card overflow-hidden rounded-sm group cursor-pointer flex flex-col h-full transition-all duration-500 hover:shadow-[0_8px_30px_rgba(197,160,89,0.08)] hover:-translate-y-1">
                   {/* Photo area */}
                   <div className="relative aspect-[16/10] overflow-hidden border-b border-border/40 bg-muted/20">
-                    <img 
-                      src={coverImage} 
-                      alt={p.name} 
+                    <img
+                      src={coverImage}
+                      alt={p.name}
                       className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110 opacity-70 group-hover:opacity-90"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-                    
+
                     {/* Premium glass logo overlay */}
                     <div className="absolute bottom-4 left-4 flex items-center gap-3">
                       <div className="w-10 h-10 rounded-sm glass gold-border flex items-center justify-center font-display text-xs tracking-wider text-primary font-bold shadow-lg">
