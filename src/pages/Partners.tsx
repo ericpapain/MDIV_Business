@@ -7,7 +7,7 @@ export default function Partners() {
     <div className="pt-32 pb-20 container">
       <div className="text-center mb-16 animate-fade-up">
         <div className="eyebrow mb-4">Recherche de partenaires</div>
-        <h1 className="font-display text-5xl md:text-7xl leading-[0.95]"><DEVENEZ></DEVENEZ> <em className="italic gold-text"><Partenaires></Partenaires></em>.</h1>
+        <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">DEVENEZ <em className="italic gold-text">Partenaire</em>.</h1>
         <p className="mt-6 text-muted-foreground font-serif italic max-w-xl mx-auto">Nous recherchons des partenaires d'exception dans ces secteurs clés pour enrichir notre écosystème.</p>
       </div>
 
