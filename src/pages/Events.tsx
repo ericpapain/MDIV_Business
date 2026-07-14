@@ -140,7 +140,7 @@ export default function Events() {
           <h2 className="font-display text-3xl">Éditions passées</h2>
           <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Archives confidentielles</div>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {events.past.map((e: any) => (
             <div key={e.id} className="luxe-card rounded-sm overflow-hidden group opacity-90 hover:opacity-100 flex flex-col relative">
               <div className="aspect-[4/3] overflow-hidden relative shrink-0">

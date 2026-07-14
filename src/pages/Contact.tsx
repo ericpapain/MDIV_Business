@@ -36,15 +36,19 @@ Merci.` : "";
       <div className="grid lg:grid-cols-5 gap-10">
         <div className="lg:col-span-2 space-y-6">
           {[
-            { I: Mail, t: t("contact.info.mail"), v: "m.div-network@bne.com" },
-            { I: Phone, t: t("contact.info.phone"), v: "+33 6 66 07 88 70" },
+            { I: Mail, t: t("contact.info.mail"), v: "m.div-network@bne.com", href: "mailto:m.divcsltg@gmail.com,ericpapainmezatio@gmail.com" },
+            { I: Phone, t: t("contact.info.phone"), v: "+33 6 66 07 88 70", href: "tel:+33666078870" },
             { I: MapPin, t: t("contact.info.address"), v: "En cours..." },
-          ].map(({ I, t: title, v }) => (
+          ].map(({ I, t: title, v, href }) => (
             <div key={title} className="glass p-5 rounded-sm flex items-center gap-4">
               <div className="w-11 h-11 rounded-sm bg-emerald-deep/60 gold-border flex items-center justify-center"><I size={16} className="text-primary" /></div>
               <div>
                 <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{title}</div>
-                <div className="font-display text-lg mt-0.5">{v}</div>
+                {href ? (
+                  <a href={href} className="font-display text-lg mt-0.5 hover:text-gold-light transition-colors block">{v}</a>
+                ) : (
+                  <div className="font-display text-lg mt-0.5">{v}</div>
+                )}
               </div>
             </div>
           ))}

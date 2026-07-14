@@ -44,8 +44,8 @@ export function SiteFooter() {
         <div>
           <div className="eyebrow mb-4">{t("footer.contact")}</div>
           <ul className="space-y-2 text-sm text-foreground/70">
-            <li>m.div-network@bne.com</li>
-            <li>+33 6 66 07 88 70</li>
+            <li><a href="mailto:m.divcsltg@gmail.com,ericpapainmezatio@gmail.com" className="hover:text-primary transition-colors">m.div-network@bne.com</a></li>
+            <li><a href="tel:+33666078870" className="hover:text-primary transition-colors">+33 6 66 07 88 70</a></li>
             <li>En cours...</li>
           </ul>
         </div>
