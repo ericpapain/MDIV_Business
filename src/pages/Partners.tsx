@@ -16,20 +16,29 @@ export default function Partners() {
       </div>
 
       <form
-        onSubmit={(e) => { e.preventDefault(); setSent(true); toast.success("Votre demande de partenariat a été envoyée avec succès."); }}
+        onSubmit={(e) => { 
+          e.preventDefault(); 
+          const fd = new FormData(e.currentTarget);
+          const data = Object.fromEntries(fd.entries());
+          const subject = encodeURIComponent("Candidature Partenaire - M.DIV");
+          const body = encodeURIComponent(`Entreprise: ${data.company || ''}\nSecteur: ${data.sector || ''}\nNom: ${data.name || ''}\nEmail: ${data.email || ''}\nTéléphone: ${data.phone || ''}\nPays: ${data.country || ''}\n\nPourquoi devenir partenaire ?\n${data.why || ''}\n\nValeur ajoutée :\n${data.value || ''}`);
+          window.location.href = `mailto:m.divcsltg@gmail.com,ericpapainmezatio@gmail.com?subject=${subject}&body=${body}`;
+          setSent(true); 
+          toast.success("Votre demande a été préparée dans votre logiciel de messagerie."); 
+        }}
         className="glass-strong p-8 md:p-12 rounded-sm space-y-6 corner-deco relative"
       >
         <div className="grid sm:grid-cols-2 gap-6">
-          <Field label="Nom de l'entreprise" icon={<Building size={14} />} required />
-          <Field label="Secteur d'activité" icon={<Briefcase size={14} />} required />
-          <Field label="Votre Nom" icon={<User size={14} />} required />
-          <Field label="Votre Email" type="email" icon={<Mail size={14} />} required />
-          <Field label="Téléphone" type="tel" />
-          <Field label="Pays / Région" icon={<MapPin size={14} />} />
+          <Field label="Nom de l'entreprise" name="company" icon={<Building size={14} />} required />
+          <Field label="Secteur d'activité" name="sector" icon={<Briefcase size={14} />} required />
+          <Field label="Votre Nom" name="name" icon={<User size={14} />} required />
+          <Field label="Votre Email" name="email" type="email" icon={<Mail size={14} />} required />
+          <Field label="Téléphone" name="phone" type="tel" />
+          <Field label="Pays / Région" name="country" icon={<MapPin size={14} />} />
         </div>
         
-        <Field label="Pourquoi souhaitez-vous devenir partenaire ?" textarea required />
-        <Field label="Quelle valeur ajoutée apportez-vous à notre écosystème ?" textarea required />
+        <Field label="Pourquoi souhaitez-vous devenir partenaire ?" name="why" textarea required />
+        <Field label="Quelle valeur ajoutée apportez-vous à notre écosystème ?" name="value" textarea required />
 
         <button type="submit" disabled={sent} className="btn-gold w-full py-4 mt-4 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3">
           {sent ? "Candidature envoyée" : <><Send size={14} /> Soumettre la candidature</>}
@@ -39,7 +48,7 @@ export default function Partners() {
   );
 }
 
-function Field({ label, type = "text", textarea, icon, required }: { label: string; type?: string; textarea?: boolean; icon?: React.ReactNode; required?: boolean }) {
+function Field({ label, name, type = "text", textarea, icon, required }: { label: string; name?: string; type?: string; textarea?: boolean; icon?: React.ReactNode; required?: boolean }) {
   const cls = "w-full bg-muted/40 border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors";
   return (
     <div>
@@ -47,7 +56,7 @@ function Field({ label, type = "text", textarea, icon, required }: { label: stri
         {icon}
         {label} {required && <span className="text-gold">*</span>}
       </div>
-      {textarea ? <textarea rows={4} className={cls} required={required} /> : <input type={type} className={cls} required={required} />}
+      {textarea ? <textarea name={name} rows={4} className={cls} required={required} /> : <input name={name} type={type} className={cls} required={required} />}
     </div>
   );
 }
