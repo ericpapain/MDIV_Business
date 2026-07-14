@@ -15,11 +15,14 @@ import Events from "./pages/Events";
 import Partners from "./pages/Partners";
 import Media from "./pages/Media";
 import Contact from "./pages/Contact";
+import Avis from "./pages/Avis";
+import EventReplay from "./pages/EventReplay";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLeads from "./pages/admin/AdminLeads";
 import AdminProfiles from "./pages/admin/AdminProfiles";
 import AdminPricing from "./pages/admin/AdminPricing";
 import NotFound from "./pages/NotFound";
+import DemoFlow from "./pages/Demo/DemoFlow";
 
 const queryClient = new QueryClient();
 
@@ -38,9 +41,11 @@ const App = () => (
               <Route path="/offres" element={<Offers />} />
               <Route path="/experiences" element={<Experiences />} />
               <Route path="/evenements" element={<Events />} />
+              <Route path="/revivre/:id" element={<EventReplay />} />
               <Route path="/partenaires" element={<Partners />} />
               <Route path="/media" element={<Media />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/avis" element={<Avis />} />
             </Route>
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
@@ -48,6 +53,7 @@ const App = () => (
               <Route path="profils" element={<AdminProfiles />} />
               <Route path="tarification" element={<AdminPricing />} />
             </Route>
+            <Route path="/demo" element={<DemoFlow />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

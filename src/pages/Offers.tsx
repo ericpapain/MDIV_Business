@@ -1,5 +1,5 @@
 import { offers, computeFinalPrice } from "@/data/mockData";
-import { Check, ArrowRight, Crown, Users, Diamond, Handshake, Network, Utensils, TrendingUp, Camera, UserCheck, Mail } from "lucide-react";
+import { Check, ArrowRight, Crown, Users, Diamond, Handshake, Network, Utensils, TrendingUp, Camera, UserCheck, Mail, Globe, Cpu, Compass, Rocket, Target, Zap, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import destChampagne from "@/assets/original/dest-champagne.png";
 import destSuisse from "@/assets/original/dest-suisse.png";
@@ -105,31 +105,107 @@ export default function Offers() {
   return (
     <div className="pt-32 pb-20 container">
 
+      {/* ── Cartes formules ── */}
+      <div className="grid lg:grid-cols-3 gap-6 mb-20">
+        {offers.map((o, i) => {
+          const price = computeFinalPrice(o);
+          const featured = i === 1;
+          let IconComp = () => (
+            <div className="relative flex items-center justify-center w-28 h-28">
+              <div className="absolute inset-0 bg-gold/5 rounded-full blur-xl group-hover:bg-gold/15 transition-colors duration-700" />
+              <Globe size={80} strokeWidth={0.5} className="text-gold/20 absolute group-hover:rotate-180 transition-transform duration-1000" />
+              <Compass size={36} strokeWidth={1.5} className="text-gold-light relative z-10 group-hover:scale-110 transition-transform duration-500" />
+              <Sparkles size={16} strokeWidth={1.5} className="text-primary absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </div>
+          );
+
+          if (o.id === "investor") {
+            IconComp = () => (
+              <div className="relative flex items-center justify-center w-28 h-28">
+                <div className="absolute inset-0 bg-gold/5 rounded-full blur-xl group-hover:bg-gold/15 transition-colors duration-700" />
+                <Target size={80} strokeWidth={0.5} className="text-gold/20 absolute group-hover:scale-110 transition-transform duration-1000" />
+                <Rocket size={36} strokeWidth={1.5} className="text-gold-light relative z-10 group-hover:-translate-y-2 group-hover:translate-x-2 transition-transform duration-500" />
+                <Sparkles size={16} strokeWidth={1.5} className="text-primary absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100" />
+              </div>
+            );
+          }
+
+          if (o.id === "exclusive") {
+            IconComp = () => (
+              <div className="relative flex items-center justify-center w-28 h-28">
+                <div className="absolute inset-0 bg-gold/5 rounded-full blur-xl group-hover:bg-gold/15 transition-colors duration-700" />
+                <Cpu size={80} strokeWidth={0.5} className="text-gold/20 absolute group-hover:rotate-90 transition-transform duration-1000" />
+                <Zap size={36} strokeWidth={1.5} className="text-gold-light relative z-10 group-hover:scale-110 transition-transform duration-500" />
+                <Sparkles size={16} strokeWidth={1.5} className="text-primary absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
+            );
+          }
+
+          return (
+            <div key={o.id} className={`luxe-card overflow-hidden rounded-sm flex flex-col ${featured ? "border-gold/60 lg:-translate-y-4 shadow-[0_30px_80px_-30px_hsl(42_60%_54%/0.4)]" : ""}`}>
+              <div className="w-full h-48 relative overflow-hidden group bg-gradient-to-br from-background via-background to-gold/5 flex items-center justify-center border-b border-gold/10">
+                <div className="absolute inset-0 bg-noise opacity-20" />
+                <IconComp />
+                {o.badge && <div className="absolute top-4 left-4 px-3 py-1 text-[10px] uppercase tracking-[0.22em] gold-border rounded-sm bg-emerald-deep/90 text-gold-light shadow-lg z-20">{o.badge}</div>}
+              </div>
+              <div className="p-8 flex flex-col flex-1">
+                <div className="font-display text-3xl mb-2">{o.name}</div>
+                <div className="text-sm text-muted-foreground font-serif italic mb-6">{o.tagline}</div>
+                <div className="hairline mb-6" />
+                <ul className="space-y-4 mb-8 flex-1">
+                  {o.features.map((f) => {
+                    const parts = f.split(" : ");
+                    return (
+                      <li key={f} className="flex items-start gap-3 text-[23px] text-foreground/80 leading-relaxed group/item">
+                        <div className="mt-0.5 rounded-full p-0.5 bg-gold/10 group-hover/item:bg-gold/20 transition-colors">
+                          <Check size={12} className="text-gold" strokeWidth={3} />
+                        </div>
+                        <span>
+                          {parts.length > 1 ? (
+                            <>
+                              <strong className="text-white font-medium tracking-wide">{parts[0]} :</strong> {parts.slice(1).join(" : ")}
+                            </>
+                          ) : (
+                            f
+                          )}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <Link to="/experience" className={`${featured ? "btn-gold" : "btn-ghost-gold"} text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3 mt-auto`}>
+                  Choisir <ArrowRight size={14} />
+                </Link>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {/* ══════════════════════════════════════════════
           BANNIÈRE — BUSINESS EXPERIENCE INTERNATIONAL
          ══════════════════════════════════════════════ */}
-      <div className="rounded-2xl overflow-hidden border border-gold/20 shadow-[0_20px_80px_-20px_rgba(197,160,89,0.25)] mb-20 bg-[#0a0d0f]">
+      <div className="rounded-2xl overflow-hidden border border-gold/20 shadow-[0_20px_80px_-20px_rgba(197,160,89,0.25)] bg-[#0a0d0f]">
 
         <div className="grid lg:grid-cols-[38%_62%]">
 
           {/* ── Colonne gauche ── */}
-          <div className="p-8 md:p-12 flex flex-col gap-6">
+          <div className="p-6 md:p-8 flex flex-col gap-4">
 
             {/* Badge NOUVEAU */}
-            <div className="self-start px-4 py-1.5 text-[10px] uppercase tracking-[0.3em] font-bold border border-gold/50 text-gold-light rounded-sm bg-gold/5">
+            <div className="self-start px-4 py-1 text-[10px] uppercase tracking-[0.3em] font-bold border border-gold/50 text-gold-light rounded-sm bg-gold/5">
               Nouveau
             </div>
 
             {/* Titre principal */}
             <div>
-              <div className="font-display text-5xl md:text-6xl leading-none uppercase text-white mb-1">
+              <div className="font-display text-4xl md:text-5xl leading-none uppercase text-white mb-1">
                 Business
               </div>
-              <div className="font-display text-5xl md:text-6xl leading-none uppercase gold-text mb-2">
+              <div className="font-display text-4xl md:text-5xl leading-none uppercase gold-text mb-2">
                 Experience
               </div>
-              <div className="text-[11px] uppercase tracking-[0.4em] text-foreground/60 border-t border-b border-gold/20 py-2 mt-3">
+              <div className="text-[11px] uppercase tracking-[0.4em] text-foreground/60 border-t border-b border-gold/20 py-2 mt-2">
                 — International —
               </div>
             </div>
@@ -191,11 +267,11 @@ export default function Offers() {
             {/* Pied de colonne gauche */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-gold/10 mt-auto">
               <p className="text-[9px] uppercase tracking-[0.15em] text-foreground/50 leading-relaxed max-w-[200px]">
-                Une expérience conçue pour les entrepreneurs, dirigeants, investisseurs et décideurs.
+                Une expérience conçue pour entrepreneurs et décideurs.
               </p>
               <p className="font-serif italic text-sm text-gold-light text-center sm:text-right">
                 Votre passerelle vers<br />
-                <em>de nouveaux écosystèmes d'affaires.</em>
+                <em>de nouveaux écosystèmes.</em>
               </p>
               <Link
                 to="/contact"
@@ -213,7 +289,6 @@ export default function Offers() {
             <svg width="0" height="0" style={{ position: "absolute" }}>
               <defs>
                 <clipPath id="dest-veil-clip" clipPathUnits="objectBoundingBox">
-                  {/* Courbe convexe sur le bord gauche : arc qui bombe vers la GAUCHE, réduit à 8% de protrusion */}
                   <path d="M 0.0 0 C 0.08 0.25 0.08 0.75 0.0 1 L 1 1 L 1 0 Z" />
                 </clipPath>
               </defs>
@@ -227,22 +302,18 @@ export default function Offers() {
                 <Link
                   key={dest.id}
                   to={dest.href}
-                  className={`relative flex-1 group overflow-hidden cursor-pointer min-h-[230px] ${i < destinations.length - 1 ? "border-b border-gold/10" : ""}`}
+                  className={`relative flex-1 group overflow-hidden cursor-pointer min-h-[140px] ${i < destinations.length - 1 ? "border-b border-gold/10" : ""}`}
                 >
-                  {/* Image de fond */}
                   <img
                     src={dest.image}
                     alt={dest.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-80"
                   />
-                  {/* Dégradé sombre renforcé à gauche pour fusionner avec le voile */}
                   <div className="absolute inset-0 bg-gradient-to-r from-[#0a0d0f]/95 via-[#0a0d0f]/50 to-transparent" />
 
-                  {/* Contenu décalé vers la droite pour ne pas être caché par le voile */}
-                  <div className="relative z-10 h-full flex items-center pl-16 md:pl-24 pr-6 py-5 justify-between gap-4">
-                    {/* Texte gauche */}
-                    <div className="flex flex-col gap-1.5">
-                      <div className="font-display text-2xl md:text-3xl italic text-white tracking-wide group-hover:text-gold-light transition-colors duration-300">
+                  <div className="relative z-10 h-full flex items-center pl-10 md:pl-16 pr-6 py-3 justify-between gap-4">
+                    <div className="flex flex-col gap-1">
+                      <div className="font-display text-xl md:text-2xl italic text-white tracking-wide group-hover:text-gold-light transition-colors duration-300">
                         {dest.name}
                       </div>
                       {dest.country && (
@@ -253,11 +324,9 @@ export default function Offers() {
                       )}
                     </div>
 
-                    {/* Drapeau CSS aux couleurs réelles du pays */}
                     <FlagCSS type={dest.flagType} />
                   </div>
 
-                  {/* Flèche hover */}
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
                     <ArrowRight size={18} className="text-gold-light" />
                   </div>
@@ -279,61 +348,6 @@ export default function Offers() {
           </div>
         </div>
       </div>
-
-      {/* ── En-tête formules ── */}
-      {/* 
-      <div className="text-center mb-16 animate-fade-up">
-        <div className="eyebrow mb-4">Nos formules</div>
-        <h2 className="font-display text-5xl md:text-7xl leading-[0.95]">
-          Trois portes. <em className="italic gold-text">Un seul cercle.</em>
-        </h2>
-        <p className="mt-6 text-muted-foreground font-serif italic max-w-xl mx-auto">
-          Chaque expérience est sur-mesure. Voici nos cadres de référence.
-        </p>
-      </div>
-      */}
-
-      {/* ── Cartes formules ── */}
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        {offers.map((o, i) => {
-          const price = computeFinalPrice(o);
-          const featured = i === 1;
-          return (
-            <div key={o.id} className={`luxe-card rounded-sm p-8 flex flex-col ${featured ? "border-gold/60 lg:-translate-y-4 shadow-[0_30px_80px_-30px_hsl(42_60%_54%/0.4)]" : ""}`}>
-              {o.badge && <div className="self-start px-3 py-1 mb-4 text-[10px] uppercase tracking-[0.22em] gold-border rounded-sm text-gold-light">{o.badge}</div>}
-              <div className="font-display text-3xl mb-2">{o.name}</div>
-              <div className="text-sm text-muted-foreground font-serif italic mb-6">{o.tagline}</div>
-              {/* <div className="mb-6">
-                <div className="font-display text-5xl gold-text">{price.toLocaleString("fr-FR")} €</div>
-                <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mt-1">par personne · TTC</div>
-              </div> */}
-              <div className="hairline mb-6" />
-              <ul className="space-y-3 mb-8 flex-1">
-                {o.features.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-foreground/80">
-                    <Check size={14} className="text-primary mt-0.5 shrink-0" /> {f}
-                  </li>
-                ))}
-              </ul>
-              <Link to="/experience" className={`${featured ? "btn-gold" : "btn-ghost-gold"} text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3`}>
-                Choisir <ArrowRight size={14} />
-              </Link>
-              {/* <details className="mt-6 group">
-                <summary className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground cursor-pointer hover:text-primary">Détail des coûts</summary>
-                <div className="mt-3 space-y-1 text-xs text-muted-foreground font-mono">
-                  <div className="flex justify-between"><span>Hôtellerie</span><span>{o.costBreakdown.hotel} €</span></div>
-                  <div className="flex justify-between"><span>Gastronomie</span><span>{o.costBreakdown.dining} €</span></div>
-                  <div className="flex justify-between"><span>Activités</span><span>{o.costBreakdown.activity} €</span></div>
-                  <div className="flex justify-between"><span>Commissions</span><span>{o.costBreakdown.commission} €</span></div>
-                  <div className="flex justify-between border-t border-border pt-1 mt-1"><span>Marge ({Math.round(o.margin * 100)}%)</span><span className="text-gold">+{price - (o.costBreakdown.hotel + o.costBreakdown.dining + o.costBreakdown.activity + o.costBreakdown.commission)} €</span></div>
-                </div>
-              </details> */}
-            </div>
-          );
-        })}
-      </div>
-
 
       <div className="mt-20 text-center">
         <Crown size={28} className="mx-auto text-primary mb-4" />

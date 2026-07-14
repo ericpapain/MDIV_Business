@@ -27,52 +27,50 @@ export type Offer = {
 export const offers: Offer[] = [
   {
     id: "networking",
-    name: "Networking Experience",
-    tagline: "Pour entrepreneurs en quête de connexions stratégiques",
+    name: "LES SÉJOURS BNE",
+    tagline: "L'Odyssée Entrepreneuriale",
     basePrice: 1490,
     costBreakdown: { hotel: 480, dining: 320, activity: 180, commission: 80 },
     margin: 0.32,
     features: [
-      "2 nuits hôtel 5 étoiles",
-      "1 dîner d'affaires Michelin",
-      "Accès soirée privée",
-      "3 contacts qualifiés garantis",
-      "Conciergerie 24/7",
+      "Immersion totale au cœur de territoires d'exception",
+      "Synergies stratégiques entre esprits visionnaires",
+      "Expériences sensorielles et mémorables hors du temps",
+      "Des connexions authentiques qui transcendent les frontières",
+      "Bénéfices : Expansion internationale, alliances durables et opportunités inédites",
+      "Impact : Rayonnement économique et attractivité décuplée pour les territoires hôtes"
     ],
     image: eventNetworking,
   },
   {
     id: "investor",
-    name: "Investor Experience",
-    tagline: "Sourcing d'opportunités d'investissement vérifiées",
+    name: "ACCOMPAGNEMENT BNE ENTREPRISES",
+    tagline: "Propulser votre rayonnement vers l'excellence",
     basePrice: 3890,
     costBreakdown: { hotel: 980, dining: 720, activity: 540, commission: 220 },
     margin: 0.38,
     features: [
-      "Suite signature 3 nuits",
-      "Yacht privé & dîner gastronomique",
-      "Pitch de 5 startups pré-sélectionnées",
-      "Due diligence flash incluse",
-      "Driver privé Mercedes Classe S",
+      "Fondation Stratégique : Analyse pointue, positionnement sur-mesure et création de récits captivants",
+      "Résonance Digitale : Amplification de votre aura, storytelling immersif et activation de réseaux qualifiés",
+      "Conquête & Synergies : Événements signatures, rencontres exclusives et tissage de liens à haute valeur",
+      "Finalité : Métamorphoser votre visibilité en croissance exponentielle et opportunités tangibles"
     ],
-    badge: "Le plus choisi",
     image: expYacht,
   },
   {
     id: "exclusive",
-    name: "Premium Exclusive",
-    tagline: "Ultra-personnalisation. Sur invitation uniquement.",
+    name: "BNE IA BUSINESS",
+    tagline: "L'Intelligence Artificielle comme levier d'avant-garde",
     basePrice: 9800,
     costBreakdown: { hotel: 2400, dining: 1600, activity: 1800, commission: 600 },
     margin: 0.45,
     features: [
-      "Villa privée avec staff dédié",
-      "Jet partagé sur demande",
-      "Rencontres organisées family offices",
-      "Concierge ex-Bristol assigné",
-      "Programme cousu-main 100 %",
+      "Audit Visionnaire : Détection chirurgicale des gisements de productivité et des opportunités d'innovation",
+      "Aura Augmentée : Création de contenus magnétisants et stratégie d'influence propulsée par les algorithmes",
+      "Machine de Conquête : Automatisation de l'acquisition, qualification ultra-ciblée et fidélisation",
+      "Élévation Humaine : Acculturation de vos équipes pour maîtriser les outils de demain",
+      "L'ambition : Transcender vos limites, gagner un temps précieux et catalyser la performance globale"
     ],
-    badge: "Privé",
     image: expHotel,
   },
 ];
@@ -90,14 +88,11 @@ export const experiences = [
 
 export const events = {
   upcoming: [
-    { id: "u1", title: "BUSINESS NETWORKING || SEJOUR FONDATEUR  #2", date: "27 — 28 JUIN 2026", city: "LA TABLE D'ESSOYES", desc: "Sommet privé réunissant 80 family offices européens.", image: eventSummit },
-    { id: "u2", title: "Founders Dinner Series #14", date: "28 Sept 2026", city: "Paris", desc: "Dîner intimiste pour 24 fondateurs Série A+.", image: eventNetworking },
-    { id: "u3", title: "Yacht Investor Day", date: "10 Oct 2026", city: "Saint-Tropez", desc: "Une journée. Cinq startups. Vingt investisseurs.", image: eventSummit },
+    { id: "u1", title: "Geneva Wealth Summit", date: "15 — 16 SEPTEMBRE 2026", targetDate: "2026-09-15T09:00:00", city: "Genève", country: "Suisse", desc: "Sommet privé dédié à l'investissement et la préservation de patrimoine.", image: eventSummit },
   ],
   past: [
-    { id: "p1", title: "Marrakech Business Retreat", date: "Mars 2026", city: "Marrakech", desc: "3 jours de retraite stratégique avec 40 leaders.", image: eventNetworking },
-    { id: "p2", title: "Geneva Wealth Circle", date: "Janvier 2026", city: "Genève", desc: "Cercle confidentiel autour de la transmission.", image: eventSummit },
-    { id: "p3", title: "Dubai Founders Brunch", date: "Novembre 2025", city: "Dubai", desc: "Brunch panoramique sur la Marina.", image: eventNetworking },
+    { id: "p1", title: "Séjour Fondateur #1", date: "27 Juin 2026", city: "Essoyes", country: "France", desc: "La première édition historique du rassemblement fondateur.", image: eventNetworking, code: "FND26" },
+    { id: "p2", title: "Networking Spécial Immobilier #1", date: "19 Juin 2026", city: "Troyes", country: "France", desc: "Rencontre confidentielle entre leaders de l'immobilier.", image: eventSummit, code: "IMM26" },
   ],
 };
 
@@ -122,10 +117,8 @@ export const media = [
   { id: "m6", type: "Reel", title: "Champagne & Pitch", duration: "0:42", image: expDining },
 ];
 
-export const testimonials = [
-  { name: "Alexandre M.", role: "Fondateur, SaaS B2B (Série B)", quote: "J'ai signé deux LPs pendant le week-end. Le ROI est immédiat.", flagType: "france" },
-  { name: "Sofia R.", role: "Managing Partner, Family Office", quote: "L'expérience est d'une élégance rare. Le sourcing, d'une rigueur absolue.", flagType: "suisse" },
-  { name: "Karim B.", role: "CEO, FinTech MENA", quote: "Le seul cercle où l'on rencontre les bons interlocuteurs sans les chercher.", flagType: "belgique" },
+export const testimonials: { name: string; role: string; quote: string; flagType: string }[] = [
+  // Les avis s'ajouteront ici
 ];
 
 export const leads = [
@@ -160,3 +153,10 @@ export function computeLeadScore(profile: Profile, objective: Objective, budget:
   s += Math.min(8, duration * 2);
   return Math.min(99, s);
 }
+
+export const members = [
+  { id: 1, name: "Jean-Philippe Courtois", role: "EVP & President, National Transformation Partnerships", image: portrait1 },
+  { id: 2, name: "Sarah B.", role: "Fondatrice, Tech Innovate", image: portrait2 },
+  { id: 3, name: "Marc A.", role: "Directeur Général, InvestCorp", image: portrait1 },
+  { id: 4, name: "Elise C.", role: "CEO, EcoVentures", image: portrait2 },
+];

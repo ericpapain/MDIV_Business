@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Crown, Users, Target, Diamond, Play, Star, Check } from "lucide-react";
+import { ArrowRight, Sparkles, Crown, Users, Target, Diamond, Play, Star, Check, MapPin } from "lucide-react";
 import { images, offers, testimonials, events, computeFinalPrice } from "@/data/mockData";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { toast } from "sonner";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { EventHero } from "@/components/event/EventHero";
 import { ChampagneEvent } from "@/components/event/ChampagneEvent";
-import tableEssoyesVideo from "@/assets/videos/table_essoyes.mp4";
+import { MembersCarousel } from "@/components/site/MembersCarousel";
+import { AboutBNE } from "@/components/site/AboutBNE";
 
 // Vidéo de paysage cinématographique hébergée sur Google Cloud Storage (sans restriction CORS ni hotlinking)
 const DEMO_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4";
@@ -57,7 +58,7 @@ export default function Home() {
         <div className="absolute inset-0">
           <img src={images.hero} alt="Cercle privé d'affaires" className="w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r w-3/4 from-background via-background/50 to-transparent" />
         </div>
 
         <div className="container relative z-10 grid lg:grid-cols-12 gap-10 items-center">
@@ -74,7 +75,7 @@ export default function Home() {
               {t("home.hero.desc")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/contact" className="btn-gold px-8 py-4 text-xs uppercase tracking-[0.24em] rounded-sm flex items-center gap-3 justify-center group">
+              <Link to="/experience" className="btn-gold px-8 py-4 text-xs uppercase tracking-[0.24em] rounded-sm flex items-center gap-3 justify-center group">
                 {t("home.hero.btn1")} <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link to="/evenements" className="btn-ghost-gold px-8 py-4 text-xs uppercase tracking-[0.24em] rounded-sm flex items-center gap-3 justify-center">
@@ -97,32 +98,47 @@ export default function Home() {
           </div>
 
           <div className="lg:col-span-5 hidden lg:flex flex-col gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-            <div className="glass-strong p-6 rounded-sm relative corner-deco">
-              <div>
-                <div className="eyebrow mb-3">{t("home.hero_live.eyebrow")}</div>
-                <div className="font-display text-2xl mb-2">{t("home.hero_live.title")}</div>
-                <div className="text-sm text-muted-foreground mb-4">{t("home.hero_live.desc")}</div>
-                <div className="flex items-center gap-2 text-xs text-success">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-soft" /> {t("home.hero_live.status")}
+            <div className="glass-strong p-6 rounded-sm relative corner-deco flex flex-col">
+              <div className="flex items-center justify-between mb-6">
+                <div className="eyebrow flex items-center gap-2 text-primary text-[21px]">
+                  <Sparkles size={12} className="animate-pulse-soft" /> À l'agenda BNE
+                </div>
+                <div className="text-[18px] uppercase tracking-[0.2em] text-gold/60 border border-gold/20 px-2 py-0.5 rounded-sm">
+                  Places limitées
                 </div>
               </div>
-
-              <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent my-5" />
-
-              <div>
-                <div className="eyebrow mb-3 flex items-center gap-2 text-primary">
-                  <Sparkles size={12} className="text-primary animate-pulse-soft" /> {t("home.hero_live.upcoming")}
-                </div>
-                <div className="font-display text-xl mb-1">{events.upcoming[0].title}</div>
-                <div className="text-xs text-muted-foreground mb-4">
-                  {events.upcoming[0].city} · {events.upcoming[0].date}
-                </div>
-                <Link
-                  to="/contact"
-                  className="w-full py-2.5 text-[10px] uppercase tracking-[0.2em] rounded-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 btn-gold hover:opacity-90"
-                >
-                  {t("home.hero_live.reserve_btn")}
-                </Link>
+              
+              <div className="flex flex-col gap-2">
+                {events.upcoming.slice(0, 2).map((event, idx) => {
+                  const day = event.date.split(" ")[0];
+                  const month = event.date.split(" ").slice(-2)[0].substring(0, 4).toUpperCase();
+                  return (
+                    <div key={event.id} className="group relative">
+                      {idx !== 0 && <div className="h-px bg-gradient-to-r from-transparent via-gold/15 to-transparent my-4" />}
+                      <div className="flex gap-4 items-start">
+                        {/* Bloc Date */}
+                        <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-sm bg-gold/5 border border-gold/10 group-hover:bg-gold/15 group-hover:border-gold/30 transition-colors duration-500">
+                          <span className="text-[29px] font-display text-gold-light leading-none">{day}</span>
+                          <span className="text-[18px] uppercase tracking-[0.15em] text-muted-foreground mt-1">{month}</span>
+                        </div>
+                        
+                        {/* Contenu */}
+                        <div className="flex-1 min-w-0 pt-0.5">
+                          <h4 className="font-display text-[27px] mb-1.5 truncate text-white group-hover:text-gold-light transition-colors duration-300">{event.title}</h4>
+                          <div className="text-[21px] text-muted-foreground mb-3 flex items-center gap-1.5">
+                            <MapPin size={10} className="text-gold/60" /> {event.city}
+                          </div>
+                          <Link
+                            to="/contact"
+                            className="text-[19px] uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-1.5 transition-colors w-fit"
+                          >
+                            Réserver <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -144,11 +160,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ÉVÉNEMENT IMMOBILIER IMMERSIF */}
-      <EventHero />
+      {/* QUI SOMMES NOUS */}
+      <AboutBNE />
 
-      {/* SÉJOUR FONDATEUR CHAMPAGNE IMMERSIF */}
-      <ChampagneEvent />
+      {/* ÉVÉNEMENTS DANS UN MENU DÉROULANT */}
+      <section className="container py-10">
+        <details className="group border border-gold/20 rounded-sm bg-background/50 backdrop-blur-sm overflow-hidden">
+          <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-white/5 transition-colors outline-none">
+            <h2 className="font-display text-2xl md:text-4xl text-white">Découvrir nos expériences immersives</h2>
+            <div className="w-10 h-10 rounded-full border border-gold/30 flex shrink-0 items-center justify-center group-open:rotate-180 transition-transform duration-300">
+              <ArrowRight size={20} className="text-gold rotate-90" />
+            </div>
+          </summary>
+          <div className="p-6 pt-0 flex flex-col gap-10">
+            <EventHero />
+            <ChampagneEvent />
+          </div>
+        </details>
+      </section>
 
       {/* PROMESSES */}
       {/* 
@@ -207,52 +236,8 @@ export default function Home() {
       </section>
       */}
 
-      {/* VIDEO BANNER */}
-      <section className="relative py-32 my-16 overflow-hidden min-h-[450px] flex items-center justify-center">
-        {playHomeVideo ? (
-          <div className="container relative z-10 w-full max-w-4xl aspect-video rounded-sm overflow-hidden gold-border shadow-2xl animate-fade-in bg-background">
-            <video
-              className="w-full h-full object-cover"
-              src={tableEssoyesVideo}
-              autoPlay
-              controls
-              loop
-              playsInline
-            />
-            <button
-              onClick={() => setPlayHomeVideo(false)}
-              className="absolute top-4 right-4 bg-background/80 text-foreground hover:text-primary px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] rounded-sm font-semibold glass gold-border transition-colors z-20"
-            >
-              {t("home.video.close")}
-            </button>
-          </div>
-        ) : (
-          <>
-            <video
-              src={tableEssoyesVideo}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover opacity-40"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-background via-background/70 to-background" />
-            <div className="container relative text-center">
-              <div className="eyebrow mb-4">{t("home.video.eyebrow")}</div>
-              <h2 className="font-display text-5xl md:text-7xl mb-6">{t("home.video.title1")} <em className="italic gold-text">{t("home.video.title2")}</em></h2>
-              <p className="max-w-xl mx-auto text-muted-foreground mb-10 font-serif italic">
-                {t("home.video.desc")}
-              </p>
-              <button
-                onClick={() => setPlayHomeVideo(true)}
-                className="mx-auto w-20 h-20 rounded-full btn-gold flex items-center justify-center group"
-              >
-                <Play size={24} className="ml-1 group-hover:scale-110 transition-transform" />
-              </button>
-            </div>
-          </>
-        )}
-      </section>
+      {/* MEMBERS CAROUSEL */}
+      <MembersCarousel />
 
       {/* PROCHAIN ÉVÉNEMENT */}
       {/*  <section className="container py-28 grid lg:grid-cols-2 gap-12 items-center">
@@ -280,7 +265,7 @@ export default function Home() {
       </section> */}
 
       {/* TESTIMONIALS */}
-      <section className="container py-28">
+      <section className="container py-16">
         <SectionHeading eyebrow={t("home.testimonials.eyebrow")} title={t("home.testimonials.title")} center />
         <div className="grid md:grid-cols-3 gap-6">
           {testimonials.map((tItem) => (
@@ -299,18 +284,9 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
-
-      {/* CTA FINAL */}
-      <section className="container py-28">
-        <div className="relative overflow-hidden rounded-sm glass-strong p-12 md:p-20 text-center corner-deco">
-          <Diamond className="mx-auto mb-6 text-primary" size={32} />
-          <h2 className="font-display text-4xl md:text-6xl mb-6 max-w-3xl mx-auto leading-[1.05]">
-            {t("home.cta.title1")} <em className="italic gold-text">{t("home.cta.title2")}</em>
-          </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto mb-10">{t("home.cta.desc")}</p>
-          <Link to="/contact" className="btn-gold inline-flex px-10 py-4 text-xs uppercase tracking-[0.24em] rounded-sm items-center gap-3">
-            {t("home.cta.btn")} <ArrowRight size={14} />
+        <div className="flex justify-center mt-12">
+          <Link to="/avis" className="btn-ghost-gold inline-flex px-8 py-3.5 text-[10px] uppercase tracking-[0.24em] rounded-sm items-center gap-3">
+            Donnez-nous votre avis <ArrowRight size={14} />
           </Link>
         </div>
       </section>

@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 import { Chatbot } from "./Chatbot";
+import { FloatingContactButton } from "./FloatingContactButton";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -16,6 +17,7 @@ export function SiteLayout() {
       </main>
       <SiteFooter />
       {/* <Chatbot /> */}
+      <FloatingContactButton />
     </div>
   );
 }

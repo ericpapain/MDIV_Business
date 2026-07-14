@@ -50,7 +50,7 @@ export default function AIBuilder() {
         profile: data.profile, objective: data.objective, budget: String(data.budget),
         interests: data.interests.join(","), duration: String(data.duration), country: data.country,
       }).toString();
-      navigate(`/resultat?${q}`);
+      navigate(`/contact?${q}`);
     }
   };
 
@@ -176,7 +176,7 @@ export default function AIBuilder() {
             </button>
             <button onClick={next} disabled={!valid}
               className="btn-gold px-8 py-3.5 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed">
-              {step === steps.length - 1 ? "Générer mon expérience exclusive" : "Continuer"} <ArrowRight size={14} />
+              {step === steps.length - 1 ? "Demander à être contacté" : "Continuer"} <ArrowRight size={14} />
             </button>
           </div>
         </div>

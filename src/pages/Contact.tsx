@@ -1,11 +1,31 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useLocation } from "react-router-dom";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 export default function Contact() {
   const { t } = useLanguage();
   const [sent, setSent] = useState(false);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const profile = searchParams.get("profile");
+  const objective = searchParams.get("objective");
+  const budget = searchParams.get("budget");
+  const duration = searchParams.get("duration");
+  const country = searchParams.get("country");
+
+  const defaultMsg = profile ? `Bonjour,
+Je souhaite être contacté pour organiser une expérience.
+Voici mes préférences :
+- Profil : ${profile}
+- Objectif : ${objective}
+- Budget : ${budget} €
+- Durée : ${duration} jours
+- Destination : ${country}
+
+Merci.` : "";
+
   return (
     <div className="pt-32 pb-20 container">
       <div className="text-center mb-16 animate-fade-up">
@@ -58,7 +78,7 @@ export default function Contact() {
               ))}
             </div>
           </div>
-          <Field label={t("contact.form.msg")} textarea />
+          <Field label={t("contact.form.msg")} textarea defaultValue={defaultMsg} />
           <button type="submit" disabled={sent} className="btn-gold w-full py-4 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3">
             {sent ? t("contact.form.sent") : <><Send size={14} /> {t("contact.form.submit")}</>}
           </button>
@@ -68,12 +88,12 @@ export default function Contact() {
   );
 }
 
-function Field({ label, type = "text", textarea }: { label: string; type?: string; textarea?: boolean }) {
+function Field({ label, type = "text", textarea, defaultValue }: { label: string; type?: string; textarea?: boolean; defaultValue?: string }) {
   const cls = "w-full bg-muted/40 border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors";
   return (
     <div>
       <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">{label}</div>
-      {textarea ? <textarea rows={4} className={cls} /> : <input type={type} className={cls} />}
+      {textarea ? <textarea rows={8} className={cls} defaultValue={defaultValue} /> : <input type={type} className={cls} defaultValue={defaultValue} />}
     </div>
   );
 }
