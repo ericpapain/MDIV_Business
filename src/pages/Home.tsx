@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Crown, Users, Target, Diamond, Play, Star, Check, MapPin } from "lucide-react";
 import { images, offers, testimonials, events, computeFinalPrice } from "@/data/mockData";
@@ -50,11 +51,69 @@ function TestimonialFlag({ type }: { type: string }) {
 export default function Home() {
   const { t } = useLanguage();
   const [playHomeVideo, setPlayHomeVideo] = useState(false);
+  const [dbReviews, setDbReviews] = useState<any[]>([]);
+  const [visitCount, setVisitCount] = useState(234);
+
+  useEffect(() => {
+    fetchReviews();
+    incrementVisitCount();
+  }, []);
+
+  const incrementVisitCount = async () => {
+    if (!supabase) return;
+    try {
+      // Increment the counter
+      const { error: upsertError } = await supabase.rpc('increment_visit_count');
+      if (upsertError) {
+        // If RPC doesn't exist, try direct read
+        const { data } = await supabase
+          .from('site_stats')
+          .select('visit_count')
+          .eq('id', 1)
+          .single();
+        if (data) setVisitCount(data.visit_count);
+        return;
+      }
+      // Read the updated count
+      const { data } = await supabase
+        .from('site_stats')
+        .select('visit_count')
+        .eq('id', 1)
+        .single();
+      if (data) setVisitCount(data.visit_count);
+    } catch (error) {
+      console.error('Error with visit counter:', error);
+    }
+  };
+
+  const fetchReviews = async () => {
+    if (!supabase) {
+      setDbReviews(testimonials);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+      
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setDbReviews(data);
+      } else {
+        setDbReviews(testimonials); // fallback
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      setDbReviews(testimonials); // fallback
+    }
+  };
 
   return (
     <div className="overflow-x-hidden">
       {/* HEROs */}
-      <section className="relative min-h-screen flex items-center pt-24 pb-16">
+      <section className="relative min-h-[85vh] flex items-center pt-24 pb-16">
         <div className="absolute inset-0">
           <img src={images.hero} alt="Cercle privé d'affaires" className="w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
@@ -83,7 +142,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="mt-14 grid grid-cols-3 gap-6 max-w-lg">
+            <div className="mt-14 grid grid-cols-4 gap-6 max-w-xl">
               {[
                 { v: t("home.hero.stat1_val"), l: t("home.hero.stat1_label") },
                 { v: t("home.hero.stat2_val"), l: t("home.hero.stat2_label") },
@@ -94,43 +153,53 @@ export default function Home() {
                   <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-1">{s.l}</div>
                 </div>
               ))}
+              <div>
+                <div className="font-display text-3xl gold-text">{visitCount.toLocaleString('fr-FR')}</div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-1">Visites</div>
+              </div>
             </div>
           </div>
 
           <div className="lg:col-span-5 hidden lg:flex flex-col gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
             <div className="glass-strong p-6 rounded-sm relative corner-deco flex flex-col">
               <div className="flex items-center justify-between mb-6">
-                <div className="eyebrow flex items-center gap-2 text-primary text-[21px]">
+                <div className="eyebrow flex items-center gap-2 text-primary text-[14px]">
                   <Sparkles size={12} className="animate-pulse-soft" /> À l'agenda BNE
                 </div>
                 <div className="text-[18px] uppercase tracking-[0.2em] text-gold/60 border border-gold/20 px-2 py-0.5 rounded-sm">
                   Places limitées
                 </div>
               </div>
-              
+
               <div className="flex flex-col gap-2">
-                {events.upcoming.slice(0, 2).map((event, idx) => {
-                  const day = event.date.split(" ")[0];
-                  const month = event.date.split(" ").slice(-2)[0].substring(0, 4).toUpperCase();
+                {events.upcoming.slice(0, 2).map((event: any, idx) => {
+                  const day = event.day || event.date.split(" ")[0];
+                  const month = event.month || event.date.split(" ").slice(-2)[0].substring(0, 4).toUpperCase();
                   return (
                     <div key={event.id} className="group relative">
                       {idx !== 0 && <div className="h-px bg-gradient-to-r from-transparent via-gold/15 to-transparent my-4" />}
                       <div className="flex gap-4 items-start">
                         {/* Bloc Date */}
                         <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-sm bg-gold/5 border border-gold/10 group-hover:bg-gold/15 group-hover:border-gold/30 transition-colors duration-500">
-                          <span className="text-[29px] font-display text-gold-light leading-none">{day}</span>
-                          <span className="text-[18px] uppercase tracking-[0.15em] text-muted-foreground mt-1">{month}</span>
+                          <span className="text-xl font-display text-gold-light leading-none font-bold">{day}</span>
+                          <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1 font-semibold">{month}</span>
                         </div>
-                        
+ 
                         {/* Contenu */}
                         <div className="flex-1 min-w-0 pt-0.5">
-                          <h4 className="font-display text-[27px] mb-1.5 truncate text-white group-hover:text-gold-light transition-colors duration-300">{event.title}</h4>
-                          <div className="text-[21px] text-muted-foreground mb-3 flex items-center gap-1.5">
-                            <MapPin size={10} className="text-gold/60" /> {event.city}
+                          {event.type && (
+                            <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-gold-light/70 mb-0.5">
+                              {event.type}
+                            </div>
+                          )}
+                          <h4 className="font-display text-lg md:text-xl mb-1 truncate text-white group-hover:text-gold-light transition-colors duration-300">{event.title}</h4>
+                          <div className="text-xs text-muted-foreground mb-3 flex items-start gap-1.5 leading-relaxed">
+                            <MapPin size={12} className="text-gold/60 shrink-0 mt-0.5" /> 
+                            <span>{event.city}</span>
                           </div>
                           <Link
                             to="/contact"
-                            className="text-[19px] uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-1.5 transition-colors w-fit"
+                            className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-1.5 transition-colors w-fit font-medium"
                           >
                             Réserver <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
                           </Link>
@@ -268,14 +337,20 @@ export default function Home() {
       <section className="container py-16">
         <SectionHeading eyebrow={t("home.testimonials.eyebrow")} title={t("home.testimonials.title")} center />
         <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((tItem) => (
-            <div key={tItem.name} className="luxe-card p-8 rounded-sm">
+          {(dbReviews.length > 0 ? dbReviews : testimonials).slice(0,3).map((tItem: any, idx) => (
+            <div key={tItem.id || idx} className="luxe-card p-8 rounded-sm">
               <div className="flex gap-1 mb-5 text-primary">
-                {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="currentColor" />)}
+                {[...Array(5)].map((_, i) => <Star key={i} size={12} fill={i < (tItem.rating || 5) ? "currentColor" : "none"} className={i >= (tItem.rating || 5) ? "text-muted" : ""} />)}
               </div>
-              <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {tItem.quote} »</p>
+              <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {tItem.quote || tItem.comment} »</p>
               <div className="flex items-center gap-4 pt-4 border-t border-border">
-                <TestimonialFlag type={tItem.flagType} />
+                {tItem.flagType ? <TestimonialFlag type={tItem.flagType} /> : (
+                  <div className="shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-white/10 flex">
+                    <div className="flex-1 h-full" style={{ background: "rgb(0, 0, 0)" }} />
+                    <div className="flex-1 h-full" style={{ background: "rgb(250, 224, 66)" }} />
+                    <div className="flex-1 h-full" style={{ background: "rgb(239, 51, 64)" }} />
+                  </div>
+                )}
                 <div>
                   <div className="font-display text-base">{tItem.name}</div>
                   <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">{tItem.role}</div>

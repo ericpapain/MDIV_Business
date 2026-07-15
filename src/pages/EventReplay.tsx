@@ -2,6 +2,8 @@ import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Play, Quote, X } from "lucide-react";
 import { events, images } from "@/data/mockData";
 import { useEffect, useState } from "react";
+import mickePhoto from "@/assets/original/CEO.jpg";
+import kassaPhoto from "@/assets/profils/kassa.jpg";
 
 const DEMO_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4";
 
@@ -30,7 +32,7 @@ export default function EventReplay() {
   return (
     <div className="bg-[#0a0d0f] min-h-screen text-white pt-20">
       {/* ── Hero Vidéo ── */}
-      <section className="relative min-h-[35vh] py-16 md:py-20 w-full overflow-hidden flex items-center justify-center bg-black">
+      <section className="relative min-h-[22vh] py-10 md:py-12 w-full overflow-hidden flex items-center justify-center bg-black">
         <video 
           autoPlay 
           muted 
@@ -43,17 +45,17 @@ export default function EventReplay() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0d0f] via-black/40 to-transparent" />
         
         <div className="relative z-10 container text-center">
-          <div className="eyebrow mb-4 flex items-center justify-center gap-3 text-gold">
+          <div className="eyebrow mb-2 flex items-center justify-center gap-3 text-gold">
             <span className="w-8 h-px bg-gold/60" /> Archives Confidentielles <span className="w-8 h-px bg-gold/60" />
           </div>
-          <h1 className="font-display text-5xl md:text-7xl lg:text-[80px] leading-none mb-6 text-white drop-shadow-lg">
+          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl leading-none mb-3 text-white drop-shadow-lg">
             {event.title}
           </h1>
-          <div className="font-mono text-sm uppercase tracking-[0.2em] text-gold-light mb-8 drop-shadow-md">
+          <div className="font-mono text-xs uppercase tracking-[0.2em] text-gold-light mb-5 drop-shadow-md">
             {event.date} · {event.city}
           </div>
-          <Link to="/evenements" className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors border border-white/20 px-6 py-3 rounded-sm bg-black/40 backdrop-blur-md">
-            <ArrowLeft size={12} /> Retour aux événements
+          <Link to="/evenements" className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors border border-white/20 px-4 py-2 rounded-sm bg-black/40 backdrop-blur-md">
+            <ArrowLeft size={10} /> Retour aux événements
           </Link>
         </div>
       </section>
@@ -102,10 +104,10 @@ export default function EventReplay() {
                 <div key={i} className="flex gap-4 md:gap-8 shrink-0">
                   <div 
                     className="relative overflow-hidden rounded-sm aspect-[4/3] w-[260px] md:w-[360px] shrink-0 group border border-white/5 cursor-pointer"
-                    onClick={() => setActiveVideo(DEMO_VIDEO_URL)}
+                    onClick={() => setActiveVideo("/videos/Cerise.mp4")}
                   >
                     <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
-                      <source src={DEMO_VIDEO_URL} type="video/mp4" />
+                      <source src="/videos/Cerise.mp4" type="video/mp4" />
                     </video>
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -114,17 +116,17 @@ export default function EventReplay() {
                       </div>
                     </div>
                     <div className="absolute bottom-4 left-4">
-                      <div className="text-sm font-display mb-1">Entretien CEO</div>
-                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Interview exclusive</div>
+                      <div className="text-sm font-display mb-1">Cerise</div>
+                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">3 mots à propos du séjour fondateur...</div>
                     </div>
                   </div>
 
                   <div 
                     className="relative overflow-hidden rounded-sm aspect-square w-[220px] md:w-[320px] shrink-0 group border border-white/5 cursor-pointer"
-                    onClick={() => setActiveVideo(DEMO_VIDEO_URL)}
+                    onClick={() => setActiveVideo("/videos/Hakan.mp4")}
                   >
                     <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
-                      <source src={DEMO_VIDEO_URL} type="video/mp4" />
+                      <source src="/videos/Hakan.mp4" type="video/mp4" />
                     </video>
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -133,17 +135,17 @@ export default function EventReplay() {
                       </div>
                     </div>
                     <div className="absolute bottom-4 left-4">
-                      <div className="text-sm font-display mb-1">Avis Participant</div>
+                      <div className="text-sm font-display mb-1">Hakan</div>
                       <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Témoignage</div>
                     </div>
                   </div>
 
                   <div 
                     className="relative overflow-hidden rounded-sm aspect-video w-[280px] md:w-[400px] shrink-0 group border border-white/5 cursor-pointer"
-                    onClick={() => setActiveVideo(DEMO_VIDEO_URL)}
+                    onClick={() => setActiveVideo("/videos/Kassa-kassa.mp4")}
                   >
                     <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
-                      <source src={DEMO_VIDEO_URL} type="video/mp4" />
+                      <source src="/videos/Kassa-kassa.mp4" type="video/mp4" />
                     </video>
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -152,10 +154,49 @@ export default function EventReplay() {
                       </div>
                     </div>
                     <div className="absolute bottom-4 left-4">
-                      <div className="text-sm font-display mb-1">Retour d'expérience</div>
-                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Bilan</div>
+                      <div className="text-sm font-display mb-1">Kassa-Kassa</div>
+                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Retour du séjour fondateur...</div>
                     </div>
                   </div>
+
+                  <div 
+                    className="relative overflow-hidden rounded-sm aspect-[4/3] w-[260px] md:w-[360px] shrink-0 group border border-white/5 cursor-pointer"
+                    onClick={() => setActiveVideo("/videos/Pierre.mp4")}
+                  >
+                    <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                      <source src="/videos/Pierre.mp4" type="video/mp4" />
+                    </video>
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                        <Play className="text-white ml-1" size={24} />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-4 left-4">
+                      <div className="text-sm font-display mb-1">Pierre</div>
+                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Retour séjour fondateur...</div>
+                    </div>
+                  </div>
+
+                  <div 
+                    className="relative overflow-hidden rounded-sm aspect-square w-[220px] md:w-[320px] shrink-0 group border border-white/5 cursor-pointer"
+                    onClick={() => setActiveVideo("/videos/Micke-1BNE.mp4")}
+                  >
+                    <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                      <source src="/videos/Micke-1BNE.mp4" type="video/mp4" />
+                    </video>
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                        <Play className="text-white ml-1" size={16} />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-4 left-4">
+                      <div className="text-sm font-display mb-1">Micke</div>
+                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Initiateur BNE...</div>
+                    </div>
+                  </div>
+
                 </div>
               ))}
             </div>
@@ -177,10 +218,10 @@ export default function EventReplay() {
                 <div key={i} className="flex gap-4 md:gap-8 shrink-0">
                   <div 
                     className="relative overflow-hidden rounded-sm aspect-video w-[280px] md:w-[420px] shrink-0 group border border-white/5 cursor-pointer"
-                    onClick={() => setActiveVideo(DEMO_VIDEO_URL)}
+                    onClick={() => setActiveVideo("/videos/Visite-Champagne-Trailer.mp4")}
                   >
                     <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
-                      <source src={DEMO_VIDEO_URL} type="video/mp4" />
+                      <source src="/videos/Visite-Champagne-Trailer.mp4" type="video/mp4" />
                     </video>
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -189,17 +230,17 @@ export default function EventReplay() {
                       </div>
                     </div>
                     <div className="absolute bottom-4 left-4">
-                      <div className="text-sm font-display mb-1">Keynote d'Ouverture</div>
-                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Conférence</div>
+                      <div className="text-sm font-display mb-1">Trailer</div>
+                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Visite Champagne</div>
                     </div>
                   </div>
 
                   <div 
                     className="relative overflow-hidden rounded-sm aspect-[3/4] w-[200px] md:w-[280px] shrink-0 group border border-white/5 cursor-pointer"
-                    onClick={() => setActiveVideo(DEMO_VIDEO_URL)}
+                    onClick={() => setActiveVideo("/videos/Micke-2BNE.mp4")}
                   >
                     <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
-                      <source src={DEMO_VIDEO_URL} type="video/mp4" />
+                      <source src="/videos/Micke-2BNE.mp4" type="video/mp4" />
                     </video>
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -208,17 +249,36 @@ export default function EventReplay() {
                       </div>
                     </div>
                     <div className="absolute bottom-4 left-4">
-                      <div className="text-sm font-display mb-1">Dîner de Gala</div>
-                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Ambiance</div>
+                      <div className="text-sm font-display mb-1">Micke</div>
+                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Ambiance BNE...</div>
+                    </div>
+                  </div>
+
+                  <div 
+                    className="relative overflow-hidden rounded-sm aspect-[3/4] w-[200px] md:w-[280px] shrink-0 group border border-white/5 cursor-pointer"
+                    onClick={() => setActiveVideo("/videos/Mathilda-Ret-Champ.mp4")}
+                  >
+                    <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                      <source src="/videos/Mathilda-Ret-Champ.mp4" type="video/mp4" />
+                    </video>
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                        <Play className="text-white ml-1" size={16} />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-4 left-4">
+                      <div className="text-sm font-display mb-1">Mathilda</div>
+                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Retour Champagne...</div>
                     </div>
                   </div>
 
                   <div 
                     className="relative overflow-hidden rounded-sm aspect-video w-[260px] md:w-[380px] shrink-0 group border border-white/5 cursor-pointer"
-                    onClick={() => setActiveVideo(DEMO_VIDEO_URL)}
+                    onClick={() => setActiveVideo("/videos/Imp_Reseau_Olivier.mp4")}
                   >
                     <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
-                      <source src={DEMO_VIDEO_URL} type="video/mp4" />
+                      <source src="/videos/Imp_Reseau_Olivier.mp4" type="video/mp4" />
                     </video>
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -227,10 +287,30 @@ export default function EventReplay() {
                       </div>
                     </div>
                     <div className="absolute bottom-4 left-4">
-                      <div className="text-sm font-display mb-1">Masterclass Stratégie</div>
-                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Workshop</div>
+                      <div className="text-sm font-display mb-1">Olivier</div>
+                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Importance du réseau...</div>
                     </div>
                   </div>
+
+                  <div 
+                    className="relative overflow-hidden rounded-sm aspect-video w-[280px] md:w-[420px] shrink-0 group border border-white/5 cursor-pointer"
+                    onClick={() => setActiveVideo("/videos/His-champ-Dautel-Cadot.mp4")}
+                  >
+                    <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                      <source src="/videos/His-champ-Dautel-Cadot.mp4" type="video/mp4" />
+                    </video>
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                        <Play className="text-white ml-1" size={24} />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-4 left-4">
+                      <div className="text-sm font-display mb-1">Dautel-Cadot</div>
+                      <div className="text-[10px] font-mono text-gold-light uppercase tracking-widest">Histoire de notre champagne Dautel-Cadot...</div>
+                    </div>
+                  </div>
+
                 </div>
               ))}
             </div>
@@ -305,15 +385,15 @@ export default function EventReplay() {
               <Quote className="absolute top-8 left-8 text-gold/20" size={80} />
               <div className="relative z-10">
                 <p className="text-xl md:text-2xl leading-relaxed mb-10 italic font-serif text-white/90">
-                  "Une parenthèse hors du temps. {event.title} m'a permis de rencontrer des profils que je n'aurais jamais pu croiser dans un cadre conventionnel. Les synergies créées ici dépassent largement le cadre du simple networking."
+                  "Ce séjour a été une formidable opportunité de croiser des perspectives financières et économiques avec des entrepreneurs de premier plan. Les échanges confidentiels et de haut niveau créent une valeur réelle et immédiate."
                 </p>
                 <div className="flex items-center gap-5">
                   <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gold/40">
-                    <img src={images.portrait2} alt="Participant" className="w-full h-full object-cover" />
+                    <img src={kassaPhoto} alt="Kassa-Kassa" className="w-full h-full object-cover" />
                   </div>
                   <div>
-                    <div className="font-semibold text-base mb-0.5">Alexandre V.</div>
-                    <div className="text-[10px] uppercase tracking-[0.2em] text-gold">Fondateur Tech & Investisseur</div>
+                    <div className="font-semibold text-base mb-0.5">Kassa-Kassa</div>
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-gold">Économiste - Financier - Fiscaliste</div>
                   </div>
                 </div>
               </div>
@@ -327,24 +407,24 @@ export default function EventReplay() {
                 </div>
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden">
-                    <img src={images.portrait1} alt="Author" className="w-full h-full object-cover" />
+                    <img src={mickePhoto} alt="Micke Ponho Dimvula" className="w-full h-full object-cover" />
                   </div>
                   <div>
-                    <div className="font-bold text-base leading-tight text-gray-900">Sarah M.</div>
-                    <div className="text-xs text-gray-600 mt-0.5">CEO @ FinTech Innov · 2nd</div>
+                    <div className="font-bold text-base leading-tight text-gray-900">Micke Ponho Dimvula</div>
+                    <div className="text-xs text-gray-600 mt-0.5">CEO & Fondateur, M.DIV Consulting · 1er</div>
                     <div className="text-[10px] text-gray-400 mt-0.5">Il y a 3 mois</div>
                   </div>
                 </div>
                 <p className="text-sm md:text-base leading-relaxed mb-4 text-gray-800">
-                  Encore des étoiles plein les yeux suite au <strong>#{event.title.replace(/\s+/g, '')}</strong>. Une organisation millimétrée par le cercle BNE. 
+                  Un immense plaisir d'avoir partagé ces moments d'exception lors du <strong>#{event.title.replace(/\s+/g, '')}</strong>. M.DIV s'engage à connecter les leaders et entrepreneurs autour d'opportunités réelles. 
                   <br/><br/>
-                  Des échanges d'une rare intensité sur l'avenir de nos industries. Heureuse d'avoir pu échanger avec des esprits si visionnaires et d'avoir identifié 3 partenaires stratégiques pour notre prochaine levée. 🚀
+                  Merci à tous nos membres fondateurs pour leur confiance et leur vision. Ensemble, nous façonnons l'excellence et le développement d'affaires de demain. 🚀
                 </p>
                 <div className="text-xs text-[#0a66c2] font-semibold hover:underline cursor-pointer mb-5">Voir la traduction</div>
                 
                 <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 font-medium">
-                  <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-full"><span className="text-base">👍❤️💡</span> 142</span>
-                  <span className="hover:underline cursor-pointer">18 commentaires · 5 partages</span>
+                  <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-full"><span className="text-base">👍❤️💡</span> 284</span>
+                  <span className="hover:underline cursor-pointer">42 commentaires · 12 partages</span>
                 </div>
               </div>
             </div>
@@ -376,9 +456,11 @@ export default function EventReplay() {
               <X size={24} />
             </button>
             <video 
+              key={activeVideo}
               src={activeVideo} 
               autoPlay 
               controls 
+              playsInline
               className="w-full h-full object-contain"
             />
           </div>

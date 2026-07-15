@@ -5,10 +5,10 @@ import { useLanguage } from "@/i18n/LanguageContext";
 export function SiteFooter() {
   const { t } = useLanguage();
   return (
-    <footer className="relative border-t border-border mt-32">
-      <div className="container py-16 grid md:grid-cols-4 gap-10">
+    <footer className="relative border-t border-border mt-16">
+      <div className="container py-8 grid md:grid-cols-4 gap-8">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-sm flex items-center justify-center gold-border bg-emerald-deep/40">
               <span className="font-display text-base gold-text font-bold tracking-tight">MD</span>
             </div>
@@ -20,38 +20,35 @@ export function SiteFooter() {
           <p className="text-sm text-muted-foreground max-w-md leading-relaxed font-serif italic">
             {t("footer.tagline")}
           </p>
-          <div className="hairline my-6 max-w-xs" />
+          <div className="hairline my-4 max-w-xs" />
           <div className="flex gap-3">
             {[Instagram, Linkedin, Youtube, Music2].map((I, i) => (
-              <a key={i} href="#" className="w-10 h-10 rounded-sm border border-border hover:border-gold/60 flex items-center justify-center transition-colors text-muted-foreground hover:text-primary">
-                <I size={16} />
+              <a key={i} href="#" className="w-8 h-8 rounded-sm border border-border hover:border-gold/60 flex items-center justify-center transition-colors text-muted-foreground hover:text-primary">
+                <I size={14} />
               </a>
             ))}
           </div>
         </div>
         <div>
-          <div className="eyebrow mb-4">{t("footer.navigation")}</div>
-          <ul className="space-y-2 text-sm text-foreground/70">
-            {/* <li><Link to="/experience" className="hover:text-primary">{t("nav.builder")}</Link></li> */}
+          <div className="eyebrow mb-3">{t("footer.navigation")}</div>
+          <ul className="space-y-1.5 text-sm text-foreground/70">
             <li><Link to="/offres" className="hover:text-primary">{t("nav.offers")}</Link></li>
             <li><Link to="/evenements" className="hover:text-primary">{t("nav.events")}</Link></li>
             <li><Link to="/home" className="hover:text-primary">{t("nav.home")}</Link></li>
             <li><Link to="/contact" className="hover:text-primary">{t("nav.contact")}</Link></li>
-            {/* <li><Link to="/partenaires" className="hover:text-primary">{t("nav.partners")}</Link></li> */}
-            {/* <li><Link to="/media" className="hover:text-primary">{t("nav.media")}</Link></li> */}
           </ul>
         </div>
         <div>
-          <div className="eyebrow mb-4">{t("footer.contact")}</div>
-          <ul className="space-y-2 text-sm text-foreground/70">
+          <div className="eyebrow mb-3">{t("footer.contact")}</div>
+          <ul className="space-y-1.5 text-sm text-foreground/70">
             <li><a href="mailto:m.divcsltg@gmail.com,ericpapainmezatio@gmail.com" className="hover:text-primary transition-colors">m.div-network@bne.com</a></li>
             <li><a href="tel:+33666078870" className="hover:text-primary transition-colors">+33 6 66 07 88 70</a></li>
-            <li>En cours...</li>
+            <li>1000 Troyes</li>
           </ul>
         </div>
       </div>
       <div className="border-t border-border">
-        <div className="container py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+        <div className="container py-4 flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
           <div>© {new Date().getFullYear()} M.DIV Business · {t("footer.rights")}</div>
           <div className="flex gap-6">
             <a href="#">{t("footer.privacy")}</a>

@@ -1,19 +1,54 @@
 import { motion } from "framer-motion";
 
+interface Member {
+  name: string;
+  role: string;
+  icon: string;
+}
+
 interface Country {
   name: string;
   flag: string;
   code: string;
-  desc: string;
+  members: Member[];
   colors: string[]; // flag stripe colors for the corner accent
 }
 
 export function CountryShowcase() {
   const countries: Country[] = [
-    { name: "France", flag: "🇫🇷", code: "FR", desc: "Family offices, entrepreneurs technologiques et investisseurs immobiliers.", colors: ["#002395", "#FFFFFF", "#ED2939"] },
-    { name: "Belgique", flag: "🇧🇪", code: "BE", desc: "Dirigeants de holdings privées et promoteurs immobiliers transfrontaliers.", colors: ["#2D2926", "#FDDA24", "#C8102E"] },
-    { name: "Luxembourg", flag: "🇱🇺", code: "LU", desc: "Gestionnaires de fonds, investisseurs en private equity et conseils.", colors: ["#EF3340", "#FFFFFF", "#00A3E0"] },
-    { name: "Suisse", flag: "🇨🇭", code: "CH", desc: "Family offices de Genève et Zurich, gestionnaires de fortune indépendants.", colors: ["#DA291C", "#FFFFFF", "#DA291C"] },
+    { 
+      name: "France", flag: "🇫🇷", code: "FR", 
+      members: [
+        { name: "Micke", role: "CEO fondateur et initiateur du séjour", icon: "👨‍💼" },
+        { name: "Eric", role: "Expert IA et IT, développeur de la plateforme", icon: "👨‍💼" },
+        { name: "Pierre", role: "Marchand de biens", icon: "👨‍💼" },
+        { name: "Sibley", role: "Expert vidéo et Ads", icon: "👨‍💼" },
+      ],
+      colors: ["#002395", "#FFFFFF", "#ED2939"] 
+    },
+    { 
+      name: "Belgique", flag: "🇧🇪", code: "BE", 
+      members: [
+        { name: "Cerise", role: "Dirigeante Cabinet Médico-Esthétique", icon: "👩‍💼" },
+        { name: "Rémy", role: "Dirigeant Agence web", icon: "👨‍💼" },
+        { name: "Hakan", role: "Membre de la délégation", icon: "👨‍💼" },
+      ],
+      colors: ["#2D2926", "#FDDA24", "#C8102E"] 
+    },
+    { 
+      name: "Luxembourg", flag: "🇱🇺", code: "LU", 
+      members: [
+        { name: "Kassa", role: "Economiste - Financier - Fiscaliste", icon: "👨‍💼" },
+      ],
+      colors: ["#EF3340", "#FFFFFF", "#00A3E0"] 
+    },
+    { 
+      name: "Suisse", flag: "🇨🇭", code: "CH", 
+      members: [
+        { name: "Mathilda Guyot", role: "Référente Suisse du Royalty Club", icon: "👩‍💼" },
+      ],
+      colors: ["#DA291C", "#FFFFFF", "#DA291C"] 
+    },
   ];
 
   return (
@@ -78,9 +113,17 @@ export function CountryShowcase() {
               </div>
             </div>
 
-            <p className="text-xs text-white/70 leading-relaxed font-light mt-1">
-              {country.desc}
-            </p>
+            <div className="mt-1 flex flex-col gap-3 border-t border-white/10 pt-3 relative z-10">
+              {country.members.map((member, mIdx) => (
+                <div key={mIdx} className="flex items-start gap-3">
+                  <div className="text-xl mt-0.5">{member.icon}</div>
+                  <div className="flex flex-col">
+                    <span className="text-[13px] font-display font-semibold text-white tracking-wide">{member.name}</span>
+                    <span className="text-[9px] text-white/60 leading-snug mt-0.5 font-medium">{member.role}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </motion.div>
         ))}
       </div>

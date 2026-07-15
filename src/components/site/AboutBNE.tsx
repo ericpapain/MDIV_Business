@@ -45,7 +45,7 @@ export function AboutBNE() {
                 </div>
                 <h4 className="font-display text-sm uppercase tracking-[0.15em] text-white">Entrepreneurs<br />& Dirigeants</h4>
               </div>
-              <ul className="text-[21px] text-muted-foreground space-y-2 list-disc pl-4">
+              <ul className="text-[14px] text-muted-foreground space-y-2 list-disc pl-4">
                 <li>Développer leur réseau</li>
                 <li>Accéder à de nouvelles opportunités</li>
                 <li>Trouver des expertises complémentaires</li>
@@ -59,7 +59,7 @@ export function AboutBNE() {
                 </div>
                 <h4 className="font-display text-sm uppercase tracking-[0.15em] text-white">Entreprises</h4>
               </div>
-              <ul className="text-[21px] text-muted-foreground space-y-2 list-disc pl-4 mt-8 sm:mt-0">
+              <ul className="text-[14px] text-muted-foreground space-y-2 list-disc pl-4 mt-8 sm:mt-0">
                 <li>Renforcer leur visibilité</li>
                 <li>Développer leur activité</li>
                 <li>Créer des connexions qualifiées</li>
@@ -75,7 +75,7 @@ export function AboutBNE() {
         <h3 className="font-display text-3xl mb-10 text-center text-white">Parcours d'engagement</h3>
         <div className="flex flex-col md:flex-row items-center justify-center gap-6 relative">
           <div className="hidden md:block absolute top-8 left-[10%] right-[10%] h-px bg-gold/20" />
-          
+
           {[
             { step: 1, title: "Découverte", desc: "Événement ou rencontre BNE", icon: Search },
             { step: 2, title: "Expérience", desc: "Participation à un séjour", icon: Briefcase },

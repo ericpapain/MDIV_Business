@@ -1,10 +1,51 @@
+import { useState } from "react";
 import { offers, computeFinalPrice } from "@/data/mockData";
-import { Check, ArrowRight, Crown, Users, Diamond, Handshake, Network, Utensils, TrendingUp, Camera, UserCheck, Mail, Globe, Cpu, Compass, Rocket, Target, Zap, Sparkles } from "lucide-react";
+import { Check, ArrowRight, Crown, Users, Diamond, Handshake, Network, Utensils, TrendingUp, Camera, UserCheck, Mail, Globe, Cpu, Compass, Rocket, Target, Zap, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import destChampagne from "@/assets/original/dest-champagne.png";
 import destSuisse from "@/assets/original/dest-suisse.png";
 import destLuxembourg from "@/assets/original/dest-luxembourg.png";
 import destBelgique from "@/assets/original/dest-belgique.png";
+
+function CountryFlag({ type, className }: { type: string; className?: string }) {
+  const base = `w-12 h-8 border border-white/10 shrink-0 rounded-xs ${className || ""}`;
+  if (type === "france") {
+    return (
+      <div className={base} style={{ display: "flex" }}>
+        <div style={{ flex: 1, background: "#0055A5" }} />
+        <div style={{ flex: 1, background: "#FFFFFF" }} />
+        <div style={{ flex: 1, background: "#E70020" }} />
+      </div>
+    );
+  }
+  if (type === "suisse") {
+    return (
+      <div className={`${base} bg-[#D81E05] flex items-center justify-center`} style={{ position: "relative" }}>
+        <div style={{ width: "3px", height: "14px", background: "#FFFFFF", position: "absolute" }} />
+        <div style={{ width: "14px", height: "3px", background: "#FFFFFF", position: "absolute" }} />
+      </div>
+    );
+  }
+  if (type === "luxembourg") {
+    return (
+      <div className={base} style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, background: "#EA1821" }} />
+        <div style={{ flex: 1, background: "#FFFFFF" }} />
+        <div style={{ flex: 1, background: "#00A3E0" }} />
+      </div>
+    );
+  }
+  if (type === "belgique") {
+    return (
+      <div className={base} style={{ display: "flex" }}>
+        <div style={{ flex: 1, background: "#000000" }} />
+        <div style={{ flex: 1, background: "#FAE042" }} />
+        <div style={{ flex: 1, background: "#EF3340" }} />
+      </div>
+    );
+  }
+  return null;
+}
 
 /* ─── Destinations cliquables ─── */
 const destinations = [
@@ -102,11 +143,21 @@ const services = [
 ];
 
 export default function Offers() {
+  const [activeServices, setActiveServices] = useState<string[]>([]);
+
+  const toggleService = (serviceId: string) => {
+    if (activeServices.includes(serviceId)) {
+      setActiveServices(activeServices.filter(s => s !== serviceId));
+    } else {
+      setActiveServices([...activeServices, serviceId]);
+    }
+  };
+
   return (
-    <div className="pt-32 pb-20 container">
+    <div className="pt-24 pb-12 container">
 
       {/* ── Cartes formules ── */}
-      <div className="grid lg:grid-cols-3 gap-6 mb-20">
+      <div className="grid lg:grid-cols-3 gap-6 mb-12">
         {offers.map((o, i) => {
           const price = computeFinalPrice(o);
           const featured = i === 1;
@@ -152,28 +203,328 @@ export default function Offers() {
                 <div className="font-display text-3xl mb-2">{o.name}</div>
                 <div className="text-sm text-muted-foreground font-serif italic mb-6">{o.tagline}</div>
                 <div className="hairline mb-6" />
-                <ul className="space-y-4 mb-8 flex-1">
-                  {o.features.map((f) => {
-                    const parts = f.split(" : ");
-                    return (
-                      <li key={f} className="flex items-start gap-3 text-[23px] text-foreground/80 leading-relaxed group/item">
-                        <div className="mt-0.5 rounded-full p-0.5 bg-gold/10 group-hover/item:bg-gold/20 transition-colors">
-                          <Check size={12} className="text-gold" strokeWidth={3} />
+                {o.id === 'networking' ? (
+                  <div className="flex-1 text-[14px] font-ubuntu text-foreground/90 leading-relaxed space-y-4">
+                    <div className="space-y-3">
+                      <div 
+                        onClick={() => toggleService('sejours')}
+                        className="custom-accordion-header"
+                      >
+                        <span className="flex items-center"><span className="mr-2">✈️</span> Séjours immersifs</span>
+                        {activeServices.includes('sejours') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                      </div>
+                      {activeServices.includes('sejours') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Découverte d'un territoire</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Rencontres entrepreneuriales</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Expériences immersives</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Moments de partage</div>
+                          </div>
                         </div>
-                        <span>
-                          {parts.length > 1 ? (
-                            <>
-                              <strong className="text-white font-medium tracking-wide">{parts[0]} :</strong> {parts.slice(1).join(" : ")}
-                            </>
-                          ) : (
-                            f
-                          )}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <Link to="/experience" className={`${featured ? "btn-gold" : "btn-ghost-gold"} text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3 mt-auto`}>
+                      )}
+                    </div>
+
+                    <div className="border-t border-gold/10 pt-4 space-y-3">
+                      <div 
+                        onClick={() => toggleService('participants')}
+                        className="custom-accordion-header"
+                      >
+                        <span className="flex items-center"><span className="mr-2">🌍</span> Valeur participants</span>
+                        {activeServices.includes('participants') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                      </div>
+                      {activeServices.includes('participants') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Réseau</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Ouverture internationale</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Partenariats</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Opportunités</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="border-t border-gold/10 pt-4 space-y-3">
+                      <div 
+                        onClick={() => toggleService('territoires')}
+                        className="custom-accordion-header"
+                      >
+                        <span className="flex items-center"><span className="mr-2">📈</span> Valeur territoires</span>
+                        {activeServices.includes('territoires') ? <ChevronUp size={16} className="text-white/70" /> : <ChevronDown size={16} className="text-white/70" />}
+                      </div>
+                      {activeServices.includes('territoires') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Visibilité</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Attractivité</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Valorisation économique</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : o.id === 'investor' ? (
+                  <div className="flex-1 text-[14px] font-ubuntu text-foreground/90 leading-relaxed space-y-4 mb-8">
+                    <div className="space-y-3">
+                      <div 
+                        onClick={() => toggleService('analyse')}
+                        className="custom-accordion-header"
+                      >
+                        <span>1️⃣ Analyse &amp; Construction</span>
+                        {activeServices.includes('analyse') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                      </div>
+                      {activeServices.includes('analyse') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Compréhension du besoin</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Positionnement &amp; stratégie</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Création de contenus</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border-t border-gold/10 pt-4 space-y-3">
+                      <div 
+                        onClick={() => toggleService('amplification')}
+                        className="custom-accordion-header"
+                      >
+                        <span>2️⃣ Amplification</span>
+                        {activeServices.includes('amplification') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                      </div>
+                      {activeServices.includes('amplification') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Diffusion digitale</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Valorisation &amp; storytelling</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Activation du réseau</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border-t border-gold/10 pt-4 space-y-3">
+                      <div 
+                        onClick={() => toggleService('connexion')}
+                        className="custom-accordion-header"
+                      >
+                        <span>3️⃣ Connexion &amp; Développement</span>
+                        {activeServices.includes('connexion') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                      </div>
+                      {activeServices.includes('connexion') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Événement dédié</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Rencontres ciblées</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Mises en relation &amp; suivi</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 space-y-4 mb-8 text-[14px]">
+                    {/* Diagnostic */}
+                    <div className="space-y-3">
+                      <div 
+                        onClick={() => toggleService('diagnostic')} 
+                        className="custom-accordion-header"
+                      >
+                        <span className="flex items-center">🤖 Diagnostic IA</span>
+                        {activeServices.includes('diagnostic') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                      </div>
+                      {activeServices.includes('diagnostic') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Identifier les tâches qui prennent du temps</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Repérer les opportunités d'amélioration</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Mesurer les gains possibles</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Définir les priorités d'action</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Automatisation */}
+                    <div className="space-y-3">
+                      <div 
+                        onClick={() => toggleService('automatisation')} 
+                        className="custom-accordion-header"
+                      >
+                        <span className="flex items-center">⚡ Automatisation</span>
+                        {activeServices.includes('automatisation') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                      </div>
+                      {activeServices.includes('automatisation') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Gérer les emails plus rapidement</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Répondre aux appels d'offres</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Créer des comptes-rendus de réunion automatiquement</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Créer des documents automatiquement</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Réduire les tâches répétitives</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Faire travailler les outils ensemble</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Communication */}
+                    <div className="space-y-3">
+                      <div 
+                        onClick={() => toggleService('communication')} 
+                        className="custom-accordion-header"
+                      >
+                        <span className="flex items-center">📣 Communication &amp; Visibilité</span>
+                        {activeServices.includes('communication') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                      </div>
+                      {activeServices.includes('communication') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Créer du contenu facilement</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Animer les réseaux sociaux</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Améliorer la visibilité sur Google</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Préparer des supports professionnels</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Commercial */}
+                    <div className="space-y-3">
+                      <div 
+                        onClick={() => toggleService('commercial')} 
+                        className="custom-accordion-header"
+                      >
+                        <span className="flex items-center">📈 Développement Commercial</span>
+                        {activeServices.includes('commercial') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                      </div>
+                      {activeServices.includes('commercial') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Trouver de nouveaux clients</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Identifier les prospects prioritaires</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Préparer les rendez-vous</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Suivre les opportunités commerciales</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* IA */}
+                    <div className="space-y-3">
+                      <div 
+                        onClick={() => toggleService('ia')} 
+                        className="custom-accordion-header"
+                      >
+                        <span className="flex items-center">🧠 IA Générative</span>
+                        {activeServices.includes('ia') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                      </div>
+                      {activeServices.includes('ia') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Utiliser efficacement ChatGPT et les IA gratuites</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Créer des assistants IA sur mesure</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Exploiter Microsoft Copilot</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Retrouver facilement les informations utiles</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Formation */}
+                    <div className="space-y-3">
+                      <div 
+                        onClick={() => toggleService('formation')} 
+                        className="custom-accordion-header"
+                      >
+                        <span className="flex items-center">🎓 Formation des Équipes</span>
+                        {activeServices.includes('formation') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                      </div>
+                      {activeServices.includes('formation') && (
+                        <div className="custom-service-content">
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Découvrir les usages de l'IA</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Apprendre par des cas concrets</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Prendre en main les outils</div>
+                          </div>
+                          <div className="custom-service-item">
+                            <div className="font-medium text-foreground/90">Accompagner le changement</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <Link 
+                  to={o.id === 'networking' ? "/sejour#a-venir" : "/contact"} 
+                  className={`${featured ? "btn-gold" : "btn-ghost-gold"} text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3 mt-auto`}
+                >
                   Choisir <ArrowRight size={14} />
                 </Link>
               </div>
@@ -210,26 +561,7 @@ export default function Offers() {
               </div>
             </div>
 
-            {/* 3 Piliers cliquables */}
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { icon: Users, label: "Connecter", sub: "les dirigeants" },
-                { icon: Diamond, label: "Valoriser", sub: "les territoires" },
-                { icon: Handshake, label: "Créer", sub: "des opportunités" },
-              ].map(({ icon: Icon, label, sub }) => (
-                <button
-                  key={label}
-                  onClick={() => {/* TODO: redirection */ }}
-                  className="flex flex-col items-center gap-2 p-3 rounded-sm border border-gold/10 bg-gold/5 hover:border-gold/40 hover:bg-gold/10 transition-all duration-300 group text-center"
-                >
-                  <div className="w-10 h-10 rounded-full border border-gold/30 flex items-center justify-center group-hover:border-gold/60 transition-colors">
-                    <Icon size={16} className="text-primary" />
-                  </div>
-                  <div className="text-[9px] uppercase tracking-[0.2em] text-gold-light font-semibold leading-tight">{label}</div>
-                  <div className="text-[8px] uppercase tracking-[0.15em] text-foreground/50 leading-tight">{sub}</div>
-                </button>
-              ))}
-            </div>
+
 
             {/* Accroche */}
             <p className="text-sm text-foreground/70 font-semibold text-center leading-relaxed border-t border-b border-gold/10 py-4">
@@ -240,42 +572,19 @@ export default function Offers() {
               </span>
             </p>
 
-            {/* Encadré services */}
-            <div className="rounded-sm border border-gold/25 bg-gold/5 p-5">
-              <div className="text-[9px] uppercase tracking-[0.3em] text-gold-light font-bold text-center mb-4">
-                Des week-ends premium clés en main
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {services.map(({ icon: Icon, label, sub }) => (
-                  <button
-                    key={label}
-                    onClick={() => {/* TODO: redirection */ }}
-                    className="flex items-start gap-2.5 text-left hover:opacity-80 transition-opacity group"
-                  >
-                    <div className="w-8 h-8 shrink-0 rounded-sm border border-gold/20 bg-gold/5 flex items-center justify-center group-hover:border-gold/50 transition-colors mt-0.5">
-                      <Icon size={13} className="text-primary" />
-                    </div>
-                    <div>
-                      <div className="text-[9px] uppercase tracking-[0.18em] text-foreground/80 font-semibold leading-tight">{label}</div>
-                      <div className="text-[8px] uppercase tracking-[0.12em] text-foreground/40 leading-tight mt-0.5">{sub}</div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
+
 
             {/* Pied de colonne gauche */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-gold/10 mt-auto">
-              <p className="text-[9px] uppercase tracking-[0.15em] text-foreground/50 leading-relaxed max-w-[200px]">
-                Une expérience conçue pour entrepreneurs et décideurs.
-              </p>
-              <p className="font-serif italic text-sm text-gold-light text-center sm:text-right">
-                Votre passerelle vers<br />
-                <em>de nouveaux écosystèmes.</em>
-              </p>
+            <div className="flex items-center justify-between gap-4 pt-2 border-t border-gold/10 mt-auto w-full">
+              <div className="flex items-center gap-1.5">
+                <CountryFlag type="france" />
+                <CountryFlag type="suisse" />
+                <CountryFlag type="luxembourg" />
+                <CountryFlag type="belgique" />
+              </div>
               <Link
-                to="/contact"
-                className="shrink-0 flex items-center gap-2 px-5 py-3 btn-gold rounded-sm text-[9px] uppercase tracking-[0.25em] font-bold"
+                to="/sejour#a-venir"
+                className="shrink-0 flex items-center gap-2 px-4 py-2.5 btn-gold rounded-sm text-[9px] uppercase tracking-[0.25em] font-bold"
               >
                 <Mail size={13} />
                 Pré-inscriptions<br />ouvertes
@@ -302,7 +611,7 @@ export default function Offers() {
                 <Link
                   key={dest.id}
                   to={dest.href}
-                  className={`relative flex-1 group overflow-hidden cursor-pointer min-h-[140px] ${i < destinations.length - 1 ? "border-b border-gold/10" : ""}`}
+                  className={`relative flex-1 group overflow-hidden cursor-pointer min-h-[100px] ${i < destinations.length - 1 ? "border-b border-gold/10" : ""}`}
                 >
                   <img
                     src={dest.image}
@@ -324,7 +633,7 @@ export default function Offers() {
                       )}
                     </div>
 
-                    <FlagCSS type={dest.flagType} />
+                    <CountryFlag type={dest.flagType} />
                   </div>
 
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">

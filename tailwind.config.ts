@@ -15,6 +15,7 @@ export default {
         display: ['"Playfair Display"', 'serif'],
         serif: ['"Cormorant Garamond"', 'serif'],
         body: ['Inter', 'sans-serif'],
+        ubuntu: ['Ubuntu', 'sans-serif'],
         mono: ['ui-monospace', 'monospace'],
       },
       colors: {

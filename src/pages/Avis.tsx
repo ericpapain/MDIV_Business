@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import { Star, Send } from "lucide-react";
 import { toast } from "sonner";
 import { events } from "@/data/mockData";
@@ -26,10 +27,36 @@ export default function Avis() {
   });
 
   const [reviews, setReviews] = useState<Review[]>([]);
-
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = async () => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      if (data) {
+        setReviews(data as Review[]);
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const selectedEvent = pastEvents.find(ev => ev.id === formData.eventId);
     const validCode = selectedEvent ? selectedEvent.code : "BNE2026";
@@ -40,25 +67,45 @@ export default function Avis() {
     }
     
     const selectedEventTitle = pastEvents.find(ev => ev.id === formData.eventId)?.title || "Événement BNE";
-    
-    const newReview: Review = {
-      id: Date.now().toString(),
-      name: formData.name,
-      role: formData.role,
-      rating: formData.rating,
-      comment: formData.comment,
-      event: selectedEventTitle,
-    };
-    
-    setReviews([newReview, ...reviews]);
     setSent(true);
-    toast.success("Votre avis a été publié avec succès.");
     
-    // Reset form after 3s
-    setTimeout(() => {
+    try {
+      const newReview = {
+        name: formData.name,
+        role: formData.role,
+        rating: formData.rating,
+        comment: formData.comment,
+        event: selectedEventTitle,
+      };
+
+      if (!supabase) {
+        toast.error("Base de données non configurée.");
+        setSent(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('reviews')
+        .insert([newReview])
+        .select();
+
+      if (error) throw error;
+
+      if (data) {
+        setReviews([data[0] as Review, ...reviews]);
+        toast.success("Votre avis a été publié avec succès.");
+      }
+      
+      setTimeout(() => {
+        setSent(false);
+        setFormData({ ...formData, code: "", comment: "", rating: 5 });
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error inserting review:', error);
+      toast.error("Une erreur est survenue lors de la publication de votre avis.");
       setSent(false);
-      setFormData({ ...formData, code: "", comment: "", rating: 5 });
-    }, 3000);
+    }
   };
 
   return (

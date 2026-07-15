@@ -24,7 +24,7 @@ export function ChampagneEvent() {
             damping: 15,
           }}
           className={`relative w-full rounded-sm overflow-hidden border border-white/10 shadow-2xl transition-all duration-300 ${
-            isOpen ? "min-h-[140vh]" : "h-[80vh] md:h-[85vh] min-h-[550px]"
+            isOpen ? "min-h-[140vh]" : "h-[45vh] md:h-[55vh] min-h-[400px]"
           }`}
         >
           {/* Backdrop Ken Burns zooming image */}
@@ -89,20 +89,20 @@ export function ChampagneEvent() {
             {/* Middle Row: Content Text & Countdown */}
             <div className="my-auto py-8 w-full flex flex-col gap-8">
               {/* Title & Subtitle (constrained to max-w-4xl) */}
-              <div className="max-w-4xl flex flex-col gap-6">
+              <div className="max-w-4xl flex flex-col gap-3">
                 {/* Progressive Title Fade-in */}
-                <div className="space-y-4">
+                <div className="space-y-1 md:space-y-2">
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.2 }}
-                    className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-goldLight font-bold"
+                    className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-goldLight font-bold"
                   >
                     Business Networking Experience
                   </motion.div>
                   
-                  <h2 className="font-display text-4xl md:text-6xl lg:text-7xl leading-none text-white tracking-tight">
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl leading-none text-white tracking-tight">
                     <motion.span
                       initial={{ opacity: 0, y: 15 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -118,7 +118,7 @@ export function ChampagneEvent() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.7, delay: 0.8 }}
-                      className="block font-serif italic text-gold-light mt-1 md:mt-2"
+                      className="block font-serif italic text-gold-light mt-0.5 md:mt-1"
                     >
                       CHAMPAGNE
                     </motion.span>
@@ -131,7 +131,7 @@ export function ChampagneEvent() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.7, delay: 1.1 }}
-                  className="text-sm md:text-base text-white/70 max-w-2xl leading-relaxed font-light"
+                  className="text-xs md:text-sm text-white/70 max-w-2xl leading-relaxed font-light"
                 >
                   Un cercle privé international réunissant entrepreneurs et investisseurs autour d'opportunités d'affaires concrètes et durables.
                 </motion.p>

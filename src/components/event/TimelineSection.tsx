@@ -118,39 +118,7 @@ export function TimelineSection() {
           })}
         </div>
 
-        {/* Final Celebration Card (Session Networking) */}
-        <div className="relative mt-20 flex flex-col items-center">
-          {/* Final Pulse Node */}
-          <div className="absolute left-4 md:left-1/2 top-0 w-10 h-10 rounded-full bg-gold/20 border-2 border-gold shadow-[0_0_20px_rgba(212,175,55,0.6)] -translate-x-1/2 flex items-center justify-center z-30">
-            <Sparkles size={16} className="text-gold animate-spin" style={{ animationDuration: "8s" }} />
-          </div>
 
-          <div className="w-full max-w-xl pl-12 md:pl-0 pt-12">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="w-full bg-gradient-to-br from-[#1B2DBF]/20 via-[#05071F]/40 to-[#293FFF]/10 backdrop-blur-lg rounded-sm border border-gold/30 p-8 text-center relative overflow-hidden group shadow-[0_10px_40px_rgba(27,45,191,0.2)]"
-            >
-              {/* Shimmer background animation */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-
-              <h3 className="font-display text-2xl md:text-3xl text-gold mb-3">
-                🤝 Session Networking & Clôture
-              </h3>
-              <p className="text-sm text-white/80 max-w-md mx-auto leading-relaxed mb-6 font-light">
-                Rencontres qualifiées, mises en relation par IA avec investisseurs, partenaires et entrepreneurs leaders de l'immobilier.
-              </p>
-              
-              <div className="flex flex-wrap justify-center gap-3 text-[10px] uppercase tracking-[0.2em] font-semibold text-white/60">
-                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-sm">Investisseurs</span>
-                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-sm">Partenaires</span>
-                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-sm">Propriétaires</span>
-              </div>
-            </motion.div>
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import Result from "./pages/Result";
 import Offers from "./pages/Offers";
 import Experiences from "./pages/Experiences";
 import Events from "./pages/Events";
+import Sejour from "./pages/Sejour";
 import Partners from "./pages/Partners";
 import Media from "./pages/Media";
 import Contact from "./pages/Contact";
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/offres" element={<Offers />} />
               <Route path="/experiences" element={<Experiences />} />
               <Route path="/evenements" element={<Events />} />
+              <Route path="/sejour" element={<Sejour />} />
               <Route path="/revivre/:id" element={<EventReplay />} />
               <Route path="/partenaires" element={<Partners />} />
               <Route path="/media" element={<Media />} />

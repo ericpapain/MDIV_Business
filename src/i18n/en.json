@@ -5,6 +5,7 @@
     "offers": "Offers",
     "experiences": "Experiences",
     "events": "Events",
+    "sejour": "Stays",
     "partners": "Partners",
     "media": "Media",
     "contact": "Contact",
@@ -30,11 +31,11 @@
       "desc": "A confidential ecosystem for entrepreneurs, investors, and leaders. Tailor-made experiences, AI-orchestrated encounters, verified opportunities.",
       "btn1": "Design my experience",
       "btn2": "Explore events",
-      "stat1_val": "1,200+",
+      "stat1_val": "10",
       "stat1_label": "Members",
       "stat2_val": "47",
       "stat2_label": "Countries",
-      "stat3_val": "94%",
+      "stat3_val": "87%",
       "stat3_label": "Satisfaction"
     },
     "hero_live": {

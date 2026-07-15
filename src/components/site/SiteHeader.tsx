@@ -8,6 +8,7 @@ const navKeys = [
   //{ to: "/experience", key: "nav.builder" }, // page web cachée
   { to: "/offres", key: "nav.offers" },
   //{ to: "/experiences", key: "nav.experiences" },
+  { to: "/sejour", key: "nav.sejour" },
   { to: "/evenements", key: "nav.events" },
   { to: "/partenaires", key: "nav.partners" },
   //{ to: "/media", key: "nav.media" },

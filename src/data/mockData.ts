@@ -1,13 +1,20 @@
-import hero from "@/assets/original/Resto.jpg";
+import hero from "@/assets/original/business_meeting_hero.png";
 import expHotel from "@/assets/original/fleur.jpg";
 import expDining from "@/assets/original/diner.jpg";
 import expYacht from "@/assets/original/Champagne.jpg";
 import eventNetworking from "@/assets/original/tallk.jpg";
 import eventSummit from "@/assets/original/Pitch.jpg";
-import portrait1 from "@/assets/original/CEO.jpg";
-import portrait2 from "@/assets/original/CEO.jpg";
+import eventFondateur from "@/assets/original/fondateur.jpg";
+import eventImmobilier from "@/assets/original/immobilier.jpg";
+import eventAvenir from "@/assets/original/avenir.png";
+import eventIndia from "@/assets/original/india.jpeg";
+import cerise from "@/assets/profils/cerise.jpg";
+import kassa from "@/assets/profils/kassa.jpg";
+import mathilda from "@/assets/profils/mathilda.jpg";
+import pierre from "@/assets/profils/pierre.jpg";
+import remy from "@/assets/profils/remy.jpg";
 
-export const images = { hero, expHotel, expDining, expYacht, eventNetworking, eventSummit, portrait1, portrait2 };
+export const images = { hero, expHotel, expDining, expYacht, eventNetworking, eventSummit };
 
 export type Profile = "entrepreneur" | "investor" | "freelancer";
 export type Objective = "networking" | "investment" | "discovery";
@@ -27,7 +34,7 @@ export type Offer = {
 export const offers: Offer[] = [
   {
     id: "networking",
-    name: "LES SÉJOURS BNE",
+    name: "PROCHAINS SÉJOURS BNE",
     tagline: "L'Odyssée Entrepreneuriale",
     basePrice: 1490,
     costBreakdown: { hotel: 480, dining: 320, activity: 180, commission: 80 },
@@ -44,7 +51,7 @@ export const offers: Offer[] = [
   },
   {
     id: "investor",
-    name: "ACCOMPAGNEMENT BNE ENTREPRISES",
+    name: "DEMANDER UN ACCOMPAGNEMENT BNE ENTREPRISES",
     tagline: "Propulser votre rayonnement vers l'excellence",
     basePrice: 3890,
     costBreakdown: { hotel: 980, dining: 720, activity: 540, commission: 220 },
@@ -59,7 +66,7 @@ export const offers: Offer[] = [
   },
   {
     id: "exclusive",
-    name: "BNE IA BUSINESS",
+    name: "DEMANDER UN SERVICE BNE IA BUSINESS",
     tagline: "L'Intelligence Artificielle comme levier d'avant-garde",
     basePrice: 9800,
     costBreakdown: { hotel: 2400, dining: 1600, activity: 1800, commission: 600 },
@@ -88,11 +95,12 @@ export const experiences = [
 
 export const events = {
   upcoming: [
-    { id: "u1", title: "Geneva Wealth Summit", date: "15 — 16 SEPTEMBRE 2026", targetDate: "2026-09-15T09:00:00", city: "Genève", country: "Suisse", desc: "Sommet privé dédié à l'investissement et la préservation de patrimoine.", image: eventSummit },
+    { id: "u1", title: "Namaste India", type: "Événement", date: "VENDREDI 7 AOÛT 2026", day: "7", month: "AOÛT", targetDate: "2026-08-07T19:00:00", city: "23 boulevard Georges Pompidou, 10003 Troyes", country: "France", desc: "Le rendez-vous des entrepreneurs et dirigeants. Buffet à volonté, networking business et défilé de mode.", image: eventIndia },
+    { id: "u2", title: "Sion - Suisse", type: "Séjour", date: "10 OCTOBRE 2026", day: "10", month: "OCT", targetDate: "2026-10-10T09:00:00", city: "Sion", country: "Suisse", desc: "Sommet privé dédié à l'investissement et la préservation de patrimoine.", image: eventAvenir },
   ],
   past: [
-    { id: "p1", title: "Séjour Fondateur #1", date: "27 Juin 2026", city: "Essoyes", country: "France", desc: "La première édition historique du rassemblement fondateur.", image: eventNetworking, code: "FND26" },
-    { id: "p2", title: "Networking Spécial Immobilier #1", date: "19 Juin 2026", city: "Troyes", country: "France", desc: "Rencontre confidentielle entre leaders de l'immobilier.", image: eventSummit, code: "IMM26" },
+    { id: "p1", title: "Séjour Fondateur #1", date: "27 Juin 2026", city: "Essoyes", country: "France", desc: "La première édition historique du rassemblement fondateur.", image: eventFondateur, code: "FND26", hasReplay: true },
+    { id: "p2", title: "Networking Spécial Immobilier #1", date: "19 Juin 2026", city: "Troyes", country: "France", desc: "Rencontre confidentielle entre leaders de l'immobilier.", image: eventImmobilier, code: "IMM26", hasReplay: false },
   ],
 };
 
@@ -155,8 +163,9 @@ export function computeLeadScore(profile: Profile, objective: Objective, budget:
 }
 
 export const members = [
-  { id: 1, name: "Jean-Philippe Courtois", role: "EVP & President, National Transformation Partnerships", image: portrait1 },
-  { id: 2, name: "Sarah B.", role: "Fondatrice, Tech Innovate", image: portrait2 },
-  { id: 3, name: "Marc A.", role: "Directeur Général, InvestCorp", image: portrait1 },
-  { id: 4, name: "Elise C.", role: "CEO, EcoVentures", image: portrait2 },
+  { id: 1, name: "Rémy", role: "Dirigeant Agence web spécialisée dans la création de sites web et d'applications pour les indépendants et les PME", image: remy, flag: "🇧🇪", countryCode: "BE" },
+  { id: 2, name: "Cerise", role: "Dirigeante Cabinet Médico-Esthétique en Rajeunissement de la peau", image: cerise, flag: "🇧🇪", countryCode: "BE" },
+  { id: 3, name: "Pierre", role: "Marchand de biens", image: pierre, flag: "🇫🇷", countryCode: "FR" },
+  { id: 4, name: "Mathilda", role: "Référente Suisse du Royalty Club", image: mathilda, flag: "🇨🇭", countryCode: "CH" },
+  { id: 5, name: "Kassa", role: "Economiste - Financier - Fiscaliste", image: kassa, flag: "🇱🇺", countryCode: "LU" },
 ];

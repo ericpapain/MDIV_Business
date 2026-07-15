@@ -93,6 +93,8 @@ function Countdown({ targetDateStr }: { targetDateStr: string }) {
 }
 
 export default function Events() {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   return (
     <div className="pt-32 pb-20 container">
       <div className="text-center mb-16 animate-fade-up">
@@ -101,14 +103,14 @@ export default function Events() {
       </div>
 
       <div className="mb-20">
-        <div className="flex items-end justify-between mb-8">
-          <h2 className="font-display text-3xl">À venir</h2>
+        <div className="flex items-end justify-between mb-8" id="a-venir">
+          <h2 className="font-display text-3xl">Événements à venir</h2>
           <div className="text-[11px] uppercase tracking-[0.22em] text-primary">{events.upcoming.length} événement{events.upcoming.length > 1 ? 's' : ''} ouvert{events.upcoming.length > 1 ? 's' : ''}</div>
         </div>
         <div className="grid lg:grid-cols-3 gap-6">
-          {events.upcoming.map((e: any) => (
+          {events.upcoming.filter((e: any) => e.id === "u1").map((e: any) => (
             <div key={e.id} className="luxe-card rounded-sm overflow-hidden group flex flex-col">
-              <div className="aspect-[4/3] overflow-hidden relative shrink-0">
+              <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image)}>
                 <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                 {e.country && (
                   <div className="absolute top-4 left-4 z-10">
@@ -140,34 +142,64 @@ export default function Events() {
           <h2 className="font-display text-3xl">Éditions passées</h2>
           <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Archives confidentielles</div>
         </div>
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {events.past.map((e: any) => (
-            <div key={e.id} className="luxe-card rounded-sm overflow-hidden group opacity-90 hover:opacity-100 flex flex-col relative">
-              <div className="aspect-[4/3] overflow-hidden relative shrink-0">
-                <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
-                {e.country && (
-                  <div className="absolute top-4 left-4 z-10">
-                    <FlagCSS type={e.country} />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {events.past
+            .filter((e: any) => e.id !== "p1")
+            .map((e: any) => (
+              <div key={e.id} className="luxe-card rounded-sm overflow-hidden group opacity-90 hover:opacity-100 flex flex-col relative">
+                <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image)}>
+                  <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                  {e.country && (
+                    <div className="absolute top-4 left-4 z-10">
+                      <FlagCSS type={e.country} />
+                    </div>
+                  )}
+                </div>
+                <div className="p-6 flex flex-col flex-1">
+                  <div className="font-mono text-xs text-muted-foreground mb-2 flex items-center justify-between">
+                    <span>{e.date} · {e.city}</span>
                   </div>
-                )}
-              </div>
-              <div className="p-6 flex flex-col flex-1">
-                <div className="font-mono text-xs text-muted-foreground mb-2 flex items-center justify-between">
-                  <span>{e.date} · {e.city}</span>
+                  <div className="font-display text-xl mb-2">{e.title}</div>
+                  <div className="text-sm text-muted-foreground mb-6">{e.desc}</div>
+                  
+                  <div className="mt-auto pt-4 border-t border-gold/10">
+                    {e.hasReplay !== false ? (
+                      <Link to={`/revivre/${e.id}`} className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-2 transition-colors w-fit">
+                        <Play size={14} /> Revivre l'événement
+                      </Link>
+                    ) : (
+                      <span className="text-xs uppercase tracking-[0.2em] text-white/30 flex items-center gap-2 select-none cursor-not-allowed w-fit">
+                        <Play size={14} className="opacity-30" /> Pas de replay
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="font-display text-xl mb-2">{e.title}</div>
-                <div className="text-sm text-muted-foreground mb-6">{e.desc}</div>
-                
-                <div className="mt-auto pt-4 border-t border-gold/10">
-                  <Link to={`/revivre/${e.id}`} className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-2 transition-colors w-fit">
-                    <Play size={14} /> Revivre l'événement
-                  </Link>
-                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 cursor-zoom-out"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center">
+            <img 
+              src={selectedImage} 
+              alt="Agrandissement" 
+              className="max-w-full max-h-full object-contain rounded-sm border border-gold/30 shadow-2xl"
+            />
+            <button 
+              className="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors font-display text-lg"
+              onClick={() => setSelectedImage(null)}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

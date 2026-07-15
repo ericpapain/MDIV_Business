@@ -5,6 +5,7 @@
     "offers": "Offres",
     "experiences": "Expériences",
     "events": "Événements",
+    "sejour": "Séjours",
     "partners": "Partenaires",
     "media": "Media",
     "contact": "Contact",
@@ -30,11 +31,11 @@
       "desc": "Un écosystème confidentiel pour entrepreneurs, investisseurs et leaders. Expériences sur-mesure, rencontres orchestrées par IA, opportunités vérifiées.",
       "btn1": "Composer mon expérience",
       "btn2": "Explorer les événements",
-      "stat1_val": "En cours",
+      "stat1_val": "10",
       "stat1_label": "Membres",
       "stat2_val": "4",
       "stat2_label": "Pays",
-      "stat3_val": "En cours%",
+      "stat3_val": "87%",
       "stat3_label": "Satisfaction"
     },
     "hero_live": {
@@ -178,8 +179,8 @@
   "contact": {
     "hero": {
       "eyebrow": "Conciergerie",
-      "title1": "Une conversation",
-      "title2": "discrète."
+      "title1": "Décrivez nous votre besoin",
+      "title2": "!"
     },
     "info": {
       "mail": "Conciergerie",

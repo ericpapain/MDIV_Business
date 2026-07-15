@@ -21,7 +21,7 @@ export function EventHero() {
             damping: 15,
           }}
           className={`relative w-full rounded-sm overflow-hidden border border-white/10 shadow-2xl transition-all duration-300 ${
-            isOpen ? "min-h-[120vh]" : "h-[75vh] md:h-[80vh] min-h-[500px]"
+            isOpen ? "min-h-[120vh]" : "h-[50vh] md:h-[60vh] min-h-[400px]"
           }`}
         >
           {/* Ken Burns zooming background image + Overlay */}
@@ -86,15 +86,15 @@ export function EventHero() {
             {/* Middle Row: Content & Countdown */}
             <div className="my-auto py-8 max-w-3xl flex flex-col gap-6 md:gap-8">
               {/* Event Titles */}
-              <div className="space-y-3">
-                <span className="text-xs uppercase tracking-[0.3em] text-gold font-bold">
+              <div className="space-y-1 md:space-y-2">
+                <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-gold font-bold">
                   Exclusive Elite Summit
                 </span>
-                <h1 className="font-display text-4xl md:text-6xl lg:text-7xl leading-tight text-white">
+                <h1 className="font-display text-3xl md:text-4xl lg:text-5xl leading-tight text-white">
                   NETWORKING <br className="hidden md:inline" />
                   EXPERIENCE
                 </h1>
-                <h2 className="font-serif italic text-2xl md:text-4xl text-gold-light">
+                <h2 className="font-serif italic text-xl md:text-2xl text-gold-light">
                   Spécial Immobilier
                 </h2>
               </div>
