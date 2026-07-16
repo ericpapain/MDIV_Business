@@ -1,42 +1,48 @@
 import { useState, useEffect } from "react";
-import { members } from "@/data/mockData";
+import { getMembers } from "@/data/mockData";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 export function MembersCarousel() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedMember, setSelectedMember] = useState<typeof members[0] | null>(null);
+  const { t } = useLanguage();
+  const localizedMembers = getMembers(t);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [selectedMember, setSelectedMember] = useState<typeof localizedMembers[0] | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % members.length);
+      setActiveIndex((prev) => (prev + 1) % localizedMembers.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, []);
-
-  const next = () => setCurrentIndex((prev) => (prev + 1) % members.length);
-  const prev = () => setCurrentIndex((prev) => (prev - 1 + members.length) % members.length);
+  }, [localizedMembers.length]);
 
   return (
     <section className="container py-20 relative">
       <div className="text-center mb-12">
-        <div className="eyebrow mb-4">Le Cercle</div>
-        <h2 className="font-display text-4xl md:text-5xl leading-[1.05]">Découvrez <em className="italic gold-text">nos membres</em></h2>
+        <div className="eyebrow mb-4">{t("home.testimonials.eyebrow")}</div>
+        <h2 className="font-display text-4xl md:text-5xl leading-[1.05]">
+          {t("home.testimonials.title_start")} <em className="italic gold-text">{t("home.testimonials.title_end")}</em>
+        </h2>
       </div>
 
       <div className="relative max-w-4xl mx-auto flex items-center justify-center">
-        <button onClick={prev} className="absolute left-0 z-10 w-12 h-12 flex items-center justify-center rounded-full glass hover:bg-gold/10 transition-colors hidden md:flex">
+        <button 
+          onClick={() => setActiveIndex(prev => prev === 0 ? localizedMembers.length - 1 : prev - 1)}
+          className="absolute left-0 z-10 w-12 h-12 flex items-center justify-center rounded-full glass hover:bg-gold/10 transition-colors hidden md:flex"
+        >
           <ChevronLeft size={24} className="text-gold" />
         </button>
 
         <div className="w-full overflow-hidden relative" style={{ height: "700px" }}>
-          {members.map((member, i) => {
-            const offset = i - currentIndex;
-            const normalizedOffset = offset < -members.length / 2 ? offset + members.length : offset > members.length / 2 ? offset - members.length : offset;
+          {localizedMembers.map((member, idx) => {
+            let offset = idx - activeIndex;
+            if (offset < -localizedMembers.length / 2) offset += localizedMembers.length;
+            if (offset > localizedMembers.length / 2) offset -= localizedMembers.length;
             
-            let translateX = normalizedOffset * 105; // base translation
-            let scale = 1 - Math.abs(normalizedOffset) * 0.15;
-            let opacity = 1 - Math.abs(normalizedOffset) * 0.5;
-            let zIndex = 10 - Math.abs(normalizedOffset);
+            let translateX = offset * 105;
+            let scale = 1 - Math.abs(offset) * 0.15;
+            let opacity = 1 - Math.abs(offset) * 0.5;
+            let zIndex = 10 - Math.abs(offset);
 
             return (
               <div
@@ -49,10 +55,11 @@ export function MembersCarousel() {
                   pointerEvents: opacity > 0 ? "auto" : "none"
                 }}
                 onClick={() => {
-                  if (normalizedOffset !== 0) {
-                    setCurrentIndex(i);
+                  if (offset !== 0) {
+                    setActiveIndex(idx);
+                  } else {
+                    setSelectedMember(member);
                   }
-                  setSelectedMember(member);
                 }}
               >
                 <div className="w-full aspect-[3/4] rounded-sm border-2 border-gold shadow-2xl relative hover:border-gold-light transition-colors duration-300 bg-black/40 backdrop-blur-md p-[6px]">
@@ -74,17 +81,20 @@ export function MembersCarousel() {
           })}
         </div>
 
-        <button onClick={next} className="absolute right-0 z-10 w-12 h-12 flex items-center justify-center rounded-full glass hover:bg-gold/10 transition-colors hidden md:flex">
+        <button 
+          onClick={() => setActiveIndex(prev => (prev + 1) % localizedMembers.length)}
+          className="absolute right-0 z-10 w-12 h-12 flex items-center justify-center rounded-full glass hover:bg-gold/10 transition-colors hidden md:flex"
+        >
           <ChevronRight size={24} className="text-gold" />
         </button>
       </div>
 
       <div className="flex justify-center gap-2 mt-8">
-        {members.map((_, i) => (
+        {localizedMembers.map((_, idx) => (
           <button
-            key={i}
-            onClick={() => setCurrentIndex(i)}
-            className={`w-2 h-2 rounded-full transition-all ${i === currentIndex ? "bg-gold w-6" : "bg-white/20 hover:bg-white/40"}`}
+            key={idx}
+            onClick={() => setActiveIndex(idx)}
+            className={`w-2 h-2 rounded-full transition-all ${idx === activeIndex ? "bg-gold w-6" : "bg-white/20 hover:bg-white/40"}`}
           />
         ))}
       </div>

@@ -116,7 +116,7 @@ export function TimelineCard({
         <h3 className="font-display text-lg sm:text-xl md:text-2xl text-white group-hover:text-gold transition-colors duration-300 break-words whitespace-normal">
           {title}
         </h3>
-        {description && <p className="text-xs sm:text-sm text-white/70 leading-relaxed font-light break-words whitespace-normal">{description}</p>}
+        {description && <p className="text-xs sm:text-sm text-white/70 leading-relaxed font-light break-words whitespace-pre-line">{description}</p>}
       </div>
 
       {/* Corner decorations to match general site styles */}

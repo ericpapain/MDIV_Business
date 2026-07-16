@@ -7,14 +7,16 @@ import { CountryShowcase } from "./CountryShowcase";
 import { ProgramTimeline } from "./ProgramTimeline";
 import destChampagne from "@/assets/original/dest-champagne.png";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export function ChampagneEvent() {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useLanguage();
 
 
   return (
     <div className="relative w-full overflow-hidden bg-[#03081D] py-10 md:py-16">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-0 sm:px-4">
         {/* Main Champagne Event Wrapper Card */}
         <motion.div
           layout
@@ -72,17 +74,17 @@ export function ChampagneEvent() {
           <GoldParticles />
 
           {/* Content container */}
-          <div className="relative z-20 h-full flex flex-col justify-between p-6 md:p-14 overflow-y-auto scrollbar-none">
+          <div className="relative z-20 h-full flex flex-col justify-between p-4 sm:p-6 md:p-14 overflow-y-auto scrollbar-none">
             {/* Top Row: Event Badges */}
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-goldLight animate-pulse-soft" />
                 <span className="text-[10px] uppercase tracking-[0.25em] text-goldLight font-bold">
-                  Séjour Privé Exclusif
+                  {t("event_champagne.eyebrow")}
                 </span>
               </div>
               <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-sm text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 backdrop-blur-sm">
-                Champagne • Juin 2026
+                {t("event_champagne.badge")}
               </div>
             </div>
 
@@ -99,7 +101,7 @@ export function ChampagneEvent() {
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-goldLight font-bold"
                   >
-                    Business Networking Experience
+                    {t("event_champagne.title_small")}
                   </motion.div>
                   
                   <h2 className="font-display text-3xl md:text-4xl lg:text-5xl leading-none text-white tracking-tight">
@@ -110,7 +112,7 @@ export function ChampagneEvent() {
                       transition={{ duration: 0.7, delay: 0.5 }}
                       className="block"
                     >
-                      SÉJOUR FONDATEUR
+                      {t("event_champagne.title1")}
                     </motion.span>
                     
                     <motion.span
@@ -120,7 +122,7 @@ export function ChampagneEvent() {
                       transition={{ duration: 0.7, delay: 0.8 }}
                       className="block font-serif italic text-gold-light mt-0.5 md:mt-1"
                     >
-                      CHAMPAGNE
+                      {t("event_champagne.title2")}
                     </motion.span>
                   </h2>
                 </div>
@@ -133,7 +135,7 @@ export function ChampagneEvent() {
                   transition={{ duration: 0.7, delay: 1.1 }}
                   className="text-xs md:text-sm text-white/70 max-w-2xl leading-relaxed font-light"
                 >
-                  Un cercle privé international réunissant entrepreneurs et investisseurs autour d'opportunités d'affaires concrètes et durables.
+                  {t("event_champagne.desc")}
                 </motion.p>
               </div>
 
@@ -159,13 +161,13 @@ export function ChampagneEvent() {
                 >
                   <div>
                     <div className="text-[10px] uppercase tracking-[0.2em] text-white/45 font-semibold mb-2">
-                      Début du séjour
+                      {t("event_champagne.meta_label")}
                     </div>
                     <div className="font-display text-lg md:text-xl text-white font-bold tracking-wide">
-                      27 - 28 JUIN 2026
+                      {t("event_champagne.date")}
                     </div>
                     <div className="text-[10px] text-goldLight/80 font-mono mt-0.5">
-                      📍 La Table d'Essoyes
+                      {t("event_champagne.location")}
                     </div>
                   </div>
                   <div className="h-10 w-px bg-white/10 hidden sm:block" />
@@ -185,17 +187,17 @@ export function ChampagneEvent() {
               >
                 {isOpen ? (
                   <>
-                    Refermer le programme <ChevronUp size={14} className="animate-bounce" />
+                    {t("event_champagne.hide_program")} <ChevronUp size={14} className="animate-bounce" />
                   </>
                 ) : (
                   <>
-                    Découvrir le programme <ChevronDown size={14} className="animate-bounce" />
+                    {t("event_champagne.show_program")} <ChevronDown size={14} className="animate-bounce" />
                   </>
                 )}
               </button>
 
               <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium">
-                Accès exclusif • Curation des profils par Aria
+                {t("event_champagne.footer_note")}
               </p>
             </div>
 
@@ -230,16 +232,16 @@ export function ChampagneEvent() {
 
                       <Lock className="mx-auto text-goldLight mb-4 animate-pulse-soft" size={24} />
                       <h3 className="font-display text-xl md:text-2xl text-white mb-2 font-medium">
-                        Sur invitation uniquement
+                        {t("event_champagne.booking.title")}
                       </h3>
                       <p className="text-xs text-white/60 mb-6 max-w-sm mx-auto leading-relaxed">
-                        Ce séjour est réservé aux membres qualifiés et co-optés. Seules 12 places de fondateurs sont disponibles pour préserver la valeur des échanges.
+                        {t("event_champagne.booking.desc")}
                       </p>
 
                       <span
                         className="w-full py-3.5 text-[10px] uppercase tracking-[0.2em] rounded-sm font-semibold flex items-center justify-center gap-2.5 bg-white/5 border border-white/10 text-white/30 cursor-not-allowed select-none"
                       >
-                        Demander une invitation <Send size={11} className="opacity-30" />
+                        {t("event_champagne.booking.btn")} <Send size={11} className="opacity-30" />
                       </span>
                     </motion.div>
                   </div>
@@ -250,7 +252,7 @@ export function ChampagneEvent() {
                       onClick={() => setIsOpen(false)}
                       className="btn-ghost-gold px-8 py-3 text-xs uppercase tracking-[0.2em] rounded-sm flex items-center gap-2"
                     >
-                      Refermer le programme <ChevronUp size={12} />
+                      {t("event_champagne.hide_program")} <ChevronUp size={12} />
                     </button>
                   </div>
                 </motion.div>

@@ -15,16 +15,13 @@ export default function Contact() {
   const duration = searchParams.get("duration");
   const country = searchParams.get("country");
 
-  const defaultMsg = profile ? `Bonjour,
-Je souhaite être contacté pour organiser une expérience.
-Voici mes préférences :
-- Profil : ${profile}
-- Objectif : ${objective}
-- Budget : ${budget} €
-- Durée : ${duration} jours
-- Destination : ${country}
-
-Merci.` : "";
+  const defaultMsg = profile ? `${t("contact.form.msgIntro")}
+${t("contact.form.profile")} : ${profile}
+${t("contact.form.msgObjective")} ${objective}
+${t("contact.form.msgBudget")} ${budget} €
+${t("contact.form.msgDuration")} ${duration} jours
+${t("contact.form.msgCountry")} ${country}
+${t("contact.form.msgOutro")}` : "";
 
   return (
     <div className="pt-32 pb-20 container">
@@ -65,11 +62,11 @@ Merci.` : "";
             e.preventDefault(); 
             const fd = new FormData(e.currentTarget);
             const data = Object.fromEntries(fd.entries());
-            const subject = encodeURIComponent("Nouvelle demande de contact - M.DIV");
-            const body = encodeURIComponent(`Prénom: ${data.fn || ''}\nNom: ${data.ln || ''}\nEmail: ${data.email || ''}\nTéléphone: ${data.phone || ''}\nProfil: ${data.profile || ''}\n\nMessage:\n${data.msg || ''}`);
+            const subject = encodeURIComponent(t("contact.form.emailSubject"));
+            const body = encodeURIComponent(`${t("contact.form.fn")}: ${data.fn || ''}\n${t("contact.form.ln")}: ${data.ln || ''}\n${t("contact.form.email")}: ${data.email || ''}\n${t("contact.form.phone")}: ${data.phone || ''}\n${t("contact.form.profile")}: ${data.profile || ''}\n\n${t("contact.form.msg")}:\n${data.msg || ''}`);
             window.location.href = `mailto:m.divcsltg@gmail.com,ericpapainmezatio@gmail.com?subject=${subject}&body=${body}`;
             setSent(true); 
-            toast.success("Votre demande a été préparée dans votre logiciel de messagerie."); 
+            toast.success(t("contact.form.success")); 
           }}
           className="lg:col-span-3 glass-strong p-8 md:p-10 rounded-sm space-y-5 corner-deco relative"
         >

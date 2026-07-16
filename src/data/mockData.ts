@@ -82,6 +82,23 @@ export const offers: Offer[] = [
   },
 ];
 
+export const getOffers = (t: (key: string) => string) => {
+  return offers.map(o => {
+    const translatedName = t(`mock_offers.${o.id}.name`);
+    const translatedTagline = t(`mock_offers.${o.id}.tagline`);
+    
+    return {
+      ...o,
+      name: translatedName !== `mock_offers.${o.id}.name` ? translatedName : o.name,
+      tagline: translatedTagline !== `mock_offers.${o.id}.tagline` ? translatedTagline : o.tagline,
+      features: o.features.map((_, i) => {
+        const tf = t(`mock_offers.${o.id}.features.${i}`);
+        return tf !== `mock_offers.${o.id}.features.${i}` ? tf : o.features[i];
+      })
+    };
+  });
+};
+
 export const experiences = [
   { id: "h1", category: "Hôtels", title: "Penthouse Suite — Genève", price: 2400, location: "Suisse", image: expHotel },
   { id: "h2", category: "Hôtels", title: "Riad Royal — Marrakech", price: 1800, location: "Maroc", image: expHotel },
@@ -102,6 +119,43 @@ export const events = {
     { id: "p1", title: "Séjour Fondateur #1", date: "27 Juin 2026", city: "Essoyes", country: "France", desc: "La première édition historique du rassemblement fondateur.", image: eventFondateur, code: "FND26", hasReplay: true },
     { id: "p2", title: "Networking Spécial Immobilier #1", date: "19 Juin 2026", city: "Troyes", country: "France", desc: "Rencontre confidentielle entre leaders de l'immobilier.", image: eventImmobilier, code: "IMM26", hasReplay: false },
   ],
+};
+
+export const getEvents = (t: (key: string) => string) => {
+  return {
+    upcoming: events.upcoming.map(e => {
+      const translatedTitle = t(`mock_events.${e.id}.title`);
+      const translatedType = t(`mock_events.${e.id}.type`);
+      const translatedMonth = t(`mock_events.${e.id}.month`);
+      const translatedCountry = t(`mock_events.${e.id}.country`);
+      const translatedDesc = t(`mock_events.${e.id}.desc`);
+      const translatedDate = t(`mock_events.${e.id}.date`);
+      
+      return {
+        ...e,
+        title: translatedTitle !== `mock_events.${e.id}.title` ? translatedTitle : e.title,
+        type: translatedType !== `mock_events.${e.id}.type` ? translatedType : e.type,
+        month: translatedMonth !== `mock_events.${e.id}.month` ? translatedMonth : e.month,
+        country: translatedCountry !== `mock_events.${e.id}.country` ? translatedCountry : e.country,
+        desc: translatedDesc !== `mock_events.${e.id}.desc` ? translatedDesc : e.desc,
+        date: translatedDate !== `mock_events.${e.id}.date` ? translatedDate : e.date,
+      };
+    }),
+    past: events.past.map(e => {
+      const translatedTitle = t(`mock_events.${e.id}.title`);
+      const translatedDesc = t(`mock_events.${e.id}.desc`);
+      const translatedCountry = t(`mock_events.${e.id}.country`);
+      const translatedDate = t(`mock_events.${e.id}.date`);
+
+      return {
+        ...e,
+        title: translatedTitle !== `mock_events.${e.id}.title` ? translatedTitle : e.title,
+        desc: translatedDesc !== `mock_events.${e.id}.desc` ? translatedDesc : e.desc,
+        country: translatedCountry !== `mock_events.${e.id}.country` ? translatedCountry : e.country,
+        date: translatedDate !== `mock_events.${e.id}.date` ? translatedDate : e.date,
+      };
+    }),
+  };
 };
 
 export const partners = [
@@ -169,3 +223,14 @@ export const members = [
   { id: 4, name: "Mathilda", role: "Référente Suisse du Royalty Club", image: mathilda, flag: "🇨🇭", countryCode: "CH" },
   { id: 5, name: "Kassa", role: "Economiste - Financier - Fiscaliste", image: kassa, flag: "🇱🇺", countryCode: "LU" },
 ];
+
+export const getMembers = (t: (key: string) => string) => {
+  return members.map(m => {
+    const key = m.name.toLowerCase();
+    const translatedRole = t(`mock_members.${key}`);
+    return {
+      ...m,
+      role: translatedRole !== `mock_members.${key}` ? translatedRole : m.role
+    };
+  });
+};

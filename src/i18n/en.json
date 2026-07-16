@@ -10,7 +10,17 @@
     "media": "Media",
     "contact": "Contact",
     "admin": "Admin",
-    "reserve": "Book my experience"
+    "reserve": "Book my experience",
+    "reserve_call": "Book a discovery call"
+  },
+  "common": {
+    "days": "Days",
+    "hours": "H",
+    "minutes": "Min",
+    "seconds": "Sec",
+    "request_invite": "Request an invitation",
+    "replay": "Relive the event",
+    "no_replay": "No replay"
   },
   "footer": {
     "tagline": "\"The confidential ecosystem where travel becomes capital, and every encounter an opportunity.\"",
@@ -36,7 +46,8 @@
       "stat2_val": "47",
       "stat2_label": "Countries",
       "stat3_val": "87%",
-      "stat3_label": "Satisfaction"
+      "stat3_label": "Satisfaction",
+      "visits": "Visits"
     },
     "hero_live": {
       "eyebrow": "Tonight · Live",
@@ -51,6 +62,14 @@
       "ai_reco_desc": "\"Based on similar profiles, Aria has selected 3 experiences.\"",
       "ai_reco_btn": "Activate Aria"
     },
+    "agenda": {
+      "eyebrow": "On the BNE agenda",
+      "limited": "Limited spots",
+      "reserve": "Reserve"
+    },
+    "events_accordion": {
+      "title": "Past and upcoming events & stays"
+    },
     "scroll": "Scroll",
     "promises": {
       "eyebrow": "The Commitment",
@@ -64,13 +83,6 @@
       "p3_desc": "Family offices, Series A+ founders, international operators.",
       "p4_title": "Measurable ROI",
       "p4_desc": "84% of our members sign a deal within 6 months."
-    },
-    "offers": {
-      "eyebrow": "Experiences",
-      "title": "Three doors. One circle.",
-      "all": "All offers",
-      "from": "From",
-      "price_unit": "€"
     },
     "video": {
       "eyebrow": "Original Web Series",
@@ -90,8 +102,11 @@
       "btn": "Request an invitation"
     },
     "testimonials": {
-      "eyebrow": "Member voices",
-      "title": "The circle speaks for itself."
+      "eyebrow": "Member testmionials",
+      "title": "The circle speaks for itself.",
+      "title_start": "Discover",
+      "title_end": "our members",
+      "btn": "Give us your feedback"
     },
     "cta": {
       "title1": "Your next deal starts with",
@@ -102,46 +117,112 @@
   },
   "offers": {
     "banner": {
-      "badge": "New",
-      "title1": "Business",
-      "title2": "Experience",
-      "subtitle": "— International —",
-      "p1_label": "Connect",
-      "p1_sub": "leaders",
-      "p2_label": "Enhance",
-      "p2_sub": "territories",
-      "p3_label": "Create",
-      "p3_sub": "opportunities",
-      "hook1": "4 EXCEPTIONAL DESTINATIONS.",
-      "hook2": "ONE GOAL: ENCOUNTERS THAT",
-      "hook3": "TRANSFORM YOUR AMBITIONS INTO OPPORTUNITIES.",
-      "services_title": "Turnkey premium weekends",
-      "s1_label": "Networking",
-      "s1_sub": "qualified",
-      "s2_label": "Experiences",
-      "s2_sub": "gastronomic",
-      "s3_label": "Encounters",
-      "s3_sub": "exclusive business",
-      "s4_label": "Development",
-      "s4_sub": "partnerships",
-      "s5_label": "Discovery",
-      "s5_sub": "territories",
-      "s6_label": "Support",
-      "s6_sub": "personalized",
-      "footer_desc": "An experience designed for entrepreneurs, executives, investors and decision-makers.",
-      "footer_quote1": "Your gateway to",
-      "footer_quote2": "new business ecosystems.",
-      "btn": "Pre-registrations open",
-      "f1": "Networking",
-      "f2": "Discovery",
-      "f3": "Sharing",
-      "f4": "Growth"
+      "new": "New",
+      "pre_registrations": "Pre-registrations\\nopen",
+      "destinations_text1": "4 EXCEPTIONAL DESTINATIONS.",
+      "destinations_text2": "ONE GOAL: ENCOUNTERS THAT\\nTRANSFORM YOUR AMBITIONS INTO OPPORTUNITIES.",
+      "footer": [
+        "Networking",
+        "Discovery",
+        "Sharing",
+        "Growth"
+      ]
     },
     "formulas": {
       "eyebrow": "Our formulas",
       "title1": "Three doors.",
       "title2": "One circle.",
       "sub": "Each experience is tailor-made. Here are our reference frameworks."
+    },
+    "accordion": {
+      "sejours": "Immersive stays",
+      "valeur_participants": "Participant value",
+      "valeur_territoires": "Territory value",
+      "analyse": "1️⃣ Analysis & Construction",
+      "amplification": "2️⃣ Amplification",
+      "connexion": "3️⃣ Connection & Development",
+      "diagnostic": "🤖 AI Diagnostic",
+      "automatisation": "⚡ Automation",
+      "communication": "📣 Communication & Visibility",
+      "commercial": "📈 Business Development",
+      "ia": "🧠 Generative AI",
+      "formation": "🎓 Team Training",
+      "items": {
+        "decouverte": "Discovery of a territory",
+        "rencontres_ent": "Entrepreneurial meetings",
+        "exp_immersives": "Immersive experiences",
+        "partage": "Moments of sharing",
+        "reseau": "Network",
+        "ouverture": "International openness",
+        "partenariats": "Partnerships",
+        "opportunites": "Opportunities",
+        "visibilite": "Visibility",
+        "attractivite": "Attractiveness",
+        "valorisation": "Economic valuation",
+        "comprehension": "Understanding needs",
+        "positionnement": "Positioning & strategy",
+        "contenus": "Content creation",
+        "diffusion": "Digital broadcast",
+        "storytelling": "Valuation & storytelling",
+        "activation": "Network activation",
+        "event_dedie": "Dedicated event",
+        "rencontres_ciblees": "Targeted meetings",
+        "mises_en_relation": "Matchmaking & follow-up",
+        "identifier_taches": "Identify time-consuming tasks",
+        "reperer_opportunites": "Spot opportunities for improvement",
+        "mesurer_gains": "Measure potential gains",
+        "definir_priorites": "Define action priorities",
+        "gerer_emails": "Manage emails faster",
+        "repondre_appels": "Respond to calls for tender",
+        "cr_reunion": "Create meeting minutes automatically",
+        "creer_docs": "Create documents automatically",
+        "reduire_taches": "Reduce repetitive tasks",
+        "outils_ensemble": "Make tools work together",
+        "creer_contenu_facile": "Create content easily",
+        "animer_reseaux": "Animate social networks",
+        "ameliorer_google": "Improve Google visibility",
+        "preparer_supports": "Prepare professional materials",
+        "trouver_clients": "Find new clients",
+        "identifier_prospects": "Identify priority prospects",
+        "preparer_rdv": "Prepare meetings",
+        "suivre_opportunites": "Track business opportunities",
+        "utiliser_chatgpt": "Use ChatGPT and free AIs efficiently",
+        "creer_assistants": "Create custom AI assistants",
+        "exploiter_copilot": "Leverage Microsoft Copilot",
+        "retrouver_infos": "Easily find useful information",
+        "decouvrir_usages": "Discover AI usages",
+        "apprendre_cas": "Learn through concrete cases",
+        "prendre_en_main": "Master the tools",
+        "accompagner_changement": "Accompany the change"
+      }
+    },
+    "choose": "Choose",
+    "destinations": {
+      "champagne": {
+        "name": "CHAMPAGNE",
+        "country": "FRANCE",
+        "subtitle": ""
+      },
+      "suisse": {
+        "name": "SWITZERLAND",
+        "country": "",
+        "subtitle": "EXCELLENCE & INNOVATION"
+      },
+      "luxembourg": {
+        "name": "LUXEMBOURG",
+        "country": "",
+        "subtitle": "ENTREPRENEURSHIP & GROWTH"
+      },
+      "belgique": {
+        "name": "BELGIUM",
+        "country": "",
+        "subtitle": "NETWORKS & OPPORTUNITIES"
+      }
+    },
+    "atelier": {
+      "title": "Beyond bespoke?",
+      "desc": "Our Atelier offer is 100% custom. Upon qualified request only.",
+      "btn": "Request the Atelier"
     }
   },
   "events": {
@@ -203,7 +284,15 @@
       "p4": "Other",
       "msg": "Message",
       "submit": "Send my request",
-      "sent": "Request sent"
+      "sent": "Request sent",
+      "success": "Your request has been prepared in your email client.",
+      "emailSubject": "New contact request - M.DIV",
+      "msgIntro": "Hello,\nI would like to be contacted to organize an experience.\nHere are my preferences:\n",
+      "msgObjective": "- Objective:",
+      "msgBudget": "- Budget:",
+      "msgDuration": "- Duration:",
+      "msgCountry": "- Destination:",
+      "msgOutro": "\n\nThank you."
     }
   },
   "partners": {
@@ -212,6 +301,23 @@
       "title1": "Our",
       "title2": "accomplices.",
       "sub": "Exceptional houses that share our demand for detail."
+    },
+    "eyebrow": "Join the circle",
+    "title1": "Become a",
+    "title2": "Partner",
+    "desc": "Submit your application to join our exceptional ecosystem.",
+    "form": {
+      "company": "Company Name",
+      "sector": "Sector of Activity",
+      "name": "Your Name",
+      "email": "Your Email",
+      "phone": "Phone",
+      "country": "Country / Region",
+      "why": "Why do you want to become a partner?",
+      "value": "What value do you bring to our ecosystem?",
+      "sent": "Application sent",
+      "submit": "Submit Application",
+      "success": "Your request has been prepared in your email client."
     }
   },
   "media": {
@@ -272,7 +378,14 @@
       "title": "Your interests.",
       "sub": "Select what drives you.",
       "opts": [
-        "Exceptional hotels", "Starred gastronomy", "Yacht & sea", "Art & culture", "Wellness", "Startup pitches", "Family offices", "Crypto & Web3"
+        "Exceptional hotels",
+        "Starred gastronomy",
+        "Yacht & sea",
+        "Art & culture",
+        "Wellness",
+        "Startup pitches",
+        "Family offices",
+        "Crypto & Web3"
       ]
     },
     "q5": {
@@ -283,7 +396,14 @@
       "title": "Which destination?",
       "sub": "We operate in 47 countries.",
       "opts": [
-        "France", "Switzerland", "Monaco", "UAE", "United Kingdom", "Morocco", "United States", "Japan"
+        "France",
+        "Switzerland",
+        "Monaco",
+        "UAE",
+        "United Kingdom",
+        "Morocco",
+        "United States",
+        "Japan"
       ]
     },
     "nav": {
@@ -363,5 +483,279 @@
     "sub": "Page not found",
     "desc": "The route does not exist.",
     "btn": "Back to home"
+  },
+  "event_networking": {
+    "badge": "Real Estate Special",
+    "eyebrow": "Exclusive Elite Summit",
+    "title1": "NETWORKING",
+    "title2": "EXPERIENCE",
+    "subtitle": "Real Estate Special",
+    "meta_label": "Exclusive evening",
+    "date": "JUNE 20, 2026",
+    "location": "📍 La Table d'Essoyes",
+    "show_program": "Discover the program",
+    "hide_program": "Hide program",
+    "close_program": "Close program",
+    "footer_note": "By invitation only • Limited seats",
+    "timeline_title": "Summit Schedule",
+    "timeline_desc": "An evening orchestrated to the minute to optimize your connections and maximize your opportunities.",
+    "steps": {
+      "0": {
+        "time": "20:00 - Start",
+        "badge": "Gastronomy",
+        "title": "🍽️ Invest Menu",
+        "details": "Exclusive rate: 35€"
+      },
+      "1": {
+        "time": "21:45",
+        "badge": "Strategy",
+        "title": "📈 Fundraising"
+      },
+      "2": {
+        "time": "22:30",
+        "badge": "Tasting",
+        "title": "🍾 Champagne Sylvain Dautel"
+      },
+      "3": {
+        "time": "23:15",
+        "badge": "Pitches",
+        "title": "🎤 Company Pitch"
+      }
+    }
+  },
+  "countdown": {
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Sec"
+  },
+  "event_champagne": {
+    "badge": "Champagne • June 2026",
+    "eyebrow": "Exclusive Private Stay",
+    "title_small": "Business Networking Experience",
+    "title1": "FOUNDERS STAY",
+    "title2": "CHAMPAGNE",
+    "desc": "An international private circle uniting entrepreneurs and investors around concrete and sustainable business opportunities.",
+    "meta_label": "Stay start",
+    "date": "JUNE 27 - 28, 2026",
+    "location": "📍 La Table d'Essoyes",
+    "show_program": "Discover the program",
+    "hide_program": "Hide program",
+    "footer_note": "Exclusive access • Profile curation by Aria",
+    "booking": {
+      "title": "By invitation only",
+      "desc": "This stay is reserved for qualified and co-opted members. Only 12 founder spots are available to preserve the value of interactions.",
+      "btn": "Request an invitation"
+    },
+    "timeline": {
+      "title": "Stay Program",
+      "desc": "Two exclusive days designed to combine Champagne prestige, strategic connections and financial opportunities.",
+      "day1": "Day 1",
+      "day1_date": "Saturday, June 27, 2026",
+      "day2": "Day 2",
+      "day2_date": "Sunday, June 28, 2026",
+      "j1_0": {
+        "time": "11:00",
+        "badge": "Launch",
+        "title": "🤝 Welcome & Launch",
+        "description": "Official start of the Founders Stay.\n📍 CHAMPAGNE SYLVAIN DAUTEL\n10 rue Saint-Vincent, 10110 Loches-sur-Ource"
+      },
+      "j1_1": {
+        "time": "12:45 - 15:15",
+        "badge": "Lunch",
+        "title": "🍽️ Founder's Lunch",
+        "description": "📍 LA TABLE D’ESSOYES\n1 Place Pierre Renoir, 10360 Essoyes"
+      },
+      "j1_2": {
+        "time": "15:15 - 19:00",
+        "badge": "Free Time",
+        "title": "👑 Check-in & Free Time",
+        "description": "📍 OKKO HOTELS TROYES CENTRE\n12 Boulevard Carnot, 10000 Troyes"
+      },
+      "j1_3": {
+        "time": "19:00 - 22:30",
+        "badge": "Strategic Dinner",
+        "title": "🌍 International Opportunities",
+        "description": "DINNER THEME:\nDeveloping commercial bridges between Europe and India.\n📍 LA GRANGE AU PRINCE\n46 bis Avenue du Général de Gaulle, 10410 Saint-Parres-aux-Tertres"
+      },
+      "j2_0": {
+        "time": "10:00 - 11:30",
+        "badge": "Brunch",
+        "title": "🥂 Founders Brunch",
+        "description": "Closing brunch, feedback, summary of discussions, collaboration prospects, international network development, and conclusion of the inaugural edition.\n📍 OKKO HOTELS TROYES CENTRE\n12 Boulevard Carnot, 10000 Troyes"
+      }
+    }
+  },
+  "country_showcase": {
+    "eyebrow": "Connected Business Network",
+    "title": "International Delegations Attending",
+    "delegation": "Delegation",
+    "countries": {
+      "France": "France",
+      "Belgique": "Belgium",
+      "Luxembourg": "Luxembourg",
+      "Suisse": "Switzerland"
+    },
+    "roles": {
+      "micke": "Founding CEO and stay initiator",
+      "eric": "AI and IT expert, platform developer",
+      "pierre": "Property dealer",
+      "sibley": "Video and Ads expert",
+      "cerise": "Director of Medical-Aesthetic Clinic",
+      "remy": "Web agency director",
+      "hakan": "Delegation member",
+      "kassa": "Economist - Financier - Tax expert",
+      "mathilda": "Swiss representative of the Royalty Club"
+    }
+  },
+  "about_bne": {
+    "eyebrow": "Who we are",
+    "title": "BUSINESS NETWORK EXPERIENCE",
+    "subtitle": "CREATE. CONNECT. GROW.",
+    "intro": "An international ecosystem that connects entrepreneurs, companies and territories to create opportunities through meetings, visibility and innovation.",
+    "vision_title": "1. Vision",
+    "vision_desc": "BNE is an entrepreneurial development ecosystem that creates useful connections, transforms meetings into opportunities and supports stakeholders in their growth.",
+    "vision_tags": {
+      "t1": "Qualified Meetings",
+      "t2": "Immersive Experiences",
+      "t3": "Visibility",
+      "t4": "Business Opportunities",
+      "t5": "Innovation"
+    },
+    "for_who_title": "2. For whom?",
+    "for_entrepreneurs_title": "Entrepreneurs<br />& Leaders",
+    "for_entrepreneurs_items": {
+      "i1": "Develop their network",
+      "i2": "Access new opportunities",
+      "i3": "Find complementary expertise",
+      "i4": "Discover new markets"
+    },
+    "for_companies_title": "Companies",
+    "for_companies_items": {
+      "i1": "Strengthen their visibility",
+      "i2": "Develop their business",
+      "i3": "Create qualified connections",
+      "i4": "Benefit from strategic support"
+    },
+    "path_title": "Engagement Path",
+    "path_steps": {
+      "s1": {
+        "title": "Discovery",
+        "desc": "BNE event or meeting"
+      },
+      "s2": {
+        "title": "Experience",
+        "desc": "Participation in a stay"
+      },
+      "s3": {
+        "title": "Integration",
+        "desc": "Join the ecosystem"
+      },
+      "s4": {
+        "title": "Development",
+        "desc": "Company support"
+      },
+      "s5": {
+        "title": "Optimization",
+        "desc": "AI Business Solutions"
+      }
+    },
+    "values_title": "Core Values",
+    "values": {
+      "v1": "Trust",
+      "v2": "Contribution",
+      "v3": "Quality",
+      "v4": "International Opening",
+      "v5": "Collective Intelligence"
+    }
+  },
+  "sejour": {
+    "hero": {
+      "eyebrow": "Private calendar",
+      "title1": "Appointments",
+      "title2": "that matter."
+    },
+    "upcoming": {
+      "title": "Upcoming",
+      "subtitle_event": "event",
+      "subtitle_events": "events",
+      "subtitle_open_sg": "open",
+      "subtitle_open_pl": "open",
+      "open": "Open"
+    },
+    "past": {
+      "title": "Past editions",
+      "subtitle": "Confidential archives"
+    }
+  },
+  "mock_events": {
+    "u1": {
+      "title": "Namaste India",
+      "type": "Event",
+      "month": "AUG",
+      "country": "France",
+      "desc": "The gathering for entrepreneurs and executives. All-you-can-eat buffet, business networking, and fashion show.",
+      "date": "FRIDAY, AUGUST 7, 2026"
+    },
+    "u2": {
+      "title": "Sion - Switzerland",
+      "type": "Stay",
+      "month": "OCT",
+      "country": "Switzerland",
+      "desc": "Private summit dedicated to investment and wealth preservation.",
+      "date": "OCTOBER 10, 2026"
+    },
+    "p1": {
+      "title": "Founder Stay #1",
+      "country": "France",
+      "desc": "The first historic edition of the founding gathering.",
+      "date": "June 27, 2026"
+    },
+    "p2": {
+      "title": "Real Estate Networking #1",
+      "country": "France",
+      "desc": "Confidential meeting between real estate leaders.",
+      "date": "June 19, 2026"
+    }
+  },
+  "mock_offers": {
+    "networking": {
+      "name": "UPCOMING BNE STAYS",
+      "tagline": "The Entrepreneurial Odyssey",
+      "features": [
+        "Exceptional Destinations: Immersive weekends in prestigious locations combining business and pleasure",
+        "Qualified Ecosystem: Privileged moments with carefully selected investors and executives",
+        "Affinity Meetings: Deep connections created through unique contexts (gastronomy, private tours...)",
+        "The Goal: Build a powerful network in a setting that transcends traditional professional meetings"
+      ]
+    },
+    "investor": {
+      "name": "REQUEST BNE CORPORATE SUPPORT",
+      "tagline": "Propel your influence towards excellence",
+      "features": [
+        "Strategic Foundation: In-depth analysis, tailored positioning, and creation of captivating narratives",
+        "Digital Resonance: Amplification of your aura, immersive storytelling, and activation of qualified networks",
+        "Conquest & Synergies: Signature events, exclusive meetings, and weaving high-value connections",
+        "Purpose: Metamorphose your visibility into exponential growth and tangible opportunities"
+      ]
+    },
+    "exclusive": {
+      "name": "REQUEST BNE AI BUSINESS SERVICE",
+      "tagline": "Artificial Intelligence as a cutting-edge lever",
+      "features": [
+        "Visionary Audit: Surgical detection of productivity hubs and innovation opportunities",
+        "Augmented Aura: Creation of magnetizing content and algorithm-propelled influence strategy",
+        "Conquest Machine: Acquisition automation, ultra-targeted qualification, and loyalty building",
+        "Human Elevation: Acculturation of your teams to master tomorrow's tools",
+        "The Ambition: Transcend your limits, save precious time, and catalyze overall performance"
+      ]
+    }
+  },
+  "mock_members": {
+    "remy": "Director of a Web Agency specialized in website and application creation for freelancers and SMEs",
+    "cerise": "Director of a Med-Aesthetic Clinic specializing in Skin Rejuvenation",
+    "pierre": "Real Estate Developer",
+    "mathilda": "Swiss Representative of the Royalty Club",
+    "kassa": "Economist - Financier - Tax Specialist"
   }
 }

@@ -4,54 +4,51 @@ import { AnimatedGraph } from "./AnimatedGraph";
 import { ChampagneBubbles } from "./ChampagneBubbles";
 import { AudioWave } from "./AudioWave";
 import { Utensils, TrendingUp, GlassWater, Mic, Sparkles } from "lucide-react";
-
-// Image imports removed
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export function TimelineSection() {
+  const { t } = useLanguage();
+
   const steps = [
     {
-      time: "20:00 - Début",
-      badge: "Gastronomie",
-      title: "🍽️ Menu Invest",
-      // description: "Entrée + Plat + Dessert + Vin + Coupe. Une expérience gastronomique d'exception conçue pour favoriser les premiers échanges informels dans un cadre d'exception.",
+      time: t("event_networking.steps.0.time"),
+      badge: t("event_networking.steps.0.badge"),
+      title: t("event_networking.steps.0.title"),
       icon: Utensils,
-      details: "Tarif exclusif : 35€"
+      details: t("event_networking.steps.0.details")
     },
     {
-      time: "21:45",
-      badge: "Stratégie",
-      title: "📈 Levée de Fonds",
-      // description: "Présentation stratégique FRUL'IMMO et pitch exclusif sur les opportunités d'investissement et levées de fonds immobilières à fort rendement.",
+      time: t("event_networking.steps.1.time"),
+      badge: t("event_networking.steps.1.badge"),
+      title: t("event_networking.steps.1.title"),
       specialAnimation: <AnimatedGraph />,
       icon: TrendingUp,
     },
     {
-      time: "22:30",
-      badge: "Dégustation",
-      title: "🍾 Champagne Sylvain Dautel",
-      // description: "Dégustation privée et présentation de la nouvelle cuvée Sylvain Dautel. Échangez vos impressions dans une ambiance raffinée et pétillante.",
+      time: t("event_networking.steps.2.time"),
+      badge: t("event_networking.steps.2.badge"),
+      title: t("event_networking.steps.2.title"),
       specialAnimation: <ChampagneBubbles />,
       icon: GlassWater,
     },
     {
-      time: "23:15",
-      badge: "Pitchs",
-      title: "🎤 Pitch Entreprises",
-      // description: "Présentations éclair des entreprises et projets clés de l'écosystème participants à la soirée. Identifiez vos synergies instantanément.",
+      time: t("event_networking.steps.3.time"),
+      badge: t("event_networking.steps.3.badge"),
+      title: t("event_networking.steps.3.title"),
       specialAnimation: <AudioWave />,
       icon: Mic,
     },
   ];
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto px-4 py-16 text-white">
+    <div className="relative w-full max-w-5xl mx-auto px-0 sm:px-4 py-8 md:py-16 text-white">
       {/* Title */}
       <div className="text-center mb-16">
         <h2 className="font-display text-3xl md:text-5xl mb-4 gold-text">
-          Le Déroulement du Sommet
+          {t("event_networking.timeline_title")}
         </h2>
         <p className="text-sm text-white/60 max-w-lg mx-auto">
-          Une soirée orchestrée à la minute pour optimiser vos connexions et maximiser vos opportunités.
+          {t("event_networking.timeline_desc")}
         </p>
       </div>
 

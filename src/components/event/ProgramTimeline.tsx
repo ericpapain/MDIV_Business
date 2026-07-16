@@ -6,64 +6,49 @@ import { AnimatedNetwork } from "./AnimatedNetwork";
 import { ChampagneBubbles } from "./ChampagneBubbles";
 import { GoldParticles } from "./GoldParticles";
 import { Handshake, Crown, Utensils, TrendingUp, Mic, Globe, GlassWater } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 // Image Imports removed
 
 export function ProgramTimeline() {
+  const { t } = useLanguage();
   const jour1Steps = [
     {
-      time: "15:00 - Accueil",
-      badge: "Entrée",
-      title: "🤝 Accueil Privé",
-      // description: "Accueil personnalisé des participants à l'hôtel, remise des accès du cercle, cocktail de bienvenue et premier networking informel dans le salon de la Table d'Essoyes.",
+      time: t("event_champagne.timeline.j1_0.time"),
+      badge: t("event_champagne.timeline.j1_0.badge"),
+      title: t("event_champagne.timeline.j1_0.title"),
+      description: t("event_champagne.timeline.j1_0.description"),
       icon: Handshake,
     },
     {
-      time: "17:30",
-      badge: "Cercle",
-      title: "👑 Cercle Fondateur",
-      // description: "Présentation des membres, table ronde d'investisseurs, exposé de la vision stratégique du club d'affaires et définition des synergies communes.",
+      time: t("event_champagne.timeline.j1_1.time"),
+      badge: t("event_champagne.timeline.j1_1.badge"),
+      title: t("event_champagne.timeline.j1_1.title"),
+      description: t("event_champagne.timeline.j1_1.description"),
+      icon: Utensils,
+    },
+    {
+      time: t("event_champagne.timeline.j1_2.time"),
+      badge: t("event_champagne.timeline.j1_2.badge"),
+      title: t("event_champagne.timeline.j1_2.title"),
+      description: t("event_champagne.timeline.j1_2.description"),
       icon: Crown,
     },
     {
-      time: "20:00",
-      badge: "Gastronomie",
-      title: "🍽️ Dîner Prestige",
-      // description: "Repas gastronomique d'exception avec accord mets et champagnes. Échanges intimistes entre leaders et discussions libres autour de projets de prestige.",
-      icon: Utensils,
+      time: t("event_champagne.timeline.j1_3.time"),
+      badge: t("event_champagne.timeline.j1_3.badge"),
+      title: t("event_champagne.timeline.j1_3.title"),
+      description: t("event_champagne.timeline.j1_3.description"),
+      icon: Globe,
     },
   ];
 
   const jour2Steps = [
     {
-      time: "09:30 - Matinée",
-      badge: "Private Equity",
-      title: "📈 Opportunités d'Investissement",
-      // description: "Présentation des dossiers d'investissement présélectionnés, levées de fonds stratégiques et opportunités de co-investissement immobilier.",
-      specialAnimation: <InvestmentGraph />,
-      icon: TrendingUp,
-    },
-    {
-      time: "11:30",
-      badge: "Pitches",
-      title: "🎤 Pitch Entrepreneurs",
-      // description: "Sessions de pitchs des fondateurs de projets d'excellence à fort rendement. Évaluation en direct et sessions de questions-réponses.",
-      specialAnimation: <AudioWave />,
-      icon: Mic,
-    },
-    {
-      time: "14:30 - Après-midi",
-      badge: "Réseau Global",
-      title: "🌍 Networking International",
-      // description: "Sessions de connexions et de mise en relation ciblées entre les délégations de France, Belgique, Luxembourg et Suisse.",
-      specialAnimation: <AnimatedNetwork />,
-      icon: Globe,
-    },
-    {
-      time: "17:00 - Clôture",
-      badge: "Célébration",
-      title: "🥂 Clôture Prestige",
-      // description: "Dégustation finale, cocktail de clôture et mise en relation directe des parties intéressées pour matérialiser les collaborations initiées.",
+      time: t("event_champagne.timeline.j2_0.time"),
+      badge: t("event_champagne.timeline.j2_0.badge"),
+      title: t("event_champagne.timeline.j2_0.title"),
+      description: t("event_champagne.timeline.j2_0.description"),
       specialAnimation: <ChampagneBubbles />,
       icon: GlassWater,
     },
@@ -92,10 +77,10 @@ export function ProgramTimeline() {
       {/* Title */}
       <div className="text-center mb-12">
         <h2 className="font-display text-2xl md:text-4xl mb-3 gold-text">
-          Le Programme du Séjour
+          {t("event_champagne.timeline.title")}
         </h2>
         <p className="text-xs text-white/60 max-w-md mx-auto leading-relaxed">
-          Deux jours exclusifs conçus pour marier prestige champenois, connexions stratégiques et opportunités financières.
+          {t("event_champagne.timeline.desc")}
         </p>
       </div>
 
@@ -103,8 +88,8 @@ export function ProgramTimeline() {
       <div className="mb-20">
         <div className="flex justify-center mb-10">
           <div className="px-5 py-2 bg-gradient-to-r from-gold/25 via-gold/10 to-gold/25 border border-gold/40 rounded-sm text-center">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">Jour 1</span>
-            <h3 className="font-display text-base text-white mt-0.5">27 Juin 2026 • Accueil & Prestige</h3>
+            <span className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">{t("event_champagne.timeline.day1")}</span>
+            <h3 className="font-display text-base text-white mt-0.5">{t("event_champagne.timeline.day1_date")}</h3>
           </div>
         </div>
 
@@ -141,8 +126,8 @@ export function ProgramTimeline() {
       <div>
         <div className="flex justify-center mb-10">
           <div className="px-5 py-2 bg-gradient-to-r from-gold/25 via-gold/10 to-gold/25 border border-gold/40 rounded-sm text-center">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">Jour 2</span>
-            <h3 className="font-display text-base text-white mt-0.5">28 Juin 2026 • Finance & Réseau</h3>
+            <span className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">{t("event_champagne.timeline.day2")}</span>
+            <h3 className="font-display text-base text-white mt-0.5">{t("event_champagne.timeline.day2_date")}</h3>
           </div>
         </div>
 
@@ -174,6 +159,29 @@ export function ProgramTimeline() {
             })}
           </div>
         </TimelineWrapper>
+      </div>
+
+      {/* --- OBJECTIF ET COORDINATION --- */}
+      <div className="mt-20 max-w-3xl mx-auto space-y-8">
+        <div className="p-8 md:p-10 bg-white/[0.02] border border-gold/20 rounded-sm backdrop-blur-md">
+          <h3 className="font-display text-xl md:text-2xl gold-text mb-4 text-center">Objectif du Séjour</h3>
+          <p className="text-sm md:text-base text-white/80 leading-relaxed text-center font-light">
+            Créer des connexions durables entre entrepreneurs, investisseurs et décideurs afin de favoriser l’émergence de collaborations, d’opportunités d’affaires et de projets à dimension internationale.
+          </p>
+        </div>
+
+        <div className="p-8 md:p-10 bg-white/[0.02] border border-gold/20 rounded-sm backdrop-blur-md text-center">
+          <h3 className="font-display text-xl md:text-2xl gold-text mb-4">Coordination du Séjour</h3>
+          <p className="text-base text-white font-medium mb-3">Micke Dimvula</p>
+          <div className="flex flex-col gap-2 items-center justify-center text-sm text-white/70">
+            <a href="tel:+33666078870" className="flex items-center gap-2 hover:text-gold transition-colors">
+              <span>📞</span> 06 66 07 88 70
+            </a>
+            <a href="mailto:m.divcsltg@gmail.com" className="flex items-center gap-2 hover:text-gold transition-colors">
+              <span>✉️</span> m.divcsltg@gmail.com
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

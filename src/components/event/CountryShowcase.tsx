@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Member {
   name: string;
@@ -15,37 +16,39 @@ interface Country {
 }
 
 export function CountryShowcase() {
+  const { t } = useLanguage();
+
   const countries: Country[] = [
     { 
-      name: "France", flag: "🇫🇷", code: "FR", 
+      name: t("country_showcase.countries.France"), flag: "🇫🇷", code: "FR", 
       members: [
-        { name: "Micke", role: "CEO fondateur et initiateur du séjour", icon: "👨🏿‍💼" },
-        { name: "Eric", role: "Expert IA et IT, développeur de la plateforme", icon: "👨🏿‍💼" },
-        { name: "Pierre", role: "Marchand de biens", icon: "👨‍💼" },
-        { name: "Sibley", role: "Expert vidéo et Ads", icon: "👨‍💼" },
+        { name: "Micke", role: t("country_showcase.roles.micke"), icon: "👨🏿‍💼" },
+        { name: "Eric", role: t("country_showcase.roles.eric"), icon: "👨🏿‍💼" },
+        { name: "Pierre", role: t("country_showcase.roles.pierre"), icon: "👨‍💼" },
+        { name: "Sibley", role: t("country_showcase.roles.sibley"), icon: "👨‍💼" },
       ],
       colors: ["#002395", "#FFFFFF", "#ED2939"] 
     },
     { 
-      name: "Belgique", flag: "🇧🇪", code: "BE", 
+      name: t("country_showcase.countries.Belgique"), flag: "🇧🇪", code: "BE", 
       members: [
-        { name: "Cerise", role: "Dirigeante Cabinet Médico-Esthétique", icon: "👩‍💼" },
-        { name: "Rémy", role: "Dirigeant Agence web", icon: "👨‍💼" },
-        { name: "Hakan", role: "Membre de la délégation", icon: "👨‍💼" },
+        { name: "Cerise", role: t("country_showcase.roles.cerise"), icon: "👩‍💼" },
+        { name: "Rémy", role: t("country_showcase.roles.remy"), icon: "👨‍💼" },
+        { name: "Hakan", role: t("country_showcase.roles.hakan"), icon: "👨‍💼" },
       ],
       colors: ["#2D2926", "#FDDA24", "#C8102E"] 
     },
     { 
-      name: "Luxembourg", flag: "🇱🇺", code: "LU", 
+      name: t("country_showcase.countries.Luxembourg"), flag: "🇱🇺", code: "LU", 
       members: [
-        { name: "Kassa", role: "Economiste - Financier - Fiscaliste", icon: "👨‍💼" },
+        { name: "Kassa", role: t("country_showcase.roles.kassa"), icon: "👨‍💼" },
       ],
       colors: ["#EF3340", "#FFFFFF", "#00A3E0"] 
     },
     { 
-      name: "Suisse", flag: "🇨🇭", code: "CH", 
+      name: t("country_showcase.countries.Suisse"), flag: "🇨🇭", code: "CH", 
       members: [
-        { name: "Mathilda Guyot", role: "Référente Suisse du Royalty Club", icon: "👩‍💼" },
+        { name: "Mathilda Guyot", role: t("country_showcase.roles.mathilda"), icon: "👩‍💼" },
       ],
       colors: ["#DA291C", "#FFFFFF", "#DA291C"] 
     },
@@ -55,15 +58,15 @@ export function CountryShowcase() {
     <div className="w-full">
       <div className="text-center mb-6">
         <span className="text-[10px] uppercase tracking-[0.25em] text-gold font-bold">
-          Réseau d'Affaires Connecté
+          {t("country_showcase.eyebrow")}
         </span>
         <h3 className="font-display text-lg text-white mt-1">
-          Délégations Internationales Présentes
+          {t("country_showcase.title")}
         </h3>
       </div>
 
-      {/* Horizontal Layout for Desktop / horizontal slider on Mobile */}
-      <div className="flex w-full gap-4 overflow-x-auto pb-4 pt-1 px-2 scrollbar-none snap-x snap-mandatory lg:overflow-x-visible lg:pb-0 lg:flex-row lg:justify-center">
+      {/* Responsive Grid Layout */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full pt-1 px-2">
         {countries.map((country, idx) => (
           <motion.div
             key={country.code}
@@ -72,7 +75,7 @@ export function CountryShowcase() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: idx * 0.1 }}
             whileHover={{ y: -4, scale: 1.02 }}
-            className="flex-shrink-0 w-64 snap-center bg-white/[0.03] backdrop-blur-sm border border-white/10 hover:border-gold/40 p-5 rounded-sm flex flex-col gap-3 transition-colors duration-300 relative group overflow-hidden"
+            className="w-full bg-white/[0.03] backdrop-blur-sm border border-white/10 hover:border-gold/40 p-5 rounded-sm flex flex-col gap-3 transition-colors duration-300 relative group overflow-hidden"
             style={{
               boxShadow: "0 4px 20px rgba(0, 0, 0, 0.2)",
             }}
@@ -108,7 +111,7 @@ export function CountryShowcase() {
                   {country.name}
                 </h4>
                 <span className="text-[9px] font-mono tracking-widest text-gold/80 font-bold uppercase">
-                  Délégation {country.code}
+                  {t("country_showcase.delegation")} {country.code}
                 </span>
               </div>
             </div>
@@ -128,12 +131,7 @@ export function CountryShowcase() {
         ))}
       </div>
 
-      {/* Mobile Indicator */}
-      <div className="flex justify-center gap-1 mt-1 lg:hidden">
-        {countries.map((_, i) => (
-          <div key={i} className="w-1.5 h-1.5 rounded-full bg-white/20" />
-        ))}
-      </div>
+
     </div>
   );
 }

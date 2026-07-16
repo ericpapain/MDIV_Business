@@ -1,7 +1,8 @@
-import { events } from "@/data/mockData";
+import { getEvents } from "@/data/mockData";
 import { Calendar, MapPin, ArrowRight, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 function FlagCSS({ type }: { type: string }) {
   const base = "shrink-0 w-8 h-8 rounded-full overflow-hidden shadow-lg border border-white/10";
@@ -44,6 +45,8 @@ function FlagCSS({ type }: { type: string }) {
 function Countdown({ targetDateStr }: { targetDateStr: string }) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
+  const { t } = useLanguage();
+
   useEffect(() => {
     if (!targetDateStr) return;
     
@@ -74,41 +77,45 @@ function Countdown({ targetDateStr }: { targetDateStr: string }) {
     <div className="flex items-center gap-2 mt-4 mb-2">
       <div className="flex flex-col items-center justify-center bg-black/40 border border-gold/20 rounded-sm w-12 h-12 backdrop-blur-sm">
         <span className="font-display text-lg gold-text leading-none">{timeLeft.days}</span>
-        <span className="text-[8px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">Jours</span>
+        <span className="text-[8px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">{t("common.days")}</span>
       </div>
       <div className="flex flex-col items-center justify-center bg-black/40 border border-gold/20 rounded-sm w-12 h-12 backdrop-blur-sm">
         <span className="font-display text-lg gold-text leading-none">{timeLeft.hours}</span>
-        <span className="text-[8px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">H</span>
+        <span className="text-[8px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">{t("common.hours")}</span>
       </div>
       <div className="flex flex-col items-center justify-center bg-black/40 border border-gold/20 rounded-sm w-12 h-12 backdrop-blur-sm">
         <span className="font-display text-lg gold-text leading-none">{timeLeft.minutes}</span>
-        <span className="text-[8px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">Min</span>
+        <span className="text-[8px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">{t("common.minutes")}</span>
       </div>
       <div className="flex flex-col items-center justify-center bg-black/40 border border-gold/20 rounded-sm w-12 h-12 backdrop-blur-sm">
         <span className="font-display text-lg gold-text leading-none">{timeLeft.seconds}</span>
-        <span className="text-[8px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">Sec</span>
+        <span className="text-[8px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">{t("common.seconds")}</span>
       </div>
     </div>
   );
 }
 
 export default function Sejour() {
+  const { t } = useLanguage();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const localizedEvents = getEvents(t);
 
   return (
     <div className="pt-32 pb-20 container">
       <div className="text-center mb-16 animate-fade-up">
-        <div className="eyebrow mb-4">Calendrier privé</div>
-        <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">Les rendez-vous <em className="italic gold-text">qui comptent.</em></h1>
+        <div className="eyebrow mb-4">{t("sejour.hero.eyebrow")}</div>
+        <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">{t("sejour.hero.title1")} <em className="italic gold-text">{t("sejour.hero.title2")}</em></h1>
       </div>
 
       <div className="mb-20">
         <div className="flex items-end justify-between mb-8" id="a-venir">
-          <h2 className="font-display text-3xl">À venir</h2>
-          <div className="text-[11px] uppercase tracking-[0.22em] text-primary">{events.upcoming.length} événement{events.upcoming.length > 1 ? 's' : ''} ouvert{events.upcoming.length > 1 ? 's' : ''}</div>
+          <h2 className="font-display text-3xl">{t("sejour.upcoming.title")}</h2>
+          <div className="text-[11px] uppercase tracking-[0.22em] text-primary">
+            {localizedEvents.upcoming.length} {localizedEvents.upcoming.length > 1 ? t("sejour.upcoming.subtitle_events") : t("sejour.upcoming.subtitle_event")} {localizedEvents.upcoming.length > 1 ? t("sejour.upcoming.subtitle_open_pl") : t("sejour.upcoming.subtitle_open_sg")}
+          </div>
         </div>
         <div className="grid lg:grid-cols-3 gap-6">
-          {events.upcoming.filter((e: any) => e.id === "u2").map((e: any) => (
+          {localizedEvents.upcoming.filter((e: any) => e.id === "u2").map((e: any) => (
             <div key={e.id} className="luxe-card rounded-sm overflow-hidden group flex flex-col">
               <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image)}>
                 <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
@@ -118,7 +125,7 @@ export default function Sejour() {
                   </div>
                 )}
                 <div className="absolute top-4 right-4 glass-strong px-3 py-1.5 rounded-sm text-[10px] uppercase tracking-[0.2em] text-gold-light flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-soft" /> Ouvert
+                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-soft" /> {t("sejour.upcoming.open")}
                 </div>
               </div>
               <div className="p-6 flex flex-col flex-1">
@@ -129,7 +136,7 @@ export default function Sejour() {
                 <Countdown targetDateStr={e.targetDate} />
 
                 <div className="mt-auto pt-5">
-                  <Link to="/contact" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">Demander une invitation <ArrowRight size={12} /></Link>
+                  <Link to="/contact" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">{t("common.request_invite")} <ArrowRight size={12} /></Link>
                 </div>
               </div>
             </div>
@@ -139,14 +146,12 @@ export default function Sejour() {
 
       <div>
         <div className="flex items-end justify-between mb-8">
-          <h2 className="font-display text-3xl">Éditions passées</h2>
-          <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Archives confidentielles</div>
+          <h2 className="font-display text-3xl">{t("sejour.past.title")}</h2>
+          <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{t("sejour.past.subtitle")}</div>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.past
-            .filter((e: any) => e.id !== "p2")
-            .map((e: any) => (
-              <div key={e.id} className="luxe-card rounded-sm overflow-hidden group opacity-90 hover:opacity-100 flex flex-col relative">
+        <div className="grid md:grid-cols-2 gap-6">
+          {localizedEvents.past.filter((e: any) => e.id === "p1").map((e: any) => (
+            <div key={e.id} className="luxe-card rounded-sm overflow-hidden group opacity-90 hover:opacity-100 flex flex-col relative">
                 <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image)}>
                   <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
                   {e.country && (
@@ -165,11 +170,11 @@ export default function Sejour() {
                   <div className="mt-auto pt-4 border-t border-gold/10">
                     {e.hasReplay !== false ? (
                       <Link to={`/revivre/${e.id}`} className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-2 transition-colors w-fit">
-                        <Play size={14} /> Revivre l'événement
+                        <Play size={14} /> {t("common.replay")}
                       </Link>
                     ) : (
                       <span className="text-xs uppercase tracking-[0.2em] text-white/30 flex items-center gap-2 select-none cursor-not-allowed w-fit">
-                        <Play size={14} className="opacity-30" /> Pas de replay
+                        <Play size={14} className="opacity-30" /> {t("common.no_replay")}
                       </span>
                     )}
                   </div>

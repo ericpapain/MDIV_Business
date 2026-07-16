@@ -22,9 +22,14 @@ export function SiteFooter() {
           </p>
           <div className="hairline my-4 max-w-xs" />
           <div className="flex gap-3">
-            {[Instagram, Linkedin, Youtube, Music2].map((I, i) => (
-              <a key={i} href="#" className="w-8 h-8 rounded-sm border border-border hover:border-gold/60 flex items-center justify-center transition-colors text-muted-foreground hover:text-primary">
-                <I size={14} />
+            {[
+              { Icon: Instagram, href: "https://www.instagram.com/mickediv?utm_source=qr&igsh=M3QxZTVjajFmb2g3" },
+              { Icon: Linkedin, href: "https://www.linkedin.com/company/m-div-consulting/posts/?feedView=all" },
+              { Icon: Youtube, href: "#" },
+              { Icon: Music2, href: "#" },
+            ].map((item, i) => (
+              <a key={i} href={item.href} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-sm border border-border hover:border-gold/60 flex items-center justify-center transition-colors text-muted-foreground hover:text-primary">
+                <item.Icon size={14} />
               </a>
             ))}
           </div>
@@ -32,9 +37,11 @@ export function SiteFooter() {
         <div>
           <div className="eyebrow mb-3">{t("footer.navigation")}</div>
           <ul className="space-y-1.5 text-sm text-foreground/70">
+            <li><Link to="/" className="hover:text-primary">{t("nav.home")}</Link></li>
+            <li><Link to="/sejour" className="hover:text-primary">{t("nav.sejour")}</Link></li>
             <li><Link to="/offres" className="hover:text-primary">{t("nav.offers")}</Link></li>
             <li><Link to="/evenements" className="hover:text-primary">{t("nav.events")}</Link></li>
-            <li><Link to="/home" className="hover:text-primary">{t("nav.home")}</Link></li>
+            <li><Link to="/partenaires" className="hover:text-primary">{t("nav.partners")}</Link></li>
             <li><Link to="/contact" className="hover:text-primary">{t("nav.contact")}</Link></li>
           </ul>
         </div>

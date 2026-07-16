@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Crown, Users, Target, Diamond, Play, Star, Check, MapPin } from "lucide-react";
-import { images, offers, testimonials, events, computeFinalPrice } from "@/data/mockData";
+import { ArrowRight, Sparkles, Crown, Users, Target, Diamond, Play, Star, Check, MapPin, ChevronDown } from "lucide-react";
+import { images, getOffers, testimonials, getEvents, computeFinalPrice } from "@/data/mockData";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { toast } from "sonner";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -53,6 +53,7 @@ export default function Home() {
   const [playHomeVideo, setPlayHomeVideo] = useState(false);
   const [dbReviews, setDbReviews] = useState<any[]>([]);
   const [visitCount, setVisitCount] = useState(234);
+  const localizedOffers = getOffers(t);
 
   useEffect(() => {
     fetchReviews();
@@ -142,7 +143,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="mt-14 grid grid-cols-4 gap-6 max-w-xl">
+            <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-xl">
               {[
                 { v: t("home.hero.stat1_val"), l: t("home.hero.stat1_label") },
                 { v: t("home.hero.stat2_val"), l: t("home.hero.stat2_label") },
@@ -155,7 +156,7 @@ export default function Home() {
               ))}
               <div>
                 <div className="font-display text-3xl gold-text">{visitCount.toLocaleString('fr-FR')}</div>
-                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-1">Visites</div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-1">{t("home.hero.visits")}</div>
               </div>
             </div>
           </div>
@@ -164,15 +165,15 @@ export default function Home() {
             <div className="glass-strong p-6 rounded-sm relative corner-deco flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div className="eyebrow flex items-center gap-2 text-primary text-[14px]">
-                  <Sparkles size={12} className="animate-pulse-soft" /> À l'agenda BNE
+                  <Sparkles size={12} className="animate-pulse-soft" /> {t("home.agenda.eyebrow")}
                 </div>
                 <div className="text-[18px] uppercase tracking-[0.2em] text-gold/60 border border-gold/20 px-2 py-0.5 rounded-sm">
-                  Places limitées
+                  {t("home.agenda.limited")}
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                {events.upcoming.slice(0, 2).map((event: any, idx) => {
+                {getEvents(t).upcoming.slice(0, 2).map((event: any, idx) => {
                   const day = event.day || event.date.split(" ")[0];
                   const month = event.month || event.date.split(" ").slice(-2)[0].substring(0, 4).toUpperCase();
                   return (
@@ -201,7 +202,7 @@ export default function Home() {
                             to="/contact"
                             className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-1.5 transition-colors w-fit font-medium"
                           >
-                            Réserver <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+                            {t("home.agenda.reserve")} <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
                           </Link>
                         </div>
                       </div>
@@ -232,12 +233,27 @@ export default function Home() {
       {/* QUI SOMMES NOUS */}
       <AboutBNE />
 
-      {/* ÉVÉNEMENTS DANS UN MENU DÉROULANT (Retiré pour visibilité directe sur mobile) */}
+      {/* ÉVÉNEMENTS DANS UN MENU DÉROULANT */}
       <section className="container py-10">
-        <div className="flex flex-col gap-10">
-          <EventHero />
-          <ChampagneEvent />
-        </div>
+        <details className="group bg-white/[0.02] border border-white/10 rounded-md shadow-2xl overflow-hidden backdrop-blur-sm open:bg-white/[0.04] transition-colors duration-500">
+          <summary className="flex items-center justify-between cursor-pointer list-none p-6 md:p-8 hover:bg-white/[0.02] transition-colors outline-none">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center border border-gold/20">
+                <Sparkles className="text-gold w-5 h-5 animate-pulse-soft" />
+              </div>
+              <h2 className="font-display text-xl md:text-3xl gold-text uppercase tracking-wide">
+                {t("home.events_accordion.title")}
+              </h2>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-open:rotate-180 transition-transform duration-500">
+              <ChevronDown className="text-white w-5 h-5" />
+            </div>
+          </summary>
+          <div className="flex flex-col gap-10 p-2 sm:p-4 md:p-6 lg:p-10 border-t border-white/10 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
+            <EventHero />
+            <ChampagneEvent />
+          </div>
+        </details>
       </section>
 
       {/* PROMESSES */}
@@ -272,8 +288,8 @@ export default function Home() {
             {t("home.offers.all")} <ArrowRight size={12} />
           </Link>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {offers.map((o, idx) => (
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+          {localizedOffers.map((o, idx) => (
             <Link key={o.id} to="/offres" className={`luxe-card rounded-sm overflow-hidden group ${idx === 1 ? "lg:-translate-y-4" : ""}`}>
               <div className="aspect-[4/5] relative overflow-hidden">
                 <img src={o.image} alt={o.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
@@ -353,7 +369,7 @@ export default function Home() {
         </div>
         <div className="flex justify-center mt-12">
           <Link to="/avis" className="btn-ghost-gold inline-flex px-8 py-3.5 text-[10px] uppercase tracking-[0.24em] rounded-sm items-center gap-3">
-            Donnez-nous votre avis <ArrowRight size={14} />
+            {t("home.testimonials.btn")} <ArrowRight size={14} />
           </Link>
         </div>
       </section>

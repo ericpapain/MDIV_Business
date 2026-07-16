@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { offers, computeFinalPrice } from "@/data/mockData";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { getOffers, computeFinalPrice } from "@/data/mockData";
 import { Check, ArrowRight, Crown, Users, Diamond, Handshake, Network, Utensils, TrendingUp, Camera, UserCheck, Mail, Globe, Cpu, Compass, Rocket, Target, Zap, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import destChampagne from "@/assets/original/dest-champagne.png";
@@ -48,44 +49,7 @@ function CountryFlag({ type, className }: { type: string; className?: string }) 
 }
 
 /* ─── Destinations cliquables ─── */
-const destinations = [
-  {
-    id: "champagne",
-    name: "CHAMPAGNE",
-    country: "FRANCE",
-    subtitle: "",
-    image: destChampagne,
-    href: "/evenements",
-    flagType: "france",
-  },
-  {
-    id: "suisse",
-    name: "SUISSE",
-    country: "",
-    subtitle: "EXCELLENCE & INNOVATION",
-    image: destSuisse,
-    href: "/evenements",
-    flagType: "suisse",
-  },
-  {
-    id: "luxembourg",
-    name: "LUXEMBOURG",
-    country: "",
-    subtitle: "ENTREPRENDRE & SE DÉVELOPPER",
-    image: destLuxembourg,
-    href: "/evenements",
-    flagType: "luxembourg",
-  },
-  {
-    id: "belgique",
-    name: "BELGIQUE",
-    country: "",
-    subtitle: "RÉSEAUX & OPPORTUNITÉS",
-    image: destBelgique,
-    href: "/evenements",
-    flagType: "belgique",
-  },
-];
+
 
 /* ─── Mini-drapeaux CSS ─── */
 function FlagCSS({ type }: { type: string }) {
@@ -133,16 +97,50 @@ function FlagCSS({ type }: { type: string }) {
 }
 
 /* ─── Services inclus ─── */
-const services = [
-  { icon: Network, label: "Networking", sub: "qualifié" },
-  { icon: Utensils, label: "Expériences", sub: "gastronomiques" },
-  { icon: Handshake, label: "Rencontres", sub: "d'affaires exclusives" },
-  { icon: TrendingUp, label: "Développement", sub: "de partenariats" },
-  { icon: Camera, label: "Découverte", sub: "des territoires" },
-  { icon: UserCheck, label: "Accompagnement", sub: "personnalisé" },
-];
+
 
 export default function Offers() {
+  const { t } = useLanguage();
+  const offers = getOffers(t);
+
+  const destinations = [
+    {
+      id: "champagne",
+      name: t("offers.destinations.champagne.name"),
+      country: t("offers.destinations.champagne.country"),
+      subtitle: t("offers.destinations.champagne.subtitle"),
+      image: destChampagne,
+      href: "/sejour#a-venir",
+      flagType: "france",
+    },
+    {
+      id: "suisse",
+      name: t("offers.destinations.suisse.name"),
+      country: t("offers.destinations.suisse.country"),
+      subtitle: t("offers.destinations.suisse.subtitle"),
+      image: destSuisse,
+      href: "/sejour#a-venir",
+      flagType: "suisse",
+    },
+    {
+      id: "luxembourg",
+      name: t("offers.destinations.luxembourg.name"),
+      country: t("offers.destinations.luxembourg.country"),
+      subtitle: t("offers.destinations.luxembourg.subtitle"),
+      image: destLuxembourg,
+      href: "/sejour#a-venir",
+      flagType: "luxembourg",
+    },
+    {
+      id: "belgique",
+      name: t("offers.destinations.belgique.name"),
+      country: t("offers.destinations.belgique.country"),
+      subtitle: t("offers.destinations.belgique.subtitle"),
+      image: destBelgique,
+      href: "/sejour#a-venir",
+      flagType: "belgique",
+    },
+  ];
   const [activeServices, setActiveServices] = useState<string[]>([]);
 
   const toggleService = (serviceId: string) => {
@@ -210,22 +208,22 @@ export default function Offers() {
                         onClick={() => toggleService('sejours')}
                         className="custom-accordion-header"
                       >
-                        <span className="flex items-center"><span className="mr-2">✈️</span> Séjours immersifs</span>
+                        <span className="flex items-center"><span className="mr-2">✈️</span> {t("offers.accordion.sejours")}</span>
                         {activeServices.includes('sejours') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
                       </div>
                       {activeServices.includes('sejours') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Découverte d'un territoire</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.decouverte")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Rencontres entrepreneuriales</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.rencontres_ent")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Expériences immersives</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.exp_immersives")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Moments de partage</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.partage")}</div>
                           </div>
                         </div>
                       )}
@@ -236,22 +234,22 @@ export default function Offers() {
                         onClick={() => toggleService('participants')}
                         className="custom-accordion-header"
                       >
-                        <span className="flex items-center"><span className="mr-2">🌍</span> Valeur participants</span>
+                        <span className="flex items-center"><span className="mr-2">🌍</span> {t("offers.accordion.valeur_participants")}</span>
                         {activeServices.includes('participants') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
                       </div>
                       {activeServices.includes('participants') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Réseau</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.reseau")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Ouverture internationale</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.ouverture")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Partenariats</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.partenariats")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Opportunités</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.opportunites")}</div>
                           </div>
                         </div>
                       )}
@@ -261,19 +259,19 @@ export default function Offers() {
                         onClick={() => toggleService('territoires')}
                         className="custom-accordion-header"
                       >
-                        <span className="flex items-center"><span className="mr-2">📈</span> Valeur territoires</span>
+                        <span className="flex items-center"><span className="mr-2">📈</span> {t("offers.accordion.valeur_territoires")}</span>
                         {activeServices.includes('territoires') ? <ChevronUp size={16} className="text-white/70" /> : <ChevronDown size={16} className="text-white/70" />}
                       </div>
                       {activeServices.includes('territoires') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Visibilité</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.visibilite")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Attractivité</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.attractivite")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Valorisation économique</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.valorisation")}</div>
                           </div>
                         </div>
                       )}
@@ -292,13 +290,13 @@ export default function Offers() {
                       {activeServices.includes('analyse') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Compréhension du besoin</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.comprehension")}</div>
                           </div>
                           <div className="custom-service-item">
                             <div className="font-medium text-foreground/90">Positionnement &amp; stratégie</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Création de contenus</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.contenus")}</div>
                           </div>
                         </div>
                       )}
@@ -309,19 +307,19 @@ export default function Offers() {
                         onClick={() => toggleService('amplification')}
                         className="custom-accordion-header"
                       >
-                        <span>2️⃣ Amplification</span>
+                        <span>{t("offers.accordion.amplification")}</span>
                         {activeServices.includes('amplification') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
                       </div>
                       {activeServices.includes('amplification') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Diffusion digitale</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.diffusion")}</div>
                           </div>
                           <div className="custom-service-item">
                             <div className="font-medium text-foreground/90">Valorisation &amp; storytelling</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Activation du réseau</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.activation")}</div>
                           </div>
                         </div>
                       )}
@@ -338,10 +336,10 @@ export default function Offers() {
                       {activeServices.includes('connexion') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Événement dédié</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.event_dedie")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Rencontres ciblées</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.rencontres_ciblees")}</div>
                           </div>
                           <div className="custom-service-item">
                             <div className="font-medium text-foreground/90">Mises en relation &amp; suivi</div>
@@ -358,22 +356,22 @@ export default function Offers() {
                         onClick={() => toggleService('diagnostic')} 
                         className="custom-accordion-header"
                       >
-                        <span className="flex items-center">🤖 Diagnostic IA</span>
+                        <span className="flex items-center">{t("offers.accordion.diagnostic")}</span>
                         {activeServices.includes('diagnostic') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
                       </div>
                       {activeServices.includes('diagnostic') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Identifier les tâches qui prennent du temps</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.identifier_taches")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Repérer les opportunités d'amélioration</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.reperer_opportunites")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Mesurer les gains possibles</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.mesurer_gains")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Définir les priorités d'action</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.definir_priorites")}</div>
                           </div>
                         </div>
                       )}
@@ -385,28 +383,28 @@ export default function Offers() {
                         onClick={() => toggleService('automatisation')} 
                         className="custom-accordion-header"
                       >
-                        <span className="flex items-center">⚡ Automatisation</span>
+                        <span className="flex items-center">{t("offers.accordion.automatisation")}</span>
                         {activeServices.includes('automatisation') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
                       </div>
                       {activeServices.includes('automatisation') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Gérer les emails plus rapidement</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.gerer_emails")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Répondre aux appels d'offres</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.repondre_appels")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Créer des comptes-rendus de réunion automatiquement</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.cr_reunion")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Créer des documents automatiquement</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.creer_docs")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Réduire les tâches répétitives</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.reduire_taches")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Faire travailler les outils ensemble</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.outils_ensemble")}</div>
                           </div>
                         </div>
                       )}
@@ -424,16 +422,16 @@ export default function Offers() {
                       {activeServices.includes('communication') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Créer du contenu facilement</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.creer_contenu_facile")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Animer les réseaux sociaux</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.animer_reseaux")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Améliorer la visibilité sur Google</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.ameliorer_google")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Préparer des supports professionnels</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.preparer_supports")}</div>
                           </div>
                         </div>
                       )}
@@ -445,22 +443,22 @@ export default function Offers() {
                         onClick={() => toggleService('commercial')} 
                         className="custom-accordion-header"
                       >
-                        <span className="flex items-center">📈 Développement Commercial</span>
+                        <span className="flex items-center">{t("offers.accordion.commercial")}</span>
                         {activeServices.includes('commercial') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
                       </div>
                       {activeServices.includes('commercial') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Trouver de nouveaux clients</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.trouver_clients")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Identifier les prospects prioritaires</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.identifier_prospects")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Préparer les rendez-vous</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.preparer_rdv")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Suivre les opportunités commerciales</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.suivre_opportunites")}</div>
                           </div>
                         </div>
                       )}
@@ -472,22 +470,22 @@ export default function Offers() {
                         onClick={() => toggleService('ia')} 
                         className="custom-accordion-header"
                       >
-                        <span className="flex items-center">🧠 IA Générative</span>
+                        <span className="flex items-center">{t("offers.accordion.ia")}</span>
                         {activeServices.includes('ia') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
                       </div>
                       {activeServices.includes('ia') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Utiliser efficacement ChatGPT et les IA gratuites</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.utiliser_chatgpt")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Créer des assistants IA sur mesure</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.creer_assistants")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Exploiter Microsoft Copilot</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.exploiter_copilot")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Retrouver facilement les informations utiles</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.retrouver_infos")}</div>
                           </div>
                         </div>
                       )}
@@ -499,22 +497,22 @@ export default function Offers() {
                         onClick={() => toggleService('formation')} 
                         className="custom-accordion-header"
                       >
-                        <span className="flex items-center">🎓 Formation des Équipes</span>
+                        <span className="flex items-center">{t("offers.accordion.formation")}</span>
                         {activeServices.includes('formation') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
                       </div>
                       {activeServices.includes('formation') && (
                         <div className="custom-service-content">
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Découvrir les usages de l'IA</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.decouvrir_usages")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Apprendre par des cas concrets</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.apprendre_cas")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Prendre en main les outils</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.prendre_en_main")}</div>
                           </div>
                           <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Accompagner le changement</div>
+                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.accompagner_changement")}</div>
                           </div>
                         </div>
                       )}
@@ -525,7 +523,7 @@ export default function Offers() {
                   to={o.id === 'networking' ? "/sejour#a-venir" : "/contact"} 
                   className={`${featured ? "btn-gold" : "btn-ghost-gold"} text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3 mt-auto`}
                 >
-                  Choisir <ArrowRight size={14} />
+                  {t("offers.choose")} <ArrowRight size={14} />
                 </Link>
               </div>
             </div>
@@ -541,11 +539,11 @@ export default function Offers() {
         <div className="grid lg:grid-cols-[38%_62%]">
 
           {/* ── Colonne gauche ── */}
-          <div className="p-6 md:p-8 flex flex-col gap-4">
+          <div className="p-4 sm:p-6 md:p-8 flex flex-col gap-4">
 
             {/* Badge NOUVEAU */}
             <div className="self-start px-4 py-1 text-[10px] uppercase tracking-[0.3em] font-bold border border-gold/50 text-gold-light rounded-sm bg-gold/5">
-              Nouveau
+              {t("offers.banner.new")}
             </div>
 
             {/* Titre principal */}
@@ -565,18 +563,18 @@ export default function Offers() {
 
             {/* Accroche */}
             <p className="text-sm text-foreground/70 font-semibold text-center leading-relaxed border-t border-b border-gold/10 py-4">
-              4 DESTINATIONS D'EXCEPTION.<br />
+              {t("offers.banner.destinations_text1")}<br />
               <span className="text-foreground/50 font-normal text-xs">
-                UN SEUL OBJECTIF : DES RENCONTRES QUI<br />
-                TRANSFORMENT VOS AMBITIONS EN OPPORTUNITÉS.
+                {t("offers.banner.destinations_text2").split("\\n")[0]}<br />
+                {t("offers.banner.destinations_text2").split("\\n")[1]}
               </span>
             </p>
 
 
 
             {/* Pied de colonne gauche */}
-            <div className="flex items-center justify-between gap-4 pt-2 border-t border-gold/10 mt-auto w-full">
-              <div className="flex items-center gap-1.5">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gold/10 mt-auto w-full">
+              <div className="flex items-center justify-center gap-1.5 flex-wrap">
                 <CountryFlag type="france" />
                 <CountryFlag type="suisse" />
                 <CountryFlag type="luxembourg" />
@@ -587,7 +585,7 @@ export default function Offers() {
                 className="shrink-0 flex items-center gap-2 px-4 py-2.5 btn-gold rounded-sm text-[9px] uppercase tracking-[0.25em] font-bold"
               >
                 <Mail size={13} />
-                Pré-inscriptions<br />ouvertes
+                {t("offers.banner.pre_registrations").split("\\n").map((line: string, i: number) => <span key={i}>{line}<br /></span>)}
               </Link>
             </div>
           </div>
@@ -604,8 +602,7 @@ export default function Offers() {
             </svg>
 
             <div
-              className="flex flex-col"
-              style={{ clipPath: "url(#dest-veil-clip)" }}
+              className="flex flex-col lg:[clip-path:url(#dest-veil-clip)]"
             >
               {destinations.map((dest, i) => (
                 <Link
@@ -648,7 +645,7 @@ export default function Offers() {
         {/* ── Barre footer ── */}
         <div className="border-t border-gold/15 bg-gold/5 py-3">
           <div className="flex items-center justify-center gap-6 md:gap-10 flex-wrap px-6">
-            {["Networking", "Découverte", "Partage", "Croissance"].map((item, i) => (
+            {(t("offers.banner.footer") as unknown as string[]).map((item, i) => (
               <span key={item} className="flex items-center gap-3 md:gap-6">
                 <span className="text-[9px] uppercase tracking-[0.35em] text-foreground/50 hover:text-gold-light transition-colors cursor-pointer">{item}</span>
                 {i < 3 && <span className="text-gold/20 text-xs">·</span>}
@@ -660,9 +657,9 @@ export default function Offers() {
 
       <div className="mt-20 text-center">
         <Crown size={28} className="mx-auto text-primary mb-4" />
-        <h2 className="font-display text-3xl mb-3">Au-delà du sur-mesure ?</h2>
-        <p className="text-muted-foreground mb-6 font-serif italic">Notre offre Atelier compose à 100 %. Sur demande qualifiée uniquement.</p>
-        <Link to="/contact" className="btn-ghost-gold inline-flex px-7 py-3 text-xs uppercase tracking-[0.22em] rounded-sm items-center gap-3">Solliciter l'Atelier <ArrowRight size={14} /></Link>
+        <h2 className="font-display text-3xl mb-3">{t("offers.atelier.title")}</h2>
+        <p className="text-muted-foreground mb-6 font-serif italic">{t("offers.atelier.desc")}</p>
+        <Link to="/contact" className="btn-ghost-gold inline-flex px-7 py-3 text-xs uppercase tracking-[0.22em] rounded-sm items-center gap-3">{t("offers.atelier.btn")} <ArrowRight size={14} /></Link>
       </div>
     </div>
   );

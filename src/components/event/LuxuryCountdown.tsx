@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface LuxuryCountdownProps {
   targetDateStr?: string;
 }
 
 export function LuxuryCountdown({ targetDateStr = "2026-06-27T20:00:00" }: LuxuryCountdownProps) {
+  const { t } = useLanguage();
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -62,13 +64,13 @@ export function LuxuryCountdown({ targetDateStr = "2026-06-27T20:00:00" }: Luxur
 
   return (
     <div className="flex items-center gap-0.5 sm:gap-3 md:gap-4 select-none">
-      <DigitBox value={formatDigits(timeLeft.days)} label="Jours" />
+      <DigitBox value={formatDigits(timeLeft.days)} label={t("countdown.days")} />
       <div className="text-gold/60 text-xs sm:text-lg md:text-2xl font-mono -mt-3 sm:-mt-6 animate-pulse-soft">:</div>
-      <DigitBox value={formatDigits(timeLeft.hours)} label="Heures" />
+      <DigitBox value={formatDigits(timeLeft.hours)} label={t("countdown.hours")} />
       <div className="text-gold/60 text-xs sm:text-lg md:text-2xl font-mono -mt-3 sm:-mt-6 animate-pulse-soft">:</div>
-      <DigitBox value={formatDigits(timeLeft.minutes)} label="Minutes" />
+      <DigitBox value={formatDigits(timeLeft.minutes)} label={t("countdown.minutes")} />
       <div className="text-gold/60 text-xs sm:text-lg md:text-2xl font-mono -mt-3 sm:-mt-6 animate-pulse-soft">:</div>
-      <DigitBox value={formatDigits(timeLeft.seconds)} label="Sec" />
+      <DigitBox value={formatDigits(timeLeft.seconds)} label={t("countdown.seconds")} />
     </div>
   );
 }

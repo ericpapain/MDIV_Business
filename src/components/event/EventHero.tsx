@@ -5,13 +5,15 @@ import { GoldParticles } from "./GoldParticles";
 import { LuxuryCountdown } from "./LuxuryCountdown";
 import { TimelineSection } from "./TimelineSection";
 import eventNetworking from "@/assets/original/tallk.jpg";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export function EventHero() {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <div className="relative w-full overflow-hidden bg-[#05071F]">
-      <div className="container mx-auto px-4 py-8 md:py-16">
+      <div className="container mx-auto px-0 sm:px-4 py-8 md:py-16">
         {/* Main Event Wrapper Card */}
         <motion.div
           layout
@@ -69,17 +71,17 @@ export function EventHero() {
           <GoldParticles />
 
           {/* Front Content container */}
-          <div className="relative z-20 h-full flex flex-col justify-between p-6 md:p-14 overflow-y-auto scrollbar-none">
+          <div className="relative z-20 h-full flex flex-col justify-between p-4 sm:p-6 md:p-14 overflow-y-auto scrollbar-none">
             {/* Top Row: Event Badges */}
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-gold animate-pulse-soft" />
                 <span className="text-[10px] uppercase tracking-[0.25em] text-gold font-semibold">
-                  Networking Experience
+                  {t("event_networking.title1")} {t("event_networking.title2")}
                 </span>
               </div>
               <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-sm text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 backdrop-blur-sm">
-                Spécial Immobilier
+                {t("event_networking.badge")}
               </div>
             </div>
 
@@ -88,14 +90,14 @@ export function EventHero() {
               {/* Event Titles */}
               <div className="space-y-1 md:space-y-2">
                 <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-gold font-bold">
-                  Exclusive Elite Summit
+                  {t("event_networking.eyebrow")}
                 </span>
                 <h1 className="font-display text-3xl md:text-4xl lg:text-5xl leading-tight text-white">
-                  NETWORKING <br className="hidden md:inline" />
-                  EXPERIENCE
+                  {t("event_networking.title1")} <br className="hidden md:inline" />
+                  {t("event_networking.title2")}
                 </h1>
                 <h2 className="font-serif italic text-xl md:text-2xl text-gold-light">
-                  Spécial Immobilier
+                  {t("event_networking.subtitle")}
                 </h2>
               </div>
 
@@ -103,13 +105,13 @@ export function EventHero() {
               <div className="flex flex-wrap sm:flex-nowrap items-center gap-6 mt-4 border-t border-white/5 pt-6">
                 <div>
                   <div className="text-[10px] uppercase tracking-[0.2em] text-white/45 font-semibold mb-2">
-                    Soirée exclusive
+                    {t("event_networking.meta_label")}
                   </div>
                   <div className="font-display text-lg md:text-xl text-white font-bold tracking-wide">
-                    20 JUIN 2026
+                    {t("event_networking.date")}
                   </div>
                   <div className="text-[10px] text-goldLight/80 font-mono mt-0.5">
-                    📍 La Table d'Essoyes
+                    {t("event_networking.location")}
                   </div>
                 </div>
                 <div className="h-10 w-px bg-white/10 hidden sm:block" />
@@ -128,17 +130,17 @@ export function EventHero() {
               >
                 {isOpen ? (
                   <>
-                    Masquer le programme <ChevronUp size={14} className="animate-bounce" />
+                    {t("event_networking.hide_program")} <ChevronUp size={14} className="animate-bounce" />
                   </>
                 ) : (
                   <>
-                    Découvrir le programme <ChevronDown size={14} className="animate-bounce" />
+                    {t("event_networking.show_program")} <ChevronDown size={14} className="animate-bounce" />
                   </>
                 )}
               </button>
 
               <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium">
-                Sur invitation uniquement • Places limitées
+                {t("event_networking.footer_note")}
               </p>
             </div>
 
@@ -166,7 +168,7 @@ export function EventHero() {
                       }}
                       className="btn-ghost-gold px-8 py-3 text-xs uppercase tracking-[0.2em] rounded-sm flex items-center gap-2"
                     >
-                      Refermer le programme <ChevronUp size={12} />
+                      {t("event_networking.close_program")} <ChevronUp size={12} />
                     </button>
                   </div>
                 </motion.div>
