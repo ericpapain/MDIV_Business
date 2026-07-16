@@ -21,7 +21,7 @@ export function EventHero() {
             damping: 15,
           }}
           className={`relative w-full rounded-sm overflow-hidden border border-white/10 shadow-2xl transition-all duration-300 ${
-            isOpen ? "min-h-[120vh]" : "h-[50vh] md:h-[60vh] min-h-[400px]"
+            isOpen ? "min-h-[120vh] h-auto" : "h-auto lg:h-[60vh] min-h-[520px] lg:min-h-[400px]"
           }`}
         >
           {/* Ken Burns zooming background image + Overlay */}

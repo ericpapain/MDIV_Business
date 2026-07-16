@@ -24,7 +24,7 @@ export function ChampagneEvent() {
             damping: 15,
           }}
           className={`relative w-full rounded-sm overflow-hidden border border-white/10 shadow-2xl transition-all duration-300 ${
-            isOpen ? "min-h-[140vh]" : "h-[45vh] md:h-[55vh] min-h-[400px]"
+            isOpen ? "min-h-[140vh] h-auto" : "h-auto lg:h-[55vh] min-h-[650px] lg:min-h-[400px]"
           }`}
         >
           {/* Backdrop Ken Burns zooming image */}
@@ -236,12 +236,11 @@ export function ChampagneEvent() {
                         Ce séjour est réservé aux membres qualifiés et co-optés. Seules 12 places de fondateurs sont disponibles pour préserver la valeur des échanges.
                       </p>
 
-                      <Link
-                        to="/contact"
-                        className="w-full py-3.5 text-[10px] uppercase tracking-[0.2em] rounded-sm font-semibold flex items-center justify-center gap-2.5 transition-all duration-300 btn-gold hover:opacity-90 active:scale-95"
+                      <span
+                        className="w-full py-3.5 text-[10px] uppercase tracking-[0.2em] rounded-sm font-semibold flex items-center justify-center gap-2.5 bg-white/5 border border-white/10 text-white/30 cursor-not-allowed select-none"
                       >
-                        Demander une invitation <Send size={11} className="transition-transform group-hover:translate-x-0.5" />
-                      </Link>
+                        Demander une invitation <Send size={11} className="opacity-30" />
+                      </span>
                     </motion.div>
                   </div>
 

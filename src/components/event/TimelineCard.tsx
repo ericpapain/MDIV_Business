@@ -5,8 +5,8 @@ interface TimelineCardProps {
   time?: string;
   badge?: string;
   title: string;
-  description: string;
-  image?: string;
+  description?: string;
+  icon?: React.ElementType;
   specialAnimation?: React.ReactNode;
   delay?: number;
 }
@@ -15,8 +15,8 @@ export function TimelineCard({
   time,
   badge,
   title,
-  description,
-  image,
+  description = "",
+  icon: Icon,
   specialAnimation,
   delay = 0,
 }: TimelineCardProps) {
@@ -72,7 +72,7 @@ export function TimelineCard({
         transformStyle: "preserve-3d",
         perspective: 1000,
       }}
-      className="relative w-full max-w-lg mx-auto bg-white/[0.04] backdrop-blur-md rounded-sm border border-white/10 p-6 md:p-8 hover:border-gold/30 transition-colors duration-500 shadow-2xl flex flex-col gap-5 group"
+      className="relative w-full max-w-lg mx-auto bg-white/[0.04] backdrop-blur-md rounded-sm border border-white/10 p-3 sm:p-4 md:p-8 hover:border-gold/30 transition-colors duration-500 shadow-2xl flex flex-col gap-3 sm:gap-4 md:gap-5 group"
     >
       {/* Glare Shine Overlay */}
       <motion.div
@@ -86,28 +86,24 @@ export function TimelineCard({
       <div className="absolute inset-px bg-gradient-to-br from-white/[0.08] to-transparent pointer-events-none rounded-sm" />
 
       {/* Card Header */}
-      <div className="flex items-center justify-between gap-4 z-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 z-10 w-full overflow-hidden">
         {time && (
-          <span className="font-mono text-xs uppercase tracking-widest text-gold font-semibold">
+          <span className="font-mono text-[10px] sm:text-xs uppercase tracking-widest text-gold font-semibold shrink-0 break-words whitespace-normal">
             {time}
           </span>
         )}
         {badge && (
-          <span className="text-[9px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-sm bg-primary/20 border border-primary/40 text-secondary-foreground font-semibold">
+          <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.1em] sm:tracking-[0.2em] px-1.5 sm:px-2 py-0.5 rounded-sm bg-primary/20 border border-primary/40 text-secondary-foreground font-semibold shrink-0 w-fit max-w-full break-words whitespace-normal">
             {badge}
           </span>
         )}
       </div>
 
       {/* Card Visual / Graphic */}
-      {image && (
-        <div className="relative aspect-[16/9] w-full rounded-sm overflow-hidden border border-white/5 bg-[#030415] z-10">
-          <img
-            src={image}
-            alt={title}
-            loading="lazy"
-            className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-1000 ease-out"
-          />
+      {Icon && (
+        <div className="relative aspect-[21/9] w-full rounded-sm overflow-hidden border border-white/5 bg-gradient-to-br from-[#0b153b]/50 to-[#030415] z-10 flex items-center justify-center group-hover:border-gold/20 transition-colors duration-500">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gold/15 via-transparent to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
+          <Icon className="w-12 h-12 sm:w-16 sm:h-16 text-gold/60 transform group-hover:scale-110 group-hover:text-gold transition-all duration-700 drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]" strokeWidth={1.5} />
           <div className="absolute inset-0 bg-gradient-to-t from-[#05071F]/80 via-transparent to-transparent pointer-events-none" />
         </div>
       )}
@@ -116,11 +112,11 @@ export function TimelineCard({
       {specialAnimation && <div className="w-full relative z-10">{specialAnimation}</div>}
 
       {/* Card Title & Description */}
-      <div className="flex flex-col gap-2 z-10" style={{ transform: "translateZ(10px)" }}>
-        <h3 className="font-display text-xl md:text-2xl text-white group-hover:text-gold transition-colors duration-300">
+      <div className="flex flex-col gap-2 z-10 w-full overflow-hidden" style={{ transform: "translateZ(10px)" }}>
+        <h3 className="font-display text-lg sm:text-xl md:text-2xl text-white group-hover:text-gold transition-colors duration-300 break-words whitespace-normal">
           {title}
         </h3>
-        <p className="text-sm text-white/70 leading-relaxed font-light">{description}</p>
+        {description && <p className="text-xs sm:text-sm text-white/70 leading-relaxed font-light break-words whitespace-normal">{description}</p>}
       </div>
 
       {/* Corner decorations to match general site styles */}

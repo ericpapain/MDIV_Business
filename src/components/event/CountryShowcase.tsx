@@ -19,8 +19,8 @@ export function CountryShowcase() {
     { 
       name: "France", flag: "🇫🇷", code: "FR", 
       members: [
-        { name: "Micke", role: "CEO fondateur et initiateur du séjour", icon: "👨‍💼" },
-        { name: "Eric", role: "Expert IA et IT, développeur de la plateforme", icon: "👨‍💼" },
+        { name: "Micke", role: "CEO fondateur et initiateur du séjour", icon: "👨🏿‍💼" },
+        { name: "Eric", role: "Expert IA et IT, développeur de la plateforme", icon: "👨🏿‍💼" },
         { name: "Pierre", role: "Marchand de biens", icon: "👨‍💼" },
         { name: "Sibley", role: "Expert vidéo et Ads", icon: "👨‍💼" },
       ],

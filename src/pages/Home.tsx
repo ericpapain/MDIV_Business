@@ -160,7 +160,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="lg:col-span-5 hidden lg:flex flex-col gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
+          <div className="lg:col-span-5 flex flex-col gap-4 mt-8 lg:mt-0 animate-fade-up" style={{ animationDelay: "0.3s" }}>
             <div className="glass-strong p-6 rounded-sm relative corner-deco flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div className="eyebrow flex items-center gap-2 text-primary text-[14px]">
@@ -223,7 +223,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 opacity-60">
           <div className="text-[10px] uppercase tracking-[0.3em]">{t("home.scroll")}</div>
           <div className="w-px h-12 bg-gradient-to-b from-gold to-transparent" />
         </div>
@@ -232,20 +232,12 @@ export default function Home() {
       {/* QUI SOMMES NOUS */}
       <AboutBNE />
 
-      {/* ÉVÉNEMENTS DANS UN MENU DÉROULANT */}
+      {/* ÉVÉNEMENTS DANS UN MENU DÉROULANT (Retiré pour visibilité directe sur mobile) */}
       <section className="container py-10">
-        <details className="group border border-gold/20 rounded-sm bg-background/50 backdrop-blur-sm overflow-hidden">
-          <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-white/5 transition-colors outline-none">
-            <h2 className="font-display text-2xl md:text-4xl text-white">Découvrir nos expériences immersives</h2>
-            <div className="w-10 h-10 rounded-full border border-gold/30 flex shrink-0 items-center justify-center group-open:rotate-180 transition-transform duration-300">
-              <ArrowRight size={20} className="text-gold rotate-90" />
-            </div>
-          </summary>
-          <div className="p-6 pt-0 flex flex-col gap-10">
-            <EventHero />
-            <ChampagneEvent />
-          </div>
-        </details>
+        <div className="flex flex-col gap-10">
+          <EventHero />
+          <ChampagneEvent />
+        </div>
       </section>
 
       {/* PROMESSES */}

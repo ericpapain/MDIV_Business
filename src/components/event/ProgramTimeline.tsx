@@ -7,12 +7,7 @@ import { ChampagneBubbles } from "./ChampagneBubbles";
 import { GoldParticles } from "./GoldParticles";
 import { Handshake, Crown, Utensils, TrendingUp, Mic, Globe, GlassWater } from "lucide-react";
 
-// Image Imports
-import heroClub from "@/assets/original/hero-club.jpg";
-import eventSummit from "@/assets/original/Pitch.jpg";
-import expDining from "@/assets/original/diner.jpg";
-import eventNetworking from "@/assets/original/tallk.jpg";
-import destChampagne from "@/assets/original/dest-champagne.png";
+// Image Imports removed
 
 export function ProgramTimeline() {
   const jour1Steps = [
@@ -20,24 +15,21 @@ export function ProgramTimeline() {
       time: "15:00 - Accueil",
       badge: "Entrée",
       title: "🤝 Accueil Privé",
-      description: "Accueil personnalisé des participants à l'hôtel, remise des accès du cercle, cocktail de bienvenue et premier networking informel dans le salon de la Table d'Essoyes.",
-      image: heroClub,
+      // description: "Accueil personnalisé des participants à l'hôtel, remise des accès du cercle, cocktail de bienvenue et premier networking informel dans le salon de la Table d'Essoyes.",
       icon: Handshake,
     },
     {
       time: "17:30",
       badge: "Cercle",
       title: "👑 Cercle Fondateur",
-      description: "Présentation des membres, table ronde d'investisseurs, exposé de la vision stratégique du club d'affaires et définition des synergies communes.",
-      image: eventSummit,
+      // description: "Présentation des membres, table ronde d'investisseurs, exposé de la vision stratégique du club d'affaires et définition des synergies communes.",
       icon: Crown,
     },
     {
       time: "20:00",
       badge: "Gastronomie",
       title: "🍽️ Dîner Prestige",
-      description: "Repas gastronomique d'exception avec accord mets et champagnes. Échanges intimistes entre leaders et discussions libres autour de projets de prestige.",
-      image: expDining,
+      // description: "Repas gastronomique d'exception avec accord mets et champagnes. Échanges intimistes entre leaders et discussions libres autour de projets de prestige.",
       icon: Utensils,
     },
   ];
@@ -47,7 +39,7 @@ export function ProgramTimeline() {
       time: "09:30 - Matinée",
       badge: "Private Equity",
       title: "📈 Opportunités d'Investissement",
-      description: "Présentation des dossiers d'investissement présélectionnés, levées de fonds stratégiques et opportunités de co-investissement immobilier.",
+      // description: "Présentation des dossiers d'investissement présélectionnés, levées de fonds stratégiques et opportunités de co-investissement immobilier.",
       specialAnimation: <InvestmentGraph />,
       icon: TrendingUp,
     },
@@ -55,8 +47,7 @@ export function ProgramTimeline() {
       time: "11:30",
       badge: "Pitches",
       title: "🎤 Pitch Entrepreneurs",
-      description: "Sessions de pitchs des fondateurs de projets d'excellence à fort rendement. Évaluation en direct et sessions de questions-réponses.",
-      image: eventNetworking,
+      // description: "Sessions de pitchs des fondateurs de projets d'excellence à fort rendement. Évaluation en direct et sessions de questions-réponses.",
       specialAnimation: <AudioWave />,
       icon: Mic,
     },
@@ -64,7 +55,7 @@ export function ProgramTimeline() {
       time: "14:30 - Après-midi",
       badge: "Réseau Global",
       title: "🌍 Networking International",
-      description: "Sessions de connexions et de mise en relation ciblées entre les délégations de France, Belgique, Luxembourg et Suisse.",
+      // description: "Sessions de connexions et de mise en relation ciblées entre les délégations de France, Belgique, Luxembourg et Suisse.",
       specialAnimation: <AnimatedNetwork />,
       icon: Globe,
     },
@@ -72,8 +63,7 @@ export function ProgramTimeline() {
       time: "17:00 - Clôture",
       badge: "Célébration",
       title: "🥂 Clôture Prestige",
-      description: "Dégustation finale, cocktail de clôture et mise en relation directe des parties intéressées pour matérialiser les collaborations initiées.",
-      image: destChampagne,
+      // description: "Dégustation finale, cocktail de clôture et mise en relation directe des parties intéressées pour matérialiser les collaborations initiées.",
       specialAnimation: <ChampagneBubbles />,
       icon: GlassWater,
     },
@@ -129,13 +119,13 @@ export function ProgramTimeline() {
                   <div className="absolute left-4 md:left-1/2 top-10 w-8 h-8 rounded-full bg-[#03081D] border border-gold shadow-[0_0_10px_rgba(212,175,55,0.15)] -translate-x-1/2 flex items-center justify-center z-30">
                     <IconComp size={13} className="text-gold" />
                   </div>
-                  <div className="w-full md:w-1/2 pl-12 md:pl-0 md:px-8">
+                  <div className="w-full md:w-1/2 pl-10 md:pl-0 md:px-8">
                     <TimelineCard
                       time={step.time}
                       badge={step.badge}
                       title={step.title}
                       description={step.description}
-                      image={step.image}
+                      icon={step.icon}
                       delay={idx * 0.12}
                     />
                   </div>
@@ -167,13 +157,13 @@ export function ProgramTimeline() {
                   <div className="absolute left-4 md:left-1/2 top-10 w-8 h-8 rounded-full bg-[#03081D] border border-gold shadow-[0_0_10px_rgba(212,175,55,0.15)] -translate-x-1/2 flex items-center justify-center z-30">
                     <IconComp size={13} className="text-gold" />
                   </div>
-                  <div className="w-full md:w-1/2 pl-12 md:pl-0 md:px-8">
+                  <div className="w-full md:w-1/2 pl-10 md:pl-0 md:px-8">
                     <TimelineCard
                       time={step.time}
                       badge={step.badge}
                       title={step.title}
                       description={step.description}
-                      image={step.image}
+                      icon={step.icon}
                       specialAnimation={step.specialAnimation}
                       delay={idx * 0.12}
                     />

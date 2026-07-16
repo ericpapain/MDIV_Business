@@ -43,7 +43,7 @@ export function SiteFooter() {
           <ul className="space-y-1.5 text-sm text-foreground/70">
             <li><a href="mailto:m.divcsltg@gmail.com,ericpapainmezatio@gmail.com" className="hover:text-primary transition-colors">m.div-network@bne.com</a></li>
             <li><a href="tel:+33666078870" className="hover:text-primary transition-colors">+33 6 66 07 88 70</a></li>
-            <li>1000 Troyes</li>
+            <li>10000 Troyes</li>
           </ul>
         </div>
       </div>

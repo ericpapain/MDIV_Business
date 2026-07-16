@@ -5,10 +5,7 @@ import { ChampagneBubbles } from "./ChampagneBubbles";
 import { AudioWave } from "./AudioWave";
 import { Utensils, TrendingUp, GlassWater, Mic, Sparkles } from "lucide-react";
 
-import expDining from "@/assets/original/diner.jpg";
-import eventSummit from "@/assets/original/Pitch.jpg";
-import destChampagne from "@/assets/original/dest-champagne.png";
-import eventNetworking from "@/assets/original/tallk.jpg";
+// Image imports removed
 
 export function TimelineSection() {
   const steps = [
@@ -16,8 +13,7 @@ export function TimelineSection() {
       time: "20:00 - Début",
       badge: "Gastronomie",
       title: "🍽️ Menu Invest",
-      description: "Entrée + Plat + Dessert + Vin + Coupe. Une expérience gastronomique d'exception conçue pour favoriser les premiers échanges informels dans un cadre d'exception.",
-      image: expDining,
+      // description: "Entrée + Plat + Dessert + Vin + Coupe. Une expérience gastronomique d'exception conçue pour favoriser les premiers échanges informels dans un cadre d'exception.",
       icon: Utensils,
       details: "Tarif exclusif : 35€"
     },
@@ -25,8 +21,7 @@ export function TimelineSection() {
       time: "21:45",
       badge: "Stratégie",
       title: "📈 Levée de Fonds",
-      description: "Présentation stratégique FRUL'IMMO et pitch exclusif sur les opportunités d'investissement et levées de fonds immobilières à fort rendement.",
-      image: eventSummit,
+      // description: "Présentation stratégique FRUL'IMMO et pitch exclusif sur les opportunités d'investissement et levées de fonds immobilières à fort rendement.",
       specialAnimation: <AnimatedGraph />,
       icon: TrendingUp,
     },
@@ -34,8 +29,7 @@ export function TimelineSection() {
       time: "22:30",
       badge: "Dégustation",
       title: "🍾 Champagne Sylvain Dautel",
-      description: "Dégustation privée et présentation de la nouvelle cuvée Sylvain Dautel. Échangez vos impressions dans une ambiance raffinée et pétillante.",
-      image: destChampagne,
+      // description: "Dégustation privée et présentation de la nouvelle cuvée Sylvain Dautel. Échangez vos impressions dans une ambiance raffinée et pétillante.",
       specialAnimation: <ChampagneBubbles />,
       icon: GlassWater,
     },
@@ -43,8 +37,7 @@ export function TimelineSection() {
       time: "23:15",
       badge: "Pitchs",
       title: "🎤 Pitch Entreprises",
-      description: "Présentations éclair des entreprises et projets clés de l'écosystème participants à la soirée. Identifiez vos synergies instantanément.",
-      image: eventNetworking,
+      // description: "Présentations éclair des entreprises et projets clés de l'écosystème participants à la soirée. Identifiez vos synergies instantanément.",
       specialAnimation: <AudioWave />,
       icon: Mic,
     },
@@ -94,13 +87,13 @@ export function TimelineSection() {
                 </div>
 
                 {/* Left/Right content wrappers */}
-                <div className="w-full md:w-1/2 pl-12 md:pl-0 md:px-8">
+                <div className="w-full md:w-1/2 pl-10 md:pl-0 md:px-8">
                   <TimelineCard
                     time={step.time}
                     badge={step.badge}
                     title={step.title}
                     description={step.description}
-                    image={step.image}
+                    icon={step.icon}
                     specialAnimation={step.specialAnimation}
                     delay={idx * 0.15}
                   />

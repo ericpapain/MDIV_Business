@@ -43,7 +43,7 @@ export function AboutBNE() {
                 <div className="w-12 h-12 rounded-full border border-gold/30 flex items-center justify-center mb-3 bg-background/50">
                   <Users className="text-gold" size={20} />
                 </div>
-                <h4 className="font-display text-sm uppercase tracking-[0.15em] text-white">Entrepreneurs<br />& Dirigeants</h4>
+                <h4 className="font-display text-sm uppercase tracking-[0.15em] text-white min-h-[40px] flex items-center justify-center">Entrepreneurs<br />& Dirigeants</h4>
               </div>
               <ul className="text-[14px] text-muted-foreground space-y-2 list-disc pl-4">
                 <li>Développer leur réseau</li>
@@ -57,9 +57,9 @@ export function AboutBNE() {
                 <div className="w-12 h-12 rounded-full border border-gold/30 flex items-center justify-center mb-3 bg-background/50">
                   <Building className="text-gold" size={20} />
                 </div>
-                <h4 className="font-display text-sm uppercase tracking-[0.15em] text-white">Entreprises</h4>
+                <h4 className="font-display text-sm uppercase tracking-[0.15em] text-white min-h-[40px] flex items-center justify-center">Entreprises</h4>
               </div>
-              <ul className="text-[14px] text-muted-foreground space-y-2 list-disc pl-4 mt-8 sm:mt-0">
+              <ul className="text-[14px] text-muted-foreground space-y-2 list-disc pl-4">
                 <li>Renforcer leur visibilité</li>
                 <li>Développer leur activité</li>
                 <li>Créer des connexions qualifiées</li>
