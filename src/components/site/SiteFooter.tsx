@@ -25,11 +25,11 @@ export function SiteFooter() {
             {[
               { Icon: Instagram, href: "https://www.instagram.com/mickediv?utm_source=qr&igsh=M3QxZTVjajFmb2g3" },
               { Icon: Linkedin, href: "https://www.linkedin.com/company/m-div-consulting/posts/?feedView=all" },
-              { Icon: Youtube, href: "#" },
-              { Icon: Music2, href: "#" },
+              // { Icon: Youtube, href: "#" },
+              // { Icon: Music2, href: "#" },
             ].map((item, i) => (
-              <a key={i} href={item.href} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-sm border border-border hover:border-gold/60 flex items-center justify-center transition-colors text-muted-foreground hover:text-primary">
-                <item.Icon size={14} />
+              <a key={i} href={item.href} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-sm border border-border hover:border-gold/60 flex items-center justify-center transition-colors text-muted-foreground hover:text-primary">
+                <item.Icon size={20} />
               </a>
             ))}
           </div>

@@ -112,7 +112,7 @@ export default function Events() {
         <div className="flex items-end justify-between mb-8" id="a-venir">
           <h2 className="font-display text-3xl">{t("sejour.upcoming.title")}</h2>
           <div className="text-[11px] uppercase tracking-[0.22em] text-primary">
-            {events.upcoming.length} {events.upcoming.length > 1 ? t("sejour.upcoming.subtitle_events") : t("sejour.upcoming.subtitle_event")} {events.upcoming.length > 1 ? t("sejour.upcoming.subtitle_open_pl") : t("sejour.upcoming.subtitle_open_sg")}
+            {localizedEvents.upcoming.length} {localizedEvents.upcoming.length > 1 ? t("sejour.upcoming.subtitle_events") : t("sejour.upcoming.subtitle_event")} {localizedEvents.upcoming.length > 1 ? t("sejour.upcoming.subtitle_open_pl") : t("sejour.upcoming.subtitle_open_sg")}
           </div>
         </div>
         <div className="grid lg:grid-cols-3 gap-6">

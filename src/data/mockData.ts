@@ -116,7 +116,7 @@ export const events = {
     { id: "u2", title: "Sion - Suisse", type: "Séjour", date: "10 OCTOBRE 2026", day: "10", month: "OCT", targetDate: "2026-10-10T09:00:00", city: "Sion", country: "Suisse", desc: "Sommet privé dédié à l'investissement et la préservation de patrimoine.", image: eventAvenir },
   ],
   past: [
-    { id: "p1", title: "Séjour Fondateur #1", date: "27 Juin 2026", city: "Essoyes", country: "France", desc: "La première édition historique du rassemblement fondateur.", image: eventFondateur, code: "FND26", hasReplay: true },
+    { id: "p1", title: "Séjour Fondateur #1", date: "27 Juin 2026", city: "Essoyes", country: "France", desc: "La première édition historique du rassemblement fondateur.", image: eventFondateur, code: "FND26", hasReplay: false },
     { id: "p2", title: "Networking Spécial Immobilier #1", date: "19 Juin 2026", city: "Troyes", country: "France", desc: "Rencontre confidentielle entre leaders de l'immobilier.", image: eventImmobilier, code: "IMM26", hasReplay: false },
   ],
 };
@@ -221,7 +221,7 @@ export const members = [
   { id: 2, name: "Cerise", role: "Dirigeante Cabinet Médico-Esthétique en Rajeunissement de la peau", image: cerise, flag: "🇧🇪", countryCode: "BE" },
   { id: 3, name: "Pierre", role: "Marchand de biens", image: pierre, flag: "🇫🇷", countryCode: "FR" },
   { id: 4, name: "Mathilda", role: "Référente Suisse du Royalty Club", image: mathilda, flag: "🇨🇭", countryCode: "CH" },
-  { id: 5, name: "Kassa", role: "Economiste - Financier - Fiscaliste", image: kassa, flag: "🇱🇺", countryCode: "LU" },
+  { id: 5, name: "Kassa-Kassa", role: "Economiste - Financier - Fiscaliste", image: kassa, flag: "🇱🇺", countryCode: "LU" },
 ];
 
 export const getMembers = (t: (key: string) => string) => {

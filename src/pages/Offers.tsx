@@ -202,7 +202,7 @@ export default function Offers() {
                 <div className="text-sm text-muted-foreground font-serif italic mb-6">{o.tagline}</div>
                 <div className="hairline mb-6" />
                 {o.id === 'networking' ? (
-                  <div className="flex-1 text-[14px] font-ubuntu text-foreground/90 leading-relaxed space-y-4">
+                  <div className="flex-1 text-[14px] font-ubuntu text-foreground/90 leading-relaxed space-y-4 mb-8">
                     <div className="space-y-3">
                       <div 
                         onClick={() => toggleService('sejours')}

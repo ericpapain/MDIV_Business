@@ -41,14 +41,14 @@ export function CountryShowcase() {
     { 
       name: t("country_showcase.countries.Luxembourg"), flag: "🇱🇺", code: "LU", 
       members: [
-        { name: "Kassa", role: t("country_showcase.roles.kassa"), icon: "👨‍💼" },
+        { name: "Kassa-Kassa", role: t("country_showcase.roles.kassa"), icon: "👨‍💼" },
       ],
       colors: ["#EF3340", "#FFFFFF", "#00A3E0"] 
     },
     { 
       name: t("country_showcase.countries.Suisse"), flag: "🇨🇭", code: "CH", 
       members: [
-        { name: "Mathilda Guyot", role: t("country_showcase.roles.mathilda"), icon: "👩‍💼" },
+        { name: "Mathilda", role: t("country_showcase.roles.mathilda"), icon: "👩‍💼" },
       ],
       colors: ["#DA291C", "#FFFFFF", "#DA291C"] 
     },

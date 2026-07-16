@@ -24,3 +24,13 @@ dist-ssr
 *.sw?
 promp.md
 promp_offre.md
+# Videos and Replay pages
+video_*.html
+revivre/p1
+revivre/p2
+revivre/*
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
