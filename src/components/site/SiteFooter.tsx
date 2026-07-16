@@ -24,7 +24,7 @@ export function SiteFooter() {
           <div className="flex gap-3">
             {[
               { Icon: Instagram, href: "https://www.instagram.com/mickediv?utm_source=qr&igsh=M3QxZTVjajFmb2g3" },
-              { Icon: Linkedin, href: "https://www.linkedin.com/company/m-div-consulting/posts/?feedView=all" },
+              { Icon: Linkedin, href: "https://www.linkedin.com/in/mickedivconsulting?utm_source=share_via&utm_content=profile&utm_medium=member_android" },
               // { Icon: Youtube, href: "#" },
               // { Icon: Music2, href: "#" },
             ].map((item, i) => (
