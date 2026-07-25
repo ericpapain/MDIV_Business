@@ -177,8 +177,8 @@ export function ProgramTimeline() {
             <a href="tel:+33666078870" className="flex items-center gap-2 hover:text-gold transition-colors">
               <span>📞</span> 06 66 07 88 70
             </a>
-            <a href="mailto:m.divcsltg@gmail.com" className="flex items-center gap-2 hover:text-gold transition-colors">
-              <span>✉️</span> m.divcsltg@gmail.com
+            <a href="mailto:contact@mdiv-network.com" className="flex items-center gap-2 hover:text-gold transition-colors">
+              <span>✉️</span> contact@mdiv-network.com
             </a>
           </div>
         </div>

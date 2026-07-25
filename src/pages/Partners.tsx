@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Send, MapPin, Briefcase, User, Mail, Building } from "lucide-react";
+import { Building, User, Mail, MapPin, Briefcase, Send } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 export default function Partners() {
   const { t } = useLanguage();
   const [sent, setSent] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   return (
     <div className="pt-32 pb-20 container max-w-4xl">
@@ -18,15 +20,52 @@ export default function Partners() {
       </div>
 
       <form
-        onSubmit={(e) => { 
-          e.preventDefault(); 
+        onSubmit={async (e) => { 
+          e.preventDefault();
+          if (!captchaToken) {
+            toast.error("Veuillez vérifier que vous n'êtes pas un robot.");
+            return;
+          }
+           
           const fd = new FormData(e.currentTarget);
           const data = Object.fromEntries(fd.entries());
-          const subject = encodeURIComponent("Candidature Partenaire - M.DIV");
-          const body = encodeURIComponent(`Entreprise: ${data.company || ''}\nSecteur: ${data.sector || ''}\nNom: ${data.name || ''}\nEmail: ${data.email || ''}\nTéléphone: ${data.phone || ''}\nPays: ${data.country || ''}\n\nPourquoi devenir partenaire ?\n${data.why || ''}\n\nValeur ajoutée :\n${data.value || ''}`);
-          window.location.href = `mailto:m.divcsltg@gmail.com,ericpapainmezatio@gmail.com?subject=${subject}&body=${body}`;
-          setSent(true); 
-          toast.success(t("partners.form.success")); 
+          const subject = "Candidature Partenaire - M.DIV";
+          try {
+            const res = await fetch("https://api.web3forms.com/submit", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json"
+              },
+              body: JSON.stringify({
+                access_key: "42f75cf0-743a-4f15-a419-1213f3de3cd8",
+                "h-captcha-response": captchaToken,
+                subject: subject,
+                from_name: data.company || data.name || "Nouveau Partenaire",
+                replyto: data.email,
+                Entreprise: data.company,
+                Secteur: data.sector,
+                Nom: data.name,
+                Email: data.email,
+                Téléphone: data.phone,
+                Pays: data.country,
+                "Pourquoi devenir partenaire": data.why,
+                "Valeur ajoutée": data.value,
+              })
+            });
+
+            const result = await res.json();
+            if (!res.ok || !result.success) {
+              console.error("Web3Forms Erreur:", result);
+              throw new Error(result.message || "Erreur lors de l'envoi");
+            }
+            
+            setSent(true); 
+            toast.success(t("partners.form.success")); 
+          } catch (error: any) {
+            console.error("Erreur détaillée lors de l'envoi:", error);
+            toast.error("Erreur: " + (error.message || "Veuillez réessayer ultérieurement."));
+          }
         }}
         className="glass-strong p-8 md:p-12 rounded-sm space-y-6 corner-deco relative"
       >
@@ -42,9 +81,32 @@ export default function Partners() {
         <Field label={t("partners.form.why")} name="why" textarea required />
         <Field label={t("partners.form.value")} name="value" textarea required />
 
-        <button type="submit" disabled={sent} className="btn-gold w-full py-4 mt-4 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3">
-          {sent ? t("partners.form.sent") : <><Send size={14} /> {t("partners.form.submit")}</>}
-        </button>
+        {!sent && (
+          <div className="flex justify-center my-4">
+            <HCaptcha
+              sitekey="50b2fe65-b00b-4b9e-ad62-3ba471098be2"
+              onVerify={(token) => setCaptchaToken(token)}
+            />
+          </div>
+        )}
+
+        {sent ? (
+          <button 
+            type="button" 
+            onClick={(e) => {
+              setSent(false);
+              setCaptchaToken("");
+              e.currentTarget.closest('form')?.reset();
+            }}
+            className="w-full py-4 mt-4 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3 bg-muted/40 hover:bg-muted transition-colors border border-border"
+          >
+            Faire une nouvelle demande
+          </button>
+        ) : (
+          <button type="submit" className="btn-gold w-full py-4 mt-4 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3">
+            <Send size={14} /> {t("partners.form.submit")}
+          </button>
+        )}
       </form>
     </div>
   );
