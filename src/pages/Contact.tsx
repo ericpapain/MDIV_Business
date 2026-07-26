@@ -64,7 +64,7 @@ ${t("contact.form.msgOutro")}` : "";
           onSubmit={async (e) => { 
             e.preventDefault();
             if (!captchaToken) {
-              toast.error("Veuillez vérifier que vous n'êtes pas un robot.");
+              toast.error(t("contact.form.captchaError"));
               return;
             }
              
@@ -88,7 +88,7 @@ ${t("contact.form.msgOutro")}` : "";
                   Nom: data.fn,
                   Prénom: data.ln,
                   Téléphone: data.phone,
-                  Profil: data.profile,
+                  Profil: selectedProfile === t("contact.form.p4") ? `Autre - ${data.profile_other}` : data.profile,
                   Message: data.msg,
                 })
               });
@@ -116,9 +116,11 @@ ${t("contact.form.msgOutro")}` : "";
             <Field label={t("contact.form.email")} name="email" type="email" required />
             <Field label={t("contact.form.phone")} name="phone" />
           </div>
-          <Field label="Objet de la demande" name="subject" required />
+          <Field label={t("contact.form.subject")} name="subject" required />
           <div>
-            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">{t("contact.form.profile")}</div>
+            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+              {t("contact.form.profile")} <span className="text-gold">*</span>
+            </div>
             <div className="flex flex-wrap gap-2">
               {[t("contact.form.p1"), t("contact.form.p2"), t("contact.form.p3"), t("contact.form.p4")].map((p) => (
                 <label 
@@ -129,6 +131,11 @@ ${t("contact.form.msgOutro")}` : "";
                 </label>
               ))}
             </div>
+            {selectedProfile === t("contact.form.p4") && (
+              <div className="mt-4">
+                <Field label={t("contact.form.profileOther")} name="profile_other" required />
+              </div>
+            )}
           </div>
           <Field label={t("contact.form.msg")} name="msg" textarea defaultValue={defaultMsg} required minLength={50} />
           
@@ -152,7 +159,7 @@ ${t("contact.form.msgOutro")}` : "";
               }}
               className="w-full py-4 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3 bg-muted/40 hover:bg-muted transition-colors border border-border"
             >
-              Faire une nouvelle demande
+              {t("contact.form.newRequest")}
             </button>
           ) : (
             <button type="submit" className="btn-gold w-full py-4 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3">

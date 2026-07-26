@@ -115,9 +115,9 @@ export default function Events() {
             {localizedEvents.upcoming.length} {localizedEvents.upcoming.length > 1 ? t("sejour.upcoming.subtitle_events") : t("sejour.upcoming.subtitle_event")} {localizedEvents.upcoming.length > 1 ? t("sejour.upcoming.subtitle_open_pl") : t("sejour.upcoming.subtitle_open_sg")}
           </div>
         </div>
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {localizedEvents.upcoming.filter((e: any) => e.id === "u1").map((e: any) => (
-            <div key={e.id} className="luxe-card rounded-sm overflow-hidden group flex flex-col">
+            <div key={e.id} className="luxe-card rounded-sm overflow-hidden group flex flex-col h-full min-h-[560px]">
               <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image)}>
                 <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                 {e.country && (
@@ -154,7 +154,7 @@ export default function Events() {
           {localizedEvents.past
             .filter((e: any) => e.id !== "p1")
             .map((e: any) => (
-              <div key={e.id} className="luxe-card rounded-sm overflow-hidden group opacity-90 hover:opacity-100 flex flex-col relative">
+              <div key={e.id} className="luxe-card rounded-sm overflow-hidden group opacity-90 hover:opacity-100 flex flex-col relative h-full min-h-[560px]">
                 <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image)}>
                   <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
                   {e.country && (
@@ -164,13 +164,13 @@ export default function Events() {
                   )}
                 </div>
                 <div className="p-6 flex flex-col flex-1">
-                  <div className="font-mono text-xs text-muted-foreground mb-2 flex items-center justify-between">
-                    <span>{e.date} · {e.city}</span>
+                  <div className="font-mono text-xs text-gold-light flex items-center gap-2 mb-3">
+                    <Calendar size={12} /> {e.date} <span className="text-muted-foreground">·</span> <MapPin size={12} /> {e.city}
                   </div>
-                  <div className="font-display text-xl mb-2">{e.title}</div>
-                  <div className="text-sm text-muted-foreground mb-6">{e.desc}</div>
+                  <div className="font-display text-2xl mb-2">{e.title}</div>
+                  <div className="text-sm text-muted-foreground mb-4 leading-relaxed">{e.desc}</div>
                   
-                  <div className="mt-auto pt-4 border-t border-gold/10">
+                  <div className="mt-auto pt-5 border-t border-gold/10">
                     {e.hasReplay !== false ? (
                       <Link to={`/revivre/${e.id}`} className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-2 transition-colors w-fit">
                         <Play size={14} /> {t("common.replay")}

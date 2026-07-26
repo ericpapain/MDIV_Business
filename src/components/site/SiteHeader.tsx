@@ -55,8 +55,12 @@ export function SiteHeader() {
 
         <div className="hidden lg:flex items-center gap-3">
           <button onClick={toggleLanguage} className="flex items-center text-[10px] uppercase tracking-[0.2em] font-semibold mr-2 border border-border rounded-sm overflow-hidden">
-            <span className={`px-2 py-1.5 transition-colors ${language === 'fr' ? 'bg-gold/20 text-gold-light' : 'hover:bg-muted text-muted-foreground'}`}>FR</span>
-            <span className={`px-2 py-1.5 transition-colors ${language === 'en' ? 'bg-gold/20 text-gold-light' : 'hover:bg-muted text-muted-foreground'}`}>EN</span>
+            <span className={`flex items-center gap-1.5 px-2 py-1.5 transition-colors ${language === 'fr' ? 'bg-gold/20 text-gold-light' : 'hover:bg-muted text-muted-foreground'}`}>
+              <img src="https://flagcdn.com/w20/fr.png" alt="FR" className="w-3.5 h-[10px] object-cover rounded-[2px]" /> FR
+            </span>
+            <span className={`flex items-center gap-1.5 px-2 py-1.5 transition-colors ${language === 'en' ? 'bg-gold/20 text-gold-light' : 'hover:bg-muted text-muted-foreground'}`}>
+              <img src="https://flagcdn.com/w20/gb.png" alt="EN" className="w-3.5 h-[10px] object-cover rounded-[2px]" /> EN
+            </span>
           </button>
           {/* <Link to="/admin" className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground hover:text-primary transition-colors">{t("nav.admin")}</Link>
           <Link to="/experience" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] font-medium rounded-sm">
@@ -74,8 +78,12 @@ export function SiteHeader() {
           <div className="container py-6 flex flex-col gap-4">
             <div className="flex justify-end mb-2">
               <button onClick={toggleLanguage} className="flex items-center text-xs uppercase tracking-[0.2em] font-semibold border border-border rounded-sm overflow-hidden">
-                <span className={`px-3 py-1.5 transition-colors ${language === 'fr' ? 'bg-gold/20 text-gold-light' : 'hover:bg-muted text-muted-foreground'}`}>FR</span>
-                <span className={`px-3 py-1.5 transition-colors ${language === 'en' ? 'bg-gold/20 text-gold-light' : 'hover:bg-muted text-muted-foreground'}`}>EN</span>
+                <span className={`flex items-center gap-2 px-3 py-1.5 transition-colors ${language === 'fr' ? 'bg-gold/20 text-gold-light' : 'hover:bg-muted text-muted-foreground'}`}>
+                  <img src="https://flagcdn.com/w20/fr.png" alt="FR" className="w-4 h-3 object-cover rounded-[2px]" /> FR
+                </span>
+                <span className={`flex items-center gap-2 px-3 py-1.5 transition-colors ${language === 'en' ? 'bg-gold/20 text-gold-light' : 'hover:bg-muted text-muted-foreground'}`}>
+                  <img src="https://flagcdn.com/w20/gb.png" alt="EN" className="w-4 h-3 object-cover rounded-[2px]" /> EN
+                </span>
               </button>
             </div>
             {navKeys.map((n) => (

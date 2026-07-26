@@ -23,7 +23,7 @@ export default function Partners() {
         onSubmit={async (e) => { 
           e.preventDefault();
           if (!captchaToken) {
-            toast.error("Veuillez vérifier que vous n'êtes pas un robot.");
+            toast.error(t("partners.form.captchaError"));
             return;
           }
            
@@ -100,7 +100,7 @@ export default function Partners() {
             }}
             className="w-full py-4 mt-4 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3 bg-muted/40 hover:bg-muted transition-colors border border-border"
           >
-            Faire une nouvelle demande
+            {t("partners.form.newRequest")}
           </button>
         ) : (
           <button type="submit" className="btn-gold w-full py-4 mt-4 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3">

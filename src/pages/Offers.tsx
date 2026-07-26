@@ -655,11 +655,28 @@ export default function Offers() {
         </div>
       </div>
 
-      <div className="mt-20 text-center">
-        <Crown size={28} className="mx-auto text-primary mb-4" />
-        <h2 className="font-display text-3xl mb-3">{t("offers.atelier.title")}</h2>
-        <p className="text-muted-foreground mb-6 font-serif italic">{t("offers.atelier.desc")}</p>
-        <Link to="/contact" className="btn-ghost-gold inline-flex px-7 py-3 text-xs uppercase tracking-[0.22em] rounded-sm items-center gap-3">{t("offers.atelier.btn")} <ArrowRight size={14} /></Link>
+      <div className="mt-32 border-y border-gold/10 bg-black/20 py-24 -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12 relative overflow-hidden">
+        <div className="text-center mb-12">
+          <div className="eyebrow mb-4">Partenaires & Membres</div>
+          <h2 className="font-display text-3xl">Ils nous font confiance</h2>
+        </div>
+        
+        <div className="relative flex overflow-hidden group">
+          <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
+
+          <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused]">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="flex gap-6 md:gap-10 px-3 md:px-5 items-center">
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <div key={n} className="w-40 md:w-56 h-28 luxe-card rounded-sm flex items-center justify-center grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-default p-4 text-center">
+                    <span className="font-display text-xs md:text-sm text-foreground/40 font-bold tracking-[0.2em] uppercase leading-tight">En cours de mise à jour</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
