@@ -32,6 +32,11 @@
     "charter": "Circle Charter"
   },
   "home": {
+    "trust": {
+      "eyebrow": "Partners & Members",
+      "title": "They trust us",
+      "placeholder": "Update in progress"
+    },
     "hero": {
       "eyebrow": "By invitation · Since 2019",
       "title1": "Travel",

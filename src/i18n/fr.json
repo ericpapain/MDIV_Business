@@ -32,6 +32,11 @@
     "charter": "Charte du Cercle"
   },
   "home": {
+    "trust": {
+      "eyebrow": "Partenaires & Membres",
+      "title": "Ils nous font confiance",
+      "placeholder": "En cours de mise à jour"
+    },
     "hero": {
       "eyebrow": "Sur invitation · Depuis 2019",
       "title1": "Le voyage",

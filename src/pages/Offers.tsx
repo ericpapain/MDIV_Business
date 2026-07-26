@@ -657,8 +657,8 @@ export default function Offers() {
 
       <div className="mt-32 border-y border-gold/10 bg-black/20 py-24 -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12 relative overflow-hidden">
         <div className="text-center mb-12">
-          <div className="eyebrow mb-4">Partenaires & Membres</div>
-          <h2 className="font-display text-3xl">Ils nous font confiance</h2>
+          <div className="eyebrow mb-4">{t("home.trust.eyebrow")}</div>
+          <h2 className="font-display text-3xl">{t("home.trust.title")}</h2>
         </div>
         
         <div className="relative flex overflow-hidden group">
@@ -670,7 +670,7 @@ export default function Offers() {
               <div key={i} className="flex gap-6 md:gap-10 px-3 md:px-5 items-center">
                 {[1, 2, 3, 4, 5, 6].map((n) => (
                   <div key={n} className="w-40 md:w-56 h-28 luxe-card rounded-sm flex items-center justify-center grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-default p-4 text-center">
-                    <span className="font-display text-xs md:text-sm text-foreground/40 font-bold tracking-[0.2em] uppercase leading-tight">En cours de mise à jour</span>
+                    <span className="font-display text-xs md:text-sm text-foreground/40 font-bold tracking-[0.2em] uppercase leading-tight">{t("home.trust.placeholder")}</span>
                   </div>
                 ))}
               </div>
