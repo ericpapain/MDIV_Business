@@ -8,25 +8,25 @@
   :root {
     /* LIGHT MODE */
     --background: 45 35% 98%;
-    --foreground: 218 45% 9%;
+    --foreground: 0 0% 0%;
 
     --card: 45 35% 100%;
-    --card-foreground: 218 45% 9%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 45 35% 100%;
-    --popover-foreground: 218 45% 9%;
+    --popover-foreground: 0 0% 0%;
 
     --primary: 42 55% 45%;
     --primary-foreground: 45 35% 98%;
 
     --secondary: 218 20% 90%;
-    --secondary-foreground: 218 45% 9%;
+    --secondary-foreground: 0 0% 0%;
 
     --muted: 218 20% 92%;
-    --muted-foreground: 218 20% 40%;
+    --muted-foreground: 0 0% 30%;
 
     --accent: 218 30% 90%;
-    --accent-foreground: 218 45% 9%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 70% 50%;
     --destructive-foreground: 45 35% 98%;
@@ -35,7 +35,7 @@
     --success-foreground: 45 35% 98%;
 
     --warning: 38 95% 45%;
-    --warning-foreground: 218 45% 9%;
+    --warning-foreground: 0 0% 0%;
 
     --border: 218 20% 85%;
     --input: 218 20% 85%;
