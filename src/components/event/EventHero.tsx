@@ -22,7 +22,7 @@ export function EventHero() {
             stiffness: 100,
             damping: 15,
           }}
-          className={`relative w-full rounded-sm overflow-hidden border border-white/10 shadow-2xl transition-all duration-300 ${
+          className={`relative w-full rounded-sm overflow-hidden border border-border/10 shadow-2xl transition-all duration-300 ${
             isOpen ? "min-h-[120vh] h-auto" : "h-auto lg:h-[60vh] min-h-[520px] lg:min-h-[400px]"
           }`}
         >
@@ -80,7 +80,7 @@ export function EventHero() {
                   {t("event_networking.title1")} {t("event_networking.title2")}
                 </span>
               </div>
-              <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-sm text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 backdrop-blur-sm">
+              <div className="px-3 py-1 bg-foreground/5 border border-border/10 rounded-sm text-[9px] uppercase tracking-[0.2em] font-semibold text-foreground/80 backdrop-blur-sm">
                 {t("event_networking.badge")}
               </div>
             </div>
@@ -92,7 +92,7 @@ export function EventHero() {
                 <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-gold font-bold">
                   {t("event_networking.eyebrow")}
                 </span>
-                <h1 className="font-display text-3xl md:text-4xl lg:text-5xl leading-tight text-white">
+                <h1 className="font-display text-3xl md:text-4xl lg:text-5xl leading-tight text-foreground">
                   {t("event_networking.title1")} <br className="hidden md:inline" />
                   {t("event_networking.title2")}
                 </h1>
@@ -102,19 +102,19 @@ export function EventHero() {
               </div>
 
               {/* Event Meta: Date, Location & Countdown */}
-              <div className="flex flex-wrap sm:flex-nowrap items-center gap-6 mt-4 border-t border-white/5 pt-6">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-6 mt-4 border-t border-border/5 pt-6">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.2em] text-white/45 font-semibold mb-2">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-foreground/45 font-semibold mb-2">
                     {t("event_networking.meta_label")}
                   </div>
-                  <div className="font-display text-lg md:text-xl text-white font-bold tracking-wide">
+                  <div className="font-display text-lg md:text-xl text-foreground font-bold tracking-wide">
                     {t("event_networking.date")}
                   </div>
                   <div className="text-[10px] text-goldLight/80 font-mono mt-0.5">
                     {t("event_networking.location")}
                   </div>
                 </div>
-                <div className="h-10 w-px bg-white/10 hidden sm:block" />
+                <div className="h-10 w-px bg-foreground/10 hidden sm:block" />
                 <LuxuryCountdown targetDateStr="2026-06-20T20:00:00" />
               </div>
             </div>
@@ -139,7 +139,7 @@ export function EventHero() {
                 )}
               </button>
 
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/50 font-medium">
                 {t("event_networking.footer_note")}
               </p>
             </div>
@@ -152,7 +152,7 @@ export function EventHero() {
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-full mt-12 overflow-hidden border-t border-white/10 pt-10"
+                  className="w-full mt-12 overflow-hidden border-t border-border/10 pt-10"
                 >
                   <TimelineSection />
 

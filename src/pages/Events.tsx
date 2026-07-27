@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 function FlagCSS({ type }: { type: string }) {
-  const base = "shrink-0 w-8 h-8 rounded-full overflow-hidden shadow-lg border border-white/10";
+  const base = "shrink-0 w-8 h-8 rounded-full overflow-hidden shadow-lg border border-border/10";
   if (!type) return null;
   
   if (type === "France") {
@@ -176,7 +176,7 @@ export default function Events() {
                         <Play size={14} /> {t("common.replay")}
                       </Link>
                     ) : (
-                      <span className="text-xs uppercase tracking-[0.2em] text-white/30 flex items-center gap-2 select-none cursor-not-allowed w-fit">
+                      <span className="text-xs uppercase tracking-[0.2em] text-foreground/30 flex items-center gap-2 select-none cursor-not-allowed w-fit">
                         <Play size={14} className="opacity-30" /> {t("common.no_replay")}
                       </span>
                     )}
@@ -200,7 +200,7 @@ export default function Events() {
               className="max-w-full max-h-full object-contain rounded-sm border border-gold/30 shadow-2xl"
             />
             <button 
-              className="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors font-display text-lg"
+              className="absolute top-4 right-4 text-foreground/70 hover:text-foreground bg-foreground/10 hover:bg-foreground/20 px-3 py-1.5 rounded-full transition-colors font-display text-lg"
               onClick={() => setSelectedImage(null)}
             >
               ✕

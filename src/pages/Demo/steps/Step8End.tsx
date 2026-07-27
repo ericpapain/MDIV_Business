@@ -116,7 +116,7 @@ export function Step8End({ onReset, demoType }: Props) {
         </div>
         <button
           onClick={onReset}
-          className="flex items-center gap-2 rounded-full bg-neutral-900 border border-neutral-800 px-4 py-2 text-sm text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+          className="flex items-center gap-2 rounded-full bg-neutral-900 border border-neutral-800 px-4 py-2 text-sm text-neutral-400 hover:text-foreground hover:bg-neutral-800 transition-colors"
         >
           <RefreshCcw size={14} />
           Terminer / Recommencer
@@ -128,7 +128,7 @@ export function Step8End({ onReset, demoType }: Props) {
         <div className="w-1/3 flex flex-col bg-neutral-900/40 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl relative">
           <div className="bg-neutral-800/50 p-4 border-b border-neutral-800 flex items-center gap-3 shrink-0">
             <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-              <Bot size={16} className="text-white" />
+              <Bot size={16} className="text-foreground" />
             </div>
             <span className="font-semibold text-sm">Assistant ARIA</span>
           </div>
@@ -173,14 +173,14 @@ export function Step8End({ onReset, demoType }: Props) {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                 placeholder="Ex: Remplace le profil X..."
-                className="w-full bg-neutral-800 border border-neutral-700 rounded-full py-3 pl-4 pr-12 text-sm text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-neutral-800 border border-neutral-700 rounded-full py-3 pl-4 pr-12 text-sm text-foreground focus:outline-none focus:border-indigo-500"
               />
               <button 
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim() || isTyping}
                 className="absolute right-1 top-1 w-10 h-10 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-700 rounded-full flex items-center justify-center transition-colors"
               >
-                <Send size={16} className="text-white ml-0.5" />
+                <Send size={16} className="text-foreground ml-0.5" />
               </button>
             </div>
           </div>

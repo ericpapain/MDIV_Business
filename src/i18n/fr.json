@@ -9,6 +9,7 @@
     "partners": "Partenaires",
     "media": "Media",
     "contact": "Contact",
+    "services_ia": "Services IA",
     "admin": "Admin",
     "reserve": "Réserver mon expérience",
     "reserve_call": "Réserver un appel découverte"
@@ -65,7 +66,9 @@
       "reserved": "Place réservée",
       "ai_reco_title": "Recommandation IA",
       "ai_reco_desc": "« Basé sur les profils similaires, Aria a sélectionné 3 expériences. »",
-      "ai_reco_btn": "Activer Aria"
+      "ai_reco_btn": "Activer Aria",
+      "ai_services_btn": "Découvrir nos services IA",
+      "ai_diag_btn": "Diagnostic IA gratuit"
     },
     "agenda": {
       "eyebrow": "À l'agenda BNE",

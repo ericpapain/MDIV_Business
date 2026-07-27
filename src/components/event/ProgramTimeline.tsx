@@ -58,7 +58,7 @@ export function ProgramTimeline() {
     return (
       <div className="relative">
         {/* Draw vertical line */}
-        <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/10 pointer-events-none" />
+        <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-foreground/10 pointer-events-none" />
         <motion.div
           initial={{ scaleY: 0 }}
           whileInView={{ scaleY: 1 }}
@@ -73,13 +73,13 @@ export function ProgramTimeline() {
   };
 
   return (
-    <div className="w-full text-white">
+    <div className="w-full text-foreground">
       {/* Title */}
       <div className="text-center mb-12">
         <h2 className="font-display text-2xl md:text-4xl mb-3 gold-text">
           {t("event_champagne.timeline.title")}
         </h2>
-        <p className="text-xs text-white/60 max-w-md mx-auto leading-relaxed">
+        <p className="text-xs text-foreground/60 max-w-md mx-auto leading-relaxed">
           {t("event_champagne.timeline.desc")}
         </p>
       </div>
@@ -89,7 +89,7 @@ export function ProgramTimeline() {
         <div className="flex justify-center mb-10">
           <div className="px-5 py-2 bg-gradient-to-r from-gold/25 via-gold/10 to-gold/25 border border-gold/40 rounded-sm text-center">
             <span className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">{t("event_champagne.timeline.day1")}</span>
-            <h3 className="font-display text-base text-white mt-0.5">{t("event_champagne.timeline.day1_date")}</h3>
+            <h3 className="font-display text-base text-foreground mt-0.5">{t("event_champagne.timeline.day1_date")}</h3>
           </div>
         </div>
 
@@ -127,7 +127,7 @@ export function ProgramTimeline() {
         <div className="flex justify-center mb-10">
           <div className="px-5 py-2 bg-gradient-to-r from-gold/25 via-gold/10 to-gold/25 border border-gold/40 rounded-sm text-center">
             <span className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">{t("event_champagne.timeline.day2")}</span>
-            <h3 className="font-display text-base text-white mt-0.5">{t("event_champagne.timeline.day2_date")}</h3>
+            <h3 className="font-display text-base text-foreground mt-0.5">{t("event_champagne.timeline.day2_date")}</h3>
           </div>
         </div>
 
@@ -165,15 +165,15 @@ export function ProgramTimeline() {
       <div className="mt-20 max-w-3xl mx-auto space-y-8">
         <div className="p-8 md:p-10 bg-white/[0.02] border border-gold/20 rounded-sm backdrop-blur-md">
           <h3 className="font-display text-xl md:text-2xl gold-text mb-4 text-center">Objectif du Séjour</h3>
-          <p className="text-sm md:text-base text-white/80 leading-relaxed text-center font-light">
+          <p className="text-sm md:text-base text-foreground/80 leading-relaxed text-center font-light">
             Créer des connexions durables entre entrepreneurs, investisseurs et décideurs afin de favoriser l’émergence de collaborations, d’opportunités d’affaires et de projets à dimension internationale.
           </p>
         </div>
 
         <div className="p-8 md:p-10 bg-white/[0.02] border border-gold/20 rounded-sm backdrop-blur-md text-center">
           <h3 className="font-display text-xl md:text-2xl gold-text mb-4">Coordination du Séjour</h3>
-          <p className="text-base text-white font-medium mb-3">Micke Dimvula</p>
-          <div className="flex flex-col gap-2 items-center justify-center text-sm text-white/70">
+          <p className="text-base text-foreground font-medium mb-3">Micke Dimvula</p>
+          <div className="flex flex-col gap-2 items-center justify-center text-sm text-foreground/70">
             <a href="tel:+33666078870" className="flex items-center gap-2 hover:text-gold transition-colors">
               <span>📞</span> 06 66 07 88 70
             </a>

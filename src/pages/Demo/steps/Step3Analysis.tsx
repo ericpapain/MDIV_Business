@@ -61,7 +61,7 @@ export function Step3Analysis({ onNext, demoType }: Props) {
             strokeLinecap="round"
           />
         </svg>
-        <div className="absolute text-4xl font-bold text-white">{Math.round(progress)}%</div>
+        <div className="absolute text-4xl font-bold text-foreground">{Math.round(progress)}%</div>
       </motion.div>
 
       <div className="w-full space-y-6">

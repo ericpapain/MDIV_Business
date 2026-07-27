@@ -52,11 +52,11 @@ export function Step2Chat({ onNext, demoType }: Props) {
               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                 msg.sender === 'aria' ? 'bg-indigo-600' : 'bg-neutral-700'
               }`}>
-                {msg.sender === 'aria' ? <Bot size={18} className="text-white" /> : <User size={18} className="text-white" />}
+                {msg.sender === 'aria' ? <Bot size={18} className="text-foreground" /> : <User size={18} className="text-foreground" />}
               </div>
               <div className={`max-w-[80%] rounded-2xl p-4 text-[15px] leading-relaxed ${
                 msg.sender === 'user' 
-                  ? 'bg-neutral-800 text-white rounded-tr-sm' 
+                  ? 'bg-neutral-800 text-foreground rounded-tr-sm' 
                   : 'bg-neutral-900/80 border border-neutral-800 text-neutral-200 rounded-tl-sm'
               }`}>
                 {msg.text}
@@ -72,7 +72,7 @@ export function Step2Chat({ onNext, demoType }: Props) {
             className="flex gap-4"
           >
             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
-              <Bot size={18} className="text-white" />
+              <Bot size={18} className="text-foreground" />
             </div>
             <div className="bg-neutral-900/80 border border-neutral-800 rounded-2xl rounded-tl-sm p-4 flex gap-1 items-center">
               <motion.div className="w-2 h-2 bg-neutral-500 rounded-full" animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} />

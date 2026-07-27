@@ -33,11 +33,11 @@ export function Step4Result({ onNext, demoType }: Props) {
           <h2 className="text-3xl font-bold mb-2">Résultat de l'analyse</h2>
           {demoType === 'network' ? (
             <p className="text-neutral-400 text-lg">
-              Votre profil a été qualifié : <span className="text-white font-semibold">Investisseur Immobilier & Restaurateur</span>
+              Votre profil a été qualifié : <span className="text-foreground font-semibold">Investisseur Immobilier & Restaurateur</span>
             </p>
           ) : (
             <p className="text-neutral-400 text-lg">
-              Audit flash généré pour : <span className="text-white font-semibold">PME Distribution B2B (45 collab.)</span>
+              Audit flash généré pour : <span className="text-foreground font-semibold">PME Distribution B2B (45 collab.)</span>
             </p>
           )}
         </motion.div>
@@ -85,13 +85,13 @@ export function Step4Result({ onNext, demoType }: Props) {
             {demoType === 'network' ? (
               <>
                 <h3 className="text-xl font-semibold mb-2">Sourcing IA</h3>
-                <div className="text-4xl font-bold text-white mb-2">6 profils</div>
+                <div className="text-4xl font-bold text-foreground mb-2">6 profils</div>
                 <p className="text-neutral-400 text-sm">3 du réseau M.DIV interne exclusif et 3 extraits du web.</p>
               </>
             ) : (
               <>
                 <h3 className="text-xl font-semibold mb-2">Potentiel IA</h3>
-                <div className="text-4xl font-bold text-white mb-2">3 solutions</div>
+                <div className="text-4xl font-bold text-foreground mb-2">3 solutions</div>
                 <p className="text-neutral-400 text-sm">Technologies prêtes à l'emploi (no-code / LLMs).</p>
               </>
             )}
@@ -110,7 +110,7 @@ export function Step4Result({ onNext, demoType }: Props) {
             {demoType === 'network' ? (
               <>
                 <h3 className="text-xl font-semibold mb-2">Score Réseau</h3>
-                <div className="text-4xl font-bold text-white mb-2">89%</div>
+                <div className="text-4xl font-bold text-foreground mb-2">89%</div>
                 <p className="text-neutral-400 text-sm">Compatibilité moyenne avec les profils sélectionnés (Internes & Externes).</p>
               </>
             ) : (
@@ -147,12 +147,12 @@ export function Step4Result({ onNext, demoType }: Props) {
             <div className="text-right mt-4 md:mt-0">
               {demoType === 'network' ? (
                 <>
-                  <div className="text-4xl font-bold text-white">2 350 €</div>
+                  <div className="text-4xl font-bold text-foreground">2 350 €</div>
                   <p className="text-indigo-400 text-sm font-semibold">Dans votre budget (-6%)</p>
                 </>
               ) : (
                 <>
-                  <div className="text-4xl font-bold text-white">1 Semaine</div>
+                  <div className="text-4xl font-bold text-foreground">1 Semaine</div>
                   <p className="text-indigo-400 text-sm font-semibold">Diagnostic Flash</p>
                 </>
               )}

@@ -55,7 +55,7 @@ export default function DemoFlow() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden flex flex-col font-sans">
+    <div className="min-h-screen bg-black text-foreground overflow-hidden flex flex-col font-sans">
       <header className="p-6 flex justify-between items-center z-50 absolute top-0 w-full">
         <div className="font-bold text-2xl tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-500">
           M.DIV

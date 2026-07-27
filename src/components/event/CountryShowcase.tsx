@@ -60,7 +60,7 @@ export function CountryShowcase() {
         <span className="text-[10px] uppercase tracking-[0.25em] text-gold font-bold">
           {t("country_showcase.eyebrow")}
         </span>
-        <h3 className="font-display text-lg text-white mt-1">
+        <h3 className="font-display text-lg text-foreground mt-1">
           {t("country_showcase.title")}
         </h3>
       </div>
@@ -75,7 +75,7 @@ export function CountryShowcase() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: idx * 0.1 }}
             whileHover={{ y: -4, scale: 1.02 }}
-            className="w-full bg-white/[0.03] backdrop-blur-sm border border-white/10 hover:border-gold/40 p-5 rounded-sm flex flex-col gap-3 transition-colors duration-300 relative group overflow-hidden"
+            className="w-full bg-white/[0.03] backdrop-blur-sm border border-border/10 hover:border-gold/40 p-5 rounded-sm flex flex-col gap-3 transition-colors duration-300 relative group overflow-hidden"
             style={{
               boxShadow: "0 4px 20px rgba(0, 0, 0, 0.2)",
             }}
@@ -107,7 +107,7 @@ export function CountryShowcase() {
                 {country.flag}
               </motion.span>
               <div>
-                <h4 className="font-display text-base text-white tracking-wide font-medium">
+                <h4 className="font-display text-base text-foreground tracking-wide font-medium">
                   {country.name}
                 </h4>
                 <span className="text-[9px] font-mono tracking-widest text-gold/80 font-bold uppercase">
@@ -116,13 +116,13 @@ export function CountryShowcase() {
               </div>
             </div>
 
-            <div className="mt-1 flex flex-col gap-3 border-t border-white/10 pt-3 relative z-10">
+            <div className="mt-1 flex flex-col gap-3 border-t border-border/10 pt-3 relative z-10">
               {country.members.map((member, mIdx) => (
                 <div key={mIdx} className="flex items-start gap-3">
                   <div className="text-xl mt-0.5">{member.icon}</div>
                   <div className="flex flex-col">
-                    <span className="text-[13px] font-display font-semibold text-white tracking-wide">{member.name}</span>
-                    <span className="text-[9px] text-white/60 leading-snug mt-0.5 font-medium">{member.role}</span>
+                    <span className="text-[13px] font-display font-semibold text-foreground tracking-wide">{member.name}</span>
+                    <span className="text-[9px] text-foreground/60 leading-snug mt-0.5 font-medium">{member.role}</span>
                   </div>
                 </div>
               ))}

@@ -25,7 +25,7 @@ export function ChampagneEvent() {
             stiffness: 100,
             damping: 15,
           }}
-          className={`relative w-full rounded-sm overflow-hidden border border-white/10 shadow-2xl transition-all duration-300 ${
+          className={`relative w-full rounded-sm overflow-hidden border border-border/10 shadow-2xl transition-all duration-300 ${
             isOpen ? "min-h-[140vh] h-auto" : "h-auto lg:h-[55vh] min-h-[650px] lg:min-h-[400px]"
           }`}
         >
@@ -83,7 +83,7 @@ export function ChampagneEvent() {
                   {t("event_champagne.eyebrow")}
                 </span>
               </div>
-              <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-sm text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 backdrop-blur-sm">
+              <div className="px-3 py-1 bg-foreground/5 border border-border/10 rounded-sm text-[9px] uppercase tracking-[0.2em] font-semibold text-foreground/80 backdrop-blur-sm">
                 {t("event_champagne.badge")}
               </div>
             </div>
@@ -104,7 +104,7 @@ export function ChampagneEvent() {
                     {t("event_champagne.title_small")}
                   </motion.div>
                   
-                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl leading-none text-white tracking-tight">
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl leading-none text-foreground tracking-tight">
                     <motion.span
                       initial={{ opacity: 0, y: 15 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -133,7 +133,7 @@ export function ChampagneEvent() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.7, delay: 1.1 }}
-                  className="text-xs md:text-sm text-white/70 max-w-2xl leading-relaxed font-light"
+                  className="text-xs md:text-sm text-foreground/70 max-w-2xl leading-relaxed font-light"
                 >
                   {t("event_champagne.desc")}
                 </motion.p>
@@ -157,20 +157,20 @@ export function ChampagneEvent() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, delay: 1.5 }}
-                  className="flex flex-wrap sm:flex-nowrap items-center gap-6 mt-4 border-t border-white/5 pt-6"
+                  className="flex flex-wrap sm:flex-nowrap items-center gap-6 mt-4 border-t border-border/5 pt-6"
                 >
                   <div>
-                    <div className="text-[10px] uppercase tracking-[0.2em] text-white/45 font-semibold mb-2">
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-foreground/45 font-semibold mb-2">
                       {t("event_champagne.meta_label")}
                     </div>
-                    <div className="font-display text-lg md:text-xl text-white font-bold tracking-wide">
+                    <div className="font-display text-lg md:text-xl text-foreground font-bold tracking-wide">
                       {t("event_champagne.date")}
                     </div>
                     <div className="text-[10px] text-goldLight/80 font-mono mt-0.5">
                       {t("event_champagne.location")}
                     </div>
                   </div>
-                  <div className="h-10 w-px bg-white/10 hidden sm:block" />
+                  <div className="h-10 w-px bg-foreground/10 hidden sm:block" />
                   <LuxuryCountdown />
                 </motion.div>
               </div>
@@ -196,7 +196,7 @@ export function ChampagneEvent() {
                 )}
               </button>
 
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/50 font-medium">
                 {t("event_champagne.footer_note")}
               </p>
             </div>
@@ -209,7 +209,7 @@ export function ChampagneEvent() {
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-full mt-16 overflow-hidden border-t border-white/10 pt-12"
+                  className="w-full mt-16 overflow-hidden border-t border-border/10 pt-12"
                 >
                   {/* Timeline */}
                   <ProgramTimeline />
@@ -231,15 +231,15 @@ export function ChampagneEvent() {
                       <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
 
                       <Lock className="mx-auto text-goldLight mb-4 animate-pulse-soft" size={24} />
-                      <h3 className="font-display text-xl md:text-2xl text-white mb-2 font-medium">
+                      <h3 className="font-display text-xl md:text-2xl text-foreground mb-2 font-medium">
                         {t("event_champagne.booking.title")}
                       </h3>
-                      <p className="text-xs text-white/60 mb-6 max-w-sm mx-auto leading-relaxed">
+                      <p className="text-xs text-foreground/60 mb-6 max-w-sm mx-auto leading-relaxed">
                         {t("event_champagne.booking.desc")}
                       </p>
 
                       <span
-                        className="w-full py-3.5 text-[10px] uppercase tracking-[0.2em] rounded-sm font-semibold flex items-center justify-center gap-2.5 bg-white/5 border border-white/10 text-white/30 cursor-not-allowed select-none"
+                        className="w-full py-3.5 text-[10px] uppercase tracking-[0.2em] rounded-sm font-semibold flex items-center justify-center gap-2.5 bg-foreground/5 border border-border/10 text-foreground/30 cursor-not-allowed select-none"
                       >
                         {t("event_champagne.booking.btn")} <Send size={11} className="opacity-30" />
                       </span>

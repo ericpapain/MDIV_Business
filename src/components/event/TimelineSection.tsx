@@ -41,13 +41,13 @@ export function TimelineSection() {
   ];
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto px-0 sm:px-4 py-8 md:py-16 text-white">
+    <div className="relative w-full max-w-5xl mx-auto px-0 sm:px-4 py-8 md:py-16 text-foreground">
       {/* Title */}
       <div className="text-center mb-16">
         <h2 className="font-display text-3xl md:text-5xl mb-4 gold-text">
           {t("event_networking.timeline_title")}
         </h2>
-        <p className="text-sm text-white/60 max-w-lg mx-auto">
+        <p className="text-sm text-foreground/60 max-w-lg mx-auto">
           {t("event_networking.timeline_desc")}
         </p>
       </div>
@@ -55,7 +55,7 @@ export function TimelineSection() {
       {/* Vertical Timeline container */}
       <div className="relative">
         {/* Central Vertical Line (Golden line drawing top-to-bottom) */}
-        <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/10 pointer-events-none" />
+        <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-foreground/10 pointer-events-none" />
         <motion.div
           initial={{ scaleY: 0 }}
           whileInView={{ scaleY: 1 }}

@@ -66,12 +66,12 @@ export function MembersCarousel() {
                   <div className="relative w-full h-full rounded-sm overflow-hidden flex items-center justify-center">
                     <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm border border-gold/30">
                       <img src={`https://flagcdn.com/w40/${member.countryCode.toLowerCase()}.png`} alt={member.countryCode} className="w-6 h-auto rounded-[2px]" />
-                      <span className="text-sm font-bold text-white tracking-wider">{member.countryCode}</span>
+                      <span className="text-sm font-bold text-foreground tracking-wider">{member.countryCode}</span>
                     </div>
                     <img src={member.image} alt={member.name} className="w-full h-full object-contain" />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
                     <div className="absolute bottom-6 left-6 right-6 text-center">
-                      <h3 className="font-display text-2xl text-white mb-1">{member.name}</h3>
+                      <h3 className="font-display text-2xl text-foreground mb-1">{member.name}</h3>
                       <p className="text-xs uppercase tracking-[0.1em] text-gold-light">{member.role}</p>
                     </div>
                   </div>
@@ -94,7 +94,7 @@ export function MembersCarousel() {
           <button
             key={idx}
             onClick={() => setActiveIndex(idx)}
-            className={`w-2 h-2 rounded-full transition-all ${idx === activeIndex ? "bg-gold w-6" : "bg-white/20 hover:bg-white/40"}`}
+            className={`w-2 h-2 rounded-full transition-all ${idx === activeIndex ? "bg-gold w-6" : "bg-foreground/20 hover:bg-foreground/40"}`}
           />
         ))}
       </div>
@@ -112,14 +112,14 @@ export function MembersCarousel() {
           >
             <button 
               onClick={() => setSelectedMember(null)}
-              className="absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/80 hover:text-gold transition-colors backdrop-blur-sm border border-gold/30"
+              className="absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-foreground hover:bg-black/80 hover:text-gold transition-colors backdrop-blur-sm border border-gold/30"
             >
               <X size={24} />
             </button>
             <div className="relative w-full h-full rounded-lg overflow-hidden flex items-center justify-center">
               <div className="absolute top-6 left-6 z-10 flex items-center gap-3 bg-black/60 px-4 py-2 rounded-full backdrop-blur-sm border border-gold/30">
                 <img src={`https://flagcdn.com/w80/${selectedMember.countryCode.toLowerCase()}.png`} alt={selectedMember.countryCode} className="w-8 h-auto rounded-sm" />
-                <span className="text-lg font-bold text-white tracking-wider">{selectedMember.countryCode}</span>
+                <span className="text-lg font-bold text-foreground tracking-wider">{selectedMember.countryCode}</span>
               </div>
               <img 
                 src={selectedMember.image} 
@@ -128,7 +128,7 @@ export function MembersCarousel() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent" />
               <div className="absolute bottom-10 left-8 right-8 text-center">
-                <h3 className="font-display text-4xl md:text-5xl text-white mb-3">{selectedMember.name}</h3>
+                <h3 className="font-display text-4xl md:text-5xl text-foreground mb-3">{selectedMember.name}</h3>
                 <p className="text-sm uppercase tracking-[0.2em] text-gold-light">{selectedMember.role}</p>
               </div>
             </div>

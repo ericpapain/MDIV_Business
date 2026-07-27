@@ -4,7 +4,7 @@ export function AudioWave() {
   const barsCount = 14;
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-white/5 rounded-md border border-white/10 relative overflow-hidden h-28 w-full group">
+    <div className="flex flex-col items-center justify-center p-6 bg-foreground/5 rounded-md border border-border/10 relative overflow-hidden h-28 w-full group">
       {/* Background ripple circles (ondes sonores) */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
         <motion.div

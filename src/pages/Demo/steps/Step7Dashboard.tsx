@@ -53,7 +53,7 @@ export function Step7Dashboard({ onNext, demoType }: Props) {
           </p>
         </div>
         <div className="text-sm bg-neutral-900 border border-neutral-800 px-4 py-2 rounded-full text-neutral-400">
-          Temps de génération : <span className="text-white font-mono">{stats.generationTime}s</span>
+          Temps de génération : <span className="text-foreground font-mono">{stats.generationTime}s</span>
         </div>
       </motion.div>
 
@@ -72,7 +72,7 @@ export function Step7Dashboard({ onNext, demoType }: Props) {
               </div>
               <p className="text-sm font-medium text-neutral-400">{stat.label}</p>
             </div>
-            <p className="text-3xl font-bold text-white">{stat.value}</p>
+            <p className="text-3xl font-bold text-foreground">{stat.value}</p>
           </motion.div>
         ))}
       </div>

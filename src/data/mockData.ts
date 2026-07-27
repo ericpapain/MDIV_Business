@@ -116,8 +116,8 @@ export const events = {
     { id: "u2", title: "Sion - Suisse", type: "Séjour", date: "10 OCTOBRE 2026", day: "10", month: "OCT", targetDate: "2026-10-10T09:00:00", city: "Sion", country: "Suisse", desc: "Sommet privé dédié à l'investissement et la préservation de patrimoine.", image: eventAvenir },
   ],
   past: [
-    { id: "p1", title: "Séjour Fondateur #1", date: "27 Juin 2026", city: "Essoyes", country: "France", desc: "La première édition historique du rassemblement fondateur.", image: eventFondateur, code: "FND26", hasReplay: false },
-    { id: "p2", title: "Networking Spécial Immobilier #1", date: "19 Juin 2026", city: "Troyes", country: "France", desc: "Rencontre confidentielle entre leaders de l'immobilier.", image: eventImmobilier, code: "IMM26", hasReplay: false },
+    { id: "p1", title: "Séjour Fondateur #1", date: "27 Juin 2026", city: "Essoyes", country: "France", desc: "La première édition historique du rassemblement fondateur.", image: eventFondateur, code: "FND26", hasReplay: true },
+    { id: "p2", title: "Networking Spécial Immobilier #1", date: "19 Juin 2026", city: "Troyes", country: "France", desc: "Rencontre confidentielle entre leaders de l'immobilier.", image: eventImmobilier, code: "IMM26", hasReplay: true },
   ],
 };
 

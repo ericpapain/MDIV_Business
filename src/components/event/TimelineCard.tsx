@@ -72,7 +72,7 @@ export function TimelineCard({
         transformStyle: "preserve-3d",
         perspective: 1000,
       }}
-      className="relative w-full max-w-lg mx-auto bg-white/[0.04] backdrop-blur-md rounded-sm border border-white/10 p-3 sm:p-4 md:p-8 hover:border-gold/30 transition-colors duration-500 shadow-2xl flex flex-col gap-3 sm:gap-4 md:gap-5 group"
+      className="relative w-full max-w-lg mx-auto bg-white/[0.04] backdrop-blur-md rounded-sm border border-border/10 p-3 sm:p-4 md:p-8 hover:border-gold/30 transition-colors duration-500 shadow-2xl flex flex-col gap-3 sm:gap-4 md:gap-5 group"
     >
       {/* Glare Shine Overlay */}
       <motion.div
@@ -101,7 +101,7 @@ export function TimelineCard({
 
       {/* Card Visual / Graphic */}
       {Icon && (
-        <div className="relative aspect-[21/9] w-full rounded-sm overflow-hidden border border-white/5 bg-gradient-to-br from-[#0b153b]/50 to-[#030415] z-10 flex items-center justify-center group-hover:border-gold/20 transition-colors duration-500">
+        <div className="relative aspect-[21/9] w-full rounded-sm overflow-hidden border border-border/5 bg-gradient-to-br from-[#0b153b]/50 to-[#030415] z-10 flex items-center justify-center group-hover:border-gold/20 transition-colors duration-500">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gold/15 via-transparent to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
           <Icon className="w-12 h-12 sm:w-16 sm:h-16 text-gold/60 transform group-hover:scale-110 group-hover:text-gold transition-all duration-700 drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]" strokeWidth={1.5} />
           <div className="absolute inset-0 bg-gradient-to-t from-[#05071F]/80 via-transparent to-transparent pointer-events-none" />
@@ -113,10 +113,10 @@ export function TimelineCard({
 
       {/* Card Title & Description */}
       <div className="flex flex-col gap-2 z-10 w-full overflow-hidden" style={{ transform: "translateZ(10px)" }}>
-        <h3 className="font-display text-lg sm:text-xl md:text-2xl text-white group-hover:text-gold transition-colors duration-300 break-words whitespace-normal">
+        <h3 className="font-display text-lg sm:text-xl md:text-2xl text-foreground group-hover:text-gold transition-colors duration-300 break-words whitespace-normal">
           {title}
         </h3>
-        {description && <p className="text-xs sm:text-sm text-white/70 leading-relaxed font-light break-words whitespace-pre-line">{description}</p>}
+        {description && <p className="text-xs sm:text-sm text-foreground/70 leading-relaxed font-light break-words whitespace-pre-line">{description}</p>}
       </div>
 
       {/* Corner decorations to match general site styles */}

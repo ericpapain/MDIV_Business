@@ -25,7 +25,7 @@ export function SiteFooter() {
             {[
               { Icon: Instagram, href: "https://www.instagram.com/mickediv?utm_source=qr&igsh=M3QxZTVjajFmb2g3" },
               { Icon: Linkedin, href: "https://www.linkedin.com/in/mickedivconsulting?utm_source=share_via&utm_content=profile&utm_medium=member_android" },
-              // { Icon: Youtube, href: "#" },
+              { Icon: Youtube, href: "https://www.youtube.com/@BusinessNetworkingExp%C3%A9rience" },
               // { Icon: Music2, href: "#" },
             ].map((item, i) => (
               <a key={i} href={item.href} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-sm border border-border hover:border-gold/60 flex items-center justify-center transition-colors text-muted-foreground hover:text-primary">

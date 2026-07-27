@@ -228,7 +228,7 @@ export default function Avis() {
               <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {review.comment} »</p>
               
               <div className="flex items-center gap-4 pt-4 border-t border-border">
-                <div className="shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-white/10 flex">
+                <div className="shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-border/10 flex">
                   {/* Default colorful avatar background like in prompt */}
                   <div className="flex-1 h-full" style={{ background: "rgb(0, 0, 0)" }} />
                   <div className="flex-1 h-full" style={{ background: "rgb(250, 224, 66)" }} />

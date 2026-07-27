@@ -12,7 +12,7 @@ export function AnimatedGraph() {
   const pathData = `M 10,${height - 10} C 60,${height - 20} 100,${height - 60} 150,${height - 50} C 200,${height - 40} 240,15 290,10`;
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 bg-white/5 rounded-md border border-white/10 relative overflow-hidden h-36 w-full">
+    <div className="flex flex-col items-center justify-center p-4 bg-foreground/5 rounded-md border border-border/10 relative overflow-hidden h-36 w-full">
       {/* Grid Lines */}
       <svg className="absolute inset-0 w-full h-full" viewBox={`0 0 ${width} ${height}`}>
         <defs>

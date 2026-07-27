@@ -69,9 +69,9 @@ export function Step1Hero({ onStart }: Props) {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => onStart('audit')}
-          className="group relative inline-flex items-center justify-center gap-3 rounded-2xl border border-neutral-700 bg-neutral-900/50 px-8 py-5 text-sm font-semibold text-white transition-all hover:bg-neutral-800 text-left"
+          className="group relative inline-flex items-center justify-center gap-3 rounded-2xl border border-neutral-700 bg-neutral-900/50 px-8 py-5 text-sm font-semibold text-foreground transition-all hover:bg-neutral-800 text-left"
         >
-          <div className="bg-white/10 p-2 rounded-full">
+          <div className="bg-foreground/10 p-2 rounded-full">
             <Search className="w-5 h-5" />
           </div>
           <div>

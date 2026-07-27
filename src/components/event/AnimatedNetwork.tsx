@@ -245,7 +245,7 @@ export function AnimatedNetwork() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center p-3 bg-white/5 rounded-md border border-white/10 relative overflow-hidden h-44 w-full">
+    <div className="flex flex-col items-center justify-center p-3 bg-foreground/5 rounded-md border border-border/10 relative overflow-hidden h-44 w-full">
       <div className="absolute top-2 left-4 text-[9px] uppercase tracking-wider text-muted-foreground z-10">
         International Connections
       </div>

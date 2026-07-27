@@ -8,7 +8,7 @@ export function InvestmentGraph() {
   const pathData = `M 10,${height - 15} C 70,${height - 25} 120,${height - 90} 180,${height - 75} C 220,${height - 65} 250,25 290,15`;
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 bg-white/5 rounded-md border border-white/10 relative overflow-hidden h-36 w-full">
+    <div className="flex flex-col items-center justify-center p-4 bg-foreground/5 rounded-md border border-border/10 relative overflow-hidden h-36 w-full">
       <svg className="absolute inset-0 w-full h-full" viewBox={`0 0 ${width} ${height}`}>
         <defs>
           <linearGradient id="invChartGradient" x1="0" y1="0" x2="0" y2="1">
@@ -93,7 +93,7 @@ export function InvestmentGraph() {
         />
       </svg>
 
-      <div className="absolute top-2 left-4 text-[9px] uppercase tracking-wider text-white/50">
+      <div className="absolute top-2 left-4 text-[9px] uppercase tracking-wider text-foreground/50">
         Fundraising Curve
       </div>
       <div className="absolute bottom-2 right-4 text-[9px] font-mono font-semibold text-goldLight">

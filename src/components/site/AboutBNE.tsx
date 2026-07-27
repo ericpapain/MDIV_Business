@@ -21,7 +21,7 @@ export function AboutBNE() {
       <div className="grid md:grid-cols-2 gap-10 mb-20">
         {/* VISION */}
         <div className="glass-strong p-8 md:p-10 rounded-sm corner-deco relative">
-          <h3 className="font-display text-3xl mb-4 text-white">{t("about_bne.vision_title")}</h3>
+          <h3 className="font-display text-3xl mb-4 text-foreground">{t("about_bne.vision_title")}</h3>
           <p className="text-muted-foreground mb-8">
             {t("about_bne.vision_desc")}
           </p>
@@ -36,14 +36,14 @@ export function AboutBNE() {
 
         {/* POUR QUI */}
         <div className="glass-strong p-8 md:p-10 rounded-sm corner-deco relative">
-          <h3 className="font-display text-3xl mb-6 text-white">{t("about_bne.for_who_title")}</h3>
+          <h3 className="font-display text-3xl mb-6 text-foreground">{t("about_bne.for_who_title")}</h3>
           <div className="grid sm:grid-cols-2 gap-8">
             <div>
               <div className="flex flex-col items-center text-center mb-4">
                 <div className="w-12 h-12 rounded-full border border-gold/30 flex items-center justify-center mb-3 bg-background/50">
                   <Users className="text-gold" size={20} />
                 </div>
-                <h4 className="font-display text-sm uppercase tracking-[0.15em] text-white min-h-[40px] flex items-center justify-center" dangerouslySetInnerHTML={{ __html: t("about_bne.for_entrepreneurs_title") }}></h4>
+                <h4 className="font-display text-sm uppercase tracking-[0.15em] text-foreground min-h-[40px] flex items-center justify-center" dangerouslySetInnerHTML={{ __html: t("about_bne.for_entrepreneurs_title") }}></h4>
               </div>
               <ul className="text-[14px] text-muted-foreground space-y-2 list-disc pl-4">
                 <li>{t("about_bne.for_entrepreneurs_items.i1")}</li>
@@ -57,7 +57,7 @@ export function AboutBNE() {
                 <div className="w-12 h-12 rounded-full border border-gold/30 flex items-center justify-center mb-3 bg-background/50">
                   <Building className="text-gold" size={20} />
                 </div>
-                <h4 className="font-display text-sm uppercase tracking-[0.15em] text-white min-h-[40px] flex items-center justify-center">{t("about_bne.for_companies_title")}</h4>
+                <h4 className="font-display text-sm uppercase tracking-[0.15em] text-foreground min-h-[40px] flex items-center justify-center">{t("about_bne.for_companies_title")}</h4>
               </div>
               <ul className="text-[14px] text-muted-foreground space-y-2 list-disc pl-4">
                 <li>{t("about_bne.for_companies_items.i1")}</li>
@@ -72,7 +72,7 @@ export function AboutBNE() {
 
       {/* PARCOURS D'ENGAGEMENT */}
       <div className="mb-20">
-        <h3 className="font-display text-3xl mb-10 text-center text-white">{t("about_bne.path_title")}</h3>
+        <h3 className="font-display text-3xl mb-10 text-center text-foreground">{t("about_bne.path_title")}</h3>
         <div className="flex flex-col md:flex-row items-center justify-center gap-6 relative">
           <div className="hidden md:block absolute top-8 left-[10%] right-[10%] h-px bg-gold/20" />
 
@@ -90,7 +90,7 @@ export function AboutBNE() {
               <div className="w-6 h-6 rounded-full bg-gold text-background font-bold text-xs flex items-center justify-center mb-3">
                 {item.step}
               </div>
-              <h4 className="font-display text-lg text-white mb-1">{item.title}</h4>
+              <h4 className="font-display text-lg text-foreground mb-1">{item.title}</h4>
               <p className="text-xs text-muted-foreground">{item.desc}</p>
             </div>
           ))}
@@ -99,7 +99,7 @@ export function AboutBNE() {
 
       {/* VALEURS */}
       <div>
-        <h3 className="font-display text-3xl mb-10 text-center text-white">{t("about_bne.values_title")}</h3>
+        <h3 className="font-display text-3xl mb-10 text-center text-foreground">{t("about_bne.values_title")}</h3>
         <div className="flex flex-wrap justify-center gap-8">
           {[
             { title: t("about_bne.values.v1"), icon: Shield },

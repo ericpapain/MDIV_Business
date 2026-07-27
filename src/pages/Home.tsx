@@ -15,7 +15,7 @@ import { AboutBNE } from "@/components/site/AboutBNE";
 const DEMO_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4";
 
 function TestimonialFlag({ type }: { type: string }) {
-  const base = "shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-white/10 flex";
+  const base = "shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-border flex";
 
   if (type === "france") {
     return (
@@ -193,7 +193,7 @@ export default function Home() {
                               {event.type}
                             </div>
                           )}
-                          <h4 className="font-display text-lg md:text-xl mb-1 truncate text-white group-hover:text-gold-light transition-colors duration-300">{event.title}</h4>
+                          <h4 className="font-display text-lg md:text-xl mb-1 truncate text-foreground group-hover:text-gold-light transition-colors duration-300">{event.title}</h4>
                           <div className="text-xs text-muted-foreground mb-3 flex items-start gap-1.5 leading-relaxed">
                             <MapPin size={12} className="text-gold/60 shrink-0 mt-0.5" /> 
                             <span>{event.city}</span>
@@ -212,15 +212,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/*<div className="glass p-6 rounded-sm">
-              <div className="eyebrow mb-3">{t("home.hero_live.ai_reco_title")}</div>
-              <p className="text-sm text-foreground/80 mb-4 font-serif italic leading-relaxed">
-                {t("home.hero_live.ai_reco_desc")}
-              </p>
-              <Link to="/experience" className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-2">
-                {t("home.hero_live.ai_reco_btn")} <Sparkles size={12} />
-              </Link>
-            </div>*/}
+
           </div>
         </div>
 
@@ -235,7 +227,7 @@ export default function Home() {
 
       {/* ÉVÉNEMENTS DANS UN MENU DÉROULANT */}
       <section className="container py-10">
-        <details className="group bg-white/[0.02] border border-white/10 rounded-md shadow-2xl overflow-hidden backdrop-blur-sm open:bg-white/[0.04] transition-colors duration-500">
+        <details className="group bg-white/[0.02] border border-border rounded-md shadow-2xl overflow-hidden backdrop-blur-sm open:bg-white/[0.04] transition-colors duration-500">
           <summary className="flex items-center justify-between cursor-pointer list-none p-6 md:p-8 hover:bg-white/[0.02] transition-colors outline-none">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center border border-gold/20">
@@ -245,11 +237,11 @@ export default function Home() {
                 {t("home.events_accordion.title")}
               </h2>
             </div>
-            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-open:rotate-180 transition-transform duration-500">
-              <ChevronDown className="text-white w-5 h-5" />
+            <div className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center border border-border group-open:rotate-180 transition-transform duration-500">
+              <ChevronDown className="text-foreground w-5 h-5" />
             </div>
           </summary>
-          <div className="flex flex-col gap-10 p-2 sm:p-4 md:p-6 lg:p-10 border-t border-white/10 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
+          <div className="flex flex-col gap-10 p-2 sm:p-4 md:p-6 lg:p-10 border-t border-border animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
             <EventHero />
             <ChampagneEvent />
           </div>
@@ -353,7 +345,7 @@ export default function Home() {
               <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {tItem.quote || tItem.comment} »</p>
               <div className="flex items-center gap-4 pt-4 border-t border-border">
                 {tItem.flagType ? <TestimonialFlag type={tItem.flagType} /> : (
-                  <div className="shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-white/10 flex">
+                  <div className="shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-border flex">
                     <div className="flex-1 h-full" style={{ background: "rgb(0, 0, 0)" }} />
                     <div className="flex-1 h-full" style={{ background: "rgb(250, 224, 66)" }} />
                     <div className="flex-1 h-full" style={{ background: "rgb(239, 51, 64)" }} />

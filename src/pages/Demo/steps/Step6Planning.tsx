@@ -43,7 +43,7 @@ export function Step6Planning({ onNext, demoType }: Props) {
               <div className="bg-indigo-600 text-white px-4 py-1.5 rounded-full font-bold text-sm">
                 {day.day}
               </div>
-              <h3 className="text-xl font-semibold text-white">{day.title}</h3>
+              <h3 className="text-xl font-semibold text-foreground">{day.title}</h3>
             </div>
 
             <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-neutral-800 before:to-transparent">
