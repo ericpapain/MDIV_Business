@@ -308,12 +308,54 @@ export const iaKpis = [
 ];
 
 export const iaJourney = [
-  { step: "Diagnostic IA Gratuit", stepEn: "Free AI Diagnostic" },
-  { step: "Applications Gratuites", stepEn: "Free Applications" },
-  { step: "Facturation IA", stepEn: "AI Billing" },
-  { step: "Automatisation IA", stepEn: "AI Automation" },
-  { step: "Formation IA", stepEn: "AI Training" },
-  { step: "Abonnement Pro", stepEn: "Pro Subscription" },
-  { step: "Agents IA", stepEn: "AI Agents" },
-  { step: "Transformation Digitale", stepEn: "Digital Transformation" },
+  { 
+    id: "diagnostic",
+    step: "Écoute & Diagnostic", 
+    stepEn: "Listening & Diagnostic",
+    desc: "Audit sur-mesure de vos processus métiers pour évaluer votre maturité numérique sans engagement.",
+    descEn: "Custom audit of your business processes to evaluate your digital maturity without commitment.",
+    roi: "Rapport détaillé & estimation des gains potentiels",
+    roiEn: "Detailed report & estimation of potential gains",
+    icon: "Search"
+  },
+  { 
+    id: "opportunites",
+    step: "Identification & Opportunités", 
+    stepEn: "Opportunity Identification",
+    desc: "Sélection chirurgicale des cas d'usage IA les plus pertinents (ex: automatisation des devis, relation client).",
+    descEn: "Surgical selection of the most relevant AI use cases (e.g., quote automation, customer relations).",
+    roi: "Feuille de route chiffrée avec budget et ROI projeté",
+    roiEn: "Costed roadmap with budget and projected ROI",
+    icon: "Target"
+  },
+  { 
+    id: "poc",
+    step: "Implémentation Modulaire", 
+    stepEn: "Modular Implementation",
+    desc: "Pas d'usine à gaz. Nous déployons un premier module pilote pour prouver la valeur en conditions réelles.",
+    descEn: "No turnkey blackbox. We deploy a first pilot module to prove value in real conditions.",
+    roi: "Mesure concrète du temps gagné sur le pilote (ex: -30% administratif)",
+    roiEn: "Concrete measurement of time saved on the pilot (e.g., -30% admin time)",
+    icon: "Zap"
+  },
+  { 
+    id: "formation",
+    step: "Acculturation & Formation", 
+    stepEn: "Training & Adoption",
+    desc: "Formation de vos équipes via notre Académie IA pour garantir une adoption rapide et pérenne.",
+    descEn: "Training of your teams via our AI Academy to ensure fast and lasting adoption.",
+    roi: "Taux d'utilisation quotidien et satisfaction des équipes",
+    roiEn: "Daily usage rate and team satisfaction",
+    icon: "Users"
+  },
+  { 
+    id: "scale",
+    step: "Passage à l'Échelle", 
+    stepEn: "Scaling Up",
+    desc: "Déploiement étendu et intégration d'agents IA autonomes une fois la rentabilité validée.",
+    descEn: "Extended deployment and integration of autonomous AI agents once profitability is validated.",
+    roi: "+25% d'amélioration globale de la rentabilité",
+    roiEn: "+25% overall profitability improvement",
+    icon: "Rocket"
+  }
 ];

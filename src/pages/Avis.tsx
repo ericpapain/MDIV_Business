@@ -30,27 +30,34 @@ export default function Avis() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // URL of the OVH API
+  const API_URL = "https://mdiv-network.com/api-avis.php";
+
   useEffect(() => {
     fetchReviews();
   }, []);
 
   const fetchReviews = async () => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
     try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error("Erreur réseau");
       
-      if (error) throw error;
-      if (data) {
-        setReviews(data as Review[]);
+      const result = await response.json();
+      if (result.success && result.data) {
+        // Map database fields to Review type if necessary
+        const formattedReviews = result.data.map((item: any) => ({
+          id: item.id.toString(),
+          name: item.nom,
+          role: item.role,
+          rating: item.note,
+          comment: item.commentaire,
+          event: item.evenement
+        }));
+        setReviews(formattedReviews);
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
+      // Optional: Load fallback or mock data if API fails (e.g., local dev)
     } finally {
       setLoading(false);
     }
@@ -70,37 +77,46 @@ export default function Avis() {
     setSent(true);
     
     try {
-      const newReview = {
-        name: formData.name,
+      const payload = {
+        pays: formData.country,
+        evenement: selectedEventTitle,
+        code_evenement: formData.code,
+        nom: formData.name,
         role: formData.role,
-        rating: formData.rating,
-        comment: formData.comment,
-        event: selectedEventTitle,
+        note: formData.rating,
+        commentaire: formData.comment,
       };
 
-      if (!supabase) {
-        toast.error("Base de données non configurée.");
-        setSent(false);
-        return;
-      }
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-      const { data, error } = await supabase
-        .from('reviews')
-        .insert([newReview])
-        .select();
+      const result = await response.json();
 
-      if (error) throw error;
-
-      if (data) {
-        setReviews([data[0] as Review, ...reviews]);
+      if (response.ok && result.success) {
+        // Optimistic update of the UI
+        const newReview: Review = {
+          id: Date.now().toString(),
+          name: formData.name,
+          role: formData.role,
+          rating: formData.rating,
+          comment: formData.comment,
+          event: selectedEventTitle,
+        };
+        setReviews([newReview, ...reviews]);
         toast.success("Votre avis a été publié avec succès.");
+        
+        setTimeout(() => {
+          setSent(false);
+          setFormData({ ...formData, code: "", comment: "", rating: 5 });
+        }, 3000);
+      } else {
+        throw new Error(result.error || "Erreur serveur");
       }
-      
-      setTimeout(() => {
-        setSent(false);
-        setFormData({ ...formData, code: "", comment: "", rating: 5 });
-      }, 3000);
-      
     } catch (error) {
       console.error('Error inserting review:', error);
       toast.error("Une erreur est survenue lors de la publication de votre avis.");

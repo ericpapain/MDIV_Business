@@ -153,10 +153,10 @@ export default function Offers() {
   };
 
   return (
-    <div className="pt-24 pb-12 container">
+    <div className="pt-24 pb-12 container max-w-[1400px]">
 
       {/* ── Cartes formules ── */}
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-2 mb-12 items-stretch justify-center">
+      <div className="flex flex-col lg:flex-row gap-6 mb-12 items-stretch justify-center">
         {offers.map((o, i) => {
           const price = computeFinalPrice(o);
           let IconComp = () => (
@@ -196,7 +196,7 @@ export default function Offers() {
                 {/* Aura lumineuse animée (effet premium) */}
                 <div className="absolute -inset-[2px] rounded-[18px] bg-gradient-to-br from-gold/60 via-gold/10 to-gold/60 opacity-0 group-hover/card:opacity-100 blur-sm transition-opacity duration-1000 group-hover/card:animate-pulse-slow" />
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                
+
                 {/* Conteneur principal de la carte */}
                 <div className="relative h-full luxe-card overflow-hidden rounded-2xl flex flex-col flex-1 bg-background/95 backdrop-blur-2xl border border-border group-hover/card:border-gold/50 transition-colors duration-700 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.8)] group-hover/card:shadow-[0_40px_100px_-20px_rgba(197,160,89,0.3)]">
                   {/* Reflet de verre (Glassmorphism highlight) */}
@@ -204,228 +204,228 @@ export default function Offers() {
                   <div className="absolute top-0 inset-x-0 h-[100px] bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-700 z-40 pointer-events-none" />
 
                   <div className="w-full h-48 relative overflow-hidden group bg-gradient-to-br from-[#12161b] via-[#0a0d0f] to-gold/5 flex items-center justify-center border-b border-border/50">
-                <div className="absolute inset-0 bg-noise opacity-20" />
-                <IconComp />
-                {o.badge && <div className="absolute top-4 left-4 px-3 py-1 text-[10px] uppercase tracking-[0.22em] gold-border rounded-sm bg-emerald-deep/90 text-gold-light shadow-lg z-20">{o.badge}</div>}
-              </div>
-              <div className="p-8 flex flex-col flex-1 relative z-10 overflow-hidden">
-                {/* Décorations abstraites internes */}
-                <div className="absolute -bottom-12 -right-12 text-gold/5 group-hover/card:text-gold/10 group-hover/card:scale-110 transition-all duration-1000 rotate-[15deg] group-hover/card:rotate-[30deg] pointer-events-none">
-                  <Hexagon size={220} strokeWidth={0.3} />
-                </div>
-                <div className="absolute top-1/4 -left-12 text-gold/5 group-hover/card:text-gold/10 group-hover/card:scale-110 transition-all duration-1000 -rotate-[15deg] pointer-events-none">
-                  <Circle size={150} strokeWidth={0.3} />
-                </div>
-                <div className="absolute top-1/3 -right-24 w-48 h-48 bg-gradient-to-tr from-gold/5 to-transparent rounded-full blur-3xl pointer-events-none group-hover/card:from-gold/10 transition-colors duration-1000" />
-                
-                <div className="min-h-[120px] lg:min-h-[140px] flex flex-col relative z-10">
-                  <div className="font-display text-2xl lg:text-3xl mb-3">{o.name}</div>
-                  <div className="text-lg text-muted-foreground font-serif italic">{o.tagline}</div>
-                </div>
-                <div className="hairline mb-6" />
-                {o.id === 'networking' ? (
-                  <div className="flex-1 text-[14px] font-ubuntu text-foreground/90 leading-relaxed space-y-4 mb-8">
-                    <div className="space-y-3">
-                      <div 
-                        onClick={() => toggleService('sejours')}
-                        className="custom-accordion-header"
-                      >
-                        <span className="flex items-center"><span className="mr-2">✈️</span> {t("offers.accordion.sejours")}</span>
-                        {activeServices.includes('sejours') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
-                      </div>
-                      {activeServices.includes('sejours') && (
-                        <div className="custom-service-content">
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.decouverte")}</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.rencontres_ent")}</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.exp_immersives")}</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.partage")}</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="border-t border-gold/10 pt-4 space-y-3">
-                      <div 
-                        onClick={() => toggleService('participants')}
-                        className="custom-accordion-header"
-                      >
-                        <span className="flex items-center"><span className="mr-2">🌍</span> {t("offers.accordion.valeur_participants")}</span>
-                        {activeServices.includes('participants') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
-                      </div>
-                      {activeServices.includes('participants') && (
-                        <div className="custom-service-content">
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.reseau")}</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.ouverture")}</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.partenariats")}</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.opportunites")}</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="border-t border-gold/10 pt-4 space-y-3">
-                      <div 
-                        onClick={() => toggleService('territoires')}
-                        className="custom-accordion-header"
-                      >
-                        <span className="flex items-center"><span className="mr-2">📈</span> {t("offers.accordion.valeur_territoires")}</span>
-                        {activeServices.includes('territoires') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
-                      </div>
-                      {activeServices.includes('territoires') && (
-                        <div className="custom-service-content">
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.visibilite")}</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.attractivite")}</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.valorisation")}</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <div className="absolute inset-0 bg-noise opacity-20" />
+                    <IconComp />
+                    {o.badge && <div className="absolute top-4 left-4 px-3 py-1 text-[10px] uppercase tracking-[0.22em] gold-border rounded-sm bg-emerald-deep/90 text-gold-light shadow-lg z-20">{o.badge}</div>}
                   </div>
-                ) : o.id === 'investor' ? (
-                  <div className="flex-1 text-[14px] font-ubuntu text-foreground/90 leading-relaxed space-y-4 mb-8">
-                    <div className="space-y-3">
-                      <div 
-                        onClick={() => toggleService('analyse')}
-                        className="custom-accordion-header"
-                      >
-                        <span className="flex items-center"><span className="mr-2">1️⃣</span> Analyse &amp; Construction</span>
-                        {activeServices.includes('analyse') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
-                      </div>
-                      {activeServices.includes('analyse') && (
-                        <div className="custom-service-content">
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.comprehension")}</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Positionnement &amp; stratégie</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.contenus")}</div>
-                          </div>
-                        </div>
-                      )}
+                  <div className="p-8 flex flex-col flex-1 relative z-10 overflow-hidden">
+                    {/* Décorations abstraites internes */}
+                    <div className="absolute -bottom-12 -right-12 text-gold/5 group-hover/card:text-gold/10 group-hover/card:scale-110 transition-all duration-1000 rotate-[15deg] group-hover/card:rotate-[30deg] pointer-events-none">
+                      <Hexagon size={220} strokeWidth={0.3} />
                     </div>
+                    <div className="absolute top-1/4 -left-12 text-gold/5 group-hover/card:text-gold/10 group-hover/card:scale-110 transition-all duration-1000 -rotate-[15deg] pointer-events-none">
+                      <Circle size={150} strokeWidth={0.3} />
+                    </div>
+                    <div className="absolute top-1/3 -right-24 w-48 h-48 bg-gradient-to-tr from-gold/5 to-transparent rounded-full blur-3xl pointer-events-none group-hover/card:from-gold/10 transition-colors duration-1000" />
 
-                    <div className="border-t border-gold/10 pt-4 space-y-3">
-                      <div 
-                        onClick={() => toggleService('amplification')}
-                        className="custom-accordion-header"
-                      >
-                        <span className="flex items-center"><span className="mr-2">2️⃣</span> {t("offers.accordion.amplification")?.replace('2️⃣ ', '') || 'Amplification'}</span>
-                        {activeServices.includes('amplification') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
-                      </div>
-                      {activeServices.includes('amplification') && (
-                        <div className="custom-service-content">
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.diffusion")}</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Valorisation &amp; storytelling</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.activation")}</div>
-                          </div>
-                        </div>
-                      )}
+                    <div className="min-h-[120px] lg:min-h-[140px] flex flex-col relative z-10">
+                      <div className="font-display text-[18px] lg:text-[24px] mb-3">{o.name}</div>
+                      <div className="text-lg text-muted-foreground font-serif italic">{o.tagline}</div>
                     </div>
+                    <div className="hairline mb-6" />
+                    {o.id === 'networking' ? (
+                      <div className="flex-1 text-[14px] font-ubuntu text-foreground/90 leading-relaxed space-y-4 mb-8">
+                        <div className="space-y-3">
+                          <div
+                            onClick={() => toggleService('sejours')}
+                            className="custom-accordion-header"
+                          >
+                            <span className="flex items-center"><span className="mr-2">✈️</span> {t("offers.accordion.sejours")}</span>
+                            {activeServices.includes('sejours') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                          </div>
+                          {activeServices.includes('sejours') && (
+                            <div className="custom-service-content">
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.decouverte")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.rencontres_ent")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.exp_immersives")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.partage")}</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
 
-                    <div className="border-t border-gold/10 pt-4 space-y-3">
-                      <div 
-                        onClick={() => toggleService('connexion')}
-                        className="custom-accordion-header"
-                      >
-                        <span className="flex items-center"><span className="mr-2">3️⃣</span> Connexion &amp; Développement</span>
-                        {activeServices.includes('connexion') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
-                      </div>
-                      {activeServices.includes('connexion') && (
-                        <div className="custom-service-content">
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.event_dedie")}</div>
+                        <div className="border-t border-gold/10 pt-4 space-y-3">
+                          <div
+                            onClick={() => toggleService('participants')}
+                            className="custom-accordion-header"
+                          >
+                            <span className="flex items-center"><span className="mr-2">🌍</span> {t("offers.accordion.valeur_participants")}</span>
+                            {activeServices.includes('participants') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
                           </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">{t("offers.accordion.items.rencontres_ciblees")}</div>
-                          </div>
-                          <div className="custom-service-item">
-                            <div className="font-medium text-foreground/90">Mises en relation &amp; suivi</div>
-                          </div>
+                          {activeServices.includes('participants') && (
+                            <div className="custom-service-content">
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.reseau")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.ouverture")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.partenariats")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.opportunites")}</div>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex-1 text-[14px] font-ubuntu text-foreground/90 leading-relaxed flex flex-col relative mb-8">
-                    <div className="absolute -top-10 -right-8 w-40 h-40 bg-gradient-to-bl from-blue-500/20 to-transparent rounded-bl-full pointer-events-none" />
-                    
-                    <div className="flex-1 relative z-10 flex flex-col">
-                      <div className="eyebrow mb-4 flex items-center gap-2 text-blue-400">
-                        <Sparkles size={14} className="animate-pulse-soft" /> {isEn ? "AI Recommendation" : "Recommandation IA"}
+                        <div className="border-t border-gold/10 pt-4 space-y-3">
+                          <div
+                            onClick={() => toggleService('territoires')}
+                            className="custom-accordion-header"
+                          >
+                            <span className="flex items-center"><span className="mr-2">📈</span> {t("offers.accordion.valeur_territoires")}</span>
+                            {activeServices.includes('territoires') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                          </div>
+                          {activeServices.includes('territoires') && (
+                            <div className="custom-service-content">
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.visibilite")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.attractivite")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.valorisation")}</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      {/* <p className="text-[18px] text-foreground/90 mb-6 font-serif italic leading-relaxed">
+                    ) : o.id === 'investor' ? (
+                      <div className="flex-1 text-[14px] font-ubuntu text-foreground/90 leading-relaxed space-y-4 mb-8">
+                        <div className="space-y-3">
+                          <div
+                            onClick={() => toggleService('analyse')}
+                            className="custom-accordion-header"
+                          >
+                            <span className="flex items-center"><span className="mr-2">1️⃣</span> Analyse &amp; Construction</span>
+                            {activeServices.includes('analyse') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                          </div>
+                          {activeServices.includes('analyse') && (
+                            <div className="custom-service-content">
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.comprehension")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">Positionnement &amp; stratégie</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.contenus")}</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="border-t border-gold/10 pt-4 space-y-3">
+                          <div
+                            onClick={() => toggleService('amplification')}
+                            className="custom-accordion-header"
+                          >
+                            <span className="flex items-center"><span className="mr-2">2️⃣</span> {t("offers.accordion.amplification")?.replace('2️⃣ ', '') || 'Amplification'}</span>
+                            {activeServices.includes('amplification') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                          </div>
+                          {activeServices.includes('amplification') && (
+                            <div className="custom-service-content">
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.diffusion")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">Valorisation &amp; storytelling</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.activation")}</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="border-t border-gold/10 pt-4 space-y-3">
+                          <div
+                            onClick={() => toggleService('connexion')}
+                            className="custom-accordion-header"
+                          >
+                            <span className="flex items-center"><span className="mr-2">3️⃣</span> Connexion &amp; Développement</span>
+                            {activeServices.includes('connexion') ? <ChevronUp size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" /> : <ChevronDown size={24} className="text-gold animate-attention drop-shadow-[0_0_6px_rgba(197,160,89,0.7)]" />}
+                          </div>
+                          {activeServices.includes('connexion') && (
+                            <div className="custom-service-content">
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.event_dedie")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">{t("offers.accordion.items.rencontres_ciblees")}</div>
+                              </div>
+                              <div className="custom-service-item">
+                                <div className="font-medium text-foreground/90">Mises en relation &amp; suivi</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex-1 text-[14px] font-ubuntu text-foreground/90 leading-relaxed flex flex-col relative mb-8">
+                        <div className="absolute -top-10 -right-8 w-40 h-40 bg-gradient-to-bl from-blue-500/20 to-transparent rounded-bl-full pointer-events-none" />
+
+                        <div className="flex-1 relative z-10 flex flex-col">
+                          <div className="eyebrow mb-4 flex items-center gap-2 text-blue-400">
+                            <Sparkles size={14} className="animate-pulse-soft" /> {isEn ? "AI Recommendation" : "Recommandation IA"}
+                          </div>
+                          {/* <p className="text-[18px] text-foreground/90 mb-6 font-serif italic leading-relaxed">
                         {isEn 
                           ? '"Based on the analysis of high-performing SMBs, Aria recommends our dedicated AI services platform to automate your administrative and commercial tasks."'
                           : "« Basé sur l'analyse des PME performantes, Aria vous recommande notre plateforme de services IA dédiée pour automatiser vos tâches administratives et commerciales. »"}
                       </p> */}
-                      
-                      <div className="space-y-3 mb-8 flex-1">
-                         <div className="flex items-center gap-3 font-medium"><Check size={16} className="text-blue-500 shrink-0" /> {isEn ? "Personalized AI Diagnostic" : "Diagnostic IA personnalisé"}</div>
-                         <div className="border-t border-gold/10 pt-4 flex items-center gap-3 font-medium"><Check size={16} className="text-blue-500 shrink-0" /> {isEn ? "50+ Business AI Applications" : "+50 applications IA métier"}</div>
-                         <div className="border-t border-gold/10 pt-4 flex items-center gap-3 font-medium"><Check size={16} className="text-blue-500 shrink-0" /> {isEn ? "AI Automations & Billing" : "Automatisations & Facturation IA"}</div>
-                      </div>
 
-                      <div className="flex flex-col gap-3 mt-auto">
-                        <Link to="/services-ia" className="w-full text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-sm flex items-center justify-center gap-2 transition-colors font-medium border border-blue-500/30">
-                          {t("home.hero_live.ai_services_btn") || "Découvrir nos services IA"} <ArrowRight size={14} />
-                        </Link>
-                        <Link to="/services-ia/diagnostic" className="w-full text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-foreground rounded-sm flex items-center justify-center gap-2 transition-all font-bold shadow-[0_0_20px_rgba(37,99,235,0.4)]">
-                          {t("home.hero_live.ai_diag_btn") || "Diagnostic IA gratuit"} <Zap size={14} className="fill-white/20" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {o.id !== 'exclusive' && (
-                  <Link 
-                    to={o.id === 'networking' ? "/sejour#a-venir" : "/contact"} 
-                    className="btn-ghost-gold text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3 mt-auto transition-colors"
-                  >
-                    {t("offers.choose")} <ArrowRight size={14} />
-                  </Link>
-                )}
-              </div>
-            </div>
-          </div>
+                          <div className="space-y-3 mb-8 flex-1">
+                            <div className="flex items-center gap-3 font-medium"><Check size={16} className="text-blue-500 shrink-0" /> {isEn ? "Personalized AI Diagnostic" : "Diagnostic IA personnalisé"}</div>
+                            <div className="border-t border-gold/10 pt-4 flex items-center gap-3 font-medium"><Check size={16} className="text-blue-500 shrink-0" /> {isEn ? "50+ Business AI Applications" : "+50 applications IA métier"}</div>
+                            <div className="border-t border-gold/10 pt-4 flex items-center gap-3 font-medium"><Check size={16} className="text-blue-500 shrink-0" /> {isEn ? "AI Automations & Billing" : "Automatisations & Facturation IA"}</div>
+                          </div>
 
-            {i < offers.length - 1 && (
-              <div className="flex items-center justify-center py-6 lg:py-0 lg:w-16 shrink-0 z-10">
-                <div className="flex lg:flex-col items-center justify-center gap-4 lg:gap-6 opacity-80">
-                  <div className="w-16 h-px lg:w-px lg:h-32 bg-gradient-to-r lg:bg-gradient-to-b from-transparent via-gold to-transparent" />
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gold blur-md opacity-40 animate-pulse-soft" />
-                    <Star className="text-gold relative z-10 drop-shadow-[0_0_12px_rgba(197,160,89,1)]" size={24} fill="currentColor" />
+                          <div className="flex flex-col gap-3 mt-auto">
+                            <Link to="/services-ia" className="w-full text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-sm flex items-center justify-center gap-2 transition-colors font-medium border border-blue-500/30">
+                              {t("home.hero_live.ai_services_btn") || "Découvrir nos services IA"} <ArrowRight size={14} />
+                            </Link>
+                            <Link to="/services-ia/diagnostic" className="w-full text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-foreground rounded-sm flex items-center justify-center gap-2 transition-all font-bold shadow-[0_0_20px_rgba(37,99,235,0.4)]">
+                              {t("home.hero_live.ai_diag_btn") || "Diagnostic IA gratuit"} <Zap size={14} className="fill-white/20" />
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {o.id !== 'exclusive' && (
+                      <Link
+                        to={o.id === 'networking' ? "/sejour#a-venir" : "/contact"}
+                        className="btn-ghost-gold text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3 mt-auto transition-colors"
+                      >
+                        {t("offers.choose")} <ArrowRight size={14} />
+                      </Link>
+                    )}
                   </div>
-                  <div className="w-16 h-px lg:w-px lg:h-32 bg-gradient-to-r lg:bg-gradient-to-b from-transparent via-gold to-transparent" />
                 </div>
               </div>
-            )}
+
+              {i < offers.length - 1 && (
+                <div className="flex items-center justify-center py-6 lg:py-0 lg:w-16 shrink-0 z-10">
+                  <div className="flex lg:flex-col items-center justify-center gap-4 lg:gap-6 opacity-80">
+                    <div className="w-16 h-px lg:w-px lg:h-32 bg-gradient-to-r lg:bg-gradient-to-b from-transparent via-gold to-transparent" />
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gold blur-md opacity-40 animate-pulse-soft" />
+                      <Star className="text-gold relative z-10 drop-shadow-[0_0_12px_rgba(197,160,89,1)]" size={24} fill="currentColor" />
+                    </div>
+                    <div className="w-16 h-px lg:w-px lg:h-32 bg-gradient-to-r lg:bg-gradient-to-b from-transparent via-gold to-transparent" />
+                  </div>
+                </div>
+              )}
             </Fragment>
           );
         })}
@@ -560,7 +560,7 @@ export default function Offers() {
           <div className="eyebrow mb-4">{t("home.trust.eyebrow")}</div>
           <h2 className="font-display text-3xl">{t("home.trust.title")}</h2>
         </div>
-        
+
         <div className="relative flex overflow-hidden group">
           <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
           <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>

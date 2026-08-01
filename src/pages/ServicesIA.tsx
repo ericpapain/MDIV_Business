@@ -2,7 +2,128 @@ import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { iaCategories, iaJourney } from "@/data/servicesIAData";
-import { ArrowRight, Sparkles, Zap, ChevronRight, Star, LayoutGrid, CreditCard, Route, ArrowDown } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, ChevronRight, Star, LayoutGrid, CreditCard, Route, ArrowDown, Search, Target, Users, Rocket, Quote } from "lucide-react";
+
+import { useEffect } from "react";
+
+
+
+const AnimatedJourneyWidget = () => {
+  const { language } = useLanguage();
+  const isEn = language === "en";
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentStepIndex((prev) => (prev + 1) % iaJourney.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const iconMap: Record<string, any> = { Search, Target, Zap, Users, Rocket };
+  const stepColors = [
+    "hsl(42, 65%, 45%)", // Or foncé
+    "hsl(42, 65%, 45%)",
+    "hsl(42, 65%, 45%)",
+    "hsl(42, 65%, 45%)",
+    "hsl(42, 65%, 45%)"
+  ];
+  const interiorColors = [
+    "hsl(42, 55%, 56%)",   // Gold
+    "hsl(221, 83%, 53%)",  // Blue
+    "hsl(280, 70%, 60%)",  // Purple
+    "hsl(150, 60%, 45%)",  // Green
+    "hsl(350, 70%, 60%)"   // Rose
+  ];
+  const currentColor = stepColors[currentStepIndex];
+
+  return (
+    <div className="relative w-full h-[450px] lg:h-[500px] group bg-transparent">
+      {/* Remove the white background and border to blend with the main div */}
+      <div className="relative z-10 p-2 md:p-4 flex flex-col h-full w-full">
+        <h3 className="text-xl md:text-2xl font-bold text-center mb-6" style={{ color: "hsl(42 55% 56%)", fontFamily: "'Inter', sans-serif" }}>
+          {isEn ? "Your Modular Journey" : "Votre Parcours Modulaire"}
+        </h3>
+        
+        <div className="absolute inset-0 top-16 pointer-events-none">
+          {/* SVG S-Curve (Snaking 3 times) */}
+          <svg className="w-full h-full text-slate-500/30" viewBox="0 0 500 500" preserveAspectRatio="none">
+             {/* Base path */}
+             <path d="M 125 75 L 375 75 A 50 50 0 0 1 375 175 L 125 175 A 50 50 0 0 0 125 275 L 375 275 A 50 50 0 0 1 375 375 L 125 375" fill="none" stroke="currentColor" strokeWidth="4" strokeDasharray="8,8" />
+             {/* Animated active path */}
+             <path 
+               d="M 125 75 L 375 75 A 50 50 0 0 1 375 175 L 125 175 A 50 50 0 0 0 125 275 L 375 275 A 50 50 0 0 1 375 375 L 125 375" 
+               fill="none" 
+               stroke={currentColor}
+               strokeWidth="4"
+               strokeLinecap="round"
+               className="transition-all duration-1000 ease-out"
+               strokeDasharray="1471"
+               strokeDashoffset={1471 - [0, 250, 657, 1064, 1471][currentStepIndex]}
+             />
+          </svg>
+
+          {/* Nodes placed over the path */}
+          {iaJourney.map((step, idx) => {
+            const Icon = iconMap[step.icon];
+            const nodesPos = [
+              { left: "25%", top: "15%", align: "left" },
+              { left: "75%", top: "15%", align: "right" },
+              { left: "25%", top: "35%", align: "left" },
+              { left: "75%", top: "55%", align: "right" },
+              { left: "25%", top: "75%", align: "left" },
+            ];
+            const pos = nodesPos[idx];
+            const isActive = idx <= currentStepIndex;
+            const isCurrent = idx === currentStepIndex;
+            const nodeColor = isActive ? stepColors[idx] : "transparent";
+            const interiorColor = isActive ? interiorColors[idx] : "transparent";
+            
+            return (
+              <div 
+                key={step.id} 
+                className="absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 transition-all duration-500"
+                style={{ left: pos.left, top: pos.top }}
+              >
+                {/* Node Icon - Creative dark/glow design */}
+                <div 
+                  className={`relative w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center border-[3px] transition-all duration-500 ${
+                    isActive ? 'text-white scale-110' : 'bg-slate-900/80 border-white/10 text-white/30 scale-100 backdrop-blur-md'
+                  }`}
+                  style={{
+                    backgroundColor: isActive ? interiorColor : undefined,
+                    borderColor: isActive ? nodeColor : undefined,
+                    boxShadow: isActive ? `0 0 25px ${interiorColor}80, inset 0 0 10px ${interiorColor}40` : 'none'
+                  }}
+                >
+                  {Icon && <Icon size={24} className={isCurrent ? "animate-pulse" : ""} style={{ color: isActive ? "white" : undefined }} />}
+                  {isCurrent && (
+                    <div 
+                      className="absolute inset-0 rounded-full animate-ping opacity-30"
+                      style={{ backgroundColor: interiorColor }}
+                    />
+                  )}
+                </div>
+                
+                {/* Tooltip / Text for the step - Placed strictly OUTSIDE the snake loops to never overlap */}
+                <div className={`absolute w-36 md:w-48 transition-all duration-500 ${pos.align === 'left' ? 'right-full mr-4 md:mr-6 text-right' : 'left-full ml-4 md:ml-6 text-left'} ${isActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-2'}`}>
+                  <div className="font-bold text-sm md:text-base leading-tight ia-gradient-text drop-shadow-sm">
+                    {isEn ? step.stepEn : step.step}
+                  </div>
+                  {isCurrent && (
+                    <div className={`mt-2 text-[10px] md:text-xs font-semibold px-3 py-1.5 rounded-md border animate-fade-up shadow-xl inline-block text-white ${pos.align === 'left' ? 'ml-auto' : 'mr-auto'}`} style={{ backgroundColor: interiorColor, borderColor: nodeColor, boxShadow: `0 0 15px ${interiorColor}60` }}>
+                      ROI: {isEn ? step.roiEn : step.roi}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function ServicesIA() {
   const { t, language } = useLanguage();
@@ -32,16 +153,16 @@ export default function ServicesIA() {
     },
     {
       id: 'parcours',
-      label: isEn ? "Journey & Reviews" : "Parcours & Avis",
+      label: isEn ? "Journey & Story" : "Parcours & Approche",
       icon: Route,
-      desc: isEn ? "Steps & testimonials" : "Étapes & témoignages",
+      desc: isEn ? "Our vision on AI" : "Notre vision de l'IA",
     },
   ];
 
   return (
     <div className="ia-page min-h-screen">
       {/* HERO — asymmetric layout */}
-      <section className="relative pt-24 pb-14 overflow-hidden">
+      <section className="relative pt-12 pb-8 lg:pt-16 lg:pb-10 overflow-hidden">
         <div className="absolute inset-0 ia-gradient-hero-subtle" />
         {/* Decorative shapes — unique to M.DIV */}
         <div className="absolute top-12 right-[10%] w-72 h-72 rounded-full opacity-[0.07] blur-[80px]" style={{ background: "radial-gradient(circle, hsl(42 55% 56%), transparent 70%)" }} />
@@ -49,11 +170,11 @@ export default function ServicesIA() {
         {/* Subtle gold line at top */}
         <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, transparent 10%, hsl(42 55% 56% / 0.4) 50%, transparent 90%)" }} />
 
-        <div className="container relative z-10 max-w-5xl mx-auto">
-          <div className="grid lg:grid-cols-[1fr_auto] gap-10 items-center">
+        <div className="w-full max-w-[1400px] mx-auto px-6 relative z-10">
+          <div className="grid lg:grid-cols-[40%_60%] gap-10 lg:gap-16 items-center">
             {/* Left: Text */}
-            <div>
-              <div className="hidden items-center gap-2 px-4 py-2 rounded-lg mb-5 text-xs font-semibold uppercase tracking-wider" style={{ background: "hsl(42 55% 56% / 0.1)", color: "hsl(42 55% 56%)", border: "1px solid hsl(42 55% 56% / 0.25)" }}>
+            <div className="relative z-20">
+              <div className="hidden items-center gap-2 px-4 py-2 rounded-lg mb-5 text-xs font-semibold uppercase tracking-wider" style={{ background: "hsl(42 55% 56% / 0.1)", color: "hsl(42 55% 56%)", border: "1px solid hsl(42 55% 56% / 0.25)", display: "inline-flex" }}>
                 <Sparkles size={13} /> M.DIV · AI Platform
               </div>
 
@@ -83,21 +204,15 @@ export default function ServicesIA() {
               </div>
             </div>
 
-            {/* Right: Coming soon KPI placeholder */}
-            <div className="hidden lg:flex items-center justify-center max-w-xs">
-              <div className="ia-card p-8 text-center opacity-60">
-                <div className="text-lg font-bold mb-2" style={{ color: "hsl(215 16% 47%)" }}>{isEn ? "Key metrics" : "Chiffres clés"}</div>
-                <div className="text-sm italic" style={{ color: "hsl(215 16% 60%)" }}>{isEn ? "Coming soon" : "Arrive bientôt"}</div>
-              </div>
+            {/* Right: Interactive Journey Animation */}
+            <div className="hidden lg:flex items-center justify-center w-full min-w-[350px] relative z-20">
+              <AnimatedJourneyWidget />
             </div>
           </div>
 
-          {/* Mobile Coming soon KPI */}
+          {/* Mobile Interactive Journey Animation */}
           <div className="flex lg:hidden justify-center mt-10">
-            <div className="ia-card p-6 text-center opacity-60">
-              <div className="text-base font-bold mb-1" style={{ color: "hsl(215 16% 47%)" }}>{isEn ? "Key metrics" : "Chiffres clés"}</div>
-              <div className="text-sm italic" style={{ color: "hsl(215 16% 60%)" }}>{isEn ? "Coming soon" : "Arrive bientôt"}</div>
-            </div>
+            <AnimatedJourneyWidget />
           </div>
         </div>
       </section>
@@ -286,18 +401,47 @@ export default function ServicesIA() {
         </div>
 
         <div className="space-y-6">
-          {iaJourney.map((j, i) => (
-            <div key={i} className="ia-journey-step ia-animate-in" style={{ animationDelay: `${i * 0.08}s` }}>
-              <div className="ia-journey-dot" />
-              <div className="ia-card p-5 flex items-center justify-between group cursor-default">
-                <div className="flex items-center gap-4">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-foreground ia-gradient-hero">{i + 1}</div>
-                  <span className="font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>{isEn ? j.stepEn : j.step}</span>
+          {iaJourney.map((step, i) => {
+            const iconMap: Record<string, any> = { Search, Target, Zap, Users, Rocket };
+            const Icon = iconMap[step.icon];
+            
+            return (
+              <div key={step.id} className="ia-journey-step ia-animate-in relative" style={{ animationDelay: `${i * 0.08}s` }}>
+                <div className="absolute left-[27px] top-10 bottom-[-24px] w-0.5 bg-gradient-to-b from-border to-transparent" />
+                <div className="ia-card p-6 flex flex-col md:flex-row gap-6 relative z-10 hover:border-gold/30 transition-colors">
+                  <div className="w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center text-foreground ia-gradient-hero shadow-lg border border-white/10">
+                    {Icon ? <Icon size={24} /> : <div className="font-bold text-xl">{i + 1}</div>}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold mb-2 text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      {i + 1}. {isEn ? step.stepEn : step.step}
+                    </h3>
+                    <p className="text-sm leading-relaxed mb-4" style={{ color: "hsl(215 16% 65%)" }}>
+                      {isEn ? step.descEn : step.desc}
+                    </p>
+                    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold" style={{ background: "hsl(221 83% 53% / 0.1)", borderColor: "hsl(221 83% 53% / 0.2)", color: "hsl(221 83% 65%)" }}>
+                      <Zap size={14} style={{ color: "hsl(42 55% 56%)" }} />
+                      <span>{isEn ? "KPI / ROI Validation" : "Validation KPI / ROI"} : {isEn ? step.roiEn : step.roi}</span>
+                    </div>
+                  </div>
                 </div>
-                <ChevronRight size={16} className="opacity-30 group-hover:opacity-100 transition-opacity" style={{ color: "hsl(221 83% 53%)" }} />
               </div>
-            </div>
-          ))}
+            );
+          })}
+        </div>
+
+        {/* Storytelling Block */}
+        <div className="mt-16 ia-card p-8 md:p-10 relative overflow-hidden border-l-4" style={{ borderLeftColor: "hsl(42 55% 56%)" }}>
+          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-10 blur-3xl" style={{ background: "hsl(42 55% 56%)" }} />
+          <Quote className="absolute top-6 left-6 text-white/5" size={80} />
+          <h3 className="text-xl font-bold mb-4 relative z-10" style={{ fontFamily: "'Inter', sans-serif", color: "hsl(42 55% 56%)" }}>
+            {isEn ? "Our Vision: From Fear to Mastery" : "Notre vision : De l'inconnu à la maîtrise"}
+          </h3>
+          <p className="text-sm md:text-base leading-relaxed relative z-10 italic" style={{ color: "hsl(215 16% 80%)" }}>
+            {isEn 
+              ? "Artificial Intelligence should not be an intimidating 'black box' nor an overpriced turnkey factory. At BNE, we know that innovation only makes sense if it serves humans and profitability. That's why we refuse imposed off-the-shelf solutions. Our philosophy? Custom AI, introduced module by module. We move at your pace: we identify, deploy, validate the Return on Investment (ROI), and train your teams. No leap of faith, just a smooth and measured transition towards the company of tomorrow."
+              : "« L'Intelligence Artificielle ne doit pas être une \"boîte noire\" intimidante ni une usine à gaz hors de prix. Chez BNE, nous savons que l'innovation n'a de sens que si elle sert l'humain et la rentabilité. C'est pourquoi nous refusons les solutions clés en main imposées. Notre philosophie ? L'IA sur-mesure, introduite module par module. Nous avançons à votre rythme : on identifie, on déploie, on valide le retour sur investissement (ROI), et on forme vos équipes. Pas de saut dans le vide, juste une transition fluide et mesurée vers l'entreprise de demain. »"}
+          </p>
         </div>
       </section>
 

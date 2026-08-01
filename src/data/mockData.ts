@@ -13,6 +13,8 @@ import kassa from "@/assets/profils/kassa.jpg";
 import mathilda from "@/assets/profils/mathilda.jpg";
 import pierre from "@/assets/profils/pierre.jpg";
 import remy from "@/assets/profils/remy.jpg";
+import micke from "@/assets/profils/micke.jpeg";
+import eric from "@/assets/profils/eric.jpg";
 
 export const images = { hero, expHotel, expDining, expYacht, eventNetworking, eventSummit };
 
@@ -66,7 +68,7 @@ export const offers: Offer[] = [
   },
   {
     id: "exclusive",
-    name: "DEMANDER UN SERVICE BNE IA BUSINESS",
+    name: "INTELLIGENCE ARTIFICIELLE || DEMANDER UN ACCOMPAGNEMENT",
     tagline: "L'Intelligence Artificielle comme levier d'avant-garde",
     basePrice: 9800,
     costBreakdown: { hotel: 2400, dining: 1600, activity: 1800, commission: 600 },
@@ -222,6 +224,8 @@ export const members = [
   { id: 3, name: "Pierre", role: "Marchand de biens", image: pierre, flag: "🇫🇷", countryCode: "FR" },
   { id: 4, name: "Mathilda", role: "Référente Suisse du Royalty Club", image: mathilda, flag: "🇨🇭", countryCode: "CH" },
   { id: 5, name: "Kassa-Kassa", role: "Economiste - Financier - Fiscaliste", image: kassa, flag: "🇱🇺", countryCode: "LU" },
+  { id: 6, name: "Micke", role: "Partenaire / Collaborateur", image: micke, flag: "🇫🇷", countryCode: "FR" },
+  { id: 7, name: "Eric", role: "Docteur en Informatique & Consultant IA", image: eric, flag: "🇫🇷", countryCode: "FR" },
 ];
 
 export const getMembers = (t: (key: string) => string) => {
