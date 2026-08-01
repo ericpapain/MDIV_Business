@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Crown, Users, Target, Diamond, Play, Star, Check, MapPin, ChevronDown } from "lucide-react";
 import { images, getOffers, testimonials, getEvents, computeFinalPrice } from "@/data/mockData";

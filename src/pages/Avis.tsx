@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+
 import { Star, Send } from "lucide-react";
 import { toast } from "sonner";
 import { events } from "@/data/mockData";
