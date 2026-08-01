@@ -14,7 +14,7 @@ import mathilda from "@/assets/profils/mathilda.jpg";
 import pierre from "@/assets/profils/pierre.jpg";
 import remy from "@/assets/profils/remy.jpg";
 import micke from "@/assets/profils/micke.jpeg";
-import eric from "@/assets/profils/Eric.png";
+import eric from "@/assets/profils/eric.png";
 
 export const images = { hero, expHotel, expDining, expYacht, eventNetworking, eventSummit };
 
