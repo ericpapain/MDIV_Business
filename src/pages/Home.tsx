@@ -88,20 +88,22 @@ export default function Home() {
   };
 
   const fetchReviews = async () => {
-    if (!supabase) {
-      setDbReviews(testimonials);
-      return;
-    }
     try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(3);
+      const response = await fetch("https://mdiv-network.com/api-avis.php");
+      if (!response.ok) throw new Error("API Network error");
       
-      if (error) throw error;
-      if (data && data.length > 0) {
-        setDbReviews(data);
+      const result = await response.json();
+      if (result.success && result.data && result.data.length > 0) {
+        const formattedReviews = result.data.map((item: any) => ({
+          id: item.id.toString(),
+          name: item.nom,
+          role: item.role,
+          rating: item.note,
+          comment: item.commentaire,
+          event: item.evenement,
+          country: item.pays
+        }));
+        setDbReviews(formattedReviews);
       } else {
         setDbReviews(testimonials); // fallback
       }
@@ -337,27 +339,34 @@ export default function Home() {
       <section className="container py-16">
         <SectionHeading eyebrow={t("home.testimonials.eyebrow")} title={t("home.testimonials.title")} center />
         <div className="grid md:grid-cols-3 gap-6">
-          {(dbReviews.length > 0 ? dbReviews : testimonials).slice(0,3).map((tItem: any, idx) => (
-            <div key={tItem.id || idx} className="luxe-card p-8 rounded-sm">
-              <div className="flex gap-1 mb-5 text-primary">
-                {[...Array(5)].map((_, i) => <Star key={i} size={12} fill={i < (tItem.rating || 5) ? "currentColor" : "none"} className={i >= (tItem.rating || 5) ? "text-muted" : ""} />)}
-              </div>
-              <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {tItem.quote || tItem.comment} »</p>
-              <div className="flex items-center gap-4 pt-4 border-t border-border">
-                {tItem.flagType ? <TestimonialFlag type={tItem.flagType} /> : (
-                  <div className="shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-border flex">
-                    <div className="flex-1 h-full" style={{ background: "rgb(0, 0, 0)" }} />
-                    <div className="flex-1 h-full" style={{ background: "rgb(250, 224, 66)" }} />
-                    <div className="flex-1 h-full" style={{ background: "rgb(239, 51, 64)" }} />
+          {(dbReviews.length > 0 ? dbReviews : testimonials).slice(0,3).map((tItem: any, idx) => {
+            let colors = ["#C5A059", "#0A0D0F", "#C5A059"];
+            const c = (tItem.country || tItem.flagType)?.toLowerCase() || "";
+            if (c === "france") colors = ["#002654", "#ffffff", "#ed2939"];
+            else if (c === "belgique") colors = ["#000000", "#fdda24", "#ef3340"];
+            else if (c === "luxembourg") colors = ["#ed2939", "#ffffff", "#00a1de"];
+            else if (c === "suisse") colors = ["#ff0000", "#ffffff", "#ff0000"];
+
+            return (
+              <div key={tItem.id || idx} className="luxe-card p-8 rounded-sm">
+                <div className="flex gap-1 mb-5 text-primary">
+                  {[...Array(5)].map((_, i) => <Star key={i} size={12} fill={i < (tItem.rating || 5) ? "currentColor" : "none"} className={i >= (tItem.rating || 5) ? "text-muted" : ""} />)}
+                </div>
+                <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {tItem.quote || tItem.comment} »</p>
+                <div className="flex items-center gap-4 pt-4 border-t border-border">
+                  <div className={`shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-border flex ${c === 'luxembourg' ? 'flex-col' : ''}`}>
+                    <div className="flex-1 h-full w-full" style={{ background: colors[0] }} />
+                    <div className="flex-1 h-full w-full" style={{ background: colors[1] }} />
+                    <div className="flex-1 h-full w-full" style={{ background: colors[2] }} />
                   </div>
-                )}
-                <div>
-                  <div className="font-display text-base">{tItem.name}</div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">{tItem.role}</div>
+                  <div>
+                    <div className="font-display text-base">{tItem.name}</div>
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">{tItem.role}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div className="flex justify-center mt-12">
           <Link to="/avis" className="btn-ghost-gold inline-flex px-8 py-3.5 text-[10px] uppercase tracking-[0.24em] rounded-sm items-center gap-3">

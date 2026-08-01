@@ -11,6 +11,7 @@ type Review = {
   rating: number;
   comment: string;
   event: string;
+  country: string;
 };
 
 export default function Avis() {
@@ -51,7 +52,8 @@ export default function Avis() {
           role: item.role,
           rating: item.note,
           comment: item.commentaire,
-          event: item.evenement
+          event: item.evenement,
+          country: item.pays
         }));
         setReviews(formattedReviews);
       }
@@ -106,6 +108,7 @@ export default function Avis() {
           rating: formData.rating,
           comment: formData.comment,
           event: selectedEventTitle,
+          country: formData.country,
         };
         setReviews([newReview, ...reviews]);
         toast.success("Votre avis a été publié avec succès.");
@@ -143,31 +146,31 @@ export default function Avis() {
             <div>
               <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">Pays</div>
               <select 
-                className="w-full bg-muted/40 border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors"
+                className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors text-foreground"
                 value={formData.country}
                 onChange={e => setFormData({...formData, country: e.target.value})}
                 required
               >
-                <option value="">Sélectionner</option>
-                <option value="France">France</option>
-                <option value="Suisse">Suisse</option>
-                <option value="Luxembourg">Luxembourg</option>
-                <option value="Belgique">Belgique</option>
-                <option value="Autre">Autre</option>
+                <option value="" className="bg-[#0a0d0f]">Sélectionner</option>
+                <option value="France" className="bg-[#0a0d0f]">France</option>
+                <option value="Suisse" className="bg-[#0a0d0f]">Suisse</option>
+                <option value="Luxembourg" className="bg-[#0a0d0f]">Luxembourg</option>
+                <option value="Belgique" className="bg-[#0a0d0f]">Belgique</option>
+                <option value="Autre" className="bg-[#0a0d0f]">Autre</option>
               </select>
             </div>
             
             <div>
               <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">Événement passé</div>
               <select 
-                className="w-full bg-muted/40 border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors"
+                className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors text-foreground"
                 value={formData.eventId}
                 onChange={e => setFormData({...formData, eventId: e.target.value})}
                 required
               >
-                <option value="">Sélectionner un événement</option>
+                <option value="" className="bg-[#0a0d0f]">Sélectionner un événement</option>
                 {pastEvents.map(ev => (
-                  <option key={ev.id} value={ev.id}>{ev.title} ({ev.city})</option>
+                  <option key={ev.id} value={ev.id} className="bg-[#0a0d0f]">{ev.title} ({ev.city})</option>
                 ))}
               </select>
             </div>
@@ -233,30 +236,39 @@ export default function Avis() {
         {/* LISTE DES AVIS */}
         <div className="space-y-6">
           <h2 className="font-display text-3xl mb-6">Derniers avis</h2>
-          {reviews.map((review) => (
-            <div key={review.id} className="luxe-card p-8 rounded-sm animate-fade-up">
-              <div className="flex gap-1 mb-3 text-primary">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={12} fill={i < review.rating ? "currentColor" : "none"} className={i >= review.rating ? "text-muted" : ""} />
-                ))}
-              </div>
-              <div className="text-xs text-gold-light mb-4 uppercase tracking-[0.1em]">{review.event}</div>
-              <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {review.comment} »</p>
-              
-              <div className="flex items-center gap-4 pt-4 border-t border-border">
-                <div className="shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-border/10 flex">
-                  {/* Default colorful avatar background like in prompt */}
-                  <div className="flex-1 h-full" style={{ background: "rgb(0, 0, 0)" }} />
-                  <div className="flex-1 h-full" style={{ background: "rgb(250, 224, 66)" }} />
-                  <div className="flex-1 h-full" style={{ background: "rgb(239, 51, 64)" }} />
+          {reviews.map((review) => {
+            let colors = ["#C5A059", "#0A0D0F", "#C5A059"];
+            const c = review.country?.toLowerCase() || "";
+            if (c === "france") colors = ["#002654", "#ffffff", "#ed2939"];
+            else if (c === "belgique") colors = ["#000000", "#fdda24", "#ef3340"];
+            else if (c === "luxembourg") colors = ["#ed2939", "#ffffff", "#00a1de"]; // Technically horizontal, but works as 3 stripes
+            else if (c === "suisse") colors = ["#ff0000", "#ffffff", "#ff0000"];
+
+            return (
+              <div key={review.id} className="luxe-card p-8 rounded-sm animate-fade-up">
+                <div className="flex gap-1 mb-3 text-primary">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={12} fill={i < review.rating ? "currentColor" : "none"} className={i >= review.rating ? "text-muted" : ""} />
+                  ))}
                 </div>
-                <div>
-                  <div className="font-display text-base">{review.name}</div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">{review.role}</div>
+                <div className="text-xs text-gold-light mb-4 uppercase tracking-[0.1em]">{review.event}</div>
+                <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {review.comment} »</p>
+                
+                <div className="flex items-center gap-4 pt-4 border-t border-border">
+                  {/* Dynamic Flag Avatar */}
+                  <div className={`shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-border/10 flex ${c === 'luxembourg' ? 'flex-col' : ''}`}>
+                    <div className="flex-1 h-full w-full" style={{ background: colors[0] }} />
+                    <div className="flex-1 h-full w-full" style={{ background: colors[1] }} />
+                    <div className="flex-1 h-full w-full" style={{ background: colors[2] }} />
+                  </div>
+                  <div>
+                    <div className="font-display text-base">{review.name}</div>
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">{review.role}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
