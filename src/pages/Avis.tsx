@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { Star, Send } from "lucide-react";
 import { toast } from "sonner";
 import { events } from "@/data/mockData";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 type Review = {
   id: string;
@@ -15,6 +16,8 @@ type Review = {
 };
 
 export default function Avis() {
+  const { language } = useLanguage();
+  const isEn = language === "en";
   const pastEvents = events.past || [];
   
   const [formData, setFormData] = useState({
@@ -71,11 +74,11 @@ export default function Avis() {
     const validCode = selectedEvent ? selectedEvent.code : "BNE2026";
 
     if (formData.code !== validCode) {
-      toast.error("Code événement invalide. Veuillez vérifier votre invitation.");
+      toast.error(isEn ? "Invalid event code. Please check your invitation." : "Code événement invalide. Veuillez vérifier votre invitation.");
       return;
     }
     
-    const selectedEventTitle = pastEvents.find(ev => ev.id === formData.eventId)?.title || "Événement BNE";
+    const selectedEventTitle = pastEvents.find(ev => ev.id === formData.eventId)?.title || (isEn ? "BNE Event" : "Événement BNE");
     setSent(true);
     
     try {
@@ -111,18 +114,18 @@ export default function Avis() {
           country: formData.country,
         };
         setReviews([newReview, ...reviews]);
-        toast.success("Votre avis a été publié avec succès.");
+        toast.success(isEn ? "Your review has been published successfully." : "Votre avis a été publié avec succès.");
         
         setTimeout(() => {
           setSent(false);
           setFormData({ ...formData, code: "", comment: "", rating: 5 });
         }, 3000);
       } else {
-        throw new Error(result.error || "Erreur serveur");
+        throw new Error(result.error || (isEn ? "Server error" : "Erreur serveur"));
       }
     } catch (error) {
       console.error('Error inserting review:', error);
-      toast.error("Une erreur est survenue lors de la publication de votre avis.");
+      toast.error(isEn ? "An error occurred while publishing your review." : "Une erreur est survenue lors de la publication de votre avis.");
       setSent(false);
     }
   };
@@ -130,45 +133,50 @@ export default function Avis() {
   return (
     <div className="pt-32 pb-20 container max-w-5xl">
       <div className="text-center mb-16 animate-fade-up">
-        <div className="eyebrow mb-4">Votre expérience</div>
-        <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">Donnez-nous <em className="italic gold-text">votre avis</em>.</h1>
+        <div className="eyebrow mb-4">{isEn ? "Your experience" : "Votre expérience"}</div>
+        <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">
+          {isEn ? "Give us " : "Donnez-nous "}
+          <em className="italic gold-text">{isEn ? "your feedback" : "votre avis"}</em>.
+        </h1>
         <p className="mt-6 text-muted-foreground font-serif italic max-w-xl mx-auto">
-          Partagez votre expérience avec la communauté BNE. Votre retour est précieux.
+          {isEn 
+            ? "Share your experience with the BNE community. Your feedback is valuable." 
+            : "Partagez votre expérience avec la communauté BNE. Votre retour est précieux."}
         </p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-12">
         {/* FORMULAIRE */}
         <form onSubmit={handleSubmit} className="glass-strong p-8 md:p-10 rounded-sm space-y-6 corner-deco relative h-fit">
-          <h2 className="font-display text-3xl mb-6">Publier un avis</h2>
+          <h2 className="font-display text-3xl mb-6">{isEn ? "Publish a review" : "Publier un avis"}</h2>
           
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">Pays</div>
+              <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">{isEn ? "Country" : "Pays"}</div>
               <select 
                 className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors text-foreground"
                 value={formData.country}
                 onChange={e => setFormData({...formData, country: e.target.value})}
                 required
               >
-                <option value="" className="bg-[#0a0d0f]">Sélectionner</option>
-                <option value="France" className="bg-[#0a0d0f]">France</option>
-                <option value="Suisse" className="bg-[#0a0d0f]">Suisse</option>
-                <option value="Luxembourg" className="bg-[#0a0d0f]">Luxembourg</option>
-                <option value="Belgique" className="bg-[#0a0d0f]">Belgique</option>
-                <option value="Autre" className="bg-[#0a0d0f]">Autre</option>
+                <option value="" className="bg-[#0a0d0f]">{isEn ? "Select" : "Sélectionner"}</option>
+                <option value="France" className="bg-[#0a0d0f]">{isEn ? "France" : "France"}</option>
+                <option value="Suisse" className="bg-[#0a0d0f]">{isEn ? "Switzerland" : "Suisse"}</option>
+                <option value="Luxembourg" className="bg-[#0a0d0f]">{isEn ? "Luxembourg" : "Luxembourg"}</option>
+                <option value="Belgique" className="bg-[#0a0d0f]">{isEn ? "Belgium" : "Belgique"}</option>
+                <option value="Autre" className="bg-[#0a0d0f]">{isEn ? "Other" : "Autre"}</option>
               </select>
             </div>
             
             <div>
-              <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">Événement passé</div>
+              <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">{isEn ? "Past event" : "Événement passé"}</div>
               <select 
                 className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors text-foreground"
                 value={formData.eventId}
                 onChange={e => setFormData({...formData, eventId: e.target.value})}
                 required
               >
-                <option value="" className="bg-[#0a0d0f]">Sélectionner un événement</option>
+                <option value="" className="bg-[#0a0d0f]">{isEn ? "Select an event" : "Sélectionner un événement"}</option>
                 {pastEvents.map(ev => (
                   <option key={ev.id} value={ev.id} className="bg-[#0a0d0f]">{ev.title} ({ev.city})</option>
                 ))}
@@ -178,31 +186,31 @@ export default function Avis() {
 
           <div className="space-y-4">
             <Field 
-              label="Code de l'événement (ex: BNE2026)" 
+              label={isEn ? "Event code (e.g. BNE2026)" : "Code de l'événement (ex: BNE2026)"} 
               value={formData.code} 
-              onChange={e => setFormData({...formData, code: e.target.value})} 
+              onChange={(e: any) => setFormData({...formData, code: e.target.value})} 
               required 
             />
             
             <div className="grid sm:grid-cols-2 gap-4">
               <Field 
-                label="Votre Nom (ou initiales)" 
+                label={isEn ? "Your Name (or initials)" : "Votre Nom (ou initiales)"} 
                 value={formData.name} 
-                onChange={e => setFormData({...formData, name: e.target.value})} 
+                onChange={(e: any) => setFormData({...formData, name: e.target.value})} 
                 required 
               />
               <Field 
-                label="Votre Rôle / Profil" 
-                placeholder="ex: CEO, TechFlow"
+                label={isEn ? "Your Role / Profile" : "Votre Rôle / Profil"} 
+                placeholder={isEn ? "e.g. CEO, TechFlow" : "ex: CEO, TechFlow"}
                 value={formData.role} 
-                onChange={e => setFormData({...formData, role: e.target.value})} 
+                onChange={(e: any) => setFormData({...formData, role: e.target.value})} 
                 required 
               />
             </div>
           </div>
 
           <div>
-            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">Note</div>
+            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">{isEn ? "Rating" : "Note"}</div>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -218,7 +226,7 @@ export default function Avis() {
           </div>
 
           <div>
-            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">Votre avis</div>
+            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">{isEn ? "Your review" : "Votre avis"}</div>
             <textarea 
               rows={4} 
               className="w-full bg-muted/40 border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors"
@@ -229,13 +237,15 @@ export default function Avis() {
           </div>
 
           <button type="submit" disabled={sent} className="btn-gold w-full py-4 mt-2 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3">
-            {sent ? "Avis publié" : <><Send size={14} /> Publier mon avis</>}
+            {sent 
+              ? (isEn ? "Review published" : "Avis publié") 
+              : <><Send size={14} /> {isEn ? "Publish my review" : "Publier mon avis"}</>}
           </button>
         </form>
 
         {/* LISTE DES AVIS */}
         <div className="space-y-6">
-          <h2 className="font-display text-3xl mb-6">Derniers avis</h2>
+          <h2 className="font-display text-3xl mb-6">{isEn ? "Latest reviews" : "Derniers avis"}</h2>
           {reviews.map((review) => {
             let colors = ["#C5A059", "#0A0D0F", "#C5A059"];
             const c = review.country?.toLowerCase() || "";

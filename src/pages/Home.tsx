@@ -352,6 +352,9 @@ export default function Home() {
                 <div className="flex gap-1 mb-5 text-primary">
                   {[...Array(5)].map((_, i) => <Star key={i} size={12} fill={i < (tItem.rating || 5) ? "currentColor" : "none"} className={i >= (tItem.rating || 5) ? "text-muted" : ""} />)}
                 </div>
+                {tItem.event && (
+                  <div className="text-xs text-gold-light mb-4 uppercase tracking-[0.1em]">{tItem.event}</div>
+                )}
                 <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {tItem.quote || tItem.comment} »</p>
                 <div className="flex items-center gap-4 pt-4 border-t border-border">
                   <div className={`shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-border flex ${c === 'luxembourg' ? 'flex-col' : ''}`}>
