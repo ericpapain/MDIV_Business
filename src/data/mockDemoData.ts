@@ -12,7 +12,7 @@ export const DEMO_PROFILES = [
   },
   {
     id: 'p2',
-    name: 'Sophie Martin',
+    name: 'Sophie Martinnn',
     role: 'Agent Immobilier Commercial',
     company: 'ImmoPro Grand Est (Metz)',
     sector: 'Immobilier',
