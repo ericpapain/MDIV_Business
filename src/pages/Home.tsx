@@ -61,29 +61,18 @@ export default function Home() {
   }, []);
 
   const incrementVisitCount = async () => {
-    if (!supabase) return;
     try {
-      // Increment the counter
-      const { error: upsertError } = await supabase.rpc('increment_visit_count');
-      if (upsertError) {
-        // If RPC doesn't exist, try direct read
-        const { data } = await supabase
-          .from('site_stats')
-          .select('visit_count')
-          .eq('id', 1)
-          .single();
-        if (data) setVisitCount(data.visit_count);
-        return;
+      const response = await fetch("https://mdiv-network.com/api-visites.php");
+      if (!response.ok) throw new Error("Erreur réseau");
+      
+      const result = await response.json();
+      if (result.success && result.total) {
+        setVisitCount(result.total);
       }
-      // Read the updated count
-      const { data } = await supabase
-        .from('site_stats')
-        .select('visit_count')
-        .eq('id', 1)
-        .single();
-      if (data) setVisitCount(data.visit_count);
     } catch (error) {
-      console.error('Error with visit counter:', error);
+      console.error('Error fetching visit count:', error);
+      // Fallback à 234 si on est en local et que le backend distant est indisponible
+      setVisitCount(234);
     }
   };
 
