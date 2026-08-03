@@ -31,33 +31,52 @@ export default function Partners() {
           const data = Object.fromEntries(fd.entries());
           const subject = "Candidature Partenaire - M.DIV";
           try {
-            const res = await fetch("https://api.web3forms.com/submit", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json"
-              },
-              body: JSON.stringify({
-                access_key: "42f75cf0-743a-4f15-a419-1213f3de3cd8",
-                "h-captcha-response": captchaToken,
-                subject: subject,
-                from_name: data.company || data.name || "Nouveau Partenaire",
-                replyto: data.email,
-                Entreprise: data.company,
-                Secteur: data.sector,
-                Nom: data.name,
-                Email: data.email,
-                Téléphone: data.phone,
-                Pays: data.country,
-                "Pourquoi devenir partenaire": data.why,
-                "Valeur ajoutée": data.value,
-              })
-            });
+            const baseData = {
+              "h-captcha-response": captchaToken,
+              subject: subject,
+              from_name: data.company || data.name || "Nouveau Partenaire",
+              replyto: data.email,
+              Entreprise: data.company,
+              Secteur: data.sector,
+              Nom: data.name,
+              Email: data.email,
+              Téléphone: data.phone,
+              Pays: data.country,
+              "Pourquoi devenir partenaire": data.why,
+              "Valeur ajoutée": data.value,
+            };
 
-            const result = await res.json();
-            if (!res.ok || !result.success) {
-              console.error("Web3Forms Erreur:", result);
-              throw new Error(result.message || "Erreur lors de l'envoi");
+            const sendToWeb3Forms = async (accessKey: string) => {
+              return fetch("https://api.web3forms.com/submit", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json"
+                },
+                body: JSON.stringify({
+                  access_key: accessKey,
+                  ...baseData
+                })
+              });
+            };
+
+            const [resEric, resMicke] = await Promise.all([
+              sendToWeb3Forms("42f75cf0-743a-4f15-a419-1213f3de3cd8"), // Clé Eric
+              sendToWeb3Forms("19268cb5-9f71-4363-9602-b6ad76d8d85b")  // Clé Micke
+            ]);
+
+            const resultEric = await resEric.json();
+            const resultMicke = await resMicke.json();
+
+            // Si l'une des requêtes a échoué (ou les deux)
+            if (!resEric.ok || !resultEric.success || !resMicke.ok || !resultMicke.success) {
+              console.error("Web3Forms Erreur (Eric):", resultEric);
+              console.error("Web3Forms Erreur (Micke):", resultMicke);
+              
+              // Si la requête principale (Eric) passe, on ne bloque pas l'utilisateur
+              if (!resEric.ok && !resultEric.success) {
+                  throw new Error(resultEric.message || "Erreur lors de l'envoi");
+              }
             }
             
             setSent(true); 
