@@ -60,22 +60,21 @@ export default function Partners() {
               });
             };
 
-            const [resEric, resMicke] = await Promise.all([
-              sendToWeb3Forms("42f75cf0-743a-4f15-a419-1213f3de3cd8"), // Clé Eric
-              sendToWeb3Forms("19268cb5-9f71-4363-9602-b6ad76d8d85b")  // Clé Micke
-            ]);
+            // Envoi séquentiel : Micke en premier, puis Eric
+            const resMicke = await sendToWeb3Forms("19268cb5-9f71-4363-9602-b6ad76d8d85b");
+            const resEric = await sendToWeb3Forms("42f75cf0-743a-4f15-a419-1213f3de3cd8");
 
-            const resultEric = await resEric.json();
             const resultMicke = await resMicke.json();
+            const resultEric = await resEric.json();
 
             // Si l'une des requêtes a échoué (ou les deux)
-            if (!resEric.ok || !resultEric.success || !resMicke.ok || !resultMicke.success) {
-              console.error("Web3Forms Erreur (Eric):", resultEric);
+            if (!resMicke.ok || !resultMicke.success || !resEric.ok || !resultEric.success) {
               console.error("Web3Forms Erreur (Micke):", resultMicke);
+              console.error("Web3Forms Erreur (Eric):", resultEric);
               
-              // Si la requête principale (Eric) passe, on ne bloque pas l'utilisateur
-              if (!resEric.ok && !resultEric.success) {
-                  throw new Error(resultEric.message || "Erreur lors de l'envoi");
+              // Si la requête de Micke passe (même si Eric échoue), on valide
+              if (!resMicke.ok && !resultMicke.success) {
+                  throw new Error(resultMicke.message || "Erreur lors de l'envoi");
               }
             }
             
