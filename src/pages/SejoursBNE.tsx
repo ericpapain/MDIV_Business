@@ -79,17 +79,19 @@ export default function SejoursBNE() {
           <motion.div 
             whileHover={{ scale: 1.05 }}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full mb-8 text-xs font-bold uppercase tracking-[0.2em] relative overflow-hidden group cursor-default" 
-            style={{ background: "hsl(42 55% 56% / 0.1)", color: "hsl(42 55% 56%)", border: "1px solid hsl(42 55% 56% / 0.25)" }}
+            style={{ background: "hsl(42 60% 54% / 0.1)", color: "hsl(42 60% 54%)", border: "1px solid hsl(42 60% 54% / 0.25)" }}
           >
             <div className="absolute inset-0 bg-gold/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             <Plane size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300 relative z-10" /> 
-            <span className="relative z-10">Séjours immersifs BNE</span>
+            <span className="relative z-10">{isEn ? "BNE Immersive Retreats" : "Séjours immersifs BNE"}</span>
           </motion.div>
           
           <h1 className="font-display text-[44px] md:text-[56px] lg:text-[68px] mb-4 leading-[1.1]">
-            Le voyage d'affaires, <br />
+            {isEn ? "Business travel, " : "Le voyage d'affaires, "} <br />
             <span className="relative inline-block mt-2">
-              <span className="relative z-10 gold-text italic pr-4">réinventé.</span>
+              <span className="relative z-10 gold-text italic pr-4">
+                {isEn ? "reinvented." : "réinventé."}
+              </span>
               <motion.span 
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
@@ -99,7 +101,7 @@ export default function SejoursBNE() {
             </span>
           </h1>
           <p className="text-lg md:text-xl font-serif italic text-muted-foreground/80 max-w-2xl mx-auto">
-            Voyager autrement. Développer durablement.
+            {isEn ? "Travel differently. Develop sustainably." : "Voyager autrement. Développer durablement."}
           </p>
           
           <motion.div 
@@ -116,12 +118,23 @@ export default function SejoursBNE() {
             variants={containerVars} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-100px" }}
             className="prose prose-invert prose-lg max-w-none prose-p:text-foreground/70 prose-p:leading-relaxed"
           >
-            <motion.p variants={itemVars} className="text-center max-w-3xl mx-auto text-xl font-light">
-              Pendant longtemps, les voyages d'affaires ont consisté à enchaîner les rendez-vous, les salons professionnels et les cartes de visite.
-              Chez BNE, nous avons choisi une autre approche.
+            <motion.p variants={itemVars} className="text-center max-w-3xl mx-auto text-xl font-light mb-4">
+              {isEn ? (
+                <>
+                  For a long time, business trips have consisted of chaining meetings, trade shows, and business cards.<br />
+                  At BNE, we chose another approach.
+                </>
+              ) : (
+                <>
+                  Pendant longtemps, les voyages d'affaires ont consisté à enchaîner les rendez-vous, les salons professionnels et les cartes de visite.<br />
+                  Chez BNE, nous avons choisi une autre approche.
+                </>
+              )}
             </motion.p>
             <motion.p variants={itemVars} className="text-center max-w-3xl mx-auto text-xl font-light mb-10">
-              Nous pensons que les meilleures opportunités naissent lorsque les dirigeants prennent le temps de comprendre un territoire, ses acteurs, sa culture économique et les relations humaines qui le composent.
+              {isEn 
+                ? "We believe that the best opportunities arise when leaders take the time to understand a territory, its key players, its economic culture, and the human relationships that compose it."
+                : "Nous pensons que les meilleures opportunités naissent lorsque les dirigeants prennent le temps de comprendre un territoire, ses acteurs, sa culture économique et les relations humaines qui le composent."}
             </motion.p>
 
             {/* BLOCK 1: DECOUVERTE */}
@@ -163,11 +176,11 @@ export default function SejoursBNE() {
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform duration-700" />
                 <Users className="text-gold w-10 h-10 mb-6 relative z-10" />
-                <h2 className="text-2xl mt-0 mb-4 font-display text-white relative z-10">Des rencontres choisies, pas accumulées</h2>
-                <p className="relative z-10 text-sm">
-                  Nous ne recherchons pas la quantité. Nous recherchons la pertinence.
-                  Chaque séjour est construit autour d'une sélection de dirigeants, d'experts, d'entrepreneurs et de partenaires.
-                  Chaque rencontre est pensée pour ouvrir une réflexion, un projet ou une collaboration.
+                <h3 className="text-2xl font-display text-white mb-4 mt-0 relative z-10">{isEn ? "Strategic Encounters" : "Rencontres stratégiques"}</h3>
+                <p className="text-foreground/80 mb-0 relative z-10 text-sm">
+                  {isEn 
+                    ? "No 'speed dating' style networking. We organize qualified meetings with local economic and institutional players."
+                    : "Pas de networking chronométré. Nous organisons des rencontres qualifiées avec des acteurs économiques et institutionnels locaux."}
                 </p>
               </motion.div>
 
@@ -181,16 +194,18 @@ export default function SejoursBNE() {
                   <Sunrise size={200} />
                 </div>
                 
-                <Sparkles className="text-gold w-10 h-10 mb-6 relative z-10" />
-                <h2 className="text-2xl mt-0 mb-4 font-display text-white relative z-10">L'expérience immersive</h2>
-                <p className="relative z-10 text-sm mb-4">
-                  Une immersion BNE ne ressemble pas à une conférence.
-                  Les échanges se poursuivent pendant les repas, les visites, les déplacements, les découvertes culturelles et les moments informels.
-                </p>
-                <div className="flex gap-4 relative z-10">
-                  <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-gold"><Coffee size={14}/> Repas</span>
-                  <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-gold"><MapPin size={14}/> Déplacements</span>
-                  <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-gold"><Camera size={14}/> Culture</span>
+                <div className="relative z-10">
+                  <div className="text-xs uppercase tracking-[0.2em] text-gold font-bold mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gold animate-pulse" /> {isEn ? "The philosophy" : "La philosophie"}
+                  </div>
+                  <h2 className="text-3xl mt-0 mb-6 font-display text-white">
+                    {isEn ? "Immersion before transaction" : "L'immersion avant la transaction"}
+                  </h2>
+                  <p className="text-foreground/80 mb-0 leading-relaxed text-sm">
+                    {isEn 
+                      ? "In a hyper-connected world, true value is found in physical encounters and the discovery of local ecosystems. BNE Immersive Retreats are designed for leaders who want to broaden their horizons, understand new markets, and create strong connections before even talking about business."
+                      : "Dans un monde hyper-connecté, la vraie valeur se trouve dans la rencontre physique et la découverte d'écosystèmes locaux. Les séjours immersifs BNE sont conçus pour les dirigeants qui souhaitent élargir leur horizon, comprendre de nouveaux marchés et créer du lien fort avant même de parler affaires."}
+                  </p>
                 </div>
               </motion.div>
 
@@ -199,15 +214,18 @@ export default function SejoursBNE() {
             {/* BLOCK 4: CE QUE LE PARTICIPANT CHERCHE */}
             <motion.div variants={itemVars} className="my-10 relative">
               <div className="absolute left-1/2 -top-6 -translate-x-1/2 w-px h-12 bg-gradient-to-b from-transparent to-gold/30" />
-              <h2 className="text-3xl text-center font-display mb-8 text-white">Ce que chaque participant vient chercher</h2>
+              <h2 className="text-3xl text-center font-display mb-8 text-white">
+                {isEn ? "What every participant is looking for" : "Ce que chaque participant vient chercher"}
+              </h2>
               
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
-                  "Une meilleure compréhension d'un marché",
-                  "De nouvelles connexions qualifiées",
-                  "Des idées concrètes pour son développement",
-                  "Des partenaires potentiels et stratégiques",
-                  "Une vision élargie de son activité"
+                  { icon: Sparkles, text: isEn ? "Inspiring environments" : "Des cadres inspirants" },
+                  { icon: Sunrise, text: isEn ? "Authentic moments" : "Des moments d'authenticité" },
+                  { icon: Hexagon, text: isEn ? "A new vision of business" : "Une nouvelle vision du business" },
+                  { icon: Circle, text: isEn ? "Lasting relationships" : "Des relations durables" },
+                  { icon: Coffee, text: isEn ? "Informal exchanges" : "Des échanges informels" },
+                  { icon: Camera, text: isEn ? "Unique memories" : "Des souvenirs uniques" },
                 ].map((item, i) => (
                   <motion.div 
                     key={i}
@@ -217,7 +235,7 @@ export default function SejoursBNE() {
                     <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-gold/20 transition-all">
                       <span className="text-gold font-bold text-xs">{i+1}</span>
                     </div>
-                    <span className="text-sm font-medium leading-tight pt-1">{item}</span>
+                    <span className="text-sm font-medium leading-tight pt-1">{item.text}</span>
                   </motion.div>
                 ))}
               </div>
@@ -231,10 +249,11 @@ export default function SejoursBNE() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <Search className="text-gold w-8 h-8 mb-6" />
-                <h3 className="text-xl font-display text-white mb-4 mt-0">Opportunités naturelles</h3>
+                <h3 className="text-xl font-display text-white mb-4 mt-0">{isEn ? "Creation of Opportunities" : "Création d'opportunités"}</h3>
                 <p className="text-sm mb-0">
-                  Nous ne promettons pas des contrats. Nous créons les conditions qui permettent aux opportunités d'émerger.
-                  Parce qu'une opportunité durable naît d'une compréhension mutuelle et d'une vision partagée.
+                  {isEn 
+                    ? "Trust acts as a catalyst. BNE retreats are designed so that the right people meet in an environment conducive to business development."
+                    : "La confiance agit comme un accélérateur. Les séjours BNE sont pensés pour que les bonnes personnes se croisent dans un cadre propice au développement."}
                 </p>
               </motion.div>
               
@@ -244,10 +263,11 @@ export default function SejoursBNE() {
               >
                 <div className="absolute inset-0 bg-gradient-to-bl from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <Globe className="text-gold w-8 h-8 mb-6" />
-                <h3 className="text-xl font-display text-white mb-4 mt-0">Visibilité rayonnante</h3>
+                <h3 className="text-xl font-display text-white mb-4 mt-0">{isEn ? "Radiant Visibility" : "Visibilité rayonnante"}</h3>
                 <p className="text-sm mb-0">
-                  Grâce aux contenus produits et aux communications du réseau, les dirigeants gagnent en visibilité.
-                  Le séjour devient un levier d'attractivité et de développement économique.
+                  {isEn 
+                    ? "Through the content produced and the network's communications, leaders gain visibility. The retreat becomes a lever for attractiveness and economic development."
+                    : "Grâce aux contenus produits et aux communications du réseau, les dirigeants gagnent en visibilité. Le séjour devient un levier d'attractivité et de développement économique."}
                 </p>
               </motion.div>
             </div>
@@ -287,18 +307,31 @@ export default function SejoursBNE() {
               </div>
             </div>
 
-            <h2 className="font-display text-2xl mb-8 relative z-10">Notre <span className="gold-text">conviction</span></h2>
+            <h2 className="font-display text-2xl mb-8 relative z-10">
+              {isEn ? "Our " : "Notre "}
+              <span className="gold-text">{isEn ? "conviction" : "conviction"}</span>
+            </h2>
             
             <div className="text-lg md:text-2xl font-serif italic text-muted-foreground max-w-3xl mx-auto leading-relaxed relative z-10 p-8 rounded-3xl bg-background/40 backdrop-blur-md border border-white/5 group-hover:border-gold/30 group-hover:shadow-[0_0_40px_rgba(205,167,81,0.15)] transition-all duration-700">
               <span className="text-gold/20 group-hover:text-gold/50 text-6xl absolute -top-4 -left-4 font-display transition-colors duration-700">"</span>
-              Un réseau permet de rencontrer.<br />
-              <span className="text-white group-hover:text-gold transition-colors duration-700">Une immersion permet de comprendre.</span><br />
-              La confiance permet ensuite de construire.
+              {isEn ? (
+                <>
+                  A network allows you to meet.<br />
+                  <span className="text-white group-hover:text-gold transition-colors duration-700">An immersion allows you to understand.</span><br />
+                  Trust then allows you to build.
+                </>
+              ) : (
+                <>
+                  Un réseau permet de rencontrer.<br />
+                  <span className="text-white group-hover:text-gold transition-colors duration-700">Une immersion permet de comprendre.</span><br />
+                  La confiance permet ensuite de construire.
+                </>
+              )}
               <span className="text-gold/20 group-hover:text-gold/50 text-6xl absolute -bottom-8 -right-4 font-display rotate-180 transition-colors duration-700">"</span>
             </div>
             
             <p className="mt-10 text-gold/80 tracking-[0.3em] uppercase text-xs font-bold relative z-10 group-hover:tracking-[0.45em] transition-all duration-700">
-              La philosophie des séjours Business Network Experience
+              {isEn ? "The Business Network Experience retreats philosophy" : "La philosophie des séjours Business Network Experience"}
             </p>
           </motion.div>
 
@@ -310,7 +343,7 @@ export default function SejoursBNE() {
           >
             <Link to="/sejour#a-venir" className="btn-gold px-10 py-5 text-sm uppercase tracking-[0.2em] rounded-full flex items-center gap-3 group shadow-[0_0_30px_rgba(197,160,89,0.3)] hover:shadow-[0_0_50px_rgba(197,160,89,0.5)] transition-all overflow-hidden relative">
               <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-              <span className="relative z-10">S'inscrire à un séjour</span> 
+              <span className="relative z-10">{isEn ? "Register for a retreat" : "S'inscrire à un séjour"}</span> 
               <ArrowRight size={16} className="relative z-10 group-hover:translate-x-2 transition-transform duration-300" />
             </Link>
           </motion.div>

@@ -83,13 +83,15 @@ export default function AccompagnementBNE() {
           >
             <div className="absolute inset-0 bg-blue-500/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             <Target size={16} className="group-hover:rotate-90 transition-transform duration-500 relative z-10" /> 
-            <span className="relative z-10">Accompagnement Stratégique</span>
+            <span className="relative z-10">{isEn ? "Strategic Coaching" : "Accompagnement Stratégique"}</span>
           </motion.div>
           
           <h1 className="font-display text-[44px] md:text-[56px] lg:text-[68px] mb-4 leading-[1.1]">
-            Transformez votre expertise en <br />
+            {isEn ? "Turn your expertise into " : "Transformez votre expertise en "}<br />
             <span className="relative inline-block mt-2">
-              <span className="relative z-10 text-blue-400 italic pr-4">opportunités.</span>
+              <span className="relative z-10 text-blue-400 italic pr-4">
+                {isEn ? "opportunities." : "opportunités."}
+              </span>
               <motion.span 
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
@@ -115,15 +117,27 @@ export default function AccompagnementBNE() {
           >
             <motion.div variants={itemVars} className="text-center max-w-3xl mx-auto space-y-4 text-lg font-light mb-10">
               <p>
-                Chaque entreprise possède une expertise, une histoire et un potentiel de développement.
-                Pourtant, beaucoup de dirigeants rencontrent les mêmes défis : gagner en visibilité, mieux valoriser leur savoir-faire, accéder aux bonnes relations ou ouvrir de nouveaux marchés.
+                {isEn 
+                  ? "Every company has an expertise, a history, and growth potential. Yet, many leaders face the same challenges: gaining visibility, better showcasing their know-how, accessing the right relationships, or opening new markets."
+                  : "Chaque entreprise possède une expertise, une histoire et un potentiel de développement. Pourtant, beaucoup de dirigeants rencontrent les mêmes défis : gagner en visibilité, mieux valoriser leur savoir-faire, accéder aux bonnes relations ou ouvrir de nouveaux marchés."}
               </p>
               <p>
-                Chez BNE, nous sommes convaincus qu’un développement durable ne repose pas uniquement sur la communication ou la prospection.
-                Il repose sur trois éléments essentiels : <strong className="text-blue-300 font-semibold">une vision claire, une stratégie adaptée et un écosystème de confiance.</strong>
+                {isEn ? (
+                  <>
+                    At BNE, we are convinced that sustainable growth does not rely solely on communication or prospecting.
+                    It relies on three essential elements: <strong className="text-blue-300 font-semibold">a clear vision, an adapted strategy, and a trusted ecosystem.</strong>
+                  </>
+                ) : (
+                  <>
+                    Chez BNE, nous sommes convaincus qu’un développement durable ne repose pas uniquement sur la communication ou la prospection.
+                    Il repose sur trois éléments essentiels : <strong className="text-blue-300 font-semibold">une vision claire, une stratégie adaptée et un écosystème de confiance.</strong>
+                  </>
+                )}
               </p>
               <p>
-                Notre rôle est d’accompagner les entreprises dans cette transformation en associant stratégie, visibilité, intelligence artificielle et connexions qualifiées.
+                {isEn 
+                  ? "Our role is to support companies in this transformation by combining strategy, visibility, artificial intelligence, and qualified connections."
+                  : "Notre rôle est d’accompagner les entreprises dans cette transformation en associant stratégie, visibilité, intelligence artificielle et connexions qualifiées."}
               </p>
             </motion.div>
 
@@ -141,21 +155,23 @@ export default function AccompagnementBNE() {
               
               <div className="relative z-10">
                 <div className="text-xs uppercase tracking-[0.2em] text-blue-400 font-bold mb-4 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" /> Première étape
+                  <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" /> {isEn ? "First step" : "Première étape"}
                 </div>
                 <h2 className="text-3xl mt-0 mb-6 font-display text-white">
-                  Un échange stratégique de 30 minutes offert
+                  {isEn ? "A 30-minute strategic conversation offered" : "Un échange stratégique de 30 minutes offert"}
                 </h2>
                 <p className="mb-8 text-foreground/80">
-                  Avant toute collaboration, BNE propose un échange individuel de 30 minutes, uniquement sur rendez-vous. Cet entretien permet de comprendre :
+                  {isEn 
+                    ? "Before any collaboration, BNE offers a 30-minute individual conversation, by appointment only. This interview helps us understand:"
+                    : "Avant toute collaboration, BNE propose un échange individuel de 30 minutes, uniquement sur rendez-vous. Cet entretien permet de comprendre :"}
                 </p>
                 <div className="grid sm:grid-cols-2 gap-4 mb-8">
                   {[
-                    "Votre entreprise", 
-                    "Votre positionnement actuel", 
-                    "Vos objectifs de développement", 
-                    "Vos enjeux commerciaux", 
-                    "Vos opportunités de croissance"
+                    isEn ? "Your company" : "Votre entreprise", 
+                    isEn ? "Your current positioning" : "Votre positionnement actuel", 
+                    isEn ? "Your development goals" : "Vos objectifs de développement", 
+                    isEn ? "Your commercial challenges" : "Vos enjeux commerciaux", 
+                    isEn ? "Your growth opportunities" : "Vos opportunités de croissance"
                   ].map((item, i) => (
                     <motion.div 
                       key={i}
@@ -170,7 +186,9 @@ export default function AccompagnementBNE() {
                   ))}
                 </div>
                 <p className="mb-0 text-sm italic text-blue-200/70 border-l-2 border-blue-500/30 pl-4 py-1">
-                  L’objectif n’est pas de proposer une solution standardisée, mais d’identifier les leviers qui peuvent réellement accélérer votre développement.
+                  {isEn 
+                    ? "The goal is not to offer a standardized solution, but to identify the levers that can truly accelerate your development."
+                    : "L’objectif n’est pas de proposer une solution standardisée, mais d’identifier les leviers qui peuvent réellement accélérer votre développement."}
                 </p>
               </div>
             </motion.div>
@@ -181,10 +199,10 @@ export default function AccompagnementBNE() {
                 <Rocket size={180} strokeWidth={0.2} />
               </motion.div>
               <div className="inline-block px-4 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-6 relative z-10">
-                La méthode BNE Accélération
+                {isEn ? "The BNE Acceleration method" : "La méthode BNE Accélération"}
               </div>
-              <h2 className="text-4xl md:text-5xl font-display mb-4 text-white relative z-10">Un plan stratégique sur 3 mois</h2>
-              <p className="text-blue-200/80 max-w-2xl mx-auto">Nous travaillons avec vous autour de trois axes complémentaires, conçus pour s'alimenter mutuellement.</p>
+              <h2 className="text-4xl md:text-5xl font-display mb-4 text-white relative z-10">{isEn ? "A 3-month strategic plan" : "Un plan stratégique sur 3 mois"}</h2>
+              <p className="text-blue-200/80 max-w-2xl mx-auto">{isEn ? "We work with you across three complementary axes, designed to mutually reinforce each other." : "Nous travaillons avec vous autour de trois axes complémentaires, conçus pour s'alimenter mutuellement."}</p>
             </motion.div>
 
             {/* BLOCK 2: GRILLE DES 3 MOIS */}
@@ -199,18 +217,18 @@ export default function AccompagnementBNE() {
                 <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-6 relative z-10 border border-blue-500/20 text-blue-400 group-hover:bg-blue-500/20 transition-colors">
                   <Search size={24} />
                 </div>
-                <h3 className="text-xl font-display text-white mb-3 mt-0 relative z-10">1. Analyse & Construction</h3>
+                <h3 className="text-xl font-display text-white mb-3 mt-0 relative z-10">{isEn ? "1. Analysis & Construction" : "1. Analyse & Construction"}</h3>
                 <p className="text-sm text-muted-foreground mb-6 relative z-10 flex-1">
-                  Clarifier votre positionnement avant de développer votre visibilité.
+                  {isEn ? "Clarify your positioning before developing your visibility." : "Clarifier votre positionnement avant de développer votre visibilité."}
                 </p>
                 <ul className="space-y-3 mb-6 text-sm text-foreground/80 relative z-10 border-t border-white/5 pt-6">
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-blue-400 mt-2 shrink-0" /> Marché et ambitions</li>
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-blue-400 mt-2 shrink-0" /> Différenciation</li>
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-blue-400 mt-2 shrink-0" /> Message entrepreneurial</li>
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-blue-400 mt-2 shrink-0" /> Stratégie & contenus</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-blue-400 mt-2 shrink-0" /> {isEn ? "Market and ambitions" : "Marché et ambitions"}</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-blue-400 mt-2 shrink-0" /> {isEn ? "Differentiation" : "Différenciation"}</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-blue-400 mt-2 shrink-0" /> {isEn ? "Entrepreneurial message" : "Message entrepreneurial"}</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-blue-400 mt-2 shrink-0" /> {isEn ? "Strategy & content" : "Stratégie & contenus"}</li>
                 </ul>
                 <div className="text-xs italic text-blue-300/70 relative z-10 bg-blue-500/5 p-3 rounded-xl border border-blue-500/10">
-                  Transformer l'expertise en un discours clair et attractif.
+                  {isEn ? "Turning expertise into a clear and attractive discourse." : "Transformer l'expertise en un discours clair et attractif."}
                 </div>
               </motion.div>
 
@@ -223,18 +241,18 @@ export default function AccompagnementBNE() {
                 <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6 relative z-10 border border-indigo-500/20 text-indigo-400 group-hover:bg-indigo-500/20 transition-colors">
                   <Activity size={24} />
                 </div>
-                <h3 className="text-xl font-display text-white mb-3 mt-0 relative z-10">2. Amplification & Rayonnement</h3>
+                <h3 className="text-xl font-display text-white mb-3 mt-0 relative z-10">{isEn ? "2. Amplification & Reach" : "2. Amplification & Rayonnement"}</h3>
                 <p className="text-sm text-muted-foreground mb-6 relative z-10 flex-1">
-                  Une expertise qui n’est pas visible reste difficilement accessible.
+                  {isEn ? "Expertise that is not visible remains difficult to access." : "Une expertise qui n’est pas visible reste difficilement accessible."}
                 </p>
                 <ul className="space-y-3 mb-6 text-sm text-foreground/80 relative z-10 border-t border-white/5 pt-6">
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-indigo-400 mt-2 shrink-0" /> Stratégie de contenu</li>
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-indigo-400 mt-2 shrink-0" /> Communication digitale</li>
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-indigo-400 mt-2 shrink-0" /> Storytelling ciblé</li>
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-indigo-400 mt-2 shrink-0" /> Outils d'Intelligence Artificielle</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-indigo-400 mt-2 shrink-0" /> {isEn ? "Content strategy" : "Stratégie de contenu"}</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-indigo-400 mt-2 shrink-0" /> {isEn ? "Digital communication" : "Communication digitale"}</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-indigo-400 mt-2 shrink-0" /> {isEn ? "Targeted storytelling" : "Storytelling ciblé"}</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-indigo-400 mt-2 shrink-0" /> {isEn ? "Artificial Intelligence tools" : "Outils d'Intelligence Artificielle"}</li>
                 </ul>
                 <div className="text-xs italic text-indigo-300/70 relative z-10 bg-indigo-500/5 p-3 rounded-xl border border-indigo-500/10">
-                  L’objectif est d’être reconnu pour votre valeur.
+                  {isEn ? "The goal is to be recognized for your value." : "L’objectif est d’être reconnu pour votre valeur."}
                 </div>
               </motion.div>
 
@@ -247,18 +265,18 @@ export default function AccompagnementBNE() {
                 <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center mb-6 relative z-10 border border-purple-500/20 text-purple-400 group-hover:bg-purple-500/20 transition-colors">
                   <Users size={24} />
                 </div>
-                <h3 className="text-xl font-display text-white mb-3 mt-0 relative z-10">3. Connexion & Développement</h3>
+                <h3 className="text-xl font-display text-white mb-3 mt-0 relative z-10">{isEn ? "3. Connection & Development" : "3. Connexion & Développement"}</h3>
                 <p className="text-sm text-muted-foreground mb-6 relative z-10 flex-1">
-                  Créer des connexions pertinentes, sans multiplier les contacts inutiles.
+                  {isEn ? "Creating relevant connections without accumulating useless contacts." : "Créer des connexions pertinentes, sans multiplier les contacts inutiles."}
                 </p>
                 <ul className="space-y-3 mb-6 text-sm text-foreground/80 relative z-10 border-t border-white/5 pt-6">
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-purple-400 mt-2 shrink-0" /> Rencontres ciblées</li>
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-purple-400 mt-2 shrink-0" /> Échanges dirigeants/partenaires</li>
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-purple-400 mt-2 shrink-0" /> Événements dédiés BNE</li>
-                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-purple-400 mt-2 shrink-0" /> Opportunités internationales</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-purple-400 mt-2 shrink-0" /> {isEn ? "Targeted meetings" : "Rencontres ciblées"}</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-purple-400 mt-2 shrink-0" /> {isEn ? "Leader/partner exchanges" : "Échanges dirigeants/partenaires"}</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-purple-400 mt-2 shrink-0" /> {isEn ? "Dedicated BNE events" : "Événements dédiés BNE"}</li>
+                  <li className="flex items-start gap-2"><div className="w-1 h-1 rounded-full bg-purple-400 mt-2 shrink-0" /> {isEn ? "International opportunities" : "Opportunités internationales"}</li>
                 </ul>
                 <div className="text-xs italic text-purple-300/70 relative z-10 bg-purple-500/5 p-3 rounded-xl border border-purple-500/10">
-                  Création de valeur durable par la confiance.
+                  {isEn ? "Sustainable value creation through trust." : "Création de valeur durable par la confiance."}
                 </div>
               </motion.div>
 
@@ -270,13 +288,16 @@ export default function AccompagnementBNE() {
                 <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6 text-blue-400 border border-blue-500/20 group-hover:bg-blue-500/20 transition-colors">
                   <Compass size={24} />
                 </div>
-                <h2 className="text-2xl mt-0 mb-4 text-white font-display">Une approche différente du développement</h2>
-                <p className="text-sm">
-                  Le monde entrepreneurial évolue. Aujourd’hui, la différence ne se fait plus uniquement par la taille d’une entreprise ou son budget de communication.
-                  Elle se fait par sa capacité à créer des relations solides, à être recommandée et à évoluer dans un environnement qui favorise les opportunités.
+                <h2 className="text-2xl mt-0 mb-4 text-white font-display">{isEn ? "A different approach to growth" : "Une approche différente du développement"}</h2>
+                <p className="text-sm mb-4">
+                  {isEn 
+                    ? "The entrepreneurial world is changing. Today, the difference is no longer made solely by the size of a company or its communication budget. It is made by its ability to create strong relationships, to be recommended, and to evolve in an environment that fosters opportunities."
+                    : "Le monde entrepreneurial évolue. Aujourd’hui, la différence ne se fait plus uniquement par la taille d’une entreprise ou son budget de communication. Elle se fait par sa capacité à créer des relations solides, à être recommandée et à évoluer dans un environnement qui favorise les opportunités."}
                 </p>
                 <p className="text-sm">
-                  Chez BNE, nous ne cherchons pas à créer du volume. Nous construisons des relations qualifiées basées sur la confiance, la complémentarité et l’intelligence collective.
+                  {isEn 
+                    ? "At BNE, we are not looking to create volume. We build qualified relationships based on trust, complementarity, and collective intelligence."
+                    : "Chez BNE, nous ne cherchons pas à créer du volume. Nous construisons des relations qualifiées basées sur la confiance, la complémentarité et l’intelligence collective."}
                 </p>
               </motion.div>
 
@@ -284,17 +305,18 @@ export default function AccompagnementBNE() {
                 <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6 text-indigo-400 border border-indigo-500/20 group-hover:bg-indigo-500/20 transition-colors">
                   <Star size={24} />
                 </div>
-                <h2 className="text-2xl mt-0 mb-4 text-white font-display">Après 3 mois : construire dans la durée</h2>
+                <h2 className="text-2xl mt-0 mb-4 text-white font-display">{isEn ? "After 3 months: building for the long term" : "Après 3 mois : construire dans la durée"}</h2>
                 <p className="text-sm">
-                  L’accompagnement BNE Accélération constitue une première étape.
-                  Pour les entreprises qui souhaitent poursuivre leur développement, nous pouvons construire un accompagnement annuel personnalisé.
+                  {isEn 
+                    ? "The BNE Acceleration program is a first step. For companies that wish to continue their development, we can build a personalized annual coaching."
+                    : "L’accompagnement BNE Accélération constitue une première étape. Pour les entreprises qui souhaitent poursuivre leur développement, nous pouvons construire un accompagnement annuel personnalisé."}
                 </p>
                 <div className="bg-background/40 border border-white/5 p-5 rounded-2xl mt-6">
                   <ul className="space-y-3 mb-0">
-                    <li className="flex items-center gap-3 text-sm font-medium"><Check size={14} className="text-indigo-400 shrink-0" /> Dynamique de visibilité continue</li>
-                    <li className="flex items-center gap-3 text-sm font-medium"><Check size={14} className="text-indigo-400 shrink-0" /> Activation du réseau</li>
-                    <li className="flex items-center gap-3 text-sm font-medium"><Check size={14} className="text-indigo-400 shrink-0" /> Nouvelles opportunités</li>
-                    <li className="flex items-center gap-3 text-sm font-medium"><Check size={14} className="text-indigo-400 shrink-0" /> Ouvertures internationales</li>
+                    <li className="flex items-center gap-3 text-sm font-medium"><Check size={14} className="text-indigo-400 shrink-0" /> {isEn ? "Continuous visibility dynamic" : "Dynamique de visibilité continue"}</li>
+                    <li className="flex items-center gap-3 text-sm font-medium"><Check size={14} className="text-indigo-400 shrink-0" /> {isEn ? "Network activation" : "Activation du réseau"}</li>
+                    <li className="flex items-center gap-3 text-sm font-medium"><Check size={14} className="text-indigo-400 shrink-0" /> {isEn ? "New opportunities" : "Nouvelles opportunités"}</li>
+                    <li className="flex items-center gap-3 text-sm font-medium"><Check size={14} className="text-indigo-400 shrink-0" /> {isEn ? "International openings" : "Ouvertures internationales"}</li>
                   </ul>
                 </div>
               </motion.div>
@@ -340,18 +362,33 @@ export default function AccompagnementBNE() {
               </svg>
             </div>
 
-            <h2 className="font-display text-2xl mb-8 relative z-10 text-white">Notre <span className="text-blue-400">conviction</span></h2>
+            <h2 className="font-display text-2xl mb-8 relative z-10 text-white">
+              {isEn ? "Our " : "Notre "}
+              <span className="text-blue-400">{isEn ? "conviction" : "conviction"}</span>
+            </h2>
             
             <div className="text-lg md:text-2xl font-serif italic text-muted-foreground max-w-3xl mx-auto leading-relaxed relative z-10 p-8 rounded-3xl bg-background/40 backdrop-blur-md border border-white/5 group-hover:border-blue-500/20 transition-colors duration-700">
               <span className="text-blue-400/20 group-hover:text-blue-400/50 text-6xl absolute -top-4 -left-4 font-display transition-colors duration-700">"</span>
-              Être visible est utile.<br />
-              <span className="text-white group-hover:text-blue-400 transition-colors duration-700">Être reconnu est précieux.</span><br />
-              Être recommandé change tout.
+              {isEn ? (
+                <>
+                  Being visible is useful.<br />
+                  <span className="text-white group-hover:text-blue-400 transition-colors duration-700">Being recognized is precious.</span><br />
+                  Being recommended changes everything.
+                </>
+              ) : (
+                <>
+                  Être visible est utile.<br />
+                  <span className="text-white group-hover:text-blue-400 transition-colors duration-700">Être reconnu est précieux.</span><br />
+                  Être recommandé change tout.
+                </>
+              )}
               <span className="text-blue-400/20 group-hover:text-blue-400/50 text-6xl absolute -bottom-8 -right-4 font-display rotate-180 transition-colors duration-700">"</span>
             </div>
             
             <p className="mt-10 text-blue-400/80 tracking-[0.2em] uppercase text-xs font-bold relative z-10 max-w-xl mx-auto leading-relaxed group-hover:tracking-[0.3em] transition-all duration-700">
-              BNE accompagne les entreprises qui souhaitent franchir un cap grâce à une méthode fondée sur la stratégie, la confiance et la puissance des écosystèmes.
+              {isEn 
+                ? "BNE supports companies looking to take a step forward through a method based on strategy, trust, and the power of ecosystems."
+                : "BNE accompagne les entreprises qui souhaitent franchir un cap grâce à une méthode fondée sur la stratégie, la confiance et la puissance des écosystèmes."}
             </p>
           </motion.div>
 
@@ -363,7 +400,7 @@ export default function AccompagnementBNE() {
           >
             <Link to="/contact" className="w-full max-w-md text-center px-10 py-5 text-sm uppercase tracking-[0.2em] rounded-full flex items-center justify-center gap-3 group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_50px_rgba(37,99,235,0.5)] transition-all font-bold relative overflow-hidden">
               <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-              <span className="relative z-10">Démarrer un échange</span> 
+              <span className="relative z-10">{isEn ? "Start a conversation" : "Démarrer un échange"}</span> 
               <Zap size={16} className="relative z-10 fill-white/20 group-hover:scale-110 transition-transform duration-300" />
             </Link>
           </motion.div>
