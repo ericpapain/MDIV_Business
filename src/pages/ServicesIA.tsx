@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { iaCategories, iaJourney } from "@/data/servicesIAData";
-import { ArrowRight, Sparkles, Zap, ChevronRight, Star, LayoutGrid, CreditCard, Route, ArrowDown, Search, Target, Users, Rocket, Quote } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, ChevronRight, Star, LayoutGrid, CreditCard, Route, ArrowDown, Search, Target, Users, Rocket, Quote, Cpu } from "lucide-react";
+import { motion } from "framer-motion";
 
 import { useEffect } from "react";
 
@@ -430,19 +431,65 @@ export default function ServicesIA() {
           })}
         </div>
 
-        {/* Storytelling Block */}
-        <div className="mt-16 ia-card p-8 md:p-10 relative overflow-hidden border-l-4" style={{ borderLeftColor: "hsl(42 55% 56%)" }}>
-          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-10 blur-3xl" style={{ background: "hsl(42 55% 56%)" }} />
-          <Quote className="absolute top-6 left-6 text-white/5" size={80} />
-          <h3 className="text-xl font-bold mb-4 relative z-10" style={{ fontFamily: "'Inter', sans-serif", color: "hsl(42 55% 56%)" }}>
-            {isEn ? "Our Vision: From Fear to Mastery" : "Notre vision : De l'inconnu à la maîtrise"}
-          </h3>
-          <p className="text-sm md:text-base leading-relaxed relative z-10 italic" style={{ color: "hsl(215 16% 80%)" }}>
+        {/* Storytelling Block / Conviction */}
+        <motion.div 
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mt-16 text-center relative py-12 group"
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(221,83%,53%)]/5 to-transparent blur-xl pointer-events-none group-hover:via-[hsl(221,83%,53%)]/10 transition-colors duration-1000" />
+          
+          {/* Creative Objects: Interactive Neural Core */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg h-full pointer-events-none opacity-20 group-hover:opacity-70 transition-opacity duration-1000">
+            <motion.div 
+              animate={{ rotate: 180 }} 
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              <div className="w-[280px] h-[280px] rounded-full border border-[hsl(42,55%,56%)]/30 border-dashed" />
+            </motion.div>
+            <motion.div 
+              animate={{ scale: [1, 1.1, 1] }} 
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              <Cpu className="text-[hsl(221,83%,53%)] w-32 h-32 group-hover:scale-125 group-hover:text-[hsl(42,55%,56%)] transition-all duration-700 ease-out" strokeWidth={0.5} />
+            </motion.div>
+            <motion.div 
+              animate={{ y: [20, -20, 20], opacity: [0.2, 0.8, 0.2] }} 
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-[20%] left-[25%] text-[hsl(42,55%,56%)] font-mono text-xs font-bold"
+            >
+              10110
+            </motion.div>
+            <motion.div 
+              animate={{ y: [-20, 20, -20], opacity: [0.1, 0.6, 0.1] }} 
+              transition={{ duration: 4, delay: 1, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute bottom-[30%] right-[20%] text-[hsl(221,83%,53%)] font-mono text-xs font-bold"
+            >
+              01001
+            </motion.div>
+          </div>
+
+          <h2 className="text-2xl mb-8 relative z-10 text-foreground font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+            {isEn ? "Our " : "Notre "}
+            <span style={{ color: "hsl(42 55% 56%)" }}>{isEn ? "Vision" : "conviction"}</span>
+          </h2>
+          
+          <div className="text-base md:text-lg italic text-muted-foreground leading-relaxed relative z-10 p-8 rounded-3xl bg-background/40 backdrop-blur-md border border-white/5 group-hover:border-[hsl(42,55%,56%)]/30 group-hover:shadow-[0_0_40px_rgba(205,167,81,0.1)] transition-all duration-700 max-w-4xl mx-auto">
+            <span className="text-[hsl(221,83%,53%)]/20 group-hover:text-[hsl(221,83%,53%)]/50 text-6xl absolute -top-4 -left-4 font-bold transition-colors duration-700">"</span>
             {isEn 
               ? "Artificial Intelligence should not be an intimidating 'black box' nor an overpriced turnkey factory. At BNE, we know that innovation only makes sense if it serves humans and profitability. That's why we refuse imposed off-the-shelf solutions. Our philosophy? Custom AI, introduced module by module. We move at your pace: we identify, deploy, validate the Return on Investment (ROI), and train your teams. No leap of faith, just a smooth and measured transition towards the company of tomorrow."
-              : "« L'Intelligence Artificielle ne doit pas être une \"boîte noire\" intimidante ni une usine à gaz hors de prix. Chez BNE, nous savons que l'innovation n'a de sens que si elle sert l'humain et la rentabilité. C'est pourquoi nous refusons les solutions clés en main imposées. Notre philosophie ? L'IA sur-mesure, introduite module par module. Nous avançons à votre rythme : on identifie, on déploie, on valide le retour sur investissement (ROI), et on forme vos équipes. Pas de saut dans le vide, juste une transition fluide et mesurée vers l'entreprise de demain. »"}
+              : "L'Intelligence Artificielle ne doit pas être une \"boîte noire\" intimidante ni une usine à gaz hors de prix. Chez BNE, nous savons que l'innovation n'a de sens que si elle sert l'humain et la rentabilité. C'est pourquoi nous refusons les solutions clés en main imposées. Notre philosophie ? L'IA sur-mesure, introduite module par module. Nous avançons à votre rythme : on identifie, on déploie, on valide le retour sur investissement (ROI), et on forme vos équipes. Pas de saut dans le vide, juste une transition fluide et mesurée vers l'entreprise de demain."}
+            <span className="text-[hsl(221,83%,53%)]/20 group-hover:text-[hsl(221,83%,53%)]/50 text-6xl absolute -bottom-8 -right-4 rotate-180 font-bold transition-colors duration-700">"</span>
+          </div>
+          
+          <p className="mt-10 tracking-[0.2em] uppercase text-xs font-bold relative z-10 group-hover:tracking-[0.3em] transition-all duration-700" style={{ color: "hsl(221 83% 53% / 0.8)" }}>
+            {isEn ? "The customized AI philosophy by BNE" : "La philosophie IA sur-mesure par BNE"}
           </p>
-        </div>
+        </motion.div>
       </section>
 
       <div className="ia-section-divider max-w-5xl mx-auto" />

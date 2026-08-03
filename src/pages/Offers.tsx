@@ -403,12 +403,20 @@ export default function Offers() {
                     )}
 
                     {o.id !== 'exclusive' && (
-                      <Link
-                        to={o.id === 'networking' ? "/sejour#a-venir" : "/contact"}
-                        className="btn-ghost-gold text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3 mt-auto transition-colors"
-                      >
-                        {t("offers.choose")} <ArrowRight size={14} />
-                      </Link>
+                      <div className="flex flex-col gap-3 mt-auto">
+                        <Link
+                          to={o.id === 'networking' ? "/sejours-bne" : "/accompagnement-bne"}
+                          className="w-full text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-sm flex items-center justify-center gap-2 transition-colors font-medium border border-blue-500/30"
+                        >
+                          En savoir plus <ArrowRight size={14} />
+                        </Link>
+                        <Link
+                          to={o.id === 'networking' ? "/sejour#a-venir" : "/contact"}
+                          className="btn-ghost-gold text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3 transition-colors"
+                        >
+                          {t("offers.choose")} <ArrowRight size={14} />
+                        </Link>
+                      </div>
                     )}
                   </div>
                 </div>

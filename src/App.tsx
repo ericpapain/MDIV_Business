@@ -28,6 +28,8 @@ import DemoFlow from "./pages/Demo/DemoFlow";
 import ServicesIA from "./pages/ServicesIA";
 import ServicesIACategory from "./pages/ServicesIACategory";
 import ServicesIADiagnostic from "./pages/ServicesIADiagnostic";
+import SejoursBNE from "./pages/SejoursBNE";
+import AccompagnementBNE from "./pages/AccompagnementBNE";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +58,8 @@ const App = () => (
                 <Route path="/services-ia" element={<ServicesIA />} />
                 <Route path="/services-ia/diagnostic" element={<ServicesIADiagnostic />} />
                 <Route path="/services-ia/:category" element={<ServicesIACategory />} />
+                <Route path="/sejours-bne" element={<SejoursBNE />} />
+                <Route path="/accompagnement-bne" element={<AccompagnementBNE />} />
               </Route>
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
