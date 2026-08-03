@@ -314,11 +314,57 @@
       "title2": "complices.",
       "sub": "Maisons d'exception qui partagent notre exigence du détail."
     },
-    "eyebrow": "Rejoindre le cercle",
-    "title1": "Devenir",
-    "title2": "Partenaire",
-    "desc": "Soumettez votre candidature pour rejoindre notre écosystème d'exception.",
+    "eyebrow": "Partenariat BNE",
+    "title1": "Devenir partenaire",
+    "title2": "BNE",
+    "subtitle": "Construisez et développez un écosystème entrepreneurial sur votre territoire",
+    "desc": "BNE accompagne les entrepreneurs, dirigeants et réseaux économiques dans la création de connexions à forte valeur entre territoires.",
+    "descP2": "Nous croyons que les plus grands projets naissent lorsque les bonnes personnes, les bonnes expertises et les bonnes opportunités se rencontrent.",
+    "descP3": "C'est pourquoi nous développons un réseau de partenaires locaux capables de faire vivre l'esprit BNE dans leur région, leur pays ou leur écosystème.",
+    "descP4": "Devenir partenaire BNE, c'est contribuer à créer des passerelles entre entrepreneurs, territoires et opportunités internationales.",
+    "section1": {
+      "title": "Un rôle de partenaire territorial",
+      "desc": "Nos partenaires sont les relais de l'écosystème BNE sur leur territoire.",
+      "descP2": "À l'image de nos référents locaux, ils participent à la construction et au développement des dynamiques BNE en apportant leur connaissance du terrain, leur réseau et leur capacité à connecter les acteurs économiques.",
+      "card1": "Identifier les entrepreneurs, dirigeants et acteurs économiques de son territoire.",
+      "card2": "Favoriser les rencontres qualifiées.",
+      "card3": "Participer à l'organisation des immersions et événements BNE.",
+      "card4": "Créer des connexions entre son territoire et les autres écosystèmes BNE.",
+      "card5": "Faire émerger de nouvelles opportunités de collaboration."
+    },
+    "section2": {
+      "title": "Ce que le partenariat BNE vous apporte",
+      "card1Title": "Une visibilité renforcée",
+      "card1Desc": "Vous devenez un acteur identifié de l'écosystème entrepreneurial de votre territoire. Vous bénéficiez d'une visibilité auprès d'un réseau international de dirigeants, entrepreneurs et partenaires engagés dans une démarche d'ouverture et de développement.",
+      "card2Title": "De nouvelles opportunités business",
+      "card2Desc": "Les rencontres BNE créent naturellement des opportunités. En connectant des entrepreneurs et des dirigeants, vous développez votre réseau, renforcez votre influence locale et pouvez identifier de nouvelles collaborations ou opportunités pour votre propre activité.",
+      "card3Title": "Une ouverture internationale",
+      "card3Desc": "BNE crée des ponts entre territoires. En rejoignant l'écosystème, vous accédez à une dynamique internationale réunissant des entrepreneurs et partenaires de différents horizons : Europe, Afrique, Amérique du Nord et autres territoires en développement.",
+      "card4Title": "Une création de valeur collective",
+      "card4Desc": "Un partenariat BNE n'est pas une simple relation commerciale. C'est une collaboration basée sur la confiance, la contribution et la création de valeur réciproque. Chaque partenaire apporte son expertise, son réseau et sa connaissance du territoire pour construire un écosystème plus fort ensemble."
+    },
+    "section3": {
+      "title": "Des partenaires engagés dans leur territoire",
+      "desc": "Chaque territoire possède ses propres forces, ses talents et ses opportunités.",
+      "descP2": "Le rôle de BNE est de créer le cadre permettant à ces ressources de se connecter et de se développer.",
+      "descP3": "Nos partenaires deviennent ainsi des acteurs essentiels dans la création de nouvelles relations économiques, entrepreneuriales et humaines."
+    },
+    "section4": {
+      "title": "Comment devenir partenaire BNE ?",
+      "desc": "Nous échangeons d'abord avec vous pour comprendre votre territoire, votre réseau et vos ambitions.",
+      "descP2": "Ensemble, nous définissons la meilleure manière de construire une dynamique BNE adaptée à votre environnement.",
+      "step1": "Échange découverte avec l'équipe BNE.",
+      "step2": "Analyse des opportunités sur votre territoire.",
+      "step3": "Définition du rôle et du modèle de collaboration.",
+      "step4": "Construction des premières actions.",
+      "step5": "Développement progressif de votre écosystème."
+    },
+    "sectionFinal": {
+      "title": "Vous souhaitez devenir un acteur du développement entrepreneurial de votre territoire ?",
+      "desc": "Contactez l'équipe BNE et échangeons sur les opportunités de collaboration."
+    },
     "form": {
+      "title": "Candidature Partenaire",
       "company": "Nom de l'entreprise",
       "sector": "Secteur d'activité",
       "name": "Votre Nom",
@@ -330,8 +376,9 @@
       "captchaError": "Veuillez vérifier que vous n'êtes pas un robot.",
       "newRequest": "Faire une nouvelle demande",
       "sent": "Candidature envoyée",
-      "submit": "Soumettre la candidature",
-      "success": "Votre demande a été préparée dans votre logiciel de messagerie."
+      "submit": "Envoyer votre demande",
+      "success": "Votre candidature a été envoyée avec succès. Nous reviendrons vers vous rapidement.",
+      "reassurance": "Vos informations sont traitées de manière confidentielle et uniquement dans le cadre de votre candidature."
     }
   },
   "media": {

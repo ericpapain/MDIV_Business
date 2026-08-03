@@ -5,7 +5,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 export function SiteFooter() {
   const { t } = useLanguage();
   return (
-    <footer className="relative border-t border-border mt-16">
+    <footer className="relative border-t border-border mt-4">
       <div className="container py-8 grid md:grid-cols-4 gap-8">
         <div className="md:col-span-2">
           <div className="flex items-center gap-3 mb-3">

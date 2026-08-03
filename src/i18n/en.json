@@ -314,11 +314,57 @@
       "title2": "accomplices.",
       "sub": "Exceptional houses that share our demand for detail."
     },
-    "eyebrow": "Join the circle",
-    "title1": "Become a",
+    "eyebrow": "BNE Partnership",
+    "title1": "Become a BNE",
     "title2": "Partner",
-    "desc": "Submit your application to join our exceptional ecosystem.",
+    "subtitle": "Build and develop an entrepreneurial ecosystem in your territory",
+    "desc": "BNE supports entrepreneurs, business leaders and economic networks in creating high-value connections between territories.",
+    "descP2": "We believe that the greatest projects emerge when the right people, the right expertise and the right opportunities come together.",
+    "descP3": "That is why we are developing a network of local partners capable of bringing the BNE spirit to life in their region, country or ecosystem.",
+    "descP4": "Becoming a BNE partner means contributing to building bridges between entrepreneurs, territories and international opportunities.",
+    "section1": {
+      "title": "A territorial partner role",
+      "desc": "Our partners are the local ambassadors of the BNE ecosystem in their territory.",
+      "descP2": "Like our local representatives, they participate in building and developing BNE dynamics by bringing their knowledge of the field, their network and their ability to connect economic players.",
+      "card1": "Identify entrepreneurs, business leaders and economic players in your territory.",
+      "card2": "Facilitate qualified meetings and connections.",
+      "card3": "Participate in organizing BNE immersions and events.",
+      "card4": "Create connections between your territory and other BNE ecosystems.",
+      "card5": "Generate new collaboration opportunities."
+    },
+    "section2": {
+      "title": "What the BNE partnership brings you",
+      "card1Title": "Enhanced visibility",
+      "card1Desc": "You become an identified player in the entrepreneurial ecosystem of your territory. You benefit from visibility among an international network of leaders, entrepreneurs and partners committed to openness and development.",
+      "card2Title": "New business opportunities",
+      "card2Desc": "BNE meetings naturally create opportunities. By connecting entrepreneurs and business leaders, you develop your network, strengthen your local influence and can identify new collaborations or opportunities for your own business.",
+      "card3Title": "International reach",
+      "card3Desc": "BNE builds bridges between territories. By joining the ecosystem, you access an international dynamic bringing together entrepreneurs and partners from different horizons: Europe, Africa, North America and other developing territories.",
+      "card4Title": "Collective value creation",
+      "card4Desc": "A BNE partnership is not just a commercial relationship. It is a collaboration based on trust, contribution and reciprocal value creation. Each partner brings their expertise, network and knowledge of the territory to build a stronger ecosystem together."
+    },
+    "section3": {
+      "title": "Partners committed to their territory",
+      "desc": "Every territory has its own strengths, talents and opportunities.",
+      "descP2": "The role of BNE is to create the framework that allows these resources to connect and grow.",
+      "descP3": "Our partners thus become essential players in creating new economic, entrepreneurial and human connections."
+    },
+    "section4": {
+      "title": "How to become a BNE partner?",
+      "desc": "We first discuss with you to understand your territory, your network and your ambitions.",
+      "descP2": "Together, we define the best way to build a BNE dynamic adapted to your environment.",
+      "step1": "Discovery meeting with the BNE team.",
+      "step2": "Analysis of opportunities in your territory.",
+      "step3": "Definition of the role and collaboration model.",
+      "step4": "Building the first actions.",
+      "step5": "Progressive development of your ecosystem."
+    },
+    "sectionFinal": {
+      "title": "Do you want to become a key player in the entrepreneurial development of your territory?",
+      "desc": "Contact the BNE team and let's discuss collaboration opportunities."
+    },
     "form": {
+      "title": "Partner Application",
       "company": "Company Name",
       "sector": "Sector of Activity",
       "name": "Your Name",
@@ -330,8 +376,9 @@
       "captchaError": "Please verify that you are not a robot.",
       "newRequest": "Make a new request",
       "sent": "Application sent",
-      "submit": "Submit Application",
-      "success": "Your request has been prepared in your email client."
+      "submit": "Send your request",
+      "success": "Your application has been sent successfully. We will get back to you shortly.",
+      "reassurance": "Your information is treated confidentially and solely within the scope of your application."
     }
   },
   "media": {

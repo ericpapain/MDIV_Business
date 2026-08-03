@@ -61,13 +61,13 @@ ${t("contact.form.msgOutro")}` : "";
         </div>
 
         <form
-          onSubmit={async (e) => { 
+          onSubmit={async (e) => {
             e.preventDefault();
             if (!captchaToken) {
               toast.error(t("contact.form.captchaError"));
               return;
             }
-             
+
             const fd = new FormData(e.currentTarget);
             const data = Object.fromEntries(fd.entries());
             const subject = data.subject || t("contact.form.emailSubject");
@@ -110,14 +110,14 @@ ${t("contact.form.msgOutro")}` : "";
               if (!resMicke.ok || !resultMicke.success || !resEric.ok || !resultEric.success) {
                 console.error("Web3Forms Erreur (Micke):", resultMicke);
                 console.error("Web3Forms Erreur (Eric):", resultEric);
-                
+
                 // Si la requête de Micke passe (même si Eric échoue), on valide
                 if (!resMicke.ok && !resultMicke.success) {
-                    throw new Error(resultMicke.message || "Erreur lors de l'envoi");
+                  throw new Error(resultMicke.message || "Erreur lors de l'envoi");
                 }
               }
 
-              setSent(true); 
+              setSent(true);
               toast.success(t("contact.form.success"));
             } catch (error: any) {
               console.error("Erreur détaillée lors de l'envoi:", error);
@@ -141,8 +141,8 @@ ${t("contact.form.msgOutro")}` : "";
             </div>
             <div className="flex flex-wrap gap-2">
               {[t("contact.form.p1"), t("contact.form.p2"), t("contact.form.p3"), t("contact.form.p4")].map((p) => (
-                <label 
-                  key={p} 
+                <label
+                  key={p}
                   className={`px-4 py-2 text-sm rounded-sm border cursor-pointer transition-colors ${selectedProfile === p ? 'border-gold bg-gold/10 text-gold' : 'border-border hover:border-gold/40'}`}
                 >
                   <input type="radio" name="profile" value={p} className="hidden" required onChange={() => setSelectedProfile(p)} /> {p}
@@ -156,7 +156,7 @@ ${t("contact.form.msgOutro")}` : "";
             )}
           </div>
           <Field label={t("contact.form.msg")} name="msg" textarea defaultValue={defaultMsg} required minLength={50} />
-          
+
           {!sent && (
             <div className="flex justify-center my-4">
               <HCaptcha
@@ -167,8 +167,8 @@ ${t("contact.form.msgOutro")}` : "";
           )}
 
           {sent ? (
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={(e) => {
                 setSent(false);
                 setSelectedProfile("");
