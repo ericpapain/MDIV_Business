@@ -11,25 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$host = 'zwpvaah279.mysql.db';
-$db   = 'zwpvaah279';
-$user = 'zwpvaah279';
-$pass = 'Champion2018';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
-
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (\PDOException $e) {
-    echo json_encode(['success' => false, 'error' => 'Erreur de connexion BDD']);
-    exit;
-}
+require_once 'api-config.php';
 
 // 1. Créer la table si elle n'existe pas
 $sqlCreate = "

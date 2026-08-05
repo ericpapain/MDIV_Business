@@ -185,15 +185,7 @@ export const testimonials: { name: string; role: string; quote: string; flagType
   // Les avis s'ajouteront ici
 ];
 
-export const leads = [
-  { id: "L-2401", name: "Julien Carrère", profile: "entrepreneur" as Profile, score: 92, budget: 4200, offer: "Investor Experience", status: "Qualifié", country: "France" },
-  { id: "L-2402", name: "Mei Tanaka", profile: "investor" as Profile, score: 88, budget: 9800, offer: "Premium Exclusive", status: "Contact privé", country: "Japon" },
-  { id: "L-2403", name: "Ahmed El Sayed", profile: "investor" as Profile, score: 76, budget: 6200, offer: "Investor Experience", status: "Qualifié", country: "UAE" },
-  { id: "L-2404", name: "Clara Voss", profile: "entrepreneur" as Profile, score: 64, budget: 1490, offer: "Networking Experience", status: "Nurturing", country: "Allemagne" },
-  { id: "L-2405", name: "Pablo Ortega", profile: "freelancer" as Profile, score: 41, budget: 900, offer: "Networking Experience", status: "Froid", country: "Espagne" },
-  { id: "L-2406", name: "Isabelle Granger", profile: "investor" as Profile, score: 95, budget: 12500, offer: "Premium Exclusive", status: "Closed", country: "Suisse" },
-  { id: "L-2407", name: "Yuki Sato", profile: "entrepreneur" as Profile, score: 73, budget: 3800, offer: "Investor Experience", status: "Qualifié", country: "Japon" },
-];
+
 
 export function computeFinalPrice(o: Offer) {
   const cost = o.costBreakdown.hotel + o.costBreakdown.dining + o.costBreakdown.activity + o.costBreakdown.commission;
@@ -206,17 +198,7 @@ export function recommendOffer(profile: Profile, objective: Objective, budget: n
   return offers[0];
 }
 
-export function computeLeadScore(profile: Profile, objective: Objective, budget: number, interests: string[], duration: number) {
-  let s = 30;
-  if (profile === "investor") s += 25;
-  if (profile === "entrepreneur") s += 18;
-  if (objective === "investment") s += 20;
-  if (objective === "networking") s += 12;
-  s += Math.min(25, Math.round(budget / 400));
-  s += Math.min(10, interests.length * 2);
-  s += Math.min(8, duration * 2);
-  return Math.min(99, s);
-}
+
 
 export const members = [
   { id: 1, name: "Rémy", role: "Dirigeant Agence web spécialisée dans la création de sites web et d'applications pour les indépendants et les PME", image: remy, flag: "🇧🇪", countryCode: "BE" },

@@ -1,8 +1,20 @@
 import { useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Calendar, MapPin, Sparkles, Users, ArrowRight, Crown, Check, Phone } from "lucide-react";
-import { computeLeadScore, recommendOffer, computeFinalPrice, experiences, testimonials } from "@/data/mockData";
+import { recommendOffer, computeFinalPrice, experiences, testimonials } from "@/data/mockData";
 import type { Profile, Objective } from "@/data/mockData";
+
+export function computeLeadScore(profile: Profile, objective: Objective, budget: number, interests: string[], duration: number) {
+  let s = 30;
+  if (profile === "investor") s += 25;
+  if (profile === "entrepreneur") s += 18;
+  if (objective === "investment") s += 20;
+  if (objective === "networking") s += 12;
+  s += Math.min(25, Math.round(budget / 400));
+  s += Math.min(10, interests.length * 2);
+  s += Math.min(8, duration * 2);
+  return Math.min(99, s);
+}
 
 export default function Result() {
   const [sp] = useSearchParams();
