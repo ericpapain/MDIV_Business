@@ -18,7 +18,7 @@ export function AdminLayout() {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetch("/api-auth.php?action=check", { credentials: "omit" })
+    fetch("/api-auth.php?action=check")
       .then(res => res.json())
       .then(data => {
         if (data.authenticated) {
@@ -34,7 +34,7 @@ export function AdminLayout() {
   }, [navigate]);
 
   const handleLogout = () => {
-    fetch("/api-auth.php?action=logout", { method: "POST", credentials: "omit" })
+    fetch("/api-auth.php?action=logout", { method: "POST" })
       .then(() => {
         toast({ title: "Déconnexion réussie" });
         navigate("/admin/login");

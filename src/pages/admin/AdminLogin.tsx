@@ -13,7 +13,7 @@ export default function AdminLogin() {
 
   useEffect(() => {
     // Vérifier si déjà connecté
-    fetch("/api-auth.php?action=check", { credentials: "omit" }) // TODO: utiliser include en prod
+    fetch("/api-auth.php?action=check")
       .then((res) => res.json())
       .then((data) => {
         if (data.authenticated) {
