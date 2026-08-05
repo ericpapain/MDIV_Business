@@ -1,20 +1,33 @@
-import { useState, useEffect } from "react";
-import { getMembers } from "@/data/mockData";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Loader2 } from "lucide-react";
 
 export function MembersCarousel() {
   const { t } = useLanguage();
-  const localizedMembers = getMembers(t);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [selectedMember, setSelectedMember] = useState<typeof localizedMembers[0] | null>(null);
+  const [selectedMember, setSelectedMember] = useState<any | null>(null);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % localizedMembers.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [localizedMembers.length]);
+  const { data: dbMembers, isLoading } = useQuery({
+    queryKey: ["public-members"],
+    queryFn: async () => {
+      const res = await fetch("/api-public.php?action=members");
+      const json = await res.json();
+      return json.data || [];
+    },
+  });
+
+  const localizedMembers = dbMembers || [];
+
+  if (isLoading) {
+    return (
+      <section className="container py-20 flex justify-center items-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gold" />
+      </section>
+    );
+  }
+
+  if (localizedMembers.length === 0) return null;
 
   return (
     <section className="container py-20 relative">
@@ -68,7 +81,7 @@ export function MembersCarousel() {
                       <img src={`https://flagcdn.com/w40/${member.countryCode.toLowerCase()}.png`} alt={member.countryCode} className="w-6 h-auto rounded-[2px]" />
                       <span className="text-sm font-bold text-foreground tracking-wider">{member.countryCode}</span>
                     </div>
-                    <img src={member.image} alt={member.name} className="w-full h-full object-contain" />
+                    <img src={member.image_url} alt={member.name} className="w-full h-full object-contain" />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
                     <div className="absolute bottom-6 left-6 right-6 text-center">
                       <h3 className="font-display text-2xl text-foreground mb-1">{member.name}</h3>
@@ -122,7 +135,7 @@ export function MembersCarousel() {
                 <span className="text-lg font-bold text-foreground tracking-wider">{selectedMember.countryCode}</span>
               </div>
               <img 
-                src={selectedMember.image} 
+                src={selectedMember.image_url} 
                 alt={selectedMember.name} 
                 className="w-full h-full object-contain" 
               />
