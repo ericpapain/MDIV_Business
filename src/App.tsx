@@ -21,9 +21,12 @@ import Avis from "./pages/Avis";
 import EventReplay from "./pages/EventReplay";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLogin from "./pages/admin/AdminLogin";
-import AdminMembers from "./pages/admin/AdminLeads"; // Will be renamed
+import AdminMembers from "./pages/admin/AdminMembers";
+import AdminPartners from "./pages/admin/AdminPartners";
+import AdminReviews from "./pages/admin/AdminReviews";
 import AdminVideos from "./pages/admin/AdminVideos";
 import AdminEvents from "./pages/admin/AdminEvents";
+import AdminSejours from "./pages/admin/AdminSejours";
 import AdminPricing from "./pages/admin/AdminPricing";
 import NotFound from "./pages/NotFound";
 import DemoFlow from "./pages/Demo/DemoFlow";
@@ -67,8 +70,11 @@ const App = () => (
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="members" element={<AdminMembers />} />
+                <Route path="partners" element={<AdminPartners />} />
                 <Route path="videos" element={<AdminVideos />} />
                 <Route path="events" element={<AdminEvents />} />
+                <Route path="sejours" element={<AdminSejours />} />
+                <Route path="reviews" element={<AdminReviews />} />
                 <Route path="tarification" element={<AdminPricing />} />
               </Route>
               <Route path="/demo" element={<DemoFlow />} />

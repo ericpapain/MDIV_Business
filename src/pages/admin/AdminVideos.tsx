@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Video, Loader2 } from "lucide-react";
+import { Plus, Trash2, Video, Loader2, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminVideos() {
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("general");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -18,12 +19,24 @@ export default function AdminVideos() {
     },
   });
 
+  const { data: eventsData } = useQuery({
+    queryKey: ["admin-events"],
+    queryFn: async () => {
+      const res = await fetch("/api-public.php?action=events");
+      const json = await res.json();
+      return json.data || { upcoming: [], past: [] };
+    },
+  });
+
+  // Combiner les événements et séjours
+  const allEvents = [...(eventsData?.upcoming || []), ...(eventsData?.past || [])];
+
   const addVideo = useMutation({
     mutationFn: async () => {
       const res = await fetch("/api-admin.php?action=add_video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, url }),
+        body: JSON.stringify({ title, url, category }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
@@ -33,6 +46,7 @@ export default function AdminVideos() {
       toast({ title: "Vidéo ajoutée avec succès" });
       setTitle("");
       setUrl("");
+      setCategory("general");
       queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
     },
     onError: (err: any) => {
@@ -55,6 +69,12 @@ export default function AdminVideos() {
     }
   });
 
+  const getEventName = (catId: string) => {
+    if (catId === "general") return "Général";
+    const ev = allEvents.find(e => e.id.toString() === catId);
+    return ev ? `${ev.type} : ${ev.title}` : "Inconnu";
+  };
+
   return (
     <div className="p-8 md:p-10">
       <div className="mb-8">
@@ -74,6 +94,15 @@ export default function AdminVideos() {
               <div>
                 <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Lien YouTube</label>
                 <input required value={url} onChange={e => setUrl(e.target.value)} type="url" placeholder="https://www.youtube.com/watch?v=..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Associer à</label>
+                <select value={category} onChange={e => setCategory(e.target.value)} className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm outline-none">
+                  <option value="general">Général (non associé)</option>
+                  {allEvents.map(ev => (
+                    <option key={ev.id} value={ev.id.toString()}>{ev.type} : {ev.title}</option>
+                  ))}
+                </select>
               </div>
               <button disabled={addVideo.isPending} className="w-full py-2.5 bg-gold text-background rounded-sm text-sm uppercase tracking-wider font-medium flex items-center justify-center gap-2 hover:bg-gold-light transition-colors">
                 {addVideo.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />} Ajouter à la playlist
@@ -97,11 +126,13 @@ export default function AdminVideos() {
                     </div>
                   </div>
                   <div className="p-4 flex justify-between items-start">
-                    <div>
+                    <div className="flex-1 pr-2">
                       <h3 className="font-medium text-sm line-clamp-1">{v.title}</h3>
-                      <p className="text-xs text-muted-foreground mt-1">ID: {v.youtubeId}</p>
+                      <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                        <Calendar size={12} /> {getEventName(v.category)}
+                      </div>
                     </div>
-                    <button onClick={() => { if(confirm("Supprimer cette vidéo ?")) deleteVideo.mutate(v.id); }} className="text-muted-foreground hover:text-destructive p-1 transition-colors">
+                    <button onClick={() => { if(confirm("Supprimer cette vidéo ?")) deleteVideo.mutate(v.id); }} className="text-muted-foreground hover:text-destructive p-1 transition-colors shrink-0">
                       <Trash2 size={16} />
                     </button>
                   </div>

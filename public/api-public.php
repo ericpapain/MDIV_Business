@@ -39,5 +39,23 @@ if ($action === 'events') {
     exit();
 }
 
+if ($action === 'members') {
+    $stmt = $pdo->query("SELECT * FROM members ORDER BY created_at ASC");
+    echo json_encode(['success' => true, 'data' => $stmt->fetchAll()]);
+    exit();
+}
+
+if ($action === 'partners') {
+    $stmt = $pdo->query("SELECT * FROM partners ORDER BY created_at ASC");
+    echo json_encode(['success' => true, 'data' => $stmt->fetchAll()]);
+    exit();
+}
+
+if ($action === 'reviews') {
+    $stmt = $pdo->query("SELECT id, nom as name, role, commentaire as quote, pays as country, note as rating, evenement as event FROM avis ORDER BY date_creation DESC");
+    echo json_encode(['success' => true, 'data' => $stmt->fetchAll()]);
+    exit();
+}
+
 http_response_code(400);
 echo json_encode(['success' => false, 'error' => 'Action inconnue']);
