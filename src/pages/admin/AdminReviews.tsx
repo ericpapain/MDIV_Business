@@ -83,7 +83,7 @@ export default function AdminReviews() {
           <div className="bg-muted/30 border border-border rounded-sm p-4">
             <h2 className="text-xl font-display mb-4">Liste des Avis</h2>
             <div className="space-y-3">
-              {data.map((r: any) => (
+              {data?.map((r: any) => (
                 <div key={r.id} className="p-4 bg-background border border-border/50 rounded-sm hover:border-gold/30 transition-colors">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">

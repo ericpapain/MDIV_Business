@@ -81,7 +81,7 @@ export default function AdminPartners() {
           <div className="bg-muted/30 border border-border rounded-sm p-4">
             <h2 className="text-xl font-display mb-4">Liste des Partenaires</h2>
             <div className="space-y-2">
-              {data.map((p: any) => (
+              {data?.map((p: any) => (
                 <div key={p.id} className="flex items-center justify-between p-3 bg-background border border-border/50 rounded-sm hover:border-gold/30 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-sm bg-gold/10 flex items-center justify-center text-gold">

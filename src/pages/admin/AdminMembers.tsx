@@ -85,7 +85,7 @@ export default function AdminMembers() {
           <div className="bg-muted/30 border border-border rounded-sm p-4">
             <h2 className="text-xl font-display mb-4">Liste des Membres</h2>
             <div className="space-y-2">
-              {data.map((m: any) => (
+              {data?.map((m: any) => (
                 <div key={m.id} className="flex items-center justify-between p-3 bg-background border border-border/50 rounded-sm hover:border-gold/30 transition-colors">
                   <div className="flex items-center gap-4">
                     {m.image_url && <img src={m.image_url} alt={m.name} className="w-10 h-10 rounded-full object-cover" />}
