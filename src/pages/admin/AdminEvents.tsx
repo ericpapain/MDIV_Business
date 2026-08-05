@@ -9,6 +9,7 @@ export default function AdminEvents() {
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("Événement");
+  const [imageUrl, setImageUrl] = useState("");
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -27,7 +28,7 @@ export default function AdminEvents() {
       const res = await fetch("/api-admin.php?action=add_event", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, date, location, description, type }),
+        body: JSON.stringify({ title, date, location, description, type, image_url: imageUrl }),
       });
       const d = await res.json();
       if (!d.success) throw new Error(d.error);
@@ -35,7 +36,7 @@ export default function AdminEvents() {
     },
     onSuccess: () => {
       toast({ title: "Événement créé avec succès" });
-      setTitle(""); setDate(""); setLocation(""); setDescription(""); setType("Événement");
+      setTitle(""); setDate(""); setLocation(""); setDescription(""); setType("Événement"); setImageUrl("");
       queryClient.invalidateQueries({ queryKey: ["admin-events"] });
     },
     onError: (err: any) => {
@@ -91,6 +92,10 @@ export default function AdminEvents() {
               <div>
                 <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Lieu (Ville, Pays ou Adresse)</label>
                 <input required value={location} onChange={e => setLocation(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Lien de l'image (Optionnel)</label>
+                <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} type="url" placeholder="https://... ou /assets/..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
               <div>
                 <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Description</label>

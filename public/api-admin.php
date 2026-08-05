@@ -84,9 +84,10 @@ if ($action === 'add_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $location = $data->location ?? '';
     $description = $data->description ?? '';
     $type = $data->type ?? 'Événement';
+    $image_url = $data->image_url ?? '';
     
-    $stmt = $pdo->prepare("INSERT INTO events (title, date, location, description, type) VALUES (?, ?, ?, ?, ?)");
-    if ($stmt->execute([$title, $date, $location, $description, $type])) {
+    $stmt = $pdo->prepare("INSERT INTO events (title, date, location, description, type, image_url) VALUES (?, ?, ?, ?, ?, ?)");
+    if ($stmt->execute([$title, $date, $location, $description, $type, $image_url])) {
         echo json_encode(['success' => true]);
     } else {
         http_response_code(500);
