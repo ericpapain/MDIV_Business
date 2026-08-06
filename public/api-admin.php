@@ -45,17 +45,17 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS events (
     type VARCHAR(50),
     price VARCHAR(100),
     billetterie_url VARCHAR(500),
-    program JSON,
+    program TEXT,
     status VARCHAR(50) DEFAULT 'upcoming',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
-// Migration: ajouter les colonnes si elles n'existent pas
-$pdo->exec("ALTER TABLE events ADD COLUMN IF NOT EXISTS price VARCHAR(100) DEFAULT NULL");
-$pdo->exec("ALTER TABLE events ADD COLUMN IF NOT EXISTS title_en VARCHAR(255) DEFAULT NULL");
-$pdo->exec("ALTER TABLE events ADD COLUMN IF NOT EXISTS description_en TEXT DEFAULT NULL");
-$pdo->exec("ALTER TABLE events ADD COLUMN IF NOT EXISTS billetterie_url VARCHAR(500) DEFAULT NULL");
-$pdo->exec("ALTER TABLE events ADD COLUMN IF NOT EXISTS program JSON DEFAULT NULL");
+// Migration: ajouter les colonnes si elles n'existent pas (compatible MySQL 5.x+)
+try { $pdo->exec("ALTER TABLE events ADD COLUMN price VARCHAR(100) DEFAULT NULL"); } catch(PDOException $e) {}
+try { $pdo->exec("ALTER TABLE events ADD COLUMN title_en VARCHAR(255) DEFAULT NULL"); } catch(PDOException $e) {}
+try { $pdo->exec("ALTER TABLE events ADD COLUMN description_en TEXT DEFAULT NULL"); } catch(PDOException $e) {}
+try { $pdo->exec("ALTER TABLE events ADD COLUMN billetterie_url VARCHAR(500) DEFAULT NULL"); } catch(PDOException $e) {}
+try { $pdo->exec("ALTER TABLE events ADD COLUMN program TEXT DEFAULT NULL"); } catch(PDOException $e) {}
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS members (
     id INT AUTO_INCREMENT PRIMARY KEY,
