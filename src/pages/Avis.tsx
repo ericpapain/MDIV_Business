@@ -4,6 +4,15 @@ import { Star, Send } from "lucide-react";
 import { toast } from "sonner";
 import { events } from "@/data/mockData";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { TestimonialFlag } from "@/components/site/TestimonialFlag";
+import { COUNTRIES } from "@/data/countries";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Review = {
   id: string;
@@ -20,6 +29,14 @@ export default function Avis() {
   const isEn = language === "en";
   const pastEvents = events.past || [];
   
+  const allCountries = [...COUNTRIES, { code: "autre", labelFr: "Autre", labelEn: "Other" }];
+
+  const sortedCountries = allCountries.sort((a, b) => {
+    const labelA = isEn ? a.labelEn : a.labelFr;
+    const labelB = isEn ? b.labelEn : b.labelFr;
+    return labelA.localeCompare(labelB);
+  });
+
   const [formData, setFormData] = useState({
     country: "",
     eventId: "",
@@ -73,6 +90,11 @@ export default function Avis() {
     const selectedEvent = pastEvents.find(ev => ev.id === formData.eventId);
     const validCode = selectedEvent ? selectedEvent.code : "BNE2026";
 
+    if (!formData.country) {
+      toast.error(isEn ? "Please select a country." : "Veuillez sélectionner un pays.");
+      return;
+    }
+    
     if (formData.code !== validCode) {
       toast.error(isEn ? "Invalid event code. Please check your invitation." : "Code événement invalide. Veuillez vérifier votre invitation.");
       return;
@@ -153,19 +175,28 @@ export default function Avis() {
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">{isEn ? "Country" : "Pays"}</div>
-              <select 
-                className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors text-foreground"
-                value={formData.country}
-                onChange={e => setFormData({...formData, country: e.target.value})}
-                required
+              <Select 
+                value={formData.country} 
+                onValueChange={(val) => setFormData({...formData, country: val})}
               >
-                <option value="" className="bg-[#0a0d0f]">{isEn ? "Select" : "Sélectionner"}</option>
-                <option value="France" className="bg-[#0a0d0f]">{isEn ? "France" : "France"}</option>
-                <option value="Suisse" className="bg-[#0a0d0f]">{isEn ? "Switzerland" : "Suisse"}</option>
-                <option value="Luxembourg" className="bg-[#0a0d0f]">{isEn ? "Luxembourg" : "Luxembourg"}</option>
-                <option value="Belgique" className="bg-[#0a0d0f]">{isEn ? "Belgium" : "Belgique"}</option>
-                <option value="Autre" className="bg-[#0a0d0f]">{isEn ? "Other" : "Autre"}</option>
-              </select>
+                <SelectTrigger className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 h-12 text-sm outline-none focus:border-gold/60 transition-colors text-foreground">
+                  <SelectValue placeholder={isEn ? "Select" : "Sélectionner"} />
+                </SelectTrigger>
+                <SelectContent className="bg-[#0a0d0f] border-border text-foreground z-[200] max-h-72">
+                  {sortedCountries.map((country) => (
+                    <SelectItem key={country.code} value={country.labelFr} className="focus:bg-gold/20 cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        {country.code !== "autre" ? (
+                           <TestimonialFlag type={country.code} className="w-5 h-5" />
+                        ) : (
+                           <div className="w-5 h-5 rounded-full border border-border bg-[#C5A059]" />
+                        )}
+                        <span>{isEn ? country.labelEn : country.labelFr}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div>
@@ -247,12 +278,7 @@ export default function Avis() {
         <div className="space-y-6">
           <h2 className="font-display text-3xl mb-6">{isEn ? "Latest reviews" : "Derniers avis"}</h2>
           {reviews.map((review) => {
-            let colors = ["#C5A059", "#0A0D0F", "#C5A059"];
             const c = review.country?.toLowerCase() || "";
-            if (c === "france") colors = ["#002654", "#ffffff", "#ed2939"];
-            else if (c === "belgique") colors = ["#000000", "#fdda24", "#ef3340"];
-            else if (c === "luxembourg") colors = ["#ed2939", "#ffffff", "#00a1de"]; // Technically horizontal, but works as 3 stripes
-            else if (c === "suisse") colors = ["#ff0000", "#ffffff", "#ff0000"];
 
             return (
               <div key={review.id} className="luxe-card p-8 rounded-sm animate-fade-up">
@@ -266,11 +292,7 @@ export default function Avis() {
                 
                 <div className="flex items-center gap-4 pt-4 border-t border-border">
                   {/* Dynamic Flag Avatar */}
-                  <div className={`shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-border/10 flex ${c === 'luxembourg' ? 'flex-col' : ''}`}>
-                    <div className="flex-1 h-full w-full" style={{ background: colors[0] }} />
-                    <div className="flex-1 h-full w-full" style={{ background: colors[1] }} />
-                    <div className="flex-1 h-full w-full" style={{ background: colors[2] }} />
-                  </div>
+                  <TestimonialFlag type={c} />
                   <div>
                     <div className="font-display text-base">{review.name}</div>
                     <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">{review.role}</div>

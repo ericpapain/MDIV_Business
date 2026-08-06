@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { ChevronLeft, ChevronRight, X, Loader2 } from "lucide-react";
@@ -18,6 +18,16 @@ export function MembersCarousel() {
   });
 
   const localizedMembers = dbMembers || [];
+
+  useEffect(() => {
+    if (localizedMembers.length === 0 || selectedMember) return;
+    
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % localizedMembers.length);
+    }, 3500); // Défilement toutes les 3.5 secondes
+    
+    return () => clearInterval(interval);
+  }, [localizedMembers.length, selectedMember]);
 
   if (isLoading) {
     return (

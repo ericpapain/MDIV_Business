@@ -10,44 +10,12 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { EventHero } from "@/components/event/EventHero";
 import { ChampagneEvent } from "@/components/event/ChampagneEvent";
 import { MembersCarousel } from "@/components/site/MembersCarousel";
+import { AnimatedClip } from "@/components/site/AnimatedClip";
 import { AboutBNE } from "@/components/site/AboutBNE";
+import { TestimonialFlag } from "@/components/site/TestimonialFlag";
 
 // Vidéo de paysage cinématographique hébergée sur Google Cloud Storage (sans restriction CORS ni hotlinking)
 const DEMO_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4";
-
-function TestimonialFlag({ type }: { type: string }) {
-  const base = "shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-border flex";
-
-  if (type === "france") {
-    return (
-      <div className={base}>
-        <div className="flex-1 h-full" style={{ background: "#002395" }} />
-        <div className="flex-1 h-full" style={{ background: "#FFFFFF" }} />
-        <div className="flex-1 h-full" style={{ background: "#ED2939" }} />
-      </div>
-    );
-  }
-  if (type === "suisse") {
-    return (
-      <div className={base} style={{ background: "#DA291C", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div className="relative w-[40%] h-[40%]">
-          <div className="absolute top-1/2 left-0 right-0 h-[25%] bg-white -translate-y-1/2" />
-          <div className="absolute left-1/2 top-0 bottom-0 bg-white -translate-x-1/2" style={{ width: "25%" }} />
-        </div>
-      </div>
-    );
-  }
-  if (type === "belgique") {
-    return (
-      <div className={base}>
-        <div className="flex-1 h-full" style={{ background: "#000000" }} />
-        <div className="flex-1 h-full" style={{ background: "#FAE042" }} />
-        <div className="flex-1 h-full" style={{ background: "#EF3340" }} />
-      </div>
-    );
-  }
-  return null;
-}
 
 const MONTHS_FR = ["JANV", "FÉVR", "MARS", "AVR", "MAI", "JUIN", "JUIL", "AOÛT", "SEPT", "OCT", "NOV", "DÉC"];
 const MONTHS_EN = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
@@ -359,12 +327,7 @@ export default function Home() {
         <SectionHeading eyebrow={t("home.testimonials.eyebrow")} title={t("home.testimonials.title")} center />
         <div className="grid md:grid-cols-3 gap-6">
           {(dbReviews.length > 0 ? dbReviews : testimonials).slice(0,3).map((tItem: any, idx) => {
-            let colors = ["#C5A059", "#0A0D0F", "#C5A059"];
             const c = (tItem.country || tItem.flagType)?.toLowerCase() || "";
-            if (c === "france") colors = ["#002654", "#ffffff", "#ed2939"];
-            else if (c === "belgique") colors = ["#000000", "#fdda24", "#ef3340"];
-            else if (c === "luxembourg") colors = ["#ed2939", "#ffffff", "#00a1de"];
-            else if (c === "suisse") colors = ["#ff0000", "#ffffff", "#ff0000"];
 
             return (
               <div key={tItem.id || idx} className="luxe-card p-8 rounded-sm">
@@ -376,11 +339,7 @@ export default function Home() {
                 )}
                 <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {tItem.quote || tItem.comment} »</p>
                 <div className="flex items-center gap-4 pt-4 border-t border-border">
-                  <div className={`shrink-0 w-12 h-12 rounded-full overflow-hidden shadow-lg border border-border flex ${c === 'luxembourg' ? 'flex-col' : ''}`}>
-                    <div className="flex-1 h-full w-full" style={{ background: colors[0] }} />
-                    <div className="flex-1 h-full w-full" style={{ background: colors[1] }} />
-                    <div className="flex-1 h-full w-full" style={{ background: colors[2] }} />
-                  </div>
+                  <TestimonialFlag type={c} />
                   <div>
                     <div className="font-display text-base">{tItem.name}</div>
                     <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">{tItem.role}</div>
@@ -396,6 +355,9 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* ANIMATION CLIP */}
+      <AnimatedClip />
     </div>
   );
 }
