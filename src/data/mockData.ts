@@ -6,7 +6,7 @@ import eventNetworking from "@/assets/original/tallk.jpg";
 import eventSummit from "@/assets/original/Pitch.jpg";
 import eventFondateur from "@/assets/original/fondateur.jpg";
 import eventImmobilier from "@/assets/original/immobilier.jpg";
-import eventAvenir from "@/assets/original/avenir.png";
+import eventAvenir from "@/assets/original/avenir.jpeg";
 import eventIndia from "@/assets/original/india.jpeg";
 import cerise from "@/assets/profils/cerise.jpg";
 import kassa from "@/assets/profils/kassa.jpg";
