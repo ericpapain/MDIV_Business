@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Crown, Users, Target, Diamond, Play, Star, Check, MapPin, ChevronDown } from "lucide-react";
@@ -46,6 +47,87 @@ function TestimonialFlag({ type }: { type: string }) {
     );
   }
   return null;
+}
+
+const MONTHS_FR = ["JANV", "FÉVR", "MARS", "AVR", "MAI", "JUIN", "JUIL", "AOÛT", "SEPT", "OCT", "NOV", "DÉC"];
+const MONTHS_EN = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+function AgendaBlock() {
+  const { t, language } = useLanguage();
+  const isEn = language === "en";
+
+  const { data: allEvents } = useQuery({
+    queryKey: ["home-agenda-events"],
+    queryFn: async () => {
+      const res = await fetch("/api-public.php?action=events");
+      const json = await res.json();
+      return json.data || { upcoming: [], past: [] };
+    }
+  });
+
+  // Merge and sort upcoming events from both types
+  const upcoming = (allEvents?.upcoming || [])
+    .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 3);
+
+  if (upcoming.length === 0) return null;
+
+  return (
+    <div className="lg:col-span-5 flex flex-col gap-4 mt-8 lg:mt-0 animate-fade-up" style={{ animationDelay: "0.3s" }}>
+      <div className="glass-strong p-6 rounded-sm relative corner-deco flex flex-col">
+        <div className="flex items-center justify-between mb-6">
+          <div className="eyebrow flex items-center gap-2 text-primary text-[14px]">
+            <Sparkles size={12} className="animate-pulse-soft" /> {t("home.agenda.eyebrow")}
+          </div>
+          <div className="text-[18px] uppercase tracking-[0.2em] text-gold/60 border border-gold/20 px-2 py-0.5 rounded-sm">
+            {t("home.agenda.limited")}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {upcoming.map((event: any, idx: number) => {
+            const d = new Date(event.date);
+            const day = d.getDate();
+            const month = isEn ? MONTHS_EN[d.getMonth()] : MONTHS_FR[d.getMonth()];
+            const displayTitle = isEn && event.title_en ? event.title_en : event.title;
+            const bookUrl = event.billetterie_url || "/contact";
+            const isExternal = event.billetterie_url && event.billetterie_url.startsWith("http");
+
+            return (
+              <div key={event.id} className="group relative">
+                {idx !== 0 && <div className="h-px bg-gradient-to-r from-transparent via-gold/15 to-transparent my-4" />}
+                <div className="flex gap-4 items-start">
+                  <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-sm bg-gold/5 border border-gold/10 group-hover:bg-gold/15 group-hover:border-gold/30 transition-colors duration-500">
+                    <span className="text-xl font-display text-gold-light leading-none font-bold">{day}</span>
+                    <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1 font-semibold">{month}</span>
+                  </div>
+                  <div className="flex-1 min-w-0 pt-0.5">
+                    <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-gold-light/70 mb-0.5">
+                      {event.type}
+                    </div>
+                    <h4 className="font-display text-lg md:text-xl mb-1 truncate text-foreground group-hover:text-gold-light transition-colors duration-300">{displayTitle}</h4>
+                    <div className="text-xs text-muted-foreground mb-3 flex items-start gap-1.5 leading-relaxed">
+                      <MapPin size={12} className="text-gold/60 shrink-0 mt-0.5" />
+                      <span>{event.location}</span>
+                    </div>
+                    {isExternal ? (
+                      <a href={bookUrl} target="_blank" rel="noopener noreferrer" className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-1.5 transition-colors w-fit font-medium">
+                        {t("home.agenda.reserve")} <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+                      </a>
+                    ) : (
+                      <Link to={bookUrl} className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-1.5 transition-colors w-fit font-medium">
+                        {t("home.agenda.reserve")} <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function Home() {
@@ -152,59 +234,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="lg:col-span-5 flex flex-col gap-4 mt-8 lg:mt-0 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-            <div className="glass-strong p-6 rounded-sm relative corner-deco flex flex-col">
-              <div className="flex items-center justify-between mb-6">
-                <div className="eyebrow flex items-center gap-2 text-primary text-[14px]">
-                  <Sparkles size={12} className="animate-pulse-soft" /> {t("home.agenda.eyebrow")}
-                </div>
-                <div className="text-[18px] uppercase tracking-[0.2em] text-gold/60 border border-gold/20 px-2 py-0.5 rounded-sm">
-                  {t("home.agenda.limited")}
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                {getEvents(t).upcoming.slice(0, 2).map((event: any, idx) => {
-                  const day = event.day || event.date.split(" ")[0];
-                  const month = event.month || event.date.split(" ").slice(-2)[0].substring(0, 4).toUpperCase();
-                  return (
-                    <div key={event.id} className="group relative">
-                      {idx !== 0 && <div className="h-px bg-gradient-to-r from-transparent via-gold/15 to-transparent my-4" />}
-                      <div className="flex gap-4 items-start">
-                        {/* Bloc Date */}
-                        <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-sm bg-gold/5 border border-gold/10 group-hover:bg-gold/15 group-hover:border-gold/30 transition-colors duration-500">
-                          <span className="text-xl font-display text-gold-light leading-none font-bold">{day}</span>
-                          <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1 font-semibold">{month}</span>
-                        </div>
- 
-                        {/* Contenu */}
-                        <div className="flex-1 min-w-0 pt-0.5">
-                          {event.type && (
-                            <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-gold-light/70 mb-0.5">
-                              {event.type}
-                            </div>
-                          )}
-                          <h4 className="font-display text-lg md:text-xl mb-1 truncate text-foreground group-hover:text-gold-light transition-colors duration-300">{event.title}</h4>
-                          <div className="text-xs text-muted-foreground mb-3 flex items-start gap-1.5 leading-relaxed">
-                            <MapPin size={12} className="text-gold/60 shrink-0 mt-0.5" /> 
-                            <span>{event.city}</span>
-                          </div>
-                          <Link
-                            to="/contact"
-                            className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-1.5 transition-colors w-fit font-medium"
-                          >
-                            {t("home.agenda.reserve")} <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-
-          </div>
+          <AgendaBlock />
         </div>
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 opacity-60">

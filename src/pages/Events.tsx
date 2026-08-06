@@ -1,37 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, MapPin, ArrowRight, Play, Loader2 } from "lucide-react";
+import { Calendar, MapPin, ArrowRight, Play, Loader2, ListChecks, Ticket } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
-
-function FlagCSS({ type }: { type: string }) {
-  const base = "shrink-0 w-8 h-8 rounded-full overflow-hidden shadow-lg border border-border/10";
-  if (!type) return null;
-  if (type === "France") {
-    return (
-      <div className={base} style={{ display: "flex" }}>
-        <div style={{ flex: 1, background: "#002395" }} />
-        <div style={{ flex: 1, background: "#FFFFFF" }} />
-        <div style={{ flex: 1, background: "#ED2939" }} />
-      </div>
-    );
-  }
-  if (type === "Suisse") {
-    return (
-      <div className={base} style={{ background: "#DA291C", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div className="relative w-[40%] h-[40%]">
-          <div className="absolute top-1/2 left-0 right-0 h-[25%] bg-white -translate-y-1/2" />
-          <div className="absolute left-1/2 top-0 bottom-0 bg-white -translate-x-1/2" style={{ width: "25%" }} />
-        </div>
-      </div>
-    );
-  }
-  return null;
-}
+import { ProgramPanel } from "@/components/site/ProgramPanel";
 
 export default function Events() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isEn = language === "en";
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [programEvent, setProgramEvent] = useState<any>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["public-events", "Événement"],
@@ -41,6 +19,11 @@ export default function Events() {
       return json.data || { upcoming: [], past: [] };
     }
   });
+
+  const getProgram = (e: any) => {
+    if (!e.program) return null;
+    return typeof e.program === 'string' ? JSON.parse(e.program) : e.program;
+  };
 
   return (
     <div className="pt-32 pb-20 container">
@@ -61,24 +44,62 @@ export default function Events() {
               </div>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {data?.upcoming.map((e: any) => (
-                <div key={e.id} className="luxe-card rounded-sm overflow-hidden group flex flex-col h-full min-h-[400px]">
-                  {e.image_url && (
-                    <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image_url)}>
-                      <img src={e.image_url} alt={e.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-                    </div>
-                  )}
-                  <div className="p-6 flex flex-col flex-1">
-                    <div className="font-mono text-xs text-gold-light flex items-center gap-2 mb-3"><Calendar size={12} /> {new Date(e.date).toLocaleDateString()} <span className="text-muted-foreground">·</span> <MapPin size={12} /> {e.location}</div>
-                    <div className="font-display text-2xl mb-2">{e.title}</div>
-                    <div className="text-sm text-muted-foreground mb-4 leading-relaxed whitespace-pre-line">{e.description}</div>
-                    <div className="mt-auto pt-5">
-                      <Link to="/contact" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">{t("common.request_invite")} <ArrowRight size={12} /></Link>
+              {data?.upcoming.map((e: any) => {
+                const prog = getProgram(e);
+                const hasProgram = prog && prog.length > 0;
+                return (
+                  <div key={e.id} className="luxe-card rounded-sm overflow-hidden group flex flex-col h-full min-h-[400px]">
+                    {e.image_url && (
+                      <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image_url)}>
+                        <img src={e.image_url} alt={isEn && e.title_en ? e.title_en : e.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                        {/* Badge prix */}
+                        {e.price && (
+                          <div className="absolute top-4 left-4 bg-gold/90 text-background px-3 py-1.5 rounded-sm text-sm font-bold shadow-lg">
+                            {e.price}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className="p-6 flex flex-col flex-1">
+                      <div className="font-mono text-xs text-gold-light flex items-center gap-2 mb-3"><Calendar size={12} /> {new Date(e.date).toLocaleDateString()} <span className="text-muted-foreground">·</span> <MapPin size={12} /> {e.location}</div>
+                      <div className="font-display text-2xl mb-2">{isEn && e.title_en ? e.title_en : e.title}</div>
+                      <div className="text-sm text-muted-foreground mb-4 leading-relaxed whitespace-pre-line">{isEn && e.description_en ? e.description_en : e.description}</div>
+                      
+                      {/* Prix si pas d'image */}
+                      {e.price && !e.image_url && (
+                        <div className="mb-4">
+                          <span className="inline-block bg-gold/10 border border-gold/20 text-gold px-3 py-1 rounded-sm text-sm font-semibold">{e.price}</span>
+                        </div>
+                      )}
+
+                      <div className="mt-auto pt-5 flex flex-col gap-3">
+                        {/* Bouton Réserver */}
+                        {e.billetterie_url ? (
+                          <a href={e.billetterie_url} target="_blank" rel="noopener noreferrer" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
+                            <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                          </a>
+                        ) : (
+                          <Link to="/contact" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
+                            <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                          </Link>
+                        )}
+
+                        {/* Bouton Programme */}
+                        {hasProgram ? (
+                          <button onClick={() => setProgramEvent(e)} className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-2 transition-colors w-fit font-medium">
+                            <ListChecks size={14} /> {isEn ? "View program" : "Voir le programme"}
+                          </button>
+                        ) : (
+                          <span className="text-xs uppercase tracking-[0.2em] text-foreground/30 flex items-center gap-2 select-none cursor-not-allowed w-fit">
+                            <ListChecks size={14} className="opacity-30" /> {isEn ? "Program coming soon" : "Programme à venir"}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-              {data?.upcoming.length === 0 && <p className="text-muted-foreground col-span-full">Aucun événement à venir pour le moment.</p>}
+                );
+              })}
+              {data?.upcoming.length === 0 && <p className="text-muted-foreground col-span-full">{isEn ? "No upcoming events." : "Aucun événement à venir pour le moment."}</p>}
             </div>
           </div>
 
@@ -92,19 +113,25 @@ export default function Events() {
                 <div key={e.id} className="luxe-card rounded-sm overflow-hidden group opacity-90 hover:opacity-100 flex flex-col relative h-full min-h-[400px]">
                   {e.image_url && (
                     <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image_url)}>
-                      <img src={e.image_url} alt={e.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                      <img src={e.image_url} alt={isEn && e.title_en ? e.title_en : e.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
                     </div>
                   )}
                   <div className="p-6 flex flex-col flex-1">
                     <div className="font-mono text-xs text-gold-light flex items-center gap-2 mb-3">
                       <Calendar size={12} /> {new Date(e.date).toLocaleDateString()} <span className="text-muted-foreground">·</span> <MapPin size={12} /> {e.location}
                     </div>
-                    <div className="font-display text-2xl mb-2">{e.title}</div>
-                    <div className="text-sm text-muted-foreground mb-4 leading-relaxed whitespace-pre-line">{e.description}</div>
+                    <div className="font-display text-2xl mb-2">{isEn && e.title_en ? e.title_en : e.title}</div>
+                    <div className="text-sm text-muted-foreground mb-4 leading-relaxed whitespace-pre-line">{isEn && e.description_en ? e.description_en : e.description}</div>
+                  
+                    <div className="mt-auto pt-5 border-t border-gold/10">
+                      <Link to={`/revivre/${e.id}`} className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-2 transition-colors w-fit">
+                        <Play size={14} /> {t("common.replay")}
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))}
-              {data?.past.length === 0 && <p className="text-muted-foreground col-span-full">Aucun événement passé pour le moment.</p>}
+              {data?.past.length === 0 && <p className="text-muted-foreground col-span-full">{isEn ? "No past events." : "Aucun événement passé pour le moment."}</p>}
             </div>
           </div>
         </>
@@ -116,6 +143,17 @@ export default function Events() {
             <img src={selectedImage} alt="Agrandissement" className="max-w-full max-h-full object-contain rounded-sm border border-gold/30 shadow-2xl" />
           </div>
         </div>
+      )}
+
+      {/* Programme Panel */}
+      {programEvent && (
+        <ProgramPanel
+          isOpen={true}
+          onClose={() => setProgramEvent(null)}
+          eventTitle={programEvent.title}
+          eventTitleEn={programEvent.title_en}
+          program={typeof programEvent.program === 'string' ? JSON.parse(programEvent.program) : programEvent.program}
+        />
       )}
     </div>
   );

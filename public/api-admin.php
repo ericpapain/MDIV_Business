@@ -36,14 +36,26 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS videos (
 $pdo->exec("CREATE TABLE IF NOT EXISTS events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255),
+    title_en VARCHAR(255),
     date DATETIME,
     location VARCHAR(255),
     description TEXT,
+    description_en TEXT,
     image_url VARCHAR(255),
     type VARCHAR(50),
+    price VARCHAR(100),
+    billetterie_url VARCHAR(500),
+    program JSON,
     status VARCHAR(50) DEFAULT 'upcoming',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+// Migration: ajouter les colonnes si elles n'existent pas
+$pdo->exec("ALTER TABLE events ADD COLUMN IF NOT EXISTS price VARCHAR(100) DEFAULT NULL");
+$pdo->exec("ALTER TABLE events ADD COLUMN IF NOT EXISTS title_en VARCHAR(255) DEFAULT NULL");
+$pdo->exec("ALTER TABLE events ADD COLUMN IF NOT EXISTS description_en TEXT DEFAULT NULL");
+$pdo->exec("ALTER TABLE events ADD COLUMN IF NOT EXISTS billetterie_url VARCHAR(500) DEFAULT NULL");
+$pdo->exec("ALTER TABLE events ADD COLUMN IF NOT EXISTS program JSON DEFAULT NULL");
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS members (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -100,9 +112,12 @@ if ($action === 'delete_video' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($action === 'add_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $data->title ?? ''; $date = $data->date ?? ''; $location = $data->location ?? '';
     $description = $data->description ?? ''; $type = $data->type ?? 'Événement'; $image_url = $data->image_url ?? '';
+    $price = $data->price ?? ''; $title_en = $data->title_en ?? ''; $description_en = $data->description_en ?? '';
+    $billetterie_url = $data->billetterie_url ?? '';
+    $program = isset($data->program) ? json_encode($data->program) : null;
     
-    $stmt = $pdo->prepare("INSERT INTO events (title, date, location, description, type, image_url) VALUES (?, ?, ?, ?, ?, ?)");
-    if ($stmt->execute([$title, $date, $location, $description, $type, $image_url])) echo json_encode(['success' => true]);
+    $stmt = $pdo->prepare("INSERT INTO events (title, title_en, date, location, description, description_en, type, image_url, price, billetterie_url, program) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    if ($stmt->execute([$title, $title_en, $date, $location, $description, $description_en, $type, $image_url, $price, $billetterie_url, $program])) echo json_encode(['success' => true]);
     else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
     exit();
 }
@@ -110,9 +125,12 @@ if ($action === 'add_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($action === 'edit_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $data->id ?? 0; $title = $data->title ?? ''; $date = $data->date ?? ''; $location = $data->location ?? '';
     $description = $data->description ?? ''; $type = $data->type ?? 'Événement'; $image_url = $data->image_url ?? '';
+    $price = $data->price ?? ''; $title_en = $data->title_en ?? ''; $description_en = $data->description_en ?? '';
+    $billetterie_url = $data->billetterie_url ?? '';
+    $program = isset($data->program) ? json_encode($data->program) : null;
     
-    $stmt = $pdo->prepare("UPDATE events SET title=?, date=?, location=?, description=?, type=?, image_url=? WHERE id=?");
-    if ($stmt->execute([$title, $date, $location, $description, $type, $image_url, $id])) echo json_encode(['success' => true]);
+    $stmt = $pdo->prepare("UPDATE events SET title=?, title_en=?, date=?, location=?, description=?, description_en=?, type=?, image_url=?, price=?, billetterie_url=?, program=? WHERE id=?");
+    if ($stmt->execute([$title, $title_en, $date, $location, $description, $description_en, $type, $image_url, $price, $billetterie_url, $program, $id])) echo json_encode(['success' => true]);
     else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
     exit();
 }

@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Play, Quote, X } from "lucide-react";
-import { events, images } from "@/data/mockData";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import mickePhoto from "@/assets/original/CEO.jpg";
@@ -17,7 +17,20 @@ export default function EventReplay() {
     window.scrollTo(0, 0);
   }, [id]);
 
-  const event = events.past.find(e => e.id === id);
+  const { data: dbEvents, isLoading } = useQuery({
+    queryKey: ["public-events"],
+    queryFn: async () => {
+      const res = await fetch("/api-public.php?action=events");
+      const json = await res.json();
+      return json.data || { upcoming: [], past: [] };
+    }
+  });
+
+  if (isLoading) {
+    return <div className="pt-40 pb-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" /></div>;
+  }
+
+  const event = dbEvents?.past.find((e: any) => e.id.toString() === id?.toString());
 
   if (!event) {
   
@@ -71,7 +84,7 @@ const immersionVideos = [
             {event.title}
           </h1>
           <div className="font-mono text-xs uppercase tracking-[0.2em] text-gold-light mb-5 drop-shadow-md">
-            {event.date} · {event.city}
+            {new Date(event.date).toLocaleDateString()} · {event.location}
           </div>
           <Link to="/evenements" className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-foreground/80 hover:text-foreground transition-colors border border-border/20 px-4 py-2 rounded-sm bg-black/40 dark:bg-black/40 bg-foreground/20 backdrop-blur-md">
             <ArrowLeft size={10} /> Retour aux événements
