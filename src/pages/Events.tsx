@@ -34,9 +34,9 @@ export default function Events() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["public-events"],
+    queryKey: ["public-events", "Événement"],
     queryFn: async () => {
-      const res = await fetch("/api-public.php?action=events");
+      const res = await fetch("/api-public.php?action=events&type=Événement");
       const json = await res.json();
       return json.data || { upcoming: [], past: [] };
     }

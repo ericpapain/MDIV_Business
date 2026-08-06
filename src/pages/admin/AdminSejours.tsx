@@ -110,7 +110,7 @@ export default function AdminSejours() {
               </div>
               <div>
                 <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Lien de l'image (Optionnel)</label>
-                <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} type="url" placeholder="https://... ou /assets/..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+                <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} type="text" placeholder="/assets/image.jpg ou https://..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
               <div>
                 <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Description</label>

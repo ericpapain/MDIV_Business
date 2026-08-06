@@ -1,4 +1,5 @@
 import { getEvents } from "@/data/mockData";
+import { useQuery } from "@tanstack/react-query";
 import { Calendar, MapPin, ArrowRight, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -98,7 +99,16 @@ function Countdown({ targetDateStr }: { targetDateStr: string }) {
 export default function Sejour() {
   const { t } = useLanguage();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const localizedEvents = getEvents(t);
+  const { data: dbEvents, isLoading } = useQuery({
+    queryKey: ["public-events", "Séjour"],
+    queryFn: async () => {
+      const res = await fetch("/api-public.php?action=events&type=Séjour");
+      const json = await res.json();
+      return json.data || { upcoming: [], past: [] };
+    }
+  });
+
+  const localizedEvents = dbEvents || { upcoming: [], past: [] };
 
   return (
     <div className="pt-32 pb-20 container">
@@ -111,29 +121,26 @@ export default function Sejour() {
         <div className="flex items-end justify-between mb-8" id="a-venir">
           <h2 className="font-display text-3xl">{t("sejour.upcoming.title")}</h2>
           <div className="text-[11px] uppercase tracking-[0.22em] text-primary">
-            {localizedEvents.upcoming.length} {localizedEvents.upcoming.length > 1 ? t("sejour.upcoming.subtitle_events") : t("sejour.upcoming.subtitle_event")} {localizedEvents.upcoming.length > 1 ? t("sejour.upcoming.subtitle_open_pl") : t("sejour.upcoming.subtitle_open_sg")}
+            {localizedEvents.upcoming.length} {localizedEvents.upcoming.length > 1 ? t("sejour.upcoming.subtitle_events") : t("sejour.upcoming.subtitle_event")}
           </div>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {localizedEvents.upcoming.filter((e: any) => e.id === "u2").map((e: any) => (
+          {localizedEvents.upcoming.map((e: any) => (
             <div key={e.id} className="luxe-card rounded-sm overflow-hidden group flex flex-col h-full min-h-[560px]">
-              <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image)}>
-                <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-                {e.country && (
-                  <div className="absolute top-4 left-4 z-10">
-                    <FlagCSS type={e.country} />
+              {e.image_url && (
+                <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image_url)}>
+                  <img src={e.image_url} alt={e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                  <div className="absolute top-4 right-4 glass-strong px-3 py-1.5 rounded-sm text-[10px] uppercase tracking-[0.2em] text-gold-light flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-soft" /> {t("sejour.upcoming.open")}
                   </div>
-                )}
-                <div className="absolute top-4 right-4 glass-strong px-3 py-1.5 rounded-sm text-[10px] uppercase tracking-[0.2em] text-gold-light flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-soft" /> {t("sejour.upcoming.open")}
                 </div>
-              </div>
+              )}
               <div className="p-6 flex flex-col flex-1">
-                <div className="font-mono text-xs text-gold-light flex items-center gap-2 mb-3"><Calendar size={12} /> {e.date} <span className="text-muted-foreground">·</span> <MapPin size={12} /> {e.city}</div>
+                <div className="font-mono text-xs text-gold-light flex items-center gap-2 mb-3"><Calendar size={12} /> {new Date(e.date).toLocaleDateString()} <span className="text-muted-foreground">·</span> <MapPin size={12} /> {e.location}</div>
                 <div className="font-display text-2xl mb-2">{e.title}</div>
-                <div className="text-sm text-muted-foreground mb-4 leading-relaxed">{e.desc}</div>
+                <div className="text-sm text-muted-foreground mb-4 leading-relaxed whitespace-pre-line">{e.description}</div>
                 
-                <Countdown targetDateStr={e.targetDate} />
+                <Countdown targetDateStr={e.date} />
 
                 <div className="mt-auto pt-5">
                   <Link to="/contact" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">{t("common.request_invite")} <ArrowRight size={12} /></Link>
@@ -141,6 +148,7 @@ export default function Sejour() {
               </div>
             </div>
           ))}
+          {localizedEvents.upcoming.length === 0 && <p className="text-muted-foreground col-span-full">Aucun séjour à venir pour le moment.</p>}
         </div>
       </div>
 
@@ -150,37 +158,23 @@ export default function Sejour() {
           <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{t("sejour.past.subtitle")}</div>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {localizedEvents.past.filter((e: any) => e.id === "p1").map((e: any) => (
+          {localizedEvents.past.map((e: any) => (
             <div key={e.id} className="luxe-card rounded-sm overflow-hidden group opacity-90 hover:opacity-100 flex flex-col relative h-full min-h-[560px]">
-                <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image)}>
-                  <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
-                  {e.country && (
-                    <div className="absolute top-4 left-4 z-10">
-                      <FlagCSS type={e.country} />
-                    </div>
-                  )}
-                </div>
+                {e.image_url && (
+                  <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image_url)}>
+                    <img src={e.image_url} alt={e.title} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                  </div>
+                )}
                 <div className="p-6 flex flex-col flex-1">
                   <div className="font-mono text-xs text-gold-light flex items-center gap-2 mb-3">
-                    <Calendar size={12} /> {e.date} <span className="text-muted-foreground">·</span> <MapPin size={12} /> {e.city}
+                    <Calendar size={12} /> {new Date(e.date).toLocaleDateString()} <span className="text-muted-foreground">·</span> <MapPin size={12} /> {e.location}
                   </div>
                   <div className="font-display text-2xl mb-2">{e.title}</div>
-                  <div className="text-sm text-muted-foreground mb-4 leading-relaxed">{e.desc}</div>
-                  
-                  <div className="mt-auto pt-5 border-t border-gold/10">
-                    {e.hasReplay !== false ? (
-                      <Link to={`/revivre/${e.id}`} className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-2 transition-colors w-fit">
-                        <Play size={14} /> {t("common.replay")}
-                      </Link>
-                    ) : (
-                      <span className="text-xs uppercase tracking-[0.2em] text-foreground/30 flex items-center gap-2 select-none cursor-not-allowed w-fit">
-                        <Play size={14} className="opacity-30" /> {t("common.no_replay")}
-                      </span>
-                    )}
-                  </div>
+                  <div className="text-sm text-muted-foreground mb-4 leading-relaxed whitespace-pre-line">{e.description}</div>
                 </div>
               </div>
             ))}
+            {localizedEvents.past.length === 0 && <p className="text-muted-foreground col-span-full">Aucun séjour passé pour le moment.</p>}
         </div>
       </div>
 

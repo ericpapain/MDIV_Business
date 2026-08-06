@@ -21,12 +21,15 @@ if ($action === 'videos') {
 }
 
 if ($action === 'events') {
+    $type = isset($_GET['type']) ? $_GET['type'] : null;
+    $typeFilter = $type ? " AND type = " . $pdo->quote($type) : "";
+    
     // upcoming
-    $stmtUp = $pdo->query("SELECT * FROM events WHERE date >= NOW() ORDER BY date ASC");
+    $stmtUp = $pdo->query("SELECT * FROM events WHERE date >= NOW() $typeFilter ORDER BY date ASC");
     $upcoming = $stmtUp->fetchAll();
     
     // past
-    $stmtPast = $pdo->query("SELECT * FROM events WHERE date < NOW() ORDER BY date DESC");
+    $stmtPast = $pdo->query("SELECT * FROM events WHERE date < NOW() $typeFilter ORDER BY date DESC");
     $past = $stmtPast->fetchAll();
     
     echo json_encode([
