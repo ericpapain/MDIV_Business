@@ -67,7 +67,7 @@ $row = $stmtCount->fetch();
 $totalVisits = $row['total'];
 
 // Renvoyer le total (plus 234 par défaut pour garder l'historique visuellement)
-$baseCount = 234;
+$baseCount = 700;
 $displayCount = $baseCount + $totalVisits;
 
 echo json_encode([
