@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 import { Star, Send } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { events } from "@/data/mockData";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -27,7 +28,8 @@ type Review = {
 export default function Avis() {
   const { language } = useLanguage();
   const isEn = language === "en";
-  const pastEvents = events.past || [];
+  const localPastEvents = events.past || [];
+  const [dbEvents, setDbEvents] = useState<any[]>([]);
   
   const allCountries = [...COUNTRIES, { code: "autre", labelFr: "Autre", labelEn: "Other" }];
 
@@ -56,7 +58,21 @@ export default function Avis() {
 
   useEffect(() => {
     fetchReviews();
+    fetchAllEvents();
   }, []);
+
+  const fetchAllEvents = async () => {
+    try {
+      const response = await fetch("https://mdiv-network.com/api-public.php?action=events");
+      if (!response.ok) throw new Error("Erreur réseau");
+      const result = await response.json();
+      if (result.data && result.data.length > 0) {
+        setDbEvents(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
 
   const fetchReviews = async () => {
     try {
@@ -87,8 +103,11 @@ export default function Avis() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedEvent = pastEvents.find(ev => ev.id === formData.eventId);
-    const validCode = selectedEvent ? selectedEvent.code : "BNE2026";
+    const allPastEvents = dbEvents.length > 0 
+      ? dbEvents.filter((ev: any) => new Date(ev.target_date || ev.date) < new Date())
+      : localPastEvents;
+    const selectedEvent = allPastEvents.find((ev: any) => (ev.id?.toString()) === formData.eventId);
+    const validCode = selectedEvent ? (selectedEvent.code || selectedEvent.code_evenement || "BNE2026") : "BNE2026";
 
     if (!formData.country) {
       toast.error(isEn ? "Please select a country." : "Veuillez sélectionner un pays.");
@@ -100,7 +119,10 @@ export default function Avis() {
       return;
     }
     
-    const selectedEventTitle = pastEvents.find(ev => ev.id === formData.eventId)?.title || (isEn ? "BNE Event" : "Événement BNE");
+    const allPastEventsForTitle = dbEvents.length > 0 
+      ? dbEvents.filter((ev: any) => new Date(ev.target_date || ev.date) < new Date())
+      : localPastEvents;
+    const selectedEventTitle = allPastEventsForTitle.find((ev: any) => (ev.id?.toString()) === formData.eventId)?.title || (isEn ? "BNE Event" : "Événement BNE");
     setSent(true);
     
     try {
@@ -208,8 +230,11 @@ export default function Avis() {
                 required
               >
                 <option value="" className="bg-[#0a0d0f]">{isEn ? "Select an event" : "Sélectionner un événement"}</option>
-                {pastEvents.map(ev => (
-                  <option key={ev.id} value={ev.id} className="bg-[#0a0d0f]">{ev.title} ({ev.city})</option>
+                {(dbEvents.length > 0 
+                  ? dbEvents.filter((ev: any) => new Date(ev.target_date || ev.date) < new Date())
+                  : localPastEvents
+                ).map((ev: any) => (
+                  <option key={ev.id} value={ev.id.toString()} className="bg-[#0a0d0f]">{ev.title} ({ev.city || ev.lieu})</option>
                 ))}
               </select>
             </div>
@@ -287,7 +312,17 @@ export default function Avis() {
                     <Star key={i} size={12} fill={i < review.rating ? "currentColor" : "none"} className={i >= review.rating ? "text-muted" : ""} />
                   ))}
                 </div>
-                <div className="text-xs text-gold-light mb-4 uppercase tracking-[0.1em]">{review.event}</div>
+                {(() => {
+                  const matchingEvent = dbEvents.find((ev: any) => ev.title === review.event);
+                  if (matchingEvent) {
+                    return (
+                      <Link to={`/revivre/${matchingEvent.id}`} className="text-xs text-gold-light mb-4 uppercase tracking-[0.1em] hover:text-gold transition-colors underline underline-offset-2 decoration-gold/30 hover:decoration-gold block">
+                        {review.event} →
+                      </Link>
+                    );
+                  }
+                  return <div className="text-xs text-gold-light mb-4 uppercase tracking-[0.1em]">{review.event}</div>;
+                })()}
                 <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {review.comment} »</p>
                 
                 <div className="flex items-center gap-4 pt-4 border-t border-border">

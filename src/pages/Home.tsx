@@ -13,6 +13,7 @@ import { MembersCarousel } from "@/components/site/MembersCarousel";
 import { AnimatedClip } from "@/components/site/AnimatedClip";
 import { AboutBNE } from "@/components/site/AboutBNE";
 import { TestimonialFlag } from "@/components/site/TestimonialFlag";
+import { TestimonialsCarousel } from "@/components/site/TestimonialsCarousel";
 
 // Vidéo de paysage cinématographique hébergée sur Google Cloud Storage (sans restriction CORS ni hotlinking)
 const DEMO_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4";
@@ -323,38 +324,7 @@ export default function Home() {
       </section> */}
 
       {/* TESTIMONIALS */}
-      <section className="container py-16">
-        <SectionHeading eyebrow={t("home.testimonials.eyebrow")} title={t("home.testimonials.title")} center />
-        <div className="grid md:grid-cols-3 gap-6">
-          {(dbReviews.length > 0 ? dbReviews : testimonials).slice(0,3).map((tItem: any, idx) => {
-            const c = (tItem.country || tItem.flagType)?.toLowerCase() || "";
-
-            return (
-              <div key={tItem.id || idx} className="luxe-card p-8 rounded-sm">
-                <div className="flex gap-1 mb-5 text-primary">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={12} fill={i < (tItem.rating || 5) ? "currentColor" : "none"} className={i >= (tItem.rating || 5) ? "text-muted" : ""} />)}
-                </div>
-                {tItem.event && (
-                  <div className="text-xs text-gold-light mb-4 uppercase tracking-[0.1em]">{tItem.event}</div>
-                )}
-                <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {tItem.quote || tItem.comment} »</p>
-                <div className="flex items-center gap-4 pt-4 border-t border-border">
-                  <TestimonialFlag type={c} />
-                  <div>
-                    <div className="font-display text-base">{tItem.name}</div>
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">{tItem.role}</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="flex justify-center mt-12">
-          <Link to="/avis" className="btn-ghost-gold inline-flex px-8 py-3.5 text-[10px] uppercase tracking-[0.24em] rounded-sm items-center gap-3">
-            {t("home.testimonials.btn")} <ArrowRight size={14} />
-          </Link>
-        </div>
-      </section>
+      <TestimonialsCarousel reviews={dbReviews.length > 0 ? dbReviews : testimonials} />
 
       {/* ANIMATION CLIP */}
       <AnimatedClip />
