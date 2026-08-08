@@ -66,8 +66,12 @@ export default function Avis() {
       const response = await fetch("https://mdiv-network.com/api-public.php?action=events");
       if (!response.ok) throw new Error("Erreur réseau");
       const result = await response.json();
-      if (result.data && result.data.length > 0) {
-        setDbEvents(result.data);
+      if (result.data) {
+        if (!Array.isArray(result.data)) {
+           setDbEvents([...(result.data.upcoming || []), ...(result.data.past || [])]);
+        } else if (result.data.length > 0) {
+           setDbEvents(result.data);
+        }
       }
     } catch (error) {
       console.error('Error fetching events:', error);

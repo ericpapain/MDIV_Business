@@ -20,6 +20,9 @@ export function TestimonialsCarousel({ reviews }: TestimonialsCarouselProps) {
     queryFn: async () => {
       const res = await fetch("https://mdiv-network.com/api-public.php?action=events");
       const json = await res.json();
+      if (json.data && !Array.isArray(json.data)) {
+        return [...(json.data.upcoming || []), ...(json.data.past || [])];
+      }
       return json.data || [];
     },
   });
