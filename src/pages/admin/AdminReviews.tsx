@@ -72,7 +72,7 @@ export default function AdminReviews() {
     setCountry(r.country);
   };
 
-  if (isLoading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-gold" /></div>;
+  if (isLoading) return <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-gold" /></div>;
 
   return (
     <div className="p-8">

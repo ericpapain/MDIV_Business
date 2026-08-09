@@ -4,7 +4,7 @@ import { offers, computeFinalPrice } from "@/data/mockData";
 export default function AdminPricing() {
   const [marginAdj, setMarginAdj] = useState<Record<string, number>>(Object.fromEntries(offers.map((o) => [o.id, o.margin])));
   return (
-    <div className="p-8 md:p-10">
+    <div className="">
       <div className="mb-8">
         <div className="eyebrow mb-2">Moteur de tarification</div>
         <h1 className="font-display text-4xl">Coûts · Marges · Prix final</h1>

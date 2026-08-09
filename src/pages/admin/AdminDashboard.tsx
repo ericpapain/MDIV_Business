@@ -15,13 +15,13 @@ export default function AdminDashboard() {
   });
 
   if (isLoading) {
-    return <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-gold w-8 h-8" /></div>;
+    return <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-gold w-8 h-8" /></div>;
   }
 
   const byCountry = stats?.countries?.map((c: any) => ({ name: c.country, v: parseInt(c.count) })) || [];
 
   return (
-    <div className="p-8 md:p-10">
+    <div className="">
       <div className="mb-10">
         <div className="eyebrow mb-2">Tableau de bord</div>
         <h1 className="font-display text-4xl">Pilotage du Site</h1>

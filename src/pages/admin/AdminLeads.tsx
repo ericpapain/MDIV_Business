@@ -10,7 +10,7 @@ export default function AdminMembers() {
   );
 
   return (
-    <div className="p-8 md:p-10">
+    <div className="">
       <div className="mb-8">
         <div className="eyebrow mb-2">Communauté & Partenaires</div>
         <h1 className="font-display text-4xl">Gestion des Membres</h1>

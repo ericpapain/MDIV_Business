@@ -76,7 +76,7 @@ export default function AdminVideos() {
   };
 
   return (
-    <div className="p-8 md:p-10">
+    <div className="">
       <div className="mb-8">
         <div className="eyebrow mb-2">CMS Vidéos</div>
         <h1 className="font-display text-4xl">Gestion des vidéos YouTube</h1>

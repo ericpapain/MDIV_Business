@@ -20,7 +20,7 @@ const radar = [
 
 export default function AdminProfiles() {
   return (
-    <div className="p-8 md:p-10">
+    <div className="">
       <div className="mb-8">
         <div className="eyebrow mb-2">Profils & Partenaires</div>
         <h1 className="font-display text-4xl">Analyse de la Communauté</h1>

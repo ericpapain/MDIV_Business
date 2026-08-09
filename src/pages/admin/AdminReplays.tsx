@@ -123,10 +123,10 @@ export default function AdminReplays() {
     }
   });
 
-  if (isLoading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-gold" /></div>;
+  if (isLoading) return <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-gold" /></div>;
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-8 pb-10">
       <div>
         <h1 className="font-display text-3xl mb-2">Gestion des Replays</h1>
         <p className="text-muted-foreground">Enrichissez les pages "Revivre l'événement" avec des médias et statistiques.</p>
@@ -212,52 +212,63 @@ export default function AdminReplays() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {formData.photos.map((photo, index) => (
-                <div key={index} className="flex gap-2">
-                  <input type="text" className="flex-1 bg-[#0a0d0f] border border-border rounded-sm px-4 py-2 text-sm"
-                    placeholder="URL de l'image" value={photo}
+                <div key={index} className="flex gap-3 items-center bg-black/20 p-3 rounded-sm border border-border/50">
+                  <div className="w-12 h-12 bg-black/40 rounded-sm overflow-hidden flex-shrink-0 border border-border/50 flex items-center justify-center">
+                     {photo ? <img src={photo.startsWith('http') ? photo : `/${photo}`} alt="" className="w-full h-full object-cover" /> : <ImageIcon className="w-5 h-5 text-muted-foreground opacity-50" />}
+                  </div>
+                  <input type="text" className="flex-1 bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors"
+                    placeholder="URL de l'image (ex: assets/...)" value={photo}
                     onChange={e => { const np = [...formData.photos]; np[index] = e.target.value; setFormData({...formData, photos: np}); }} />
-                  <button className="bg-red-500/10 text-red-500 px-3 rounded-sm hover:bg-red-500/20"
+                  <button className="bg-red-500/10 text-red-500 p-2 rounded-sm hover:bg-red-500/20 transition-colors" title="Supprimer"
                     onClick={() => { const np = formData.photos.filter((_, i) => i !== index); setFormData({...formData, photos: np}); }}><Trash2 size={16} /></button>
                 </div>
               ))}
-              <button className="btn-ghost-gold w-full py-2 text-xs flex justify-center items-center gap-2"
-                onClick={() => setFormData({...formData, photos: [...formData.photos, ""]})}><Plus size={14} /> Ajouter une photo manuellement</button>
             </div>
+            <button className="btn-ghost-gold w-full py-3 text-xs flex justify-center items-center gap-2 mt-4"
+              onClick={() => setFormData({...formData, photos: [...formData.photos, ""]})}><Plus size={14} /> Ajouter une photo manuellement</button>
           </div>
 
           {/* VIDEOS (YouTube) */}
           <div className="glass-strong p-6 rounded-sm border border-border space-y-4">
             <h2 className="text-xl font-display text-gold flex items-center gap-2"><Video size={20} /> Galerie Vidéos YouTube</h2>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {formData.videos.map((vid, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 bg-black/20 p-4 rounded-sm border border-border/50">
-                  <div className="md:col-span-1">
-                    <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm mb-2"
-                      placeholder="Lien YouTube" value={vid.youtube_id}
-                      onChange={e => {
-                        const nv = [...formData.videos];
-                        nv[index].youtube_id = extractYouTubeId(e.target.value);
-                        setFormData({...formData, videos: nv});
-                      }} />
-                     {vid.youtube_id && <div className="text-[10px] text-green-500">ID: {vid.youtube_id}</div>}
-                  </div>
-                  <div className="md:col-span-1">
-                    <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm"
-                      placeholder="Titre court" value={vid.title}
-                      onChange={e => { const nv = [...formData.videos]; nv[index].title = e.target.value; setFormData({...formData, videos: nv}); }} />
-                  </div>
-                  <div className="md:col-span-2 flex gap-2">
-                    <input type="text" className="flex-1 bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm"
-                      placeholder="Description" value={vid.description}
-                      onChange={e => { const nv = [...formData.videos]; nv[index].description = e.target.value; setFormData({...formData, videos: nv}); }} />
-                    <button className="bg-red-500/10 text-red-500 px-3 rounded-sm hover:bg-red-500/20"
+                <div key={index} className="bg-black/20 p-5 rounded-sm border border-border/50 relative">
+                  <div className="absolute top-4 right-4">
+                    <button className="bg-red-500/10 text-red-500 p-2 rounded-sm hover:bg-red-500/20 transition-colors"
                       onClick={() => { const nv = formData.videos.filter((_, i) => i !== index); setFormData({...formData, videos: nv}); }}><Trash2 size={16} /></button>
+                  </div>
+                  <h3 className="text-xs font-bold text-gold mb-4 uppercase tracking-widest">Vidéo #{index + 1}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Lien YouTube (ou ID)</label>
+                      <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors"
+                        placeholder="https://youtube.com/watch?v=..." value={vid.youtube_id}
+                        onChange={e => {
+                          const nv = [...formData.videos];
+                          nv[index].youtube_id = extractYouTubeId(e.target.value);
+                          setFormData({...formData, videos: nv});
+                        }} />
+                       {vid.youtube_id && <div className="text-[10px] text-green-500 mt-1">ID détecté: {vid.youtube_id}</div>}
+                    </div>
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Titre court</label>
+                      <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors"
+                        placeholder="Titre de la vidéo" value={vid.title}
+                        onChange={e => { const nv = [...formData.videos]; nv[index].title = e.target.value; setFormData({...formData, videos: nv}); }} />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs text-muted-foreground mb-1">Description (optionnelle)</label>
+                      <textarea className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors"
+                        placeholder="Quelques mots sur cette vidéo..." rows={2} value={vid.description}
+                        onChange={e => { const nv = [...formData.videos]; nv[index].description = e.target.value; setFormData({...formData, videos: nv}); }} />
+                    </div>
                   </div>
                 </div>
               ))}
-              <button className="btn-ghost-gold w-full py-2 text-xs flex justify-center items-center gap-2"
+              <button className="btn-ghost-gold w-full py-3 text-xs flex justify-center items-center gap-2"
                 onClick={() => setFormData({...formData, videos: [...formData.videos, { youtube_id: "", title: "", description: "" }]})}><Plus size={14} /> Ajouter une vidéo</button>
             </div>
           </div>
@@ -265,24 +276,39 @@ export default function AdminReplays() {
           {/* TEMPS FORTS */}
           <div className="glass-strong p-6 rounded-sm border border-border space-y-4">
             <h2 className="text-xl font-display text-gold flex items-center gap-2"><Clock size={20} /> Temps Forts (Timeline)</h2>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {formData.highlights.map((hl, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 bg-black/20 p-4 rounded-sm border border-border/50">
-                  <input type="text" className="bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm" placeholder="Heure (ex: 20:00)"
-                    value={hl.time} onChange={e => { const nh = [...formData.highlights]; nh[index].time = e.target.value; setFormData({...formData, highlights: nh}); }} />
-                  <input type="text" className="bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm" placeholder="Titre"
-                    value={hl.title} onChange={e => { const nh = [...formData.highlights]; nh[index].title = e.target.value; setFormData({...formData, highlights: nh}); }} />
-                  <input type="text" className="bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm" placeholder="URL Image"
-                    value={hl.image_url} onChange={e => { const nh = [...formData.highlights]; nh[index].image_url = e.target.value; setFormData({...formData, highlights: nh}); }} />
-                  <div className="md:col-span-4 flex gap-2">
-                    <textarea className="flex-1 bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm" placeholder="Description" rows={2}
-                      value={hl.description} onChange={e => { const nh = [...formData.highlights]; nh[index].description = e.target.value; setFormData({...formData, highlights: nh}); }} />
-                    <button className="bg-red-500/10 text-red-500 px-3 rounded-sm hover:bg-red-500/20"
+                <div key={index} className="bg-black/20 p-5 rounded-sm border border-border/50 relative">
+                  <div className="absolute top-4 right-4">
+                    <button className="bg-red-500/10 text-red-500 p-2 rounded-sm hover:bg-red-500/20 transition-colors"
                       onClick={() => { const nh = formData.highlights.filter((_, i) => i !== index); setFormData({...formData, highlights: nh}); }}><Trash2 size={16} /></button>
+                  </div>
+                  <h3 className="text-xs font-bold text-gold mb-4 uppercase tracking-widest">Temps Fort #{index + 1}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Heure / Moment</label>
+                      <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors" placeholder="ex: 20:00 ou Matin"
+                        value={hl.time} onChange={e => { const nh = [...formData.highlights]; nh[index].time = e.target.value; setFormData({...formData, highlights: nh}); }} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Titre</label>
+                      <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors" placeholder="Cocktail de bienvenue"
+                        value={hl.title} onChange={e => { const nh = [...formData.highlights]; nh[index].title = e.target.value; setFormData({...formData, highlights: nh}); }} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">URL de l'image (optionnel)</label>
+                      <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors" placeholder="assets/..."
+                        value={hl.image_url} onChange={e => { const nh = [...formData.highlights]; nh[index].image_url = e.target.value; setFormData({...formData, highlights: nh}); }} />
+                    </div>
+                    <div className="md:col-span-3">
+                      <label className="block text-xs text-muted-foreground mb-1">Description</label>
+                      <textarea className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors" placeholder="Que s'est-il passé ?" rows={2}
+                        value={hl.description} onChange={e => { const nh = [...formData.highlights]; nh[index].description = e.target.value; setFormData({...formData, highlights: nh}); }} />
+                    </div>
                   </div>
                 </div>
               ))}
-              <button className="btn-ghost-gold w-full py-2 text-xs flex justify-center items-center gap-2"
+              <button className="btn-ghost-gold w-full py-3 text-xs flex justify-center items-center gap-2"
                 onClick={() => setFormData({...formData, highlights: [...formData.highlights, { time: "", title: "", description: "", image_url: "" }]})}><Plus size={14} /> Ajouter un temps fort</button>
             </div>
           </div>
@@ -290,24 +316,39 @@ export default function AdminReplays() {
           {/* TEMOIGNAGES */}
           <div className="glass-strong p-6 rounded-sm border border-border space-y-4">
             <h2 className="text-xl font-display text-gold flex items-center gap-2"><Quote size={20} /> Témoignages spécifiques</h2>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {formData.testimonials.map((testi, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-2 bg-black/20 p-4 rounded-sm border border-border/50">
-                  <input type="text" className="bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm" placeholder="Nom"
-                    value={testi.name} onChange={e => { const nt = [...formData.testimonials]; nt[index].name = e.target.value; setFormData({...formData, testimonials: nt}); }} />
-                  <input type="text" className="bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm" placeholder="Rôle/Entreprise"
-                    value={testi.role} onChange={e => { const nt = [...formData.testimonials]; nt[index].role = e.target.value; setFormData({...formData, testimonials: nt}); }} />
-                  <input type="text" className="bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm" placeholder="URL Photo profil"
-                    value={testi.image_url} onChange={e => { const nt = [...formData.testimonials]; nt[index].image_url = e.target.value; setFormData({...formData, testimonials: nt}); }} />
-                  <div className="md:col-span-3 flex gap-2">
-                    <textarea className="flex-1 bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm font-serif italic" placeholder="Citation..." rows={2}
-                      value={testi.quote} onChange={e => { const nt = [...formData.testimonials]; nt[index].quote = e.target.value; setFormData({...formData, testimonials: nt}); }} />
-                    <button className="bg-red-500/10 text-red-500 px-3 rounded-sm hover:bg-red-500/20"
+                <div key={index} className="bg-black/20 p-5 rounded-sm border border-border/50 relative">
+                  <div className="absolute top-4 right-4">
+                    <button className="bg-red-500/10 text-red-500 p-2 rounded-sm hover:bg-red-500/20 transition-colors"
                       onClick={() => { const nt = formData.testimonials.filter((_, i) => i !== index); setFormData({...formData, testimonials: nt}); }}><Trash2 size={16} /></button>
+                  </div>
+                  <h3 className="text-xs font-bold text-gold mb-4 uppercase tracking-widest">Témoignage #{index + 1}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Nom complet</label>
+                      <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors" placeholder="Jean Dupont"
+                        value={testi.name} onChange={e => { const nt = [...formData.testimonials]; nt[index].name = e.target.value; setFormData({...formData, testimonials: nt}); }} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Rôle / Entreprise</label>
+                      <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors" placeholder="CEO chez..."
+                        value={testi.role} onChange={e => { const nt = [...formData.testimonials]; nt[index].role = e.target.value; setFormData({...formData, testimonials: nt}); }} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">URL Photo profil</label>
+                      <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors" placeholder="assets/..."
+                        value={testi.image_url} onChange={e => { const nt = [...formData.testimonials]; nt[index].image_url = e.target.value; setFormData({...formData, testimonials: nt}); }} />
+                    </div>
+                    <div className="md:col-span-3">
+                      <label className="block text-xs text-muted-foreground mb-1">Citation (Avis)</label>
+                      <textarea className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm font-serif italic outline-none focus:border-gold transition-colors" placeholder="« Un événement exceptionnel... »" rows={3}
+                        value={testi.quote} onChange={e => { const nt = [...formData.testimonials]; nt[index].quote = e.target.value; setFormData({...formData, testimonials: nt}); }} />
+                    </div>
                   </div>
                 </div>
               ))}
-              <button className="btn-ghost-gold w-full py-2 text-xs flex justify-center items-center gap-2"
+              <button className="btn-ghost-gold w-full py-3 text-xs flex justify-center items-center gap-2"
                 onClick={() => setFormData({...formData, testimonials: [...formData.testimonials, { name: "", role: "", quote: "", image_url: "" }]})}><Plus size={14} /> Ajouter un témoignage</button>
             </div>
           </div>
