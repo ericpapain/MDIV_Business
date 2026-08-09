@@ -154,7 +154,8 @@ if ($action === 'save_replay_data' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if ($action === 'scan_directory' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $folder_path = $data->path ?? '';
-    // Sécurisation basique du chemin (empêcher de remonter dans l'arborescence)
+    // Sécurisation basique du chemin et normalisation (Windows)
+    $folder_path = str_replace('\\', '/', $folder_path);
     $folder_path = str_replace('..', '', $folder_path);
     $folder_path = trim($folder_path, '/');
     

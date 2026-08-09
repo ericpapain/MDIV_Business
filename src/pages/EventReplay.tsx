@@ -374,31 +374,67 @@ export default function EventReplay() {
 
       {/* ── Modals Vidéo et Image ── */}
       {activeVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10 bg-black/95 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="relative w-full max-w-5xl aspect-video bg-black rounded-sm shadow-2xl border border-border">
-            <button onClick={() => setActiveVideo(null)} className="absolute -top-12 right-0 z-20 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white hover:text-black transition-colors">
-              <X size={20} />
-            </button>
-            <iframe
-              src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full rounded-sm"
-            ></iframe>
-          </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/40 backdrop-blur-xl animate-in fade-in duration-300">
+          <div className="absolute inset-0 cursor-pointer" onClick={() => setActiveVideo(null)} title="Fermer" />
+          <motion.div 
+            drag
+            dragConstraints={{ left: -500, right: 500, top: -300, bottom: 300 }}
+            dragMomentum={false}
+            className="relative w-[1000px] max-w-full bg-black rounded-3xl shadow-[0_0_100px_rgba(0,0,0,0.8)] border border-gold/30 flex flex-col z-10"
+          >
+            {/* Barre de déplacement */}
+            <div className="h-12 w-full bg-[#0a0d0f]/90 flex justify-between items-center px-6 cursor-grab active:cursor-grabbing border-b border-border rounded-t-3xl">
+               <div className="flex gap-2">
+                 <button onClick={() => setActiveVideo(null)} className="w-3.5 h-3.5 rounded-full bg-red-500 hover:bg-red-400 transition-colors" />
+                 <div className="w-3.5 h-3.5 rounded-full bg-yellow-500/50" />
+                 <div className="w-3.5 h-3.5 rounded-full bg-green-500/50" />
+               </div>
+               <div className="text-[10px] font-mono tracking-[0.3em] text-gold-light/60 uppercase pointer-events-none">Glisser pour déplacer</div>
+               <button onClick={() => setActiveVideo(null)} className="text-muted-foreground hover:text-white transition-colors cursor-pointer">
+                 <X size={18} />
+               </button>
+            </div>
+            
+            {/* Vidéo */}
+            <div className="w-full aspect-video rounded-b-3xl overflow-hidden bg-black pointer-events-auto">
+              <iframe
+                src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
+            </div>
+          </motion.div>
         </div>
       )}
 
       {activeImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10 bg-black/95 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="relative w-full max-w-6xl max-h-[90vh] bg-transparent rounded-lg flex items-center justify-center">
-            <button onClick={() => setActiveImage(null)} className="absolute top-0 right-0 md:-right-12 md:-top-12 z-10 w-12 h-12 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white hover:text-black transition-colors">
-              <X size={18} />
-            </button>
-            <img src={activeImage} alt="Aperçu HD" className="max-w-full max-h-[90vh] object-contain shadow-[0_0_50px_rgba(0,0,0,0.8)]" />
-          </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/40 backdrop-blur-xl animate-in fade-in duration-300">
+          <div className="absolute inset-0 cursor-pointer" onClick={() => setActiveImage(null)} title="Fermer" />
+          <motion.div 
+            drag
+            dragConstraints={{ left: -500, right: 500, top: -300, bottom: 300 }}
+            dragMomentum={false}
+            className="relative inline-block max-w-[90vw] max-h-[85vh] bg-[#0a0d0f] rounded-3xl shadow-[0_0_100px_rgba(0,0,0,0.8)] border border-gold/30 flex flex-col z-10"
+          >
+            {/* Barre de déplacement */}
+            <div className="h-12 w-full bg-[#0a0d0f] flex justify-between items-center px-6 cursor-grab active:cursor-grabbing border-b border-border rounded-t-3xl">
+               <div className="flex gap-2">
+                 <button onClick={() => setActiveImage(null)} className="w-3.5 h-3.5 rounded-full bg-red-500 hover:bg-red-400 transition-colors" />
+                 <div className="w-3.5 h-3.5 rounded-full bg-yellow-500/50" />
+                 <div className="w-3.5 h-3.5 rounded-full bg-green-500/50" />
+               </div>
+               <div className="text-[10px] font-mono tracking-[0.3em] text-gold-light/60 uppercase pointer-events-none">Glisser pour déplacer</div>
+               <button onClick={() => setActiveImage(null)} className="text-muted-foreground hover:text-white transition-colors cursor-pointer">
+                 <X size={18} />
+               </button>
+            </div>
+            <div className="rounded-b-3xl overflow-hidden bg-black flex items-center justify-center pointer-events-auto max-h-[calc(85vh-48px)]">
+              <img src={activeImage} alt="Aperçu HD" className="max-w-full max-h-full object-contain pointer-events-none" />
+            </div>
+          </motion.div>
         </div>
       )}
 
