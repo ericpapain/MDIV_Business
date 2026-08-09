@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Play, Quote, X, Calendar, MapPin, Users, Image as ImageIcon, Video, Clock, Award, Star } from "lucide-react";
+import { ArrowLeft, ArrowRight, Play, Quote, X, Calendar, MapPin, Users, Image as ImageIcon, Video, Clock, Award, Star, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
