@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { ArrowLeft, ArrowRight, Play, Quote, X, Calendar, MapPin, Users, Image as ImageIcon, Video, Clock, Award, Star, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, useRef } from "react";
@@ -8,6 +9,8 @@ const DEMO_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-buck
 
 export default function EventReplay() {
   const { id } = useParams();
+  const { language } = useLanguage();
+  const isEn = language === "en";
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("apercu");
@@ -35,9 +38,9 @@ export default function EventReplay() {
   if (!event) {
     return (
       <div className="pt-40 pb-20 container text-center min-h-[60vh] flex flex-col items-center justify-center text-foreground">
-        <h1 className="font-display text-4xl mb-6">Événement introuvable</h1>
+        <h1 className="font-display text-4xl mb-6">{isEn ? "Event not found" : "Événement introuvable"}</h1>
         <Link to="/evenements" className="btn-ghost-gold px-6 py-3 text-xs uppercase tracking-[0.2em] rounded-sm flex items-center gap-2">
-          <ArrowLeft size={14} /> Retour aux événements
+          <ArrowLeft size={14} /> {isEn ? "Back to events" : "Retour aux événements"}
         </Link>
       </div>
     );
@@ -89,30 +92,30 @@ export default function EventReplay() {
             <source src={replayData.hero_video_url} type="video/mp4" />
           </video>
         ) : (
-          <img src={event.image_url} alt={event.title} className="absolute inset-0 w-full h-full object-cover opacity-50 scale-105 animate-ken-burns" />
+          <img src={event.image_url} alt={isEn && event.title_en ? event.title_en : event.title} className="absolute inset-0 w-full h-full object-cover opacity-50 scale-105 animate-ken-burns" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0d0f] via-[#0a0d0f]/60 to-transparent" />
         
         <div className="relative z-10 container text-center pt-20 animate-fade-up">
           <div className="eyebrow mb-6 flex items-center justify-center gap-3 text-gold">
-            <span className="w-12 h-px bg-gold/60" /> Archives Confidentielles <span className="w-12 h-px bg-gold/60" />
+            <span className="w-12 h-px bg-gold/60" /> {isEn ? "Confidential Archives" : "Archives Confidentielles"} <span className="w-12 h-px bg-gold/60" />
           </div>
           <h1 className="font-display text-5xl md:text-7xl lg:text-8xl leading-none mb-6 text-foreground drop-shadow-2xl">
-            {event.title}
+            {isEn && event.title_en ? event.title_en : event.title}
           </h1>
           <div className="flex items-center justify-center gap-6 font-mono text-xs md:text-sm uppercase tracking-[0.2em] text-gold-light mb-8 drop-shadow-md">
             <span className="flex items-center gap-2"><Calendar size={14} /> {new Date(event.date).toLocaleDateString()}</span>
             <span className="flex items-center gap-2"><MapPin size={14} /> {event.location}</span>
           </div>
           <p className="max-w-2xl mx-auto text-lg md:text-xl text-foreground/80 font-serif italic mb-10">
-            {event.description}
+            {isEn && event.description_en ? event.description_en : event.description}
           </p>
           <div className="flex justify-center gap-4">
             <button onClick={() => scrollToSection('apercu')} className="btn-gold px-8 py-4 text-xs uppercase tracking-[0.2em] rounded-sm flex items-center gap-3 shadow-[0_0_30px_rgba(197,160,89,0.2)]">
-              Revivre l'expérience <ArrowRight size={14} />
+              {isEn ? "Relive the experience" : "Revivre l'expérience"} <ArrowRight size={14} />
             </button>
             <Link to="/evenements" className="btn-ghost-gold px-6 py-4 text-xs uppercase tracking-[0.2em] rounded-sm flex items-center gap-2 bg-black/20 backdrop-blur-md">
-              <ArrowLeft size={14} /> Événements
+              <ArrowLeft size={14} /> {isEn ? "Events" : "Événements"}
             </Link>
           </div>
         </div>
@@ -124,22 +127,22 @@ export default function EventReplay() {
           <div className="text-center group">
             <Users className="mx-auto mb-3 text-gold/50 group-hover:text-gold transition-colors" size={24} />
             <div className="font-display text-3xl md:text-4xl text-gold-light mb-1">{replayData.stats?.participants || "-"}</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Participants</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{isEn ? "Participants" : "Participants"}</div>
           </div>
           <div className="text-center group border-l border-gold/10">
             <ImageIcon className="mx-auto mb-3 text-gold/50 group-hover:text-gold transition-colors" size={24} />
             <div className="font-display text-3xl md:text-4xl text-gold-light mb-1">{replayData.stats?.photos || "-"}</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Photos</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{isEn ? "Photos" : "Photos"}</div>
           </div>
           <div className="text-center group border-l border-gold/10">
             <Video className="mx-auto mb-3 text-gold/50 group-hover:text-gold transition-colors" size={24} />
             <div className="font-display text-3xl md:text-4xl text-gold-light mb-1">{replayData.stats?.videos || "-"}</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Vidéos</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{isEn ? "Videos" : "Vidéos"}</div>
           </div>
           <div className="text-center group border-l border-gold/10">
             <Clock className="mx-auto mb-3 text-gold/50 group-hover:text-gold transition-colors" size={24} />
             <div className="font-display text-3xl md:text-4xl text-gold-light mb-1">{replayData.stats?.duration || "-"}</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Durée</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{isEn ? "Duration" : "Durée"}</div>
           </div>
         </div>
       </section>
@@ -148,11 +151,11 @@ export default function EventReplay() {
       <div className="sticky top-[72px] z-40 bg-[#0a0d0f]/95 backdrop-blur-xl border-b border-border py-4 mt-12 transition-all">
         <div className="container flex items-center justify-center gap-2 md:gap-8 overflow-x-auto no-scrollbar">
           {[
-            { id: 'apercu', label: 'Aperçu' },
-            { id: 'photos', label: 'Galerie Photos' },
-            { id: 'videos', label: 'Vidéos' },
-            { id: 'highlights', label: 'Temps forts' },
-            { id: 'testimonials', label: 'Témoignages' },
+            { id: 'apercu', label: isEn ? 'Overview' : 'Aperçu' },
+            { id: 'photos', label: isEn ? 'Photo Gallery' : 'Galerie Photos' },
+            { id: 'videos', label: isEn ? 'Videos' : 'Vidéos' },
+            { id: 'highlights', label: isEn ? 'Highlights' : 'Temps forts' },
+            { id: 'testimonials', label: isEn ? 'Testimonials' : 'Témoignages' },
           ].map(tab => (
             <button 
               key={tab.id}
@@ -189,7 +192,7 @@ export default function EventReplay() {
         {(replayData.photos && replayData.photos.length > 0) && (
           <section id="photos" className="scroll-mt-32">
             <div className="flex items-center gap-4 mb-10">
-              <h2 className="font-display text-3xl md:text-4xl text-foreground">Instants figés</h2>
+              <h2 className="font-display text-3xl md:text-4xl text-foreground">{isEn ? "Captured Moments" : "Instants figés"}</h2>
               <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
             </div>
             
@@ -216,7 +219,7 @@ export default function EventReplay() {
         {(replayData.videos && replayData.videos.length > 0) && (
           <section id="videos" className="scroll-mt-32">
             <div className="flex items-center gap-4 mb-10">
-              <h2 className="font-display text-3xl md:text-4xl text-foreground">Expérience Vidéo</h2>
+              <h2 className="font-display text-3xl md:text-4xl text-foreground">{isEn ? "Video Experience" : "Expérience Vidéo"}</h2>
               <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
             </div>
             
@@ -262,7 +265,7 @@ export default function EventReplay() {
         {(replayData.highlights && replayData.highlights.length > 0) && (
           <section id="highlights" className="scroll-mt-32">
             <div className="flex items-center gap-4 mb-16">
-              <h2 className="font-display text-3xl md:text-4xl text-foreground">Chronologie des Temps Forts</h2>
+              <h2 className="font-display text-3xl md:text-4xl text-foreground">{isEn ? "Timeline of Highlights" : "Chronologie des Temps Forts"}</h2>
               <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
             </div>
 
@@ -302,7 +305,7 @@ export default function EventReplay() {
           <section id="testimonials" className="scroll-mt-32">
             <div className="flex items-center gap-4 mb-16 text-center justify-center">
               <div className="h-px flex-1 bg-gradient-to-l from-border to-transparent hidden md:block" />
-              <h2 className="font-display text-3xl md:text-4xl text-foreground px-4">Ils l'ont vécu</h2>
+              <h2 className="font-display text-3xl md:text-4xl text-foreground px-4">{isEn ? "They experienced it" : "Ils l'ont vécu"}</h2>
               <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent hidden md:block" />
             </div>
 
@@ -338,7 +341,7 @@ export default function EventReplay() {
       {similarEvents.length > 0 && (
         <section className="bg-[#0a0d0f] py-20 border-t border-border">
           <div className="container">
-            <h2 className="font-display text-3xl mb-12 text-center">Continuer l'exploration</h2>
+            <h2 className="font-display text-3xl mb-12 text-center">{isEn ? "Continue exploring" : "Continuer l'exploration"}</h2>
             <div className="grid md:grid-cols-3 gap-6">
               {similarEvents.map((sim: any) => (
                 <Link key={sim.id} to={`/revivre/${sim.id}`} className="group block">
@@ -346,7 +349,7 @@ export default function EventReplay() {
                     <img src={sim.image_url} alt={sim.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="btn-ghost-gold px-6 py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm bg-black/50 backdrop-blur-sm">Revivre</span>
+                      <span className="btn-ghost-gold px-6 py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm bg-black/50 backdrop-blur-sm">{isEn ? "Relive" : "Revivre"}</span>
                     </div>
                   </div>
                   <div className="text-[10px] uppercase tracking-[0.2em] text-gold mb-1">{new Date(sim.date).toLocaleDateString()}</div>
@@ -362,12 +365,12 @@ export default function EventReplay() {
       <section className="py-24 text-center container relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-gold/10 blur-[100px] rounded-full pointer-events-none" />
         <div className="relative z-10">
-          <h2 className="font-display text-4xl md:text-5xl mb-6">Ne manquez pas la prochaine édition</h2>
+          <h2 className="font-display text-4xl md:text-5xl mb-6">{isEn ? "Don't miss the next edition" : "Ne manquez pas la prochaine édition"}</h2>
           <p className="text-muted-foreground mb-10 max-w-xl mx-auto text-lg leading-relaxed">
-            L'excellence se vit en direct. Demandez votre invitation pour rejoindre le cercle lors de notre prochain rendez-vous.
+            {isEn ? "Excellence is experienced live. Request your invitation to join the circle at our next meeting." : "L'excellence se vit en direct. Demandez votre invitation pour rejoindre le cercle lors de notre prochain rendez-vous."}
           </p>
           <Link to="/contact" className="btn-gold inline-flex px-10 py-5 text-xs uppercase tracking-[0.2em] rounded-sm items-center gap-4 hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_rgba(197,160,89,0.3)]">
-            Demander une invitation <ArrowRight size={16} />
+            {isEn ? "Request an invitation" : "Demander une invitation"} <ArrowRight size={16} />
           </Link>
         </div>
       </section>
