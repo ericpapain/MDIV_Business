@@ -56,6 +56,8 @@ try { $pdo->exec("ALTER TABLE events ADD COLUMN title_en VARCHAR(255) DEFAULT NU
 try { $pdo->exec("ALTER TABLE events ADD COLUMN description_en TEXT DEFAULT NULL"); } catch(PDOException $e) {}
 try { $pdo->exec("ALTER TABLE events ADD COLUMN billetterie_url VARCHAR(500) DEFAULT NULL"); } catch(PDOException $e) {}
 try { $pdo->exec("ALTER TABLE events ADD COLUMN program TEXT DEFAULT NULL"); } catch(PDOException $e) {}
+try { $pdo->exec("ALTER TABLE events ADD COLUMN replay_data TEXT DEFAULT NULL"); } catch(PDOException $e) {}
+try { $pdo->exec("ALTER TABLE events ADD COLUMN event_code VARCHAR(50) DEFAULT NULL"); } catch(PDOException $e) {}
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS members (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -113,11 +115,11 @@ if ($action === 'add_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $data->title ?? ''; $date = $data->date ?? ''; $location = $data->location ?? '';
     $description = $data->description ?? ''; $type = $data->type ?? 'Événement'; $image_url = $data->image_url ?? '';
     $price = $data->price ?? ''; $title_en = $data->title_en ?? ''; $description_en = $data->description_en ?? '';
-    $billetterie_url = $data->billetterie_url ?? '';
+    $billetterie_url = $data->billetterie_url ?? ''; $event_code = $data->event_code ?? '';
     $program = isset($data->program) ? json_encode($data->program) : null;
     
-    $stmt = $pdo->prepare("INSERT INTO events (title, title_en, date, location, description, description_en, type, image_url, price, billetterie_url, program) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    if ($stmt->execute([$title, $title_en, $date, $location, $description, $description_en, $type, $image_url, $price, $billetterie_url, $program])) echo json_encode(['success' => true]);
+    $stmt = $pdo->prepare("INSERT INTO events (title, title_en, date, location, description, description_en, type, image_url, price, billetterie_url, program, event_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    if ($stmt->execute([$title, $title_en, $date, $location, $description, $description_en, $type, $image_url, $price, $billetterie_url, $program, $event_code])) echo json_encode(['success' => true]);
     else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
     exit();
 }
@@ -126,11 +128,11 @@ if ($action === 'edit_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $data->id ?? 0; $title = $data->title ?? ''; $date = $data->date ?? ''; $location = $data->location ?? '';
     $description = $data->description ?? ''; $type = $data->type ?? 'Événement'; $image_url = $data->image_url ?? '';
     $price = $data->price ?? ''; $title_en = $data->title_en ?? ''; $description_en = $data->description_en ?? '';
-    $billetterie_url = $data->billetterie_url ?? '';
+    $billetterie_url = $data->billetterie_url ?? ''; $event_code = $data->event_code ?? '';
     $program = isset($data->program) ? json_encode($data->program) : null;
     
-    $stmt = $pdo->prepare("UPDATE events SET title=?, title_en=?, date=?, location=?, description=?, description_en=?, type=?, image_url=?, price=?, billetterie_url=?, program=? WHERE id=?");
-    if ($stmt->execute([$title, $title_en, $date, $location, $description, $description_en, $type, $image_url, $price, $billetterie_url, $program, $id])) echo json_encode(['success' => true]);
+    $stmt = $pdo->prepare("UPDATE events SET title=?, title_en=?, date=?, location=?, description=?, description_en=?, type=?, image_url=?, price=?, billetterie_url=?, program=?, event_code=? WHERE id=?");
+    if ($stmt->execute([$title, $title_en, $date, $location, $description, $description_en, $type, $image_url, $price, $billetterie_url, $program, $event_code, $id])) echo json_encode(['success' => true]);
     else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
     exit();
 }
@@ -139,6 +141,50 @@ if ($action === 'delete_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare("DELETE FROM events WHERE id = ?");
     $stmt->execute([$data->id ?? 0]);
     echo json_encode(['success' => true]); exit();
+}
+
+if ($action === 'save_replay_data' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $data->id ?? 0;
+    $replay_data = isset($data->replay_data) ? json_encode($data->replay_data) : null;
+    $stmt = $pdo->prepare("UPDATE events SET replay_data=? WHERE id=?");
+    if ($stmt->execute([$replay_data, $id])) echo json_encode(['success' => true]);
+    else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
+    exit();
+}
+
+if ($action === 'scan_directory' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $folder_path = $data->path ?? '';
+    // Sécurisation basique du chemin (empêcher de remonter dans l'arborescence)
+    $folder_path = str_replace('..', '', $folder_path);
+    $folder_path = trim($folder_path, '/');
+    
+    // Le dossier de base est le dossier où se trouve api-admin.php (public/)
+    $base_dir = __DIR__;
+    $target_dir = $base_dir . '/' . $folder_path;
+    
+    if (empty($folder_path) || !is_dir($target_dir)) {
+        http_response_code(400); 
+        echo json_encode(['success' => false, 'error' => 'Dossier introuvable ou chemin invalide']);
+        exit();
+    }
+    
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    $images = [];
+    
+    $files = scandir($target_dir);
+    foreach ($files as $file) {
+        $file_path = $target_dir . '/' . $file;
+        if (is_file($file_path)) {
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            if (in_array($ext, $allowed_extensions)) {
+                // Créer l'URL publique
+                $images[] = '/' . $folder_path . '/' . $file;
+            }
+        }
+    }
+    
+    echo json_encode(['success' => true, 'images' => $images]);
+    exit();
 }
 
 // --- Gestion des Membres ---

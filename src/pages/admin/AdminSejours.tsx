@@ -40,6 +40,7 @@ export default function AdminSejours() {
   const [imageUrl, setImageUrl] = useState("");
   const [price, setPrice] = useState("");
   const [billetterieUrl, setBilletterieUrl] = useState("");
+  const [eventCode, setEventCode] = useState("");
   const [program, setProgram] = useState<ProgramDay[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showProgram, setShowProgram] = useState(false);
@@ -62,7 +63,7 @@ export default function AdminSejours() {
 
   const resetForm = () => {
     setTitle(""); setTitleEn(""); setDate(""); setLocation(""); setDescription(""); setDescriptionEn("");
-    setImageUrl(""); setPrice(""); setBilletterieUrl(""); setProgram([]); setEditingId(null); setShowProgram(false);
+    setImageUrl(""); setPrice(""); setBilletterieUrl(""); setEventCode(""); setProgram([]); setEditingId(null); setShowProgram(false);
   };
 
   const submitSejour = useMutation({
@@ -70,7 +71,7 @@ export default function AdminSejours() {
       const action = editingId ? "edit_event" : "add_event";
       const payload = {
         id: editingId, title, title_en: titleEn, date, location, description, description_en: descriptionEn,
-        type: "Séjour", image_url: imageUrl, price, billetterie_url: billetterieUrl,
+        type: "Séjour", image_url: imageUrl, price, billetterie_url: billetterieUrl, event_code: eventCode,
         program: program.length > 0 ? program : null,
       };
       const res = await fetch(`/api-admin.php?action=${action}`, {
@@ -121,6 +122,7 @@ export default function AdminSejours() {
     setImageUrl(ev.image_url || "");
     setPrice(ev.price || "");
     setBilletterieUrl(ev.billetterie_url || "");
+    setEventCode(ev.event_code || "");
     const prog = typeof ev.program === 'string' ? JSON.parse(ev.program) : ev.program;
     setProgram(prog || []);
     setShowProgram(!!(prog && prog.length > 0));
@@ -186,20 +188,13 @@ export default function AdminSejours() {
                 <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Lieu (Ville, Pays ou Adresse)</label>
                 <input required value={location} onChange={e => setLocation(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
-              {/* Image */}
-              <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Lien de l'image (Optionnel)</label>
-                <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} type="text" placeholder="/assets/image.jpg ou https://..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+              <div className="grid grid-cols-2 gap-4">
+                <input type="text" placeholder="URL Image" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" value={imageUrl} onChange={e => setImageUrl(e.target.value)} />
+                <input type="text" placeholder="Prix (ex: 2990€)" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" value={price} onChange={e => setPrice(e.target.value)} />
               </div>
-              {/* Prix */}
-              <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Prix <span className="text-gold/50">ex: 490€, Gratuit</span></label>
-                <input value={price} onChange={e => setPrice(e.target.value)} type="text" placeholder="490€" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
-              </div>
-              {/* Billetterie */}
-              <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Lien Billetterie <span className="text-gold/50">optionnel</span></label>
-                <input value={billetterieUrl} onChange={e => setBilletterieUrl(e.target.value)} type="text" placeholder="https://eventbrite.fr/..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+              <div className="grid grid-cols-2 gap-4">
+                <input type="text" placeholder="URL de la Billetterie" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" value={billetterieUrl} onChange={e => setBilletterieUrl(e.target.value)} />
+                <input type="text" placeholder="Code Séjour (ex: BN26)" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" value={eventCode} onChange={e => setEventCode(e.target.value)} />
               </div>
               {/* Description FR */}
               <div>

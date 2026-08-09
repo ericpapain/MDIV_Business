@@ -111,14 +111,19 @@ export default function Avis() {
       ? dbEvents.filter((ev: any) => new Date(ev.target_date || ev.date) < new Date())
       : localPastEvents;
     const selectedEvent = allPastEvents.find((ev: any) => (ev.id?.toString()) === formData.eventId);
-    const validCode = selectedEvent ? (selectedEvent.code || selectedEvent.code_evenement || "BNE2026") : "BNE2026";
+    const validCode = selectedEvent?.event_code || "";
 
     if (!formData.country) {
       toast.error(isEn ? "Please select a country." : "Veuillez sélectionner un pays.");
       return;
     }
     
-    if (formData.code !== validCode) {
+    if (!validCode) {
+      toast.error(isEn ? "This event does not accept reviews yet." : "Cet événement n'accepte pas encore d'avis.");
+      return;
+    }
+
+    if (formData.code.trim().toUpperCase() !== validCode.trim().toUpperCase()) {
       toast.error(isEn ? "Invalid event code. Please check your invitation." : "Code événement invalide. Veuillez vérifier votre invitation.");
       return;
     }
@@ -304,42 +309,69 @@ export default function Avis() {
         </form>
 
         {/* LISTE DES AVIS */}
-        <div className="space-y-6">
-          <h2 className="font-display text-3xl mb-6">{isEn ? "Latest reviews" : "Derniers avis"}</h2>
-          {reviews.map((review) => {
-            const c = review.country?.toLowerCase() || "";
+        <div className="space-y-12">
+          <div className="text-center md:text-left">
+            <h2 className="font-display text-3xl mb-2">{isEn ? "Latest reviews" : "Derniers avis"}</h2>
+            <p className="text-muted-foreground text-sm italic">{isEn ? "Sorted by experience" : "Classés par expérience"}</p>
+          </div>
 
-            return (
-              <div key={review.id} className="luxe-card p-8 rounded-sm animate-fade-up">
-                <div className="flex gap-1 mb-3 text-primary">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={12} fill={i < review.rating ? "currentColor" : "none"} className={i >= review.rating ? "text-muted" : ""} />
-                  ))}
-                </div>
-                {(() => {
-                  const matchingEvent = dbEvents.find((ev: any) => ev.title === review.event);
-                  if (matchingEvent) {
-                    return (
-                      <Link to={`/revivre/${matchingEvent.id}`} className="text-xs text-gold-light mb-4 uppercase tracking-[0.1em] hover:text-gold transition-colors underline underline-offset-2 decoration-gold/30 hover:decoration-gold block">
-                        {review.event} →
+          {(() => {
+            const groupedReviews = reviews.reduce((acc, review) => {
+              const key = review.event || (isEn ? "Other testimonials" : "Autres témoignages");
+              if (!acc[key]) acc[key] = [];
+              acc[key].push(review);
+              return acc;
+            }, {} as Record<string, Review[]>);
+
+            return Object.entries(groupedReviews).map(([eventName, eventReviews]) => {
+              const matchingEvent = dbEvents.find((ev: any) => ev.title === eventName);
+              
+              return (
+                <div key={eventName} className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <h3 className="font-display text-xl text-gold">{eventName}</h3>
+                    <div className="h-px flex-1 bg-gradient-to-r from-gold/30 to-transparent" />
+                    {matchingEvent && (
+                      <Link to={`/revivre/${matchingEvent.id}`} className="hidden md:flex text-[10px] text-gold-light uppercase tracking-[0.1em] hover:text-gold transition-colors items-center gap-1 border border-gold/20 px-3 py-1 rounded-sm bg-gold/5">
+                        Revivre l'événement →
                       </Link>
-                    );
-                  }
-                  return <div className="text-xs text-gold-light mb-4 uppercase tracking-[0.1em]">{review.event}</div>;
-                })()}
-                <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {review.comment} »</p>
-                
-                <div className="flex items-center gap-4 pt-4 border-t border-border">
-                  {/* Dynamic Flag Avatar */}
-                  <TestimonialFlag type={c} />
-                  <div>
-                    <div className="font-display text-base">{review.name}</div>
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">{review.role}</div>
+                    )}
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 lg:grid-cols-1 gap-6 transition-opacity duration-500">
+                    {eventReviews.map((review, i) => {
+                      const c = review.country?.toLowerCase() || "";
+                      return (
+                        <div key={review.id} className="luxe-card p-8 rounded-sm animate-fade-up" style={{ animationDelay: `${i * 0.1}s` }}>
+                          <div className="flex gap-1 mb-5 text-primary">
+                            {[...Array(5)].map((_, j) => (
+                              <Star key={j} size={12} fill={j < review.rating ? "currentColor" : "none"} className={j >= review.rating ? "text-muted" : ""} />
+                            ))}
+                          </div>
+                          
+                          {matchingEvent && (
+                             <Link to={`/revivre/${matchingEvent.id}`} className="md:hidden text-xs text-gold-light mb-4 uppercase tracking-[0.1em] hover:text-gold transition-colors underline underline-offset-2 decoration-gold/30 hover:decoration-gold block">
+                               {review.event} →
+                             </Link>
+                          )}
+
+                          <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-6">« {review.comment} »</p>
+                          
+                          <div className="flex items-center gap-4 pt-4 border-t border-border">
+                            <TestimonialFlag type={c} />
+                            <div>
+                              <div className="font-display text-base">{review.name}</div>
+                              <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">{review.role}</div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            });
+          })()}
         </div>
       </div>
     </div>

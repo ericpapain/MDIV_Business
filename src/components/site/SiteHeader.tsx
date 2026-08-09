@@ -11,6 +11,7 @@ const navKeys = [
   { to: "/evenements", key: "nav.events" },
   { to: "/partenaires", key: "nav.partners" },
   { to: "/contact", key: "nav.contact" },
+  { to: "/charte", key: "La Charte" },
 ];
 
 export function SiteHeader() {
@@ -59,7 +60,7 @@ export function SiteHeader() {
                 return `text-[12px] uppercase tracking-[0.22em] transition-colors relative py-2 ${isActive ? activeColor : inactiveColor}`;
               }}
             >
-              {t(n.key)}
+              {n.key.startsWith("nav.") ? t(n.key) : n.key}
             </NavLink>
           ))}
         </nav>
@@ -102,7 +103,7 @@ export function SiteHeader() {
                   const inactiveColor = isIAPage ? "text-slate-700" : "text-foreground/80";
                   return `text-sm uppercase tracking-[0.2em] py-2 ${isActive ? activeColor : inactiveColor}`;
                 }}>
-                {t(n.key)}
+                {n.key.startsWith("nav.") ? t(n.key) : n.key}
               </NavLink>
             ))}
           </div>

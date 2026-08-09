@@ -60,7 +60,7 @@ export function SiteFooter() {
           <div className="flex gap-6">
             <a href="#">{t("footer.privacy")}</a>
             <a href="#">{t("footer.terms")}</a>
-            <a href="#">{t("footer.charter")}</a>
+            <Link to="/charte" className="text-gold hover:text-gold-light transition-colors">La Charte BNE</Link>
           </div>
         </div>
       </div>

@@ -19,6 +19,7 @@ import Media from "./pages/Media";
 import Contact from "./pages/Contact";
 import Avis from "./pages/Avis";
 import EventReplay from "./pages/EventReplay";
+import Charte from "./pages/Charte";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminMembers from "./pages/admin/AdminMembers";
@@ -28,6 +29,7 @@ import AdminVideos from "./pages/admin/AdminVideos";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminSejours from "./pages/admin/AdminSejours";
 import AdminPricing from "./pages/admin/AdminPricing";
+import AdminReplays from "./pages/admin/AdminReplays";
 import NotFound from "./pages/NotFound";
 import DemoFlow from "./pages/Demo/DemoFlow";
 import ServicesIA from "./pages/ServicesIA";
@@ -60,6 +62,7 @@ const App = () => (
                 <Route path="/media" element={<Media />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/avis" element={<Avis />} />
+                <Route path="/charte" element={<Charte />} />
                 <Route path="/services-ia" element={<ServicesIA />} />
                 <Route path="/services-ia/diagnostic" element={<ServicesIADiagnostic />} />
                 <Route path="/services-ia/:category" element={<ServicesIACategory />} />
@@ -76,6 +79,7 @@ const App = () => (
                 <Route path="sejours" element={<AdminSejours />} />
                 <Route path="reviews" element={<AdminReviews />} />
                 <Route path="tarification" element={<AdminPricing />} />
+                <Route path="replays" element={<AdminReplays />} />
               </Route>
               <Route path="/demo" element={<DemoFlow />} />
               <Route path="*" element={<NotFound />} />

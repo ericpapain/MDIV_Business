@@ -1,5 +1,5 @@
 import { NavLink, Outlet, Link, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Tag, ArrowLeft, Video, Calendar, LogOut, Loader2, Handshake, MessageSquare, Plane } from "lucide-react";
+import { LayoutDashboard, Users, Tag, ArrowLeft, Video, Calendar, LogOut, Loader2, Handshake, MessageSquare, Plane, Play } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,6 +11,7 @@ const items = [
   { to: "/admin/events", label: "Événements", icon: Calendar },
   { to: "/admin/sejours", label: "Séjours", icon: Plane },
   { to: "/admin/reviews", label: "Avis & Témoignages", icon: MessageSquare },
+  { to: "/admin/replays", label: "Replays", icon: Play },
   { to: "/admin/tarification", label: "Tarification", icon: Tag },
 ];
 
