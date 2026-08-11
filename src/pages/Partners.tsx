@@ -107,7 +107,7 @@ function AmbassadorCard({ amb, isEn, onContact, onClick }: { amb: any; isEn: boo
       {amb.logo_url && (
         <div className="mb-3 flex justify-center h-32 relative z-10">
           <img src={amb.logo_url.startsWith('http') || amb.logo_url.startsWith('/') ? amb.logo_url : `/${amb.logo_url}`}
-            alt={amb.country} className="h-full w-full object-contain rounded-lg" />
+            alt={amb.country} className="h-full w-full object-contain rounded-md" />
         </div>
       )}
       {amb.company && (
@@ -156,7 +156,7 @@ function PartnerCard({ partner, isEn, onContact, onClick }: { partner: any; isEn
       {partner.logo_url ? (
         <div className="mb-2 flex justify-center items-center h-32 relative z-10">
           <img src={partner.logo_url.startsWith('http') || partner.logo_url.startsWith('/') ? partner.logo_url : `/${partner.logo_url}`}
-            alt={partner.name} className="h-full w-full object-contain" />
+            alt={partner.name} className="h-full w-full object-contain rounded-md" />
         </div>
       ) : (
         <div className="mb-2 flex justify-center items-center h-32 relative z-10">
@@ -330,7 +330,7 @@ Secteur : ${partner.sector || partner.category}\n\n`;
                 {selectedProfile.type === "ambassador" ? (
                   <>
                     {selectedProfile.logo_url && (
-                      <img src={selectedProfile.logo_url.startsWith('http') || selectedProfile.logo_url.startsWith('/') ? selectedProfile.logo_url : `/${selectedProfile.logo_url}`} alt={selectedProfile.country} className="h-32 object-contain mb-4" />
+                      <img src={selectedProfile.logo_url.startsWith('http') || selectedProfile.logo_url.startsWith('/') ? selectedProfile.logo_url : `/${selectedProfile.logo_url}`} alt={selectedProfile.country} className="h-48 w-auto max-w-full object-contain mb-4 rounded-xl shadow-sm" />
                     )}
                     <div className="text-4xl mb-2"><Emoji symbol={selectedProfile.flag || '🌍'} /></div>
                     <h2 className="font-display text-3xl gold-text mb-1">{selectedProfile.country}</h2>
@@ -363,7 +363,7 @@ Secteur : ${partner.sector || partner.category}\n\n`;
                 ) : (
                   <>
                     {selectedProfile.logo_url ? (
-                      <img src={selectedProfile.logo_url.startsWith('http') || selectedProfile.logo_url.startsWith('/') ? selectedProfile.logo_url : `/${selectedProfile.logo_url}`} alt={selectedProfile.name} className="h-32 object-contain mb-4" />
+                      <img src={selectedProfile.logo_url.startsWith('http') || selectedProfile.logo_url.startsWith('/') ? selectedProfile.logo_url : `/${selectedProfile.logo_url}`} alt={selectedProfile.name} className="h-48 w-auto max-w-full object-contain mb-4 rounded-xl shadow-sm" />
                     ) : (
                       <div className="w-20 h-20 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mb-4">
                         <Building size={32} className="text-gold/60" />
@@ -396,10 +396,15 @@ Secteur : ${partner.sector || partner.category}\n\n`;
           <div className="text-left space-y-3">
             <h1 className="font-display text-3xl md:text-4xl lg:text-5xl leading-[0.95]">{isEn ? "Become a BNE Partner or " : "Devenir Partenaire ou "}<em className="italic gold-text">{isEn ? "Ambassador" : "Ambassadeur"} BNE</em>.</h1>
             <div className="hairline w-12" />
-            <div className="space-y-2">
-              <p className="text-xs md:text-sm text-foreground/90 leading-relaxed">{isEn ? "BNE supports entrepreneurs, business leaders, institutions and economic networks by creating high-value connections across territories." : "BNE accompagne les entrepreneurs, dirigeants, institutions et réseaux économiques dans la création de connexions à forte valeur entre territoires."}</p>
-              <p className="text-xs md:text-sm text-foreground/70 leading-relaxed">{isEn ? "Our network relies on committed partners and ambassadors who help foster business opportunities, collaborations and international growth." : "Notre réseau s'appuie sur des partenaires et ambassadeurs engagés qui contribuent à renforcer les échanges, les opportunités d'affaires et les collaborations internationales."}</p>
-              <p className="text-xs md:text-sm text-primary/80 leading-relaxed font-medium">{isEn ? "Joining BNE means becoming part of a trusted international ecosystem." : "Rejoindre BNE, c'est participer activement au développement d'un écosystème international de confiance."}</p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-xs md:text-sm text-foreground/90 leading-relaxed">{isEn ? "BNE supports entrepreneurs, business leaders, institutions and economic networks by creating high-value connections across territories." : "BNE accompagne les entrepreneurs, dirigeants, institutions et réseaux économiques dans la création de connexions à forte valeur entre territoires."}</p>
+                <p className="text-xs md:text-sm text-foreground/70 leading-relaxed">{isEn ? "Our network relies on committed partners and ambassadors who help foster business opportunities, collaborations and international growth." : "Notre réseau s'appuie sur des partenaires et ambassadeurs engagés qui contribuent à renforcer les échanges, les opportunités d'affaires et les collaborations internationales."}</p>
+                <p className="text-xs md:text-sm text-primary/80 leading-relaxed font-medium">{isEn ? "Joining BNE means becoming part of a trusted international ecosystem." : "Rejoindre BNE, c'est participer activement au développement d'un écosystème international de confiance."}</p>
+              </div>
+              <button onClick={() => containerRef.current?.scrollIntoView({ behavior: 'smooth' })} className="btn-gold py-2.5 px-6 text-[10px] sm:text-xs uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2 w-fit">
+                {isEn ? "Become a Partner or Ambassador" : "Devenir Partenaire ou Ambassadeur"}
+              </button>
             </div>
           </div>
           <div className="relative h-full min-h-[200px] lg:min-h-[300px]">
@@ -408,10 +413,12 @@ Secteur : ${partner.sector || partner.category}\n\n`;
         </div>
       </section>
 
+      <div className="container max-w-6xl"><div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" /></div>
+
       {/* ── AMBASSADORS SECTION ── */}
       {ambassadors.length > 0 && (
-        <section className="container max-w-6xl py-12">
-          <div className="flex items-center gap-4 mb-8">
+        <section className="container max-w-6xl py-6">
+          <div className="flex items-center gap-4 mb-5">
             <div className="h-px flex-1 bg-gradient-to-l from-border to-transparent hidden md:block" />
             <div className="text-center">
               <div className="eyebrow mb-2 flex items-center gap-2 justify-center"><Star size={12} className="text-gold" /> BNE Network</div>
@@ -431,10 +438,12 @@ Secteur : ${partner.sector || partner.category}\n\n`;
         </section>
       )}
 
+      <div className="container max-w-6xl"><div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" /></div>
+
       {/* ── PARTNERS SECTION ── */}
       {partners.length > 0 && (
-        <section className="container max-w-6xl py-12 border-t border-border/30">
-          <div className="flex items-center gap-4 mb-8">
+        <section className="container max-w-6xl py-6">
+          <div className="flex items-center gap-4 mb-5">
             <div className="h-px flex-1 bg-gradient-to-l from-border to-transparent hidden md:block" />
             <div className="text-center">
               <div className="eyebrow mb-2 flex items-center gap-2 justify-center"><Handshake size={12} className="text-gold" /> BNE Network</div>
@@ -454,8 +463,10 @@ Secteur : ${partner.sector || partner.category}\n\n`;
         </section>
       )}
 
+      <div className="container max-w-6xl"><div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" /></div>
+
       {/* ── ACCORDION + FORM ── */}
-      <div className="container max-w-6xl lg:h-[250vh] relative" ref={containerRef}>
+      <div className="container max-w-6xl lg:h-[250vh] relative pt-8" ref={containerRef}>
         <div className="lg:sticky lg:top-24 grid lg:grid-cols-[1fr_auto_380px] gap-8 lg:gap-10">
           <div className="relative z-10">
             <div className="space-y-3">
