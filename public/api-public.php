@@ -60,5 +60,11 @@ if ($action === 'reviews') {
     exit();
 }
 
+if ($action === 'ambassadors') {
+    $stmt = $pdo->query("SELECT * FROM ambassadors ORDER BY country ASC");
+    echo json_encode(['success' => true, 'data' => $stmt->fetchAll()]);
+    exit();
+}
+
 http_response_code(400);
 echo json_encode(['success' => false, 'error' => 'Action inconnue']);

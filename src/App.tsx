@@ -30,6 +30,7 @@ import AdminEvents from "./pages/admin/AdminEvents";
 import AdminSejours from "./pages/admin/AdminSejours";
 import AdminPricing from "./pages/admin/AdminPricing";
 import AdminReplays from "./pages/admin/AdminReplays";
+import AdminAmbassadors from "./pages/admin/AdminAmbassadors";
 import NotFound from "./pages/NotFound";
 import DemoFlow from "./pages/Demo/DemoFlow";
 import ServicesIA from "./pages/ServicesIA";
@@ -80,6 +81,7 @@ const App = () => (
                 <Route path="reviews" element={<AdminReviews />} />
                 <Route path="tarification" element={<AdminPricing />} />
                 <Route path="replays" element={<AdminReplays />} />
+                <Route path="ambassadors" element={<AdminAmbassadors />} />
               </Route>
               <Route path="/demo" element={<DemoFlow />} />
               <Route path="*" element={<NotFound />} />

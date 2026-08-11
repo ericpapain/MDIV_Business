@@ -9,7 +9,7 @@ const navKeys = [
   { to: "/sejour", key: "nav.sejour" },
   { to: "/offres", key: "nav.offers" },
   { to: "/evenements", key: "nav.events" },
-  { to: "/partenaires", key: "nav.partners" },
+  { to: "/partenaires", key: "nav.partners", labelFr: "Partenaires & Ambassadeurs", labelEn: "Partners & Ambassadors" },
   { to: "/contact", key: "nav.contact" },
   { to: "/charte", key: "La Charte" },
 ];
@@ -60,7 +60,7 @@ export function SiteHeader() {
                 return `text-[12px] uppercase tracking-[0.22em] transition-colors relative py-2 ${isActive ? activeColor : inactiveColor}`;
               }}
             >
-              {n.key.startsWith("nav.") ? t(n.key) : n.key}
+              {n.key.startsWith("nav.") ? (n.labelFr ? (language === 'en' ? n.labelEn : n.labelFr) : t(n.key)) : n.key}
             </NavLink>
           ))}
         </nav>
@@ -103,7 +103,7 @@ export function SiteHeader() {
                   const inactiveColor = isIAPage ? "text-slate-700" : "text-foreground/80";
                   return `text-sm uppercase tracking-[0.2em] py-2 ${isActive ? activeColor : inactiveColor}`;
                 }}>
-                {n.key.startsWith("nav.") ? t(n.key) : n.key}
+                {n.key.startsWith("nav.") ? (n.labelFr ? (language === 'en' ? n.labelEn : n.labelFr) : t(n.key)) : n.key}
               </NavLink>
             ))}
           </div>

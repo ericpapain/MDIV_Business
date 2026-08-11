@@ -1,5 +1,5 @@
 import { NavLink, Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Tag, ArrowLeft, Video, Calendar, LogOut, Loader2, Handshake, MessageSquare, Plane, Play, Menu, X } from "lucide-react";
+import { LayoutDashboard, Users, Tag, ArrowLeft, Video, Calendar, LogOut, Loader2, Handshake, MessageSquare, Plane, Play, Menu, X, Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -7,6 +7,7 @@ const items = [
   { to: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard, end: true },
   { to: "/admin/members", label: "Membres", icon: Users },
   { to: "/admin/partners", label: "Partenaires", icon: Handshake },
+  { to: "/admin/ambassadors", label: "Ambassadeurs", icon: Star },
   { to: "/admin/videos", label: "Vidéos", icon: Video },
   { to: "/admin/events", label: "Événements", icon: Calendar },
   { to: "/admin/sejours", label: "Séjours", icon: Plane },

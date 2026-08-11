@@ -77,6 +77,23 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS partners (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
+// Migration: enrichir la table partners
+try { $pdo->exec("ALTER TABLE partners ADD COLUMN logo_url VARCHAR(255) DEFAULT NULL"); } catch(PDOException $e) {}
+try { $pdo->exec("ALTER TABLE partners ADD COLUMN flag VARCHAR(20) DEFAULT NULL"); } catch(PDOException $e) {}
+try { $pdo->exec("ALTER TABLE partners ADD COLUMN sector VARCHAR(255) DEFAULT NULL"); } catch(PDOException $e) {}
+try { $pdo->exec("ALTER TABLE partners ADD COLUMN website VARCHAR(500) DEFAULT NULL"); } catch(PDOException $e) {}
+
+// Table Ambassadeurs
+$pdo->exec("CREATE TABLE IF NOT EXISTS ambassadors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    country VARCHAR(255) NOT NULL,
+    flag VARCHAR(20) DEFAULT '',
+    zone VARCHAR(255) DEFAULT '',
+    expertises TEXT DEFAULT '',
+    logo_url VARCHAR(255) DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
 $pdo->exec("CREATE TABLE IF NOT EXISTS reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
@@ -247,25 +264,61 @@ if ($action === 'delete_member' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$data->id ?? 0]); echo json_encode(['success' => true]); exit();
 }
 
-// --- Gestion des Partenaires ---
+// --- Gestion des Partenaires (enrichis) ---
 if ($action === 'add_partner' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $data->name ?? ''; $category = $data->category ?? ''; $country = $data->country ?? '';
-    $stmt = $pdo->prepare("INSERT INTO partners (name, category, country) VALUES (?, ?, ?)");
-    if ($stmt->execute([$name, $category, $country])) echo json_encode(['success' => true]);
+    $logo_url = $data->logo_url ?? ''; $flag = $data->flag ?? ''; $sector = $data->sector ?? ''; $website = $data->website ?? '';
+    $stmt = $pdo->prepare("INSERT INTO partners (name, category, country, logo_url, flag, sector, website) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    if ($stmt->execute([$name, $category, $country, $logo_url, $flag, $sector, $website])) echo json_encode(['success' => true]);
     else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
     exit();
 }
 
 if ($action === 'edit_partner' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $data->id ?? 0; $name = $data->name ?? ''; $category = $data->category ?? ''; $country = $data->country ?? '';
-    $stmt = $pdo->prepare("UPDATE partners SET name=?, category=?, country=? WHERE id=?");
-    if ($stmt->execute([$name, $category, $country, $id])) echo json_encode(['success' => true]);
+    $logo_url = $data->logo_url ?? ''; $flag = $data->flag ?? ''; $sector = $data->sector ?? ''; $website = $data->website ?? '';
+    $stmt = $pdo->prepare("UPDATE partners SET name=?, category=?, country=?, logo_url=?, flag=?, sector=?, website=? WHERE id=?");
+    if ($stmt->execute([$name, $category, $country, $logo_url, $flag, $sector, $website, $id])) echo json_encode(['success' => true]);
     else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
     exit();
 }
 
 if ($action === 'delete_partner' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare("DELETE FROM partners WHERE id = ?");
+    $stmt->execute([$data->id ?? 0]); echo json_encode(['success' => true]); exit();
+}
+
+// --- Gestion des Ambassadeurs ---
+if ($action === 'add_ambassador' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $country = $data->country ?? ''; $flag = $data->flag ?? ''; $zone = $data->zone ?? '';
+    $expertises = $data->expertises ?? ''; $logo_url = $data->logo_url ?? '';
+    $stmt = $pdo->prepare("INSERT INTO ambassadors (country, flag, zone, expertises, logo_url) VALUES (?, ?, ?, ?, ?)");
+    if ($stmt->execute([$country, $flag, $zone, $expertises, $logo_url])) echo json_encode(['success' => true]);
+    else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
+    exit();
+}
+
+if ($action === 'edit_ambassador' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $data->id ?? 0; $country = $data->country ?? ''; $flag = $data->flag ?? ''; $zone = $data->zone ?? '';
+    $expertises = $data->expertises ?? ''; $logo_url = $data->logo_url ?? '';
+    $stmt = $pdo->prepare("UPDATE ambassadors SET country=?, flag=?, zone=?, expertises=?, logo_url=? WHERE id=?");
+    if ($stmt->execute([$country, $flag, $zone, $expertises, $logo_url, $id])) echo json_encode(['success' => true]);
+    else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
+    exit();
+}
+
+if ($action === 'get_ambassadors' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $stmt = $pdo->query("SELECT * FROM ambassadors ORDER BY country ASC");
+    echo json_encode(['success' => true, 'data' => $stmt->fetchAll()]); exit();
+}
+
+if ($action === 'get_partners' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $stmt = $pdo->query("SELECT * FROM partners ORDER BY name ASC");
+    echo json_encode(['success' => true, 'data' => $stmt->fetchAll()]); exit();
+}
+
+if ($action === 'delete_ambassador' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $stmt = $pdo->prepare("DELETE FROM ambassadors WHERE id = ?");
     $stmt->execute([$data->id ?? 0]); echo json_encode(['success' => true]); exit();
 }
 

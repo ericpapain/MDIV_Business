@@ -2,11 +2,16 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Handshake, Trash2, Plus, Loader2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export default function AdminPartners() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [country, setCountry] = useState("");
+  const [flag, setFlag] = useState("");
+  const [sector, setSector] = useState("");
+  const [website, setWebsite] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const { toast } = useToast();
@@ -15,20 +20,20 @@ export default function AdminPartners() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-partners"],
     queryFn: async () => {
-      const res = await fetch("/api-public.php?action=partners");
+      const res = await fetch("/api-admin.php?action=get_partners");
       const json = await res.json();
       return json.data || [];
     },
   });
 
   const resetForm = () => {
-    setName(""); setCategory(""); setCountry(""); setEditingId(null);
+    setName(""); setCategory(""); setCountry(""); setFlag(""); setSector(""); setWebsite(""); setLogoUrl(""); setEditingId(null);
   };
 
   const submitPartner = useMutation({
     mutationFn: async () => {
       const action = editingId ? "edit_partner" : "add_partner";
-      const payload = { id: editingId, name, category, country };
+      const payload = { id: editingId, name, category, country, flag, sector, website, logo_url: logoUrl };
       const res = await fetch(`/api-admin.php?action=${action}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -68,63 +73,99 @@ export default function AdminPartners() {
     setName(p.name);
     setCategory(p.category);
     setCountry(p.country);
+    setFlag(p.flag || "");
+    setSector(p.sector || "");
+    setWebsite(p.website || "");
+    setLogoUrl(p.logo_url || "");
   };
 
   if (isLoading) return <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-gold" /></div>;
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-display mb-8">Gestion des Partenaires</h1>
+    <div>
+      <div className="mb-8">
+        <div className="eyebrow mb-2">CMS Réseau</div>
+        <h1 className="font-display text-4xl flex items-center gap-3">
+          <Handshake className="text-gold" size={32} /> Gestion des Partenaires
+        </h1>
+      </div>
 
-      <div className="grid lg:grid-cols-[1fr_300px] gap-8">
-        <div className="space-y-4">
-          <div className="bg-muted/30 border border-border rounded-sm p-4">
-            <h2 className="text-xl font-display mb-4">Liste des Partenaires</h2>
-            <div className="space-y-2">
-              {data?.map((p: any) => (
-                <div key={p.id} className="flex items-center justify-between p-3 bg-background border border-border/50 rounded-sm hover:border-gold/30 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-sm bg-gold/10 flex items-center justify-center text-gold">
-                      <Handshake size={20} />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-sm">{p.name}</div>
-                      <div className="text-xs text-muted-foreground">{p.category} · {p.country}</div>
-                    </div>
+      <div className="grid lg:grid-cols-[1fr_380px] gap-8">
+        {/* Liste */}
+        <div className="space-y-3">
+          <h2 className="text-xl font-display mb-4">Liste des Partenaires ({data?.length || 0})</h2>
+          {data?.map((p: any) => (
+            <div key={p.id} className="luxe-card p-4 rounded-sm flex items-center justify-between gap-4 hover:border-gold/30 transition-colors">
+              <div className="flex items-center gap-4">
+                {p.logo_url ? (
+                  <img src={p.logo_url.startsWith('http') || p.logo_url.startsWith('/') ? p.logo_url : `/${p.logo_url}`} alt={p.name} className="w-12 h-12 rounded-sm object-contain border border-gold/20 p-1 bg-black/20" />
+                ) : (
+                  <div className="w-12 h-12 rounded-sm bg-gold/10 border border-gold/20 flex items-center justify-center text-2xl">
+                    {p.flag || <Handshake size={20} className="text-gold" />}
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => startEdit(p)} className="p-2 text-muted-foreground hover:text-gold transition-colors">
-                      <Edit size={16} />
-                    </button>
-                    <button onClick={() => deletePartner.mutate(p.id)} className="p-2 text-muted-foreground hover:text-destructive transition-colors">
-                      <Trash2 size={16} />
-                    </button>
+                )}
+                <div>
+                  <div className="font-semibold text-sm flex items-center gap-2">
+                    <span>{p.flag}</span> {p.name}
                   </div>
+                  <div className="text-xs text-muted-foreground">{p.sector || p.category} · {p.country}</div>
+                  {p.website && <div className="text-xs text-gold/60 mt-0.5">{p.website}</div>}
                 </div>
-              ))}
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <button onClick={() => startEdit(p)} className="p-2 text-muted-foreground hover:text-gold transition-colors">
+                  <Edit size={16} />
+                </button>
+                <button onClick={() => { if (confirm("Supprimer ce partenaire ?")) deletePartner.mutate(p.id); }} className="p-2 text-muted-foreground hover:text-destructive transition-colors">
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
-          </div>
+          ))}
+          {data?.length === 0 && (
+            <p className="text-muted-foreground text-sm p-8 text-center border border-dashed border-border rounded-sm">
+              Aucun partenaire. Ajoutez-en un depuis le formulaire.
+            </p>
+          )}
         </div>
 
+        {/* Formulaire */}
         <div className="bg-muted/30 border border-border rounded-sm p-6 h-fit sticky top-8">
-          <h2 className="text-xl font-display mb-6">{editingId ? "Modifier Partenaire" : "Nouveau Partenaire"}</h2>
+          <h2 className="text-xl font-display mb-6">{editingId ? "Modifier le Partenaire" : "Nouveau Partenaire"}</h2>
           <form onSubmit={e => { e.preventDefault(); submitPartner.mutate(); }} className="space-y-4">
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Nom du partenaire</label>
-              <input required value={name} onChange={e => setName(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Nom de l'entreprise *</label>
+              <input required value={name} onChange={e => setName(e.target.value)} type="text" placeholder="Tech Africa" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Secteur d'activité</label>
+                <input value={sector} onChange={e => setSector(e.target.value)} type="text" placeholder="Transformation Digitale" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Catégorie</label>
+                <input value={category} onChange={e => setCategory(e.target.value)} type="text" placeholder="Tech, Finance..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Pays</label>
+                <input value={country} onChange={e => setCountry(e.target.value)} type="text" placeholder="France" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Emoji Drapeau</label>
+                <input value={flag} onChange={e => setFlag(e.target.value)} type="text" placeholder="🇫🇷" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+              </div>
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Secteur / Catégorie</label>
-              <input required value={category} onChange={e => setCategory(e.target.value)} type="text" placeholder="ex: Hôtellerie, Finance..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Site Internet</label>
+              <input value={website} onChange={e => setWebsite(e.target.value)} type="text" placeholder="https://..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
             </div>
-            <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Pays / Rayonnement</label>
-              <input required value={country} onChange={e => setCountry(e.target.value)} type="text" placeholder="ex: International" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
-            </div>
-            
-            <div className="flex gap-2">
+            <ImageUpload value={logoUrl} onChange={setLogoUrl} label="Logo de l'entreprise" />
+
+            <div className="flex gap-2 pt-2">
               <button type="submit" disabled={submitPartner.isPending} className="flex-1 py-3 bg-gold text-background font-medium text-xs tracking-wide uppercase rounded-sm flex justify-center items-center gap-2">
-                {submitPartner.isPending ? <Loader2 size={16} className="animate-spin" /> : editingId ? <><Edit size={16}/> Mettre à jour</> : <><Plus size={16}/> Ajouter</>}
+                {submitPartner.isPending ? <Loader2 size={16} className="animate-spin" /> : editingId ? <><Edit size={16} /> Mettre à jour</> : <><Plus size={16} /> Ajouter</>}
               </button>
               {editingId && (
                 <button type="button" onClick={resetForm} className="px-4 bg-muted border border-border text-foreground font-medium text-xs tracking-wide uppercase rounded-sm">

@@ -17,6 +17,7 @@ export default function Contact() {
   const budget = searchParams.get("budget");
   const duration = searchParams.get("duration");
   const country = searchParams.get("country");
+  const subjectParam = searchParams.get("subject") || "";
 
   const defaultMsg = profile ? `${t("contact.form.msgIntro")}
 ${t("contact.form.profile")} : ${profile}
@@ -134,7 +135,7 @@ ${t("contact.form.msgOutro")}` : "";
             <Field label={t("contact.form.email")} name="email" type="email" required />
             <Field label={t("contact.form.phone")} name="phone" />
           </div>
-          <Field label={t("contact.form.subject")} name="subject" required />
+          <Field label={t("contact.form.subject")} name="subject" required defaultValue={subjectParam} />
           <div>
             <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
               {t("contact.form.profile")} <span className="text-gold">*</span>
