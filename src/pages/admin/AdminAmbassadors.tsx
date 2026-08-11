@@ -10,6 +10,7 @@ export default function AdminAmbassadors() {
   const [zone, setZone] = useState("");
   const [expertises, setExpertises] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
+  const [company, setCompany] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const { toast } = useToast();
@@ -25,13 +26,13 @@ export default function AdminAmbassadors() {
   });
 
   const resetForm = () => {
-    setCountry(""); setFlag(""); setZone(""); setExpertises(""); setLogoUrl(""); setEditingId(null);
+    setCountry(""); setFlag(""); setZone(""); setExpertises(""); setLogoUrl(""); setCompany(""); setEditingId(null);
   };
 
   const submitAmbassador = useMutation({
     mutationFn: async () => {
       const action = editingId ? "edit_ambassador" : "add_ambassador";
-      const payload = { id: editingId, country, flag, zone, expertises, logo_url: logoUrl };
+      const payload = { id: editingId, country, flag, zone, expertises, logo_url: logoUrl, company };
       const res = await fetch(`/api-admin.php?action=${action}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,6 +74,7 @@ export default function AdminAmbassadors() {
     setZone(a.zone);
     setExpertises(a.expertises);
     setLogoUrl(a.logo_url);
+    setCompany(a.company || "");
   };
 
   if (isLoading) return <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-gold" /></div>;
@@ -142,6 +144,10 @@ export default function AdminAmbassadors() {
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Zone géographique couverte</label>
               <input value={zone} onChange={e => setZone(e.target.value)} type="text" placeholder="Afrique de l'Ouest" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Entreprise représentée (Optionnel)</label>
+              <input value={company} onChange={e => setCompany(e.target.value)} type="text" placeholder="Nom de l'entreprise" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Domaines d'expertise (séparés par des virgules)</label>

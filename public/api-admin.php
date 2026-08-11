@@ -91,8 +91,12 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS ambassadors (
     zone VARCHAR(255) DEFAULT '',
     expertises TEXT DEFAULT '',
     logo_url VARCHAR(255) DEFAULT '',
+    company VARCHAR(255) DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+// Migration: add company to ambassadors if missing
+try { $pdo->exec("ALTER TABLE ambassadors ADD COLUMN company VARCHAR(255) DEFAULT ''"); } catch(PDOException $e) {}
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -291,18 +295,18 @@ if ($action === 'delete_partner' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 // --- Gestion des Ambassadeurs ---
 if ($action === 'add_ambassador' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $country = $data->country ?? ''; $flag = $data->flag ?? ''; $zone = $data->zone ?? '';
-    $expertises = $data->expertises ?? ''; $logo_url = $data->logo_url ?? '';
-    $stmt = $pdo->prepare("INSERT INTO ambassadors (country, flag, zone, expertises, logo_url) VALUES (?, ?, ?, ?, ?)");
-    if ($stmt->execute([$country, $flag, $zone, $expertises, $logo_url])) echo json_encode(['success' => true]);
+    $expertises = $data->expertises ?? ''; $logo_url = $data->logo_url ?? ''; $company = $data->company ?? '';
+    $stmt = $pdo->prepare("INSERT INTO ambassadors (country, flag, zone, expertises, logo_url, company) VALUES (?, ?, ?, ?, ?, ?)");
+    if ($stmt->execute([$country, $flag, $zone, $expertises, $logo_url, $company])) echo json_encode(['success' => true]);
     else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
     exit();
 }
 
 if ($action === 'edit_ambassador' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $data->id ?? 0; $country = $data->country ?? ''; $flag = $data->flag ?? ''; $zone = $data->zone ?? '';
-    $expertises = $data->expertises ?? ''; $logo_url = $data->logo_url ?? '';
-    $stmt = $pdo->prepare("UPDATE ambassadors SET country=?, flag=?, zone=?, expertises=?, logo_url=? WHERE id=?");
-    if ($stmt->execute([$country, $flag, $zone, $expertises, $logo_url, $id])) echo json_encode(['success' => true]);
+    $expertises = $data->expertises ?? ''; $logo_url = $data->logo_url ?? ''; $company = $data->company ?? '';
+    $stmt = $pdo->prepare("UPDATE ambassadors SET country=?, flag=?, zone=?, expertises=?, logo_url=?, company=? WHERE id=?");
+    if ($stmt->execute([$country, $flag, $zone, $expertises, $logo_url, $company, $id])) echo json_encode(['success' => true]);
     else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
     exit();
 }

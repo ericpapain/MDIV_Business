@@ -18,14 +18,15 @@ export default function Contact() {
   const duration = searchParams.get("duration");
   const country = searchParams.get("country");
   const subjectParam = searchParams.get("subject") || "";
+  const msgParam = searchParams.get("msg") || "";
 
-  const defaultMsg = profile ? `${t("contact.form.msgIntro")}
+  const defaultMsg = msgParam ? msgParam : (profile ? `${t("contact.form.msgIntro")}
 ${t("contact.form.profile")} : ${profile}
 ${t("contact.form.msgObjective")} ${objective}
 ${t("contact.form.msgBudget")} ${budget} €
 ${t("contact.form.msgDuration")} ${duration} jours
 ${t("contact.form.msgCountry")} ${country}
-${t("contact.form.msgOutro")}` : "";
+${t("contact.form.msgOutro")}` : "");
 
   return (
     <div className="pt-32 pb-20 container">

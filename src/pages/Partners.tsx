@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Building, User, Mail, MapPin, Briefcase, Send, Search, Users, Calendar, Globe, Lightbulb, Eye, TrendingUp, Plane, Handshake, Shield, ChevronDown, ChevronLeft, ChevronRight, Star, ExternalLink } from "lucide-react";
+import { Building, Search, Users, Calendar, Globe, Lightbulb, Eye, TrendingUp, Plane, Handshake, Shield, ChevronDown, Star } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import partnersHero from "@/assets/partners_hands_map_solid.png";
@@ -35,82 +35,44 @@ const AccordionSection = ({ index, eyebrow, title, isActive, onClick, children }
   </section>
 );
 
-/* ─── Horizontal Carousel ─── */
-function Carousel({ children, autoPlay = true }: { children: React.ReactNode[]; autoPlay?: boolean }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const len = children.length;
-
-  useEffect(() => {
-    if (!autoPlay || len <= 1) return;
-    const iv = setInterval(() => setCurrentIndex(i => (i + 1) % len), 4000);
-    return () => clearInterval(iv);
-  }, [len, autoPlay]);
-
-  const prev = () => setCurrentIndex(i => (i - 1 + len) % len);
-  const next = () => setCurrentIndex(i => (i + 1) % len);
-
-  if (len === 0) return null;
-
-  return (
-    <div className="relative">
-      <div className="overflow-hidden">
-        <motion.div
-          className="flex"
-          animate={{ x: `-${currentIndex * 100}%` }}
-          transition={{ type: "spring", damping: 30, stiffness: 200 }}
-          style={{ width: `${len * 100}%` }}
-        >
-          {children.map((child, i) => (
-            <div key={i} style={{ width: `${100 / len}%` }} className="px-2">
-              {child}
-            </div>
-          ))}
-        </motion.div>
-      </div>
-      {len > 1 && (
-        <>
-          <button onClick={prev} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold hover:bg-gold/20 transition-colors z-10">
-            <ChevronLeft size={18} />
-          </button>
-          <button onClick={next} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold hover:bg-gold/20 transition-colors z-10">
-            <ChevronRight size={18} />
-          </button>
-          <div className="flex justify-center gap-2 mt-4">
-            {children.map((_, i) => (
-              <button key={i} onClick={() => setCurrentIndex(i)} className={`w-2 h-2 rounded-full transition-all ${i === currentIndex ? 'bg-gold w-6' : 'bg-gold/30'}`} />
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
+/* ─── Emoji Wrapper to fix Windows rendering ─── */
+const Emoji = ({ symbol }: { symbol: string }) => (
+  <span style={{ fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"' }}>
+    {symbol}
+  </span>
+);
 
 /* ─── Ambassador Card ─── */
 function AmbassadorCard({ amb, isEn, onContact }: { amb: any; isEn: boolean; onContact: () => void }) {
   const expertiseList = (amb.expertises || "").split(",").map((e: string) => e.trim()).filter(Boolean);
   return (
-    <div className="luxe-card rounded-2xl p-6 relative overflow-hidden group h-full flex flex-col">
+    <div className="luxe-card rounded-xl p-5 relative overflow-hidden group h-full flex flex-col min-w-[280px] max-w-[320px] mx-auto w-full">
       <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl group-hover:bg-gold/10 transition-colors" />
-      <div className="flex items-start gap-4 mb-5">
-        <div className="text-3xl">{amb.flag || '🌍'}</div>
+      <div className="flex items-start gap-4 mb-4">
+        <div className="text-3xl"><Emoji symbol={amb.flag || '🌍'} /></div>
         <div>
-          <div className="font-display text-xl">{amb.country}</div>
+          <div className="font-display text-lg">{amb.country}</div>
           <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{amb.zone}</div>
         </div>
       </div>
       {amb.logo_url && (
-        <div className="mb-4 flex justify-center">
+        <div className="mb-4 flex justify-center h-24">
           <img src={amb.logo_url.startsWith('http') || amb.logo_url.startsWith('/') ? amb.logo_url : `/${amb.logo_url}`}
-            alt={amb.country} className="h-16 max-w-full object-contain rounded-lg" />
+            alt={amb.country} className="h-full w-full object-contain rounded-lg" />
+        </div>
+      )}
+      {amb.company && (
+        <div className="mb-3 text-center">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{isEn ? "Company" : "Entreprise"}</div>
+          <div className="font-semibold text-sm">{amb.company}</div>
         </div>
       )}
       {expertiseList.length > 0 && (
         <div className="mb-4">
-          <div className="text-[9px] uppercase tracking-[0.2em] text-gold mb-2">{isEn ? "Expertise" : "Expertises"}</div>
+          <div className="text-[9px] uppercase tracking-[0.2em] text-gold mb-2 text-center">{isEn ? "Expertise" : "Expertises"}</div>
           <ul className="space-y-1">
             {expertiseList.map((exp: string, i: number) => (
-              <li key={i} className="text-xs text-muted-foreground flex items-center gap-2">
+              <li key={i} className="text-[11px] text-muted-foreground flex items-center justify-center gap-2">
                 <span className="w-1 h-1 rounded-full bg-gold/60 shrink-0" /> {exp}
               </li>
             ))}
@@ -118,13 +80,13 @@ function AmbassadorCard({ amb, isEn, onContact }: { amb: any; isEn: boolean; onC
         </div>
       )}
       {/* BNE Ambassador Badge */}
-      <div className="flex items-center gap-2 my-3">
-        <img src="/assets/bne_ambassador_badge.png" alt="BNE Ambassador" className="w-8 h-8 object-contain" />
-        <span className="text-[9px] uppercase tracking-[0.2em] text-gold">BNE Ambassador</span>
+      <div className="flex flex-col items-center justify-center gap-1.5 my-3 mt-auto">
+        <img src="/assets/bne_ambassador_badge.png" alt="BNE Ambassador" className="w-10 h-10 object-contain" />
+        <span className="text-[9px] uppercase tracking-[0.2em] text-gold text-center">BNE Ambassador</span>
       </div>
-      <div className="mt-auto pt-4 border-t border-border/50">
-        <button onClick={onContact} className="btn-gold w-full py-2.5 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2">
-          <Handshake size={12} /> {isEn ? "Request an Introduction" : "Mise en relation"}
+      <div className="pt-3 border-t border-border/50">
+        <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2">
+          <Handshake size={12} /> {isEn ? "Request Introduction" : "Mise en relation"}
         </button>
       </div>
     </div>
@@ -134,34 +96,35 @@ function AmbassadorCard({ amb, isEn, onContact }: { amb: any; isEn: boolean; onC
 /* ─── Partner Card ─── */
 function PartnerCard({ partner, isEn, onContact }: { partner: any; isEn: boolean; onContact: () => void }) {
   return (
-    <div className="luxe-card rounded-2xl p-6 relative overflow-hidden group h-full flex flex-col">
+    <div className="luxe-card rounded-xl p-5 relative overflow-hidden group h-full flex flex-col min-w-[280px] max-w-[320px] mx-auto w-full">
       <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl group-hover:bg-gold/10 transition-colors" />
-      <div className="flex items-center gap-3 mb-4">
-        <div className="text-2xl">{partner.flag || '🌐'}</div>
-        <div className="text-sm text-muted-foreground">{partner.country}</div>
+      <div className="flex items-center gap-3 mb-3">
+        <div className="text-2xl"><Emoji symbol={partner.flag || '🌐'} /></div>
+        <div className="text-xs text-muted-foreground">{partner.country}</div>
       </div>
       {partner.logo_url ? (
-        <div className="mb-4 flex justify-center items-center h-16">
+        <div className="mb-3 flex justify-center items-center h-24">
           <img src={partner.logo_url.startsWith('http') || partner.logo_url.startsWith('/') ? partner.logo_url : `/${partner.logo_url}`}
-            alt={partner.name} className="max-h-full max-w-full object-contain" />
+            alt={partner.name} className="h-full w-full object-contain" />
         </div>
       ) : (
-        <div className="mb-4 flex justify-center items-center h-16">
-          <div className="w-14 h-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
-            <Building size={24} className="text-gold/60" />
+        <div className="mb-3 flex justify-center items-center h-24">
+          <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
+            <Building size={28} className="text-gold/60" />
           </div>
         </div>
       )}
-      <div className="font-display text-xl mb-1">{partner.name}</div>
-      <div className="text-sm text-muted-foreground mb-4">{partner.sector || partner.category}</div>
+      <div className="font-display text-lg mb-1 text-center">{partner.name}</div>
+      <div className="text-[11px] text-muted-foreground mb-3 text-center">{partner.sector || partner.category}</div>
+      
       {/* BNE Partner Badge */}
-      <div className="flex items-center gap-2 my-3">
-        <img src="/assets/bne_partner_badge.png" alt="BNE Partner" className="w-8 h-8 object-contain" />
-        <span className="text-[9px] uppercase tracking-[0.2em] text-gold">BNE Partner</span>
+      <div className="flex flex-col items-center justify-center gap-1.5 my-3 mt-auto">
+        <img src="/assets/bne_partner_badge.png" alt="BNE Partner" className="w-10 h-10 object-contain" />
+        <span className="text-[9px] uppercase tracking-[0.2em] text-gold text-center">BNE Partner</span>
       </div>
-      <div className="mt-auto pt-4 border-t border-border/50">
-        <button onClick={onContact} className="btn-gold w-full py-2.5 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2">
-          <Handshake size={12} /> {isEn ? "Request an Introduction" : "Mise en relation"}
+      <div className="pt-3 border-t border-border/50">
+        <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2">
+          <Handshake size={12} /> {isEn ? "Request Introduction" : "Mise en relation"}
         </button>
       </div>
     </div>
@@ -218,18 +181,31 @@ export default function Partners() {
     }
   });
 
-  const handleContactAmbassador = (country: string) => {
+  const handleContactAmbassador = (amb: any) => {
     const subject = isEn
-      ? `Request for introduction with a BNE Ambassador in ${country}`
-      : `Demande de mise en relation avec un ambassadeur BNE en ${country}`;
-    navigate(`/contact?subject=${encodeURIComponent(subject)}`);
+      ? `Request for introduction with a BNE Ambassador in ${amb.country}`
+      : `Demande de mise en relation avec un ambassadeur BNE en ${amb.country}`;
+    const msg = `--- ${isEn ? 'Ambassador Info' : 'Infos Ambassadeur'} ---
+${isEn ? 'Country' : 'Pays'} : ${amb.country}
+${isEn ? 'Company' : 'Entreprise'} : ${amb.company || 'N/A'}
+Zone : ${amb.zone}
+Expertise : ${amb.expertises}
+
+`;
+    navigate(`/contact?subject=${encodeURIComponent(subject)}&msg=${encodeURIComponent(msg)}`);
   };
 
-  const handleContactPartner = (name: string) => {
+  const handleContactPartner = (partner: any) => {
     const subject = isEn
-      ? `Request for introduction with partner ${name}`
-      : `Demande de mise en relation avec le partenaire ${name}`;
-    navigate(`/contact?subject=${encodeURIComponent(subject)}`);
+      ? `Request for introduction with partner ${partner.name}`
+      : `Demande de mise en relation avec le partenaire ${partner.name}`;
+    const msg = `--- ${isEn ? 'Partner Info' : 'Infos Partenaire'} ---
+Nom : ${partner.name}
+${isEn ? 'Country' : 'Pays'} : ${partner.country}
+Secteur : ${partner.sector || partner.category}
+
+`;
+    navigate(`/contact?subject=${encodeURIComponent(subject)}&msg=${encodeURIComponent(msg)}`);
   };
 
   const missionCards = [
@@ -296,7 +272,6 @@ export default function Partners() {
         <div className="hairline mt-2" />
       </div>
 
-      {/* Type choice */}
       <div className="mb-4">
         <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-2">
           {isEn ? "I would like to become:" : "Je souhaite devenir :"}
@@ -319,7 +294,7 @@ export default function Partners() {
         {applicationType === "partner" ? (
           <>
             <div className="grid grid-cols-2 gap-3">
-              <Field label={isEn ? "Company Name" : "Nom entreprise"} name="company" icon={<Building size={12} />} required />
+              <Field label={isEn ? "Company Name" : "Nom entreprise"} name="company" required />
               <Field label={isEn ? "Activity Sector" : "Secteur d'activité"} name="sector" required />
               <Field label={isEn ? "Country" : "Pays"} name="country" />
               <Field label={isEn ? "Website" : "Site internet"} name="website" />
@@ -337,6 +312,7 @@ export default function Partners() {
               <Field label="Email" name="email" type="email" required />
               <Field label={isEn ? "Phone" : "Téléphone"} name="phone" type="tel" />
             </div>
+            <Field label={isEn ? "Company" : "Entreprise représentée"} name="company" />
             <Field label={isEn ? "Areas of Expertise" : "Domaines d'expertise"} name="expertises" textarea rows={2} required />
             <Field label={isEn ? "Languages Spoken" : "Langues parlées"} name="languages" required />
             <div className="grid grid-cols-2 gap-3">
@@ -359,7 +335,7 @@ export default function Partners() {
         </button>
       ) : (
         <button type="submit" className="btn-gold w-full py-3 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3">
-          <Send size={13} /> {isEn ? "Send your application" : "Envoyer votre demande"}
+          <Send size={13} /> {isEn ? "Send application" : "Envoyer la demande"}
         </button>
       )}
       <p className="text-[9px] text-muted-foreground/50 text-center leading-relaxed flex items-center justify-center gap-1 pt-1">
@@ -370,7 +346,6 @@ export default function Partners() {
 
   return (
     <div className="pt-32 pb-20 bg-background min-h-screen text-foreground">
-
       {/* ── HERO ── */}
       <section className="container max-w-6xl mb-6 animate-fade-up">
         <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-center">
@@ -400,8 +375,8 @@ export default function Partners() {
 
       {/* ── AMBASSADORS SECTION ── */}
       {ambassadors.length > 0 && (
-        <section className="container max-w-6xl py-16">
-          <div className="flex items-center gap-4 mb-10">
+        <section className="container max-w-6xl py-12">
+          <div className="flex items-center gap-4 mb-8">
             <div className="h-px flex-1 bg-gradient-to-l from-border to-transparent hidden md:block" />
             <div className="text-center">
               <div className="eyebrow mb-2 flex items-center gap-2 justify-center">
@@ -411,20 +386,22 @@ export default function Partners() {
             </div>
             <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent hidden md:block" />
           </div>
-          <div className="px-6">
-            <Carousel>
+          <div className="px-4">
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {ambassadors.map((amb: any) => (
-                <AmbassadorCard key={amb.id} amb={amb} isEn={isEn} onContact={() => handleContactAmbassador(amb.country)} />
+                <div key={amb.id} className="snap-center shrink-0 w-[280px] sm:w-[300px]">
+                  <AmbassadorCard amb={amb} isEn={isEn} onContact={() => handleContactAmbassador(amb)} />
+                </div>
               ))}
-            </Carousel>
+            </div>
           </div>
         </section>
       )}
 
       {/* ── PARTNERS SECTION ── */}
       {partners.length > 0 && (
-        <section className="container max-w-6xl py-16 border-t border-border/30">
-          <div className="flex items-center gap-4 mb-10">
+        <section className="container max-w-6xl py-12 border-t border-border/30">
+          <div className="flex items-center gap-4 mb-8">
             <div className="h-px flex-1 bg-gradient-to-l from-border to-transparent hidden md:block" />
             <div className="text-center">
               <div className="eyebrow mb-2 flex items-center gap-2 justify-center">
@@ -434,17 +411,19 @@ export default function Partners() {
             </div>
             <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent hidden md:block" />
           </div>
-          <div className="px-6">
-            <Carousel autoPlay={false}>
+          <div className="px-4">
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {partners.map((partner: any) => (
-                <PartnerCard key={partner.id} partner={partner} isEn={isEn} onContact={() => handleContactPartner(partner.name)} />
+                <div key={partner.id} className="snap-center shrink-0 w-[280px] sm:w-[300px]">
+                  <PartnerCard partner={partner} isEn={isEn} onContact={() => handleContactPartner(partner)} />
+                </div>
               ))}
-            </Carousel>
+            </div>
           </div>
         </section>
       )}
 
-      {/* ── ACCORDION + FORM (LAYOUT INCHANGÉ) ── */}
+      {/* ── ACCORDION + FORM ── */}
       <div className="container max-w-6xl lg:h-[250vh] relative" ref={containerRef}>
         <div className="lg:sticky lg:top-24 grid lg:grid-cols-[1fr_auto_380px] gap-8 lg:gap-10">
           <div className="relative z-10">
@@ -492,38 +471,18 @@ export default function Partners() {
                   ))}
                 </ol>
               </AccordionSection>
-
-              <section className="animate-fade-up">
-                <div className="relative glass-strong p-4 rounded-xl text-center overflow-hidden" style={{ border: "1px solid rgba(208, 166, 67, 0.3)" }}>
-                  <div className="absolute inset-0 opacity-10" style={{ background: "radial-gradient(rgba(208, 166, 67, 0.4), transparent 70%)" }} />
-                  <div className="relative flex flex-col md:flex-row items-center justify-between text-left gap-4">
-                    <div>
-                      <h2 className="font-display text-lg leading-snug mb-2">{t("partners.sectionFinal.title")}</h2>
-                      <div className="hairline w-12 mb-2" />
-                      <p className="text-[11px] text-muted-foreground leading-relaxed max-w-xs">{t("partners.sectionFinal.desc")}</p>
-                    </div>
-                    <Link to="/contact" className="flex-shrink-0 px-5 py-2.5 rounded-lg bg-gold/10 border border-gold/40 text-gold hover:bg-gold hover:text-black transition-all duration-300 text-xs font-semibold tracking-wider uppercase">
-                      {t("partners.sectionFinal.cta")}
-                    </Link>
-                  </div>
-                </div>
-              </section>
             </div>
           </div>
 
-          {/* Separator */}
           <div className="hidden lg:flex flex-col items-center justify-center relative py-12 opacity-50 hover:opacity-100 transition-opacity duration-700">
             <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gold/40 to-gold/60" />
             <div className="py-6 flex flex-col items-center relative">
               <div className="absolute w-12 h-12 bg-gold/5 rounded-full animate-pulse blur-md" />
               <div className="w-2 h-2 rotate-45 border border-gold/80 bg-background z-10" />
-              <div className="w-1 h-1 rotate-45 bg-gold/60 mt-2 z-10" />
-              <div className="w-1 h-1 rotate-45 bg-gold/30 mt-1.5 z-10" />
             </div>
             <div className="w-px flex-1 bg-gradient-to-t from-transparent via-gold/40 to-gold/60" />
           </div>
 
-          {/* Form sticky */}
           <div className="hidden lg:block relative h-full">
             <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-6">
               <FormBlock />
@@ -531,7 +490,6 @@ export default function Partners() {
           </div>
         </div>
 
-        {/* Mobile form */}
         <div className="lg:hidden mt-10">
           <FormBlock />
         </div>
