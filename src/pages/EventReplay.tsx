@@ -14,12 +14,13 @@ export default function EventReplay() {
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("apercu");
+  const [showAllPhotos, setShowAllPhotos] = useState(false);
   
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  const { data: dbEvents, isLoading } = useQuery({
+  const { data: dbEvents, isLoading: isEventsLoading } = useQuery({
     queryKey: ["public-events"],
     queryFn: async () => {
       const res = await fetch("/api-public.php?action=events");
@@ -27,6 +28,17 @@ export default function EventReplay() {
       return json.data || { upcoming: [], past: [] };
     }
   });
+
+  const { data: dbAvis, isLoading: isAvisLoading } = useQuery({
+    queryKey: ["public-avis"],
+    queryFn: async () => {
+      const res = await fetch("https://mdiv-network.com/api-avis.php");
+      const json = await res.json();
+      return json.success ? (json.data || []) : [];
+    }
+  });
+
+  const isLoading = isEventsLoading || isAvisLoading;
 
   if (isLoading) {
     return <div className="pt-40 pb-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" /></div>;
@@ -64,6 +76,9 @@ export default function EventReplay() {
       console.error("Erreur parsing replay_data", e);
     }
   }
+
+  // Filtrer les avis pour cet événement précis
+  const eventReviews = dbAvis?.filter((avis: any) => avis.evenement === event.title) || [];
 
   const similarEvents = allPastEvents.filter((e: any) => e.id.toString() !== id?.toString()).slice(0, 3);
 
@@ -196,14 +211,14 @@ export default function EventReplay() {
               <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
             </div>
             
-            <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-              {replayData.photos.map((photo: string, index: number) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {replayData.photos.slice(0, showAllPhotos ? undefined : 8).map((photo: string, index: number) => (
                 <div 
                   key={index} 
-                  className="relative group overflow-hidden rounded-sm cursor-pointer break-inside-avoid border border-border/50 bg-[#111]"
+                  className="relative group overflow-hidden rounded-2xl cursor-pointer border border-border/50 bg-[#111] aspect-square md:aspect-[4/3]"
                   onClick={() => setActiveImage(photo)}
                 >
-                  <img src={photo} alt={`Souvenir ${index + 1}`} className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                  <img src={photo} alt={`Souvenir ${index + 1}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <div className="w-12 h-12 rounded-full border border-gold/50 bg-black/50 backdrop-blur-sm flex items-center justify-center text-gold">
                       <Plus size={20} />
@@ -212,6 +227,17 @@ export default function EventReplay() {
                 </div>
               ))}
             </div>
+            
+            {replayData.photos.length > 8 && (
+              <div className="mt-8 text-center">
+                <button 
+                  onClick={() => setShowAllPhotos(!showAllPhotos)}
+                  className="btn-ghost-gold px-6 py-3 text-xs uppercase tracking-[0.2em] rounded-sm inline-flex items-center gap-2"
+                >
+                  {showAllPhotos ? (isEn ? "Show less" : "Voir moins") : (isEn ? "Show all photos" : "Voir toutes les photos")}
+                </button>
+              </div>
+            )}
           </section>
         )}
 
@@ -300,8 +326,8 @@ export default function EventReplay() {
           </section>
         )}
 
-        {/* ── 7. Témoignages ── */}
-        {(replayData.testimonials && replayData.testimonials.length > 0) && (
+        {/* ── 7. Témoignages (Avis réels) ── */}
+        {(eventReviews && eventReviews.length > 0) && (
           <section id="testimonials" className="scroll-mt-32">
             <div className="flex items-center gap-4 mb-16 text-center justify-center">
               <div className="h-px flex-1 bg-gradient-to-l from-border to-transparent hidden md:block" />
@@ -310,24 +336,20 @@ export default function EventReplay() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
-              {replayData.testimonials.map((testi: any, index: number) => (
+              {eventReviews.map((avis: any, index: number) => (
                 <div key={index} className="luxe-card p-10 rounded-sm relative group overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl group-hover:bg-gold/10 transition-colors" />
                   <Quote className="text-gold/20 mb-6" size={40} />
                   <p className="font-serif italic text-lg leading-relaxed text-foreground/90 mb-8 relative z-10">
-                    "{testi.quote}"
+                    "{avis.commentaire}"
                   </p>
                   <div className="flex items-center gap-4 pt-6 border-t border-border/50 relative z-10">
-                    {testi.image_url ? (
-                      <img src={testi.image_url} alt={testi.name} className="w-12 h-12 rounded-full object-cover border border-gold/30" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full border border-gold/30 bg-gold/10 flex items-center justify-center text-gold font-display text-xl">
-                        {testi.name.charAt(0)}
-                      </div>
-                    )}
+                    <div className="w-12 h-12 rounded-full border border-gold/30 bg-gold/10 flex items-center justify-center text-gold font-display text-xl">
+                      {avis.nom.charAt(0)}
+                    </div>
                     <div>
-                      <div className="font-display text-lg">{testi.name}</div>
-                      <div className="text-[10px] uppercase tracking-[0.2em] text-gold-light mt-0.5">{testi.role}</div>
+                      <div className="font-display text-lg">{avis.nom}</div>
+                      <div className="text-[10px] uppercase tracking-[0.2em] text-gold-light mt-0.5">{avis.role}</div>
                     </div>
                   </div>
                 </div>
