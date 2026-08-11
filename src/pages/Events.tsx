@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { ProgramPanel } from "@/components/site/ProgramPanel";
+import { SimpleCountdown } from "@/components/event/SimpleCountdown";
 
 export default function Events() {
   const { t, language } = useLanguage();
@@ -71,6 +72,8 @@ export default function Events() {
                           <span className="inline-block bg-gold/10 border border-gold/20 text-gold px-3 py-1 rounded-sm text-sm font-semibold">{e.price}</span>
                         </div>
                       )}
+
+                      <SimpleCountdown targetDateStr={e.date} />
 
                       <div className="mt-auto pt-5 flex flex-col gap-3">
                         {/* Bouton Réserver */}
