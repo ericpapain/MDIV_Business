@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Edit, Save, Loader2, Image as ImageIcon, Video, FileText, Quote, Users, Clock, Award } from "lucide-react";
+import { Plus, Trash2, Edit, Save, Loader2, Image as ImageIcon, Video, FileText, Quote, Users, Clock, Award, FolderSearch, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 interface Highlight { time: string; title: string; description: string; image_url: string; }
 interface VideoItem { youtube_id: string; title: string; description: string; }
@@ -295,10 +296,8 @@ export default function AdminReplays() {
                       <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors" placeholder="Cocktail de bienvenue"
                         value={hl.title} onChange={e => { const nh = [...formData.highlights]; nh[index].title = e.target.value; setFormData({...formData, highlights: nh}); }} />
                     </div>
-                    <div>
-                      <label className="block text-xs text-muted-foreground mb-1">URL de l'image (optionnel)</label>
-                      <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors" placeholder="assets/..."
-                        value={hl.image_url} onChange={e => { const nh = [...formData.highlights]; nh[index].image_url = e.target.value; setFormData({...formData, highlights: nh}); }} />
+                    <div className="md:col-span-1">
+                      <ImageUpload label="Image (optionnel)" value={hl.image_url} onChange={val => { const nh = [...formData.highlights]; nh[index].image_url = val; setFormData({...formData, highlights: nh}); }} />
                     </div>
                     <div className="md:col-span-3">
                       <label className="block text-xs text-muted-foreground mb-1">Description</label>
@@ -335,10 +334,8 @@ export default function AdminReplays() {
                       <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors" placeholder="CEO chez..."
                         value={testi.role} onChange={e => { const nt = [...formData.testimonials]; nt[index].role = e.target.value; setFormData({...formData, testimonials: nt}); }} />
                     </div>
-                    <div>
-                      <label className="block text-xs text-muted-foreground mb-1">URL Photo profil</label>
-                      <input type="text" className="w-full bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-sm outline-none focus:border-gold transition-colors" placeholder="assets/..."
-                        value={testi.image_url} onChange={e => { const nt = [...formData.testimonials]; nt[index].image_url = e.target.value; setFormData({...formData, testimonials: nt}); }} />
+                    <div className="md:col-span-1">
+                      <ImageUpload label="Photo profil (optionnel)" value={testi.image_url} onChange={val => { const nt = [...formData.testimonials]; nt[index].image_url = val; setFormData({...formData, testimonials: nt}); }} />
                     </div>
                     <div className="md:col-span-3">
                       <label className="block text-xs text-muted-foreground mb-1">Citation (Avis)</label>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, Plane, MapPin, Loader2, Edit, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProgramSlot {
@@ -188,13 +189,15 @@ export default function AdminSejours() {
                 <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Lieu (Ville, Pays ou Adresse)</label>
                 <input required value={location} onChange={e => setLocation(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
+              {/* Image */}
+              <ImageUpload value={imageUrl} onChange={setImageUrl} label="Image du séjour" />
+
               <div className="grid grid-cols-2 gap-4">
-                <input type="text" placeholder="URL Image" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" value={imageUrl} onChange={e => setImageUrl(e.target.value)} />
                 <input type="text" placeholder="Prix (ex: 2990€)" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" value={price} onChange={e => setPrice(e.target.value)} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <input type="text" placeholder="URL de la Billetterie" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" value={billetterieUrl} onChange={e => setBilletterieUrl(e.target.value)} />
                 <input type="text" placeholder="Code Séjour (ex: BN26)" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" value={eventCode} onChange={e => setEventCode(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-1 gap-4">
+                <input type="text" placeholder="URL de la Billetterie" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" value={billetterieUrl} onChange={e => setBilletterieUrl(e.target.value)} />
               </div>
               {/* Description FR */}
               <div>

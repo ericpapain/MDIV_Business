@@ -188,6 +188,41 @@ if ($action === 'scan_directory' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
+// --- Upload d'Images ---
+if ($action === 'upload_image' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Aucun fichier envoyé ou erreur lors du transfert']);
+        exit();
+    }
+
+    $file = $_FILES['file'];
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+    if (!in_array($ext, $allowed_extensions)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Format non autorisé. Utilisez JPG, PNG, WEBP ou GIF.']);
+        exit();
+    }
+
+    $upload_dir = __DIR__ . '/assets/uploads/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
+
+    $filename = uniqid('img_') . '.' . $ext;
+    $target_path = $upload_dir . $filename;
+
+    if (move_uploaded_file($file['tmp_name'], $target_path)) {
+        echo json_encode(['success' => true, 'url' => 'assets/uploads/' . $filename]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Erreur lors de la sauvegarde sur le serveur']);
+    }
+    exit();
+}
+
 // --- Gestion des Membres ---
 if ($action === 'add_member' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $data->name ?? ''; $role = $data->role ?? ''; $image_url = $data->image_url ?? '';

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users, Trash2, Plus, Loader2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export default function AdminMembers() {
   const [name, setName] = useState("");
@@ -121,10 +122,7 @@ export default function AdminMembers() {
               <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Rôle / Description</label>
               <input required value={role} onChange={e => setRole(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
             </div>
-            <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Lien Photo (Optionnel)</label>
-              <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} type="text" placeholder="/assets/profils/cerise.jpg ou https://..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
-            </div>
+            <ImageUpload value={imageUrl} onChange={setImageUrl} label="Photo du Membre (Optionnel)" />
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Emoji Drapeau</label>
               <input value={flag} onChange={e => setFlag(e.target.value)} type="text" placeholder="🇫🇷" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
