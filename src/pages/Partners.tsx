@@ -63,7 +63,7 @@ function SnapCarousel({ children }: { children: React.ReactNode }) {
       if (!ref.current) return;
       const { scrollLeft, scrollWidth, clientWidth } = ref.current;
       // Scroll by 1 card approximately
-      const cardWidth = 320; 
+      const cardWidth = 280; 
       if (scrollLeft + clientWidth >= scrollWidth - 10) {
         ref.current.scrollTo({ left: 0, behavior: "smooth" });
       } else {
@@ -73,8 +73,8 @@ function SnapCarousel({ children }: { children: React.ReactNode }) {
     return () => clearInterval(iv);
   }, []);
 
-  const next = () => ref.current?.scrollBy({ left: 320, behavior: "smooth" });
-  const prev = () => ref.current?.scrollBy({ left: -320, behavior: "smooth" });
+  const next = () => ref.current?.scrollBy({ left: 280, behavior: "smooth" });
+  const prev = () => ref.current?.scrollBy({ left: -280, behavior: "smooth" });
 
   return (
     <div className="relative group">
@@ -95,47 +95,43 @@ function SnapCarousel({ children }: { children: React.ReactNode }) {
 function AmbassadorCard({ amb, isEn, onContact, onClick }: { amb: any; isEn: boolean; onContact: (e: React.MouseEvent) => void; onClick: () => void }) {
   const expertiseList = (amb.expertises || "").split(",").map((e: string) => e.trim()).filter(Boolean);
   return (
-    <div onClick={onClick} className="luxe-card cursor-pointer rounded-xl px-4 py-3 relative overflow-hidden group h-full flex flex-col min-w-[280px] max-w-[320px] mx-auto w-full hover:border-gold/50 transition-colors">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl group-hover:bg-gold/15 transition-colors" />
-      <div className="flex items-start gap-4 mb-3 relative z-10">
+    <div onClick={onClick} className="luxe-card cursor-pointer rounded-xl px-3 py-3 relative overflow-hidden group h-full flex flex-col min-w-[240px] max-w-[280px] mx-auto w-full hover:border-gold/50 transition-colors">
+      <img src="/assets/Badge/bne_ambassador_badge.png" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 opacity-[0.06] blur-xl pointer-events-none group-hover:opacity-10 transition-opacity" alt="" />
+      <div className="flex items-start gap-3 mb-2 relative z-10">
         <div className="text-3xl"><Emoji symbol={amb.flag || '🌍'} /></div>
         <div>
-          <div className="font-display text-lg">{amb.country}</div>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{amb.zone}</div>
+          <div className="font-display text-lg leading-tight">{amb.country}</div>
+          <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">{amb.zone}</div>
         </div>
       </div>
       {amb.logo_url && (
-        <div className="mb-3 flex justify-center h-32 relative z-10">
+        <div className="mb-2 flex justify-center h-40 relative z-10">
           <img src={amb.logo_url.startsWith('http') || amb.logo_url.startsWith('/') ? amb.logo_url : `/${amb.logo_url}`}
             alt={amb.country} className="h-full w-full object-contain rounded-md" />
         </div>
       )}
       {amb.company && (
-        <div className="mb-3 text-center relative z-10">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{isEn ? "Company" : "Entreprise"}</div>
-          <div className="font-semibold text-sm">{amb.company}</div>
+        <div className="mb-2 text-center relative z-10">
+          <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">{isEn ? "Company" : "Entreprise"}</div>
+          <div className="font-semibold text-xs line-clamp-1">{amb.company}</div>
         </div>
       )}
       {expertiseList.length > 0 && (
-        <div className="mb-2 relative z-10">
-          <div className="text-[9px] uppercase tracking-[0.2em] text-gold mb-2 text-center">{isEn ? "Expertise" : "Expertises"}</div>
-          <ul className="space-y-1">
+        <div className="mb-3 relative z-10">
+          <div className="text-[9px] uppercase tracking-[0.2em] text-gold mb-1 text-center">{isEn ? "Expertise" : "Expertises"}</div>
+          <ul className="space-y-0.5">
             {expertiseList.slice(0, 3).map((exp: string, i: number) => (
-              <li key={i} className="text-[11px] text-muted-foreground flex items-center justify-center gap-2">
+              <li key={i} className="text-[10px] text-muted-foreground flex items-center justify-center gap-2">
                 <span className="w-1 h-1 rounded-full bg-gold/60 shrink-0" /> <span className="line-clamp-1">{exp}</span>
               </li>
             ))}
             {expertiseList.length > 3 && (
-              <li className="text-[10px] text-muted-foreground text-center italic mt-1">+{expertiseList.length - 3} {isEn ? "more" : "autres"}...</li>
+              <li className="text-[9px] text-muted-foreground text-center italic mt-0.5">+{expertiseList.length - 3} {isEn ? "more" : "autres"}...</li>
             )}
           </ul>
         </div>
       )}
-      <div className="flex flex-col items-center justify-center gap-1.5 my-2 mt-auto relative z-10">
-        <img src="/assets/Badge/bne_ambassador_badge.png" alt="BNE Ambassador" className="w-10 h-10 object-contain" />
-        <span className="text-[9px] uppercase tracking-[0.2em] text-gold text-center">BNE Ambassador</span>
-      </div>
-      <div className="pt-2 border-t border-border/50 relative z-10">
+      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto">
         <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2 hover:brightness-110">
           <Handshake size={12} /> {isEn ? "Request Introduction" : "Mise en relation"}
         </button>
@@ -147,32 +143,28 @@ function AmbassadorCard({ amb, isEn, onContact, onClick }: { amb: any; isEn: boo
 /* ─── Partner Card ─── */
 function PartnerCard({ partner, isEn, onContact, onClick }: { partner: any; isEn: boolean; onContact: (e: React.MouseEvent) => void; onClick: () => void }) {
   return (
-    <div onClick={onClick} className="luxe-card cursor-pointer rounded-xl px-4 py-3 relative overflow-hidden group h-full flex flex-col min-w-[280px] max-w-[320px] mx-auto w-full hover:border-gold/50 transition-colors">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl group-hover:bg-gold/15 transition-colors" />
-      <div className="flex items-center gap-3 mb-2 relative z-10">
+    <div onClick={onClick} className="luxe-card cursor-pointer rounded-xl px-3 py-3 relative overflow-hidden group h-full flex flex-col min-w-[240px] max-w-[280px] mx-auto w-full hover:border-gold/50 transition-colors">
+      <img src="/assets/Badge/bne_partner_badge.png" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 opacity-[0.06] blur-xl pointer-events-none group-hover:opacity-10 transition-opacity" alt="" />
+      <div className="flex items-center gap-2 mb-2 relative z-10">
         <div className="text-2xl"><Emoji symbol={partner.flag || '🌐'} /></div>
-        <div className="text-xs text-muted-foreground line-clamp-1">{partner.country}</div>
+        <div className="text-[10px] text-muted-foreground line-clamp-1">{partner.country}</div>
       </div>
       {partner.logo_url ? (
-        <div className="mb-2 flex justify-center items-center h-32 relative z-10">
+        <div className="mb-2 flex justify-center items-center h-40 relative z-10">
           <img src={partner.logo_url.startsWith('http') || partner.logo_url.startsWith('/') ? partner.logo_url : `/${partner.logo_url}`}
             alt={partner.name} className="h-full w-full object-contain rounded-md" />
         </div>
       ) : (
-        <div className="mb-2 flex justify-center items-center h-32 relative z-10">
+        <div className="mb-2 flex justify-center items-center h-40 relative z-10">
           <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
             <Building size={28} className="text-gold/60" />
           </div>
         </div>
       )}
       <div className="font-display text-lg mb-1 text-center line-clamp-1 relative z-10">{partner.name}</div>
-      <div className="text-[11px] text-muted-foreground mb-3 text-center line-clamp-2 relative z-10">{partner.sector || partner.category}</div>
+      <div className="text-[10px] text-muted-foreground mb-3 text-center line-clamp-2 relative z-10">{partner.sector || partner.category}</div>
       
-      <div className="flex flex-col items-center justify-center gap-1.5 my-2 mt-auto relative z-10">
-        <img src="/assets/Badge/bne_partner_badge.png" alt="BNE Partner" className="w-10 h-10 object-contain" />
-        <span className="text-[9px] uppercase tracking-[0.2em] text-gold text-center">BNE Partner</span>
-      </div>
-      <div className="pt-2 border-t border-border/50 relative z-10">
+      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto">
         <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2 hover:brightness-110">
           <Handshake size={12} /> {isEn ? "Request Introduction" : "Mise en relation"}
         </button>
@@ -429,7 +421,7 @@ Secteur : ${partner.sector || partner.category}\n\n`;
           <div className="px-4 relative group">
             <SnapCarousel>
               {ambassadors.map((amb: any) => (
-                <div key={amb.id} className="snap-center shrink-0 w-[280px] sm:w-[320px]">
+                <div key={amb.id} className="snap-center shrink-0 w-[240px] sm:w-[280px]">
                   <AmbassadorCard amb={amb} isEn={isEn} onContact={(e) => handleContactAmbassador(e, amb)} onClick={() => setSelectedProfile({ ...amb, type: 'ambassador' })} />
                 </div>
               ))}
@@ -454,7 +446,7 @@ Secteur : ${partner.sector || partner.category}\n\n`;
           <div className="px-4 relative group">
             <SnapCarousel>
               {partners.map((partner: any) => (
-                <div key={partner.id} className="snap-center shrink-0 w-[280px] sm:w-[320px]">
+                <div key={partner.id} className="snap-center shrink-0 w-[240px] sm:w-[280px]">
                   <PartnerCard partner={partner} isEn={isEn} onContact={(e) => handleContactPartner(e, partner)} onClick={() => setSelectedProfile({ ...partner, type: 'partner' })} />
                 </div>
               ))}
