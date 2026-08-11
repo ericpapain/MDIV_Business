@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Building, Search, Users, Calendar, Globe, Lightbulb, Eye, TrendingUp, Plane, Handshake, Shield, ChevronDown, Star } from "lucide-react";
+import { Building, Search, Users, Calendar, Globe, Lightbulb, Eye, TrendingUp, Plane, Handshake, Shield, ChevronDown, Star, Send } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import partnersHero from "@/assets/partners_hands_map_solid.png";
@@ -81,7 +81,7 @@ function AmbassadorCard({ amb, isEn, onContact }: { amb: any; isEn: boolean; onC
       )}
       {/* BNE Ambassador Badge */}
       <div className="flex flex-col items-center justify-center gap-1.5 my-3 mt-auto">
-        <img src="/assets/bne_ambassador_badge.png" alt="BNE Ambassador" className="w-10 h-10 object-contain" />
+        <img src="/assets/Badge/bne_ambassador_badge.png" alt="BNE Ambassador" className="w-10 h-10 object-contain" />
         <span className="text-[9px] uppercase tracking-[0.2em] text-gold text-center">BNE Ambassador</span>
       </div>
       <div className="pt-3 border-t border-border/50">
@@ -119,7 +119,7 @@ function PartnerCard({ partner, isEn, onContact }: { partner: any; isEn: boolean
       
       {/* BNE Partner Badge */}
       <div className="flex flex-col items-center justify-center gap-1.5 my-3 mt-auto">
-        <img src="/assets/bne_partner_badge.png" alt="BNE Partner" className="w-10 h-10 object-contain" />
+        <img src="/assets/Badge/bne_partner_badge.png" alt="BNE Partner" className="w-10 h-10 object-contain" />
         <span className="text-[9px] uppercase tracking-[0.2em] text-gold text-center">BNE Partner</span>
       </div>
       <div className="pt-3 border-t border-border/50">
