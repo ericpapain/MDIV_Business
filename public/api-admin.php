@@ -212,8 +212,19 @@ if ($action === 'scan_directory' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 // --- Upload d'Images ---
 if ($action === 'upload_image' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+        $upload_errors = [
+            UPLOAD_ERR_INI_SIZE   => 'Fichier trop volumineux (limite PHP ini)',
+            UPLOAD_ERR_FORM_SIZE  => 'Fichier trop volumineux (limite formulaire)',
+            UPLOAD_ERR_PARTIAL    => 'Transfert partiel, veuillez réessayer',
+            UPLOAD_ERR_NO_FILE    => 'Aucun fichier envoyé',
+            UPLOAD_ERR_NO_TMP_DIR => 'Dossier temporaire introuvable sur le serveur',
+            UPLOAD_ERR_CANT_WRITE => 'Impossible d\'écrire sur le disque serveur',
+            UPLOAD_ERR_EXTENSION  => 'Extension PHP a bloqué l\'upload',
+        ];
+        $err_code = $_FILES['file']['error'] ?? -1;
+        $err_msg  = $upload_errors[$err_code] ?? "Erreur inconnue (code $err_code)";
         http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Aucun fichier envoyé ou erreur lors du transfert']);
+        echo json_encode(['success' => false, 'error' => $err_msg]);
         exit();
     }
 
@@ -227,19 +238,28 @@ if ($action === 'upload_image' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    // Dossier d'upload : toujours relatif à ce fichier PHP (public/assets/uploads/)
     $upload_dir = __DIR__ . '/assets/uploads/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0755, true);
+    }
+
+    // Vérifier que le dossier est accessible en écriture
+    if (!is_writable($upload_dir)) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Dossier upload non accessible en écriture sur le serveur. Vérifiez les permissions (chmod 755 ou 777).']);
+        exit();
     }
 
     $filename = uniqid('img_') . '.' . $ext;
     $target_path = $upload_dir . $filename;
 
     if (move_uploaded_file($file['tmp_name'], $target_path)) {
-        echo json_encode(['success' => true, 'url' => 'assets/uploads/' . $filename]);
+        // URL avec slash initial = chemin absolu depuis la racine web = fonctionne en local ET en production
+        echo json_encode(['success' => true, 'url' => '/assets/uploads/' . $filename]);
     } else {
         http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'Erreur lors de la sauvegarde sur le serveur']);
+        echo json_encode(['success' => false, 'error' => 'Erreur lors de la sauvegarde sur le serveur (move_uploaded_file a échoué)']);
     }
     exit();
 }

@@ -1,4 +1,4 @@
-# Présentation M.DIV Business : L'Offre d'Accompagnement IA
+# Présentation M.DIV Business : L'Offre d'Accompagnement 
 *Destinée aux entrepreneurs, investisseurs et décideurs présents au Séjour Fondateur.*
 
 ---
