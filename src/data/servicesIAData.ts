@@ -143,10 +143,10 @@ export const iaCategories: IACategory[] = [
     descEn: "Prospect more effectively and close more deals.",
     icon: TrendingUp,
     apps: [
+      { id: "lead-gen-free", name: "Générateur de Leads Qualifiés", nameEn: "Qualified Lead Generator", desc: "Trouvez des prospects qualifiés pour votre activité", descEn: "Find qualified prospects for your business", tier: "free", badge: "Nouveau", badgeEn: "New" },
+      { id: "lead-gen-pro", name: "Générateur de Leads (Premium)", nameEn: "Lead Generator (Premium)", desc: "Recherche avancée multi-canaux et enrichissement des données B2B", descEn: "Advanced multi-channel search and B2B data enrichment", tier: "premium", badge: "Nouveau", badgeEn: "New" },
       { id: "rdv-ia", name: "Préparation de RDV IA", nameEn: "AI Meeting Preparation", desc: "Préparez vos rendez-vous commerciaux en 2 minutes", descEn: "Prepare your sales meetings in 2 minutes", tier: "free" },
-      { id: "qualif-lead", name: "Qualification Lead IA", nameEn: "AI Lead Qualification", desc: "Qualifiez automatiquement vos prospects", descEn: "Automatically qualify your prospects", tier: "free" },
       { id: "email-prosp", name: "Générateur d'Emails de Prospection", nameEn: "Prospecting Email Generator", desc: "Des emails de prospection qui convertissent", descEn: "Prospecting emails that convert", tier: "free" },
-      { id: "prospect-finder", name: "Prospect Finder IA", nameEn: "AI Prospect Finder", desc: "Trouvez vos clients idéaux automatiquement", descEn: "Find your ideal customers automatically", tier: "premium" },
       { id: "crm-ia", name: "CRM Intelligent", nameEn: "Smart CRM", desc: "CRM augmenté par l'intelligence artificielle", descEn: "CRM enhanced by artificial intelligence", tier: "premium" },
       { id: "assist-comm", name: "Assistant Commercial IA", nameEn: "AI Sales Assistant", desc: "Votre copilot commercial au quotidien", descEn: "Your daily sales copilot", tier: "premium" },
       { id: "appel-offres", name: "Assistant Appels d'Offres IA", nameEn: "AI Tender Assistant", desc: "Répondez aux appels d'offres plus rapidement", descEn: "Respond to tenders faster", tier: "premium" },
