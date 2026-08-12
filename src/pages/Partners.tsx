@@ -106,49 +106,49 @@ function AmbassadorCard({ amb, isEn, onContact, onClick }: { amb: any; isEn: boo
         </div>
       </div>
       {/* Zone fixe : logo */}
-      <div className="h-36 w-full flex items-center justify-center mb-2 relative z-10 shrink-0">
+      <div className="h-36 w-full mb-2 relative z-10 shrink-0 overflow-hidden rounded-md">
         {amb.logo_url ? (
           <img
             src={amb.logo_url.startsWith('http') || amb.logo_url.startsWith('/') ? amb.logo_url : `/${amb.logo_url}`}
             alt={amb.country}
-            className="max-h-full max-w-full w-full h-full object-contain rounded-md"
+            className="w-full h-full object-contain rounded-md"
           />
         ) : (
-          <div className="w-14 h-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
-            <Globe size={24} className="text-gold/60" />
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
+              <Globe size={24} className="text-gold/60" />
+            </div>
           </div>
         )}
       </div>
       {/* Zone fixe : nom entreprise */}
-      <div className="h-10 mb-2 text-center relative z-10 shrink-0 flex flex-col justify-center">
+      <div className="h-10 mb-2 relative z-10 shrink-0 flex flex-col justify-center">
         {amb.company && (
           <>
             <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">{isEn ? "Company" : "Entreprise"}</div>
-            <div className="font-semibold text-xs break-words leading-tight px-1">{amb.company}</div>
+            <div className="font-semibold text-xs break-words leading-tight">{amb.company}</div>
           </>
         )}
       </div>
       {/* Zone flexible : expertises */}
       {expertiseList.length > 0 && (
         <div className="mb-3 relative z-10">
-          <div className="text-[9px] uppercase tracking-[0.2em] text-gold mb-1 text-center">{isEn ? "Expertise" : "Expertises"}</div>
+          <div className="text-[9px] uppercase tracking-[0.2em] text-gold mb-1">{isEn ? "Expertise" : "Expertises"}</div>
           <ul className="space-y-0.5">
             {expertiseList.slice(0, 3).map((exp: string, i: number) => (
-              <li key={i} className="text-[10px] text-muted-foreground flex items-center justify-center gap-2">
-                <span className="w-1 h-1 rounded-full bg-gold/60 shrink-0" /> <span className="text-center">{exp}</span>
+              <li key={i} className="text-[10px] text-muted-foreground flex items-center gap-2">
+                <span className="w-1 h-1 rounded-full bg-gold/60 shrink-0" /> <span>{exp}</span>
               </li>
             ))}
             {expertiseList.length > 3 && (
-              <li className="text-[9px] text-muted-foreground text-center italic mt-0.5">+{expertiseList.length - 3} {isEn ? "more" : "autres"}...</li>
+              <li className="text-[9px] text-muted-foreground italic mt-0.5">+{expertiseList.length - 3} {isEn ? "more" : "autres"}...</li>
             )}
           </ul>
         </div>
       )}
       {/* Zone fixe : badge + bouton */}
-      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0">
-        <div className="flex items-center justify-center mb-1.5">
-          <img src="/assets/Badge/bne_ambassador_badge.png" alt="Ambassadeur BNE" className="h-6 w-auto object-contain opacity-80" />
-        </div>
+      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex flex-col items-center gap-1.5">
+        <img src="/assets/Badge/bne_ambassador_badge.png" alt="Ambassadeur BNE" className="h-6 w-auto object-contain opacity-80" />
         <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2 hover:brightness-110">
           <Handshake size={12} /> {isEn ? "Request Introduction" : "Mise en relation"}
         </button>
@@ -168,29 +168,29 @@ function PartnerCard({ partner, isEn, onContact, onClick }: { partner: any; isEn
         <div className="text-[10px] text-muted-foreground truncate">{partner.country}</div>
       </div>
       {/* Zone fixe : logo */}
-      <div className="h-36 w-full flex items-center justify-center mb-2 relative z-10 shrink-0">
+      <div className="h-36 w-full mb-2 relative z-10 shrink-0 overflow-hidden rounded-md">
         {partner.logo_url ? (
           <img
             src={partner.logo_url.startsWith('http') || partner.logo_url.startsWith('/') ? partner.logo_url : `/${partner.logo_url}`}
             alt={partner.name}
-            className="max-h-full max-w-full w-full h-full object-contain rounded-md"
+            className="w-full h-full object-contain rounded-md"
           />
         ) : (
-          <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
-            <Building size={28} className="text-gold/60" />
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
+              <Building size={28} className="text-gold/60" />
+            </div>
           </div>
         )}
       </div>
       {/* Zone fixe : nom + secteur */}
-      <div className="h-12 mb-2 text-center relative z-10 shrink-0 flex flex-col justify-center">
-        <div className="font-display text-sm leading-tight break-words px-1">{partner.name}</div>
-        <div className="text-[10px] text-muted-foreground leading-tight mt-0.5 px-1">{partner.sector || partner.category}</div>
+      <div className="h-12 mb-2 relative z-10 shrink-0 flex flex-col justify-center">
+        <div className="font-display text-sm leading-tight break-words">{partner.name}</div>
+        <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">{partner.sector || partner.category}</div>
       </div>
       {/* Zone fixe : badge + bouton */}
-      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0">
-        <div className="flex items-center justify-center mb-1.5">
-          <img src="/assets/Badge/bne_partner_badge.png" alt="Partenaire BNE" className="h-6 w-auto object-contain opacity-80" />
-        </div>
+      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex flex-col items-center gap-1.5">
+        <img src="/assets/Badge/bne_partner_badge.png" alt="Partenaire BNE" className="h-6 w-auto object-contain opacity-80" />
         <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2 hover:brightness-110">
           <Handshake size={12} /> {isEn ? "Request Introduction" : "Mise en relation"}
         </button>
