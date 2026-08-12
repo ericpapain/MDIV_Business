@@ -146,11 +146,14 @@ function AmbassadorCard({ amb, isEn, onContact, onClick }: { amb: any; isEn: boo
           </ul>
         </div>
       )}
-      {/* Zone fixe : badge + bouton */}
-      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex flex-col items-center gap-1.5">
-        <img src="/assets/Badge/bne_ambassador_badge.png" alt="Ambassadeur BNE" className="h-6 w-auto object-contain opacity-80" />
-        <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2 hover:brightness-110">
-          <Handshake size={12} /> {isEn ? "Request Introduction" : "Mise en relation"}
+      {/* Zone fixe : bouton avec badge intégré */}
+      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0">
+        <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-between px-3 hover:brightness-110">
+          <span className="flex items-center gap-1.5">
+            <Handshake size={12} />
+            <span>{isEn ? "Request Introduction" : "Mise en relation"}</span>
+          </span>
+          <img src="/assets/Badge/bne_ambassador_badge.png" alt="" className="h-5 w-auto object-contain opacity-90 shrink-0" />
         </button>
       </div>
     </div>
@@ -188,11 +191,14 @@ function PartnerCard({ partner, isEn, onContact, onClick }: { partner: any; isEn
         <div className="font-display text-sm leading-tight break-words">{partner.name}</div>
         <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">{partner.sector || partner.category}</div>
       </div>
-      {/* Zone fixe : badge + bouton */}
-      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex flex-col items-center gap-1.5">
-        <img src="/assets/Badge/bne_partner_badge.png" alt="Partenaire BNE" className="h-6 w-auto object-contain opacity-80" />
-        <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2 hover:brightness-110">
-          <Handshake size={12} /> {isEn ? "Request Introduction" : "Mise en relation"}
+      {/* Zone fixe : bouton avec badge intégré */}
+      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0">
+        <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-between px-3 hover:brightness-110">
+          <span className="flex items-center gap-1.5">
+            <Handshake size={12} />
+            <span>{isEn ? "Request Introduction" : "Mise en relation"}</span>
+          </span>
+          <img src="/assets/Badge/bne_partner_badge.png" alt="" className="h-5 w-auto object-contain opacity-90 shrink-0" />
         </button>
       </div>
     </div>
