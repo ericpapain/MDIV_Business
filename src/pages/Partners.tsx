@@ -150,7 +150,7 @@ function AmbassadorCard({ amb, isEn, onContact, onClick }: { amb: any; isEn: boo
         </div>
         {/* Zone flexible : expertises */}
         {expertiseList.length > 0 && (
-          <div className="mb-3 relative z-10">
+          <div className="mb-1 relative z-10">
             <div className="text-[9px] uppercase tracking-[0.2em] text-gold mb-1">{isEn ? "Expertise" : "Expertises"}</div>
             <ul className="space-y-0.5">
               {expertiseList.slice(0, 3).map((exp: string, i: number) => (
@@ -165,7 +165,7 @@ function AmbassadorCard({ amb, isEn, onContact, onClick }: { amb: any; isEn: boo
           </div>
         )}
         {/* Zone fixe : bouton + badge côte à côte */}
-        <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex items-center gap-2">
+        <div className="pt-1 border-t border-border/50 relative z-10 mt-auto shrink-0 flex items-center gap-2">
           <button onClick={onContact} className="btn-gold flex-1 py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-1.5 hover:brightness-110">
             <Handshake size={12} />
             <span>{isEn ? "Request Introduction" : "Mise en relation"}</span>
@@ -235,7 +235,7 @@ function PartnerCard({ partner, isEn, onContact, onClick }: { partner: any; isEn
           <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">{partner.sector || partner.category}</div>
         </div>
         {/* Zone fixe : bouton + badge côte à côte */}
-        <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex items-center gap-2">
+        <div className="pt-1 border-t border-border/50 relative z-10 mt-auto shrink-0 flex items-center gap-2">
           <button onClick={onContact} className="btn-gold flex-1 py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-1.5 hover:brightness-110">
             <Handshake size={12} />
             <span>{isEn ? "Request Introduction" : "Mise en relation"}</span>
