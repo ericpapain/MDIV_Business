@@ -94,110 +94,164 @@ function SnapCarousel({ children }: { children: React.ReactNode }) {
 /* ─── Ambassador Card ─── */
 function AmbassadorCard({ amb, isEn, onContact, onClick }: { amb: any; isEn: boolean; onContact: (e: React.MouseEvent) => void; onClick: () => void }) {
   const expertiseList = (amb.expertises || "").split(",").map((e: string) => e.trim()).filter(Boolean);
+  const [badgeZoomed, setBadgeZoomed] = useState(false);
   return (
-    <div onClick={onClick} className="luxe-card cursor-pointer rounded-xl px-2 py-3 relative overflow-hidden group h-full flex flex-col min-w-[240px] max-w-[280px] mx-auto w-full hover:border-gold/50 transition-colors">
-      <img src="/assets/Badge/bne_ambassador_badge.png" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 opacity-[0.06] blur-xl pointer-events-none group-hover:opacity-10 transition-opacity" alt="" />
-      {/* Zone fixe : header drapeau + pays */}
-      <div className="flex items-center gap-2 h-10 mb-2 relative z-10 shrink-0">
-        <div className="shrink-0"><Emoji symbol={amb.flag || '🌍'} /></div>
-        <div className="min-w-0">
-          <div className="font-display text-sm leading-tight">{amb.country}</div>
-          <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground truncate">{amb.zone}</div>
+    <>
+      {/* Zoom modal du badge */}
+      <AnimatePresence>
+        {badgeZoomed && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md cursor-zoom-out"
+            onClick={(e) => { e.stopPropagation(); setBadgeZoomed(false); }}
+          >
+            <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }} className="flex flex-col items-center gap-3">
+              <img src="/assets/Badge/bne_ambassador_badge.png" alt="BNE Ambassador Badge" className="w-64 h-64 object-contain drop-shadow-2xl" />
+              <p className="text-[11px] uppercase tracking-[0.25em] text-gold/80">BNE Ambassador Badge</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div onClick={onClick} className="luxe-card cursor-pointer rounded-xl px-2 py-3 relative overflow-hidden group h-full flex flex-col min-w-[240px] max-w-[280px] mx-auto w-full hover:border-gold/50 transition-colors">
+        <img src="/assets/Badge/bne_ambassador_badge.png" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 opacity-[0.06] blur-xl pointer-events-none group-hover:opacity-10 transition-opacity" alt="" />
+        {/* Zone fixe : header drapeau + pays */}
+        <div className="flex items-center gap-2 h-10 mb-2 relative z-10 shrink-0">
+          <div className="shrink-0"><Emoji symbol={amb.flag || '🌍'} /></div>
+          <div className="min-w-0">
+            <div className="font-display text-sm leading-tight">{amb.country}</div>
+            <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground truncate">{amb.zone}</div>
+          </div>
         </div>
-      </div>
-      {/* Zone fixe : logo */}
-      <div className="h-36 w-full mb-2 relative z-10 shrink-0 overflow-hidden rounded-md">
-        {amb.logo_url ? (
-          <img
-            src={amb.logo_url.startsWith('http') || amb.logo_url.startsWith('/') ? amb.logo_url : `/${amb.logo_url}`}
-            alt={amb.country}
-            className="w-full h-full object-contain rounded-md"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-14 h-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
-              <Globe size={24} className="text-gold/60" />
+        {/* Zone fixe : logo */}
+        <div className="h-36 w-full mb-2 relative z-10 shrink-0 overflow-hidden rounded-md">
+          {amb.logo_url ? (
+            <img
+              src={amb.logo_url.startsWith('http') || amb.logo_url.startsWith('/') ? amb.logo_url : `/${amb.logo_url}`}
+              alt={amb.country}
+              className="w-full h-full object-contain rounded-md"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
+                <Globe size={24} className="text-gold/60" />
+              </div>
             </div>
+          )}
+        </div>
+        {/* Zone fixe : nom entreprise */}
+        <div className="h-10 mb-2 relative z-10 shrink-0 flex flex-col justify-center">
+          {amb.company && (
+            <>
+              <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">{isEn ? "Company" : "Entreprise"}</div>
+              <div className="font-semibold text-xs break-words leading-tight">{amb.company}</div>
+            </>
+          )}
+        </div>
+        {/* Zone flexible : expertises */}
+        {expertiseList.length > 0 && (
+          <div className="mb-3 relative z-10">
+            <div className="text-[9px] uppercase tracking-[0.2em] text-gold mb-1">{isEn ? "Expertise" : "Expertises"}</div>
+            <ul className="space-y-0.5">
+              {expertiseList.slice(0, 3).map((exp: string, i: number) => (
+                <li key={i} className="text-[10px] text-muted-foreground flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-gold/60 shrink-0" /> <span>{exp}</span>
+                </li>
+              ))}
+              {expertiseList.length > 3 && (
+                <li className="text-[9px] text-muted-foreground italic mt-0.5">+{expertiseList.length - 3} {isEn ? "more" : "autres"}...</li>
+              )}
+            </ul>
           </div>
         )}
-      </div>
-      {/* Zone fixe : nom entreprise */}
-      <div className="h-10 mb-2 relative z-10 shrink-0 flex flex-col justify-center">
-        {amb.company && (
-          <>
-            <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">{isEn ? "Company" : "Entreprise"}</div>
-            <div className="font-semibold text-xs break-words leading-tight">{amb.company}</div>
-          </>
-        )}
-      </div>
-      {/* Zone flexible : expertises */}
-      {expertiseList.length > 0 && (
-        <div className="mb-3 relative z-10">
-          <div className="text-[9px] uppercase tracking-[0.2em] text-gold mb-1">{isEn ? "Expertise" : "Expertises"}</div>
-          <ul className="space-y-0.5">
-            {expertiseList.slice(0, 3).map((exp: string, i: number) => (
-              <li key={i} className="text-[10px] text-muted-foreground flex items-center gap-2">
-                <span className="w-1 h-1 rounded-full bg-gold/60 shrink-0" /> <span>{exp}</span>
-              </li>
-            ))}
-            {expertiseList.length > 3 && (
-              <li className="text-[9px] text-muted-foreground italic mt-0.5">+{expertiseList.length - 3} {isEn ? "more" : "autres"}...</li>
-            )}
-          </ul>
+        {/* Zone fixe : bouton + badge côte à côte */}
+        <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex items-center gap-2">
+          <button onClick={onContact} className="btn-gold flex-1 py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-1.5 hover:brightness-110">
+            <Handshake size={12} />
+            <span>{isEn ? "Request Introduction" : "Mise en relation"}</span>
+          </button>
+          {/* Badge cliquable avec label */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setBadgeZoomed(true); }}
+            className="flex flex-col items-center gap-0.5 shrink-0 cursor-zoom-in group/badge"
+            title="BNE Ambassador Badge"
+          >
+            <img src="/assets/Badge/bne_ambassador_badge.png" alt="BNE Ambassador" className="h-8 w-auto object-contain opacity-90 drop-shadow-sm group-hover/badge:opacity-100 group-hover/badge:scale-110 transition-all duration-200" />
+            <span className="text-[7px] uppercase tracking-[0.15em] text-gold/60 group-hover/badge:text-gold/90 transition-colors leading-tight text-center">BNE<br/>Ambassador</span>
+          </button>
         </div>
-      )}
-      {/* Zone fixe : bouton + badge côte à côte */}
-      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex items-center gap-2">
-        <button onClick={onContact} className="btn-gold flex-1 py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-1.5 hover:brightness-110">
-          <Handshake size={12} />
-          <span>{isEn ? "Request Introduction" : "Mise en relation"}</span>
-        </button>
-        <img src="/assets/Badge/bne_ambassador_badge.png" alt="Ambassadeur BNE" className="h-8 w-auto object-contain opacity-90 drop-shadow-sm shrink-0" />
       </div>
-    </div>
+    </>
   );
 }
 
 /* ─── Partner Card ─── */
 function PartnerCard({ partner, isEn, onContact, onClick }: { partner: any; isEn: boolean; onContact: (e: React.MouseEvent) => void; onClick: () => void }) {
+  const [badgeZoomed, setBadgeZoomed] = useState(false);
   return (
-    <div onClick={onClick} className="luxe-card cursor-pointer rounded-xl px-2 py-3 relative overflow-hidden group h-full flex flex-col min-w-[240px] max-w-[280px] mx-auto w-full hover:border-gold/50 transition-colors">
-      <img src="/assets/Badge/bne_partner_badge.png" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 opacity-[0.06] blur-xl pointer-events-none group-hover:opacity-10 transition-opacity" alt="" />
-      {/* Zone fixe : header drapeau + pays */}
-      <div className="flex items-center gap-2 h-10 mb-2 relative z-10 shrink-0">
-        <div className="shrink-0"><Emoji symbol={partner.flag || '🌐'} /></div>
-        <div className="text-[10px] text-muted-foreground truncate">{partner.country}</div>
-      </div>
-      {/* Zone fixe : logo */}
-      <div className="h-36 w-full mb-2 relative z-10 shrink-0 overflow-hidden rounded-md">
-        {partner.logo_url ? (
-          <img
-            src={partner.logo_url.startsWith('http') || partner.logo_url.startsWith('/') ? partner.logo_url : `/${partner.logo_url}`}
-            alt={partner.name}
-            className="w-full h-full object-contain rounded-md"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
-              <Building size={28} className="text-gold/60" />
-            </div>
-          </div>
+    <>
+      {/* Zoom modal du badge */}
+      <AnimatePresence>
+        {badgeZoomed && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md cursor-zoom-out"
+            onClick={(e) => { e.stopPropagation(); setBadgeZoomed(false); }}
+          >
+            <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }} className="flex flex-col items-center gap-3">
+              <img src="/assets/Badge/bne_partner_badge.png" alt="BNE Partner Badge" className="w-64 h-64 object-contain drop-shadow-2xl" />
+              <p className="text-[11px] uppercase tracking-[0.25em] text-gold/80">BNE Partner Badge</p>
+            </motion.div>
+          </motion.div>
         )}
+      </AnimatePresence>
+
+      <div onClick={onClick} className="luxe-card cursor-pointer rounded-xl px-2 py-3 relative overflow-hidden group h-full flex flex-col min-w-[240px] max-w-[280px] mx-auto w-full hover:border-gold/50 transition-colors">
+        <img src="/assets/Badge/bne_partner_badge.png" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 opacity-[0.06] blur-xl pointer-events-none group-hover:opacity-10 transition-opacity" alt="" />
+        {/* Zone fixe : header drapeau + pays */}
+        <div className="flex items-center gap-2 h-10 mb-2 relative z-10 shrink-0">
+          <div className="shrink-0"><Emoji symbol={partner.flag || '🌐'} /></div>
+          <div className="text-[10px] text-muted-foreground truncate">{partner.country}</div>
+        </div>
+        {/* Zone fixe : logo */}
+        <div className="h-36 w-full mb-2 relative z-10 shrink-0 overflow-hidden rounded-md">
+          {partner.logo_url ? (
+            <img
+              src={partner.logo_url.startsWith('http') || partner.logo_url.startsWith('/') ? partner.logo_url : `/${partner.logo_url}`}
+              alt={partner.name}
+              className="w-full h-full object-contain rounded-md"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
+                <Building size={28} className="text-gold/60" />
+              </div>
+            </div>
+          )}
+        </div>
+        {/* Zone fixe : nom + secteur */}
+        <div className="h-12 mb-2 relative z-10 shrink-0 flex flex-col justify-center">
+          <div className="font-display text-sm leading-tight break-words">{partner.name}</div>
+          <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">{partner.sector || partner.category}</div>
+        </div>
+        {/* Zone fixe : bouton + badge côte à côte */}
+        <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex items-center gap-2">
+          <button onClick={onContact} className="btn-gold flex-1 py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-1.5 hover:brightness-110">
+            <Handshake size={12} />
+            <span>{isEn ? "Request Introduction" : "Mise en relation"}</span>
+          </button>
+          {/* Badge cliquable avec label */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setBadgeZoomed(true); }}
+            className="flex flex-col items-center gap-0.5 shrink-0 cursor-zoom-in group/badge"
+            title="BNE Partner Badge"
+          >
+            <img src="/assets/Badge/bne_partner_badge.png" alt="BNE Partner" className="h-8 w-auto object-contain opacity-90 drop-shadow-sm group-hover/badge:opacity-100 group-hover/badge:scale-110 transition-all duration-200" />
+            <span className="text-[7px] uppercase tracking-[0.15em] text-gold/60 group-hover/badge:text-gold/90 transition-colors leading-tight text-center">BNE<br/>Partner</span>
+          </button>
+        </div>
       </div>
-      {/* Zone fixe : nom + secteur */}
-      <div className="h-12 mb-2 relative z-10 shrink-0 flex flex-col justify-center">
-        <div className="font-display text-sm leading-tight break-words">{partner.name}</div>
-        <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">{partner.sector || partner.category}</div>
-      </div>
-      {/* Zone fixe : bouton + badge côte à côte */}
-      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex items-center gap-2">
-        <button onClick={onContact} className="btn-gold flex-1 py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-1.5 hover:brightness-110">
-          <Handshake size={12} />
-          <span>{isEn ? "Request Introduction" : "Mise en relation"}</span>
-        </button>
-        <img src="/assets/Badge/bne_partner_badge.png" alt="Partenaire BNE" className="h-8 w-auto object-contain opacity-90 drop-shadow-sm shrink-0" />
-      </div>
-    </div>
+    </>
   );
 }
 
