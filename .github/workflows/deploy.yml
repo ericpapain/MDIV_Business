@@ -57,5 +57,9 @@ jobs:
           local-dir: ./dist/
           # Le dossier de destination sur votre serveur OVH où les fichiers doivent atterrir.
           server-dir: ./www/
-          # Demande de supprimer sur OVH les anciens fichiers qui n'existent plus dans le nouveau code (site propre).
-          dangerous-clean-slate: true
+          # ⚠️ DÉSACTIVÉ : ne pas supprimer les fichiers existants sur OVH
+          # Cela préserve les images uploadées (assets/uploads/) et les données du site
+          dangerous-clean-slate: false
+          # Exclure les dossiers qui doivent persister entre les déploiements
+          exclude: |
+            **/assets/uploads/**
