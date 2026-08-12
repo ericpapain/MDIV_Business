@@ -146,17 +146,13 @@ function AmbassadorCard({ amb, isEn, onContact, onClick }: { amb: any; isEn: boo
           </ul>
         </div>
       )}
-      {/* Zone fixe : badge + bouton séparés */}
-      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold/30" />
-          <img src="/assets/Badge/bne_ambassador_badge.png" alt="Ambassadeur BNE" className="h-6 w-auto object-contain opacity-85 drop-shadow-sm" />
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold/30" />
-        </div>
-        <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2 hover:brightness-110">
+      {/* Zone fixe : bouton + badge côte à côte */}
+      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex items-center gap-2">
+        <button onClick={onContact} className="btn-gold flex-1 py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-1.5 hover:brightness-110">
           <Handshake size={12} />
           <span>{isEn ? "Request Introduction" : "Mise en relation"}</span>
         </button>
+        <img src="/assets/Badge/bne_ambassador_badge.png" alt="Ambassadeur BNE" className="h-8 w-auto object-contain opacity-90 drop-shadow-sm shrink-0" />
       </div>
     </div>
   );
@@ -193,17 +189,13 @@ function PartnerCard({ partner, isEn, onContact, onClick }: { partner: any; isEn
         <div className="font-display text-sm leading-tight break-words">{partner.name}</div>
         <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">{partner.sector || partner.category}</div>
       </div>
-      {/* Zone fixe : badge + bouton séparés */}
-      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold/30" />
-          <img src="/assets/Badge/bne_partner_badge.png" alt="Partenaire BNE" className="h-6 w-auto object-contain opacity-85 drop-shadow-sm" />
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold/30" />
-        </div>
-        <button onClick={onContact} className="btn-gold w-full py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-2 hover:brightness-110">
+      {/* Zone fixe : bouton + badge côte à côte */}
+      <div className="pt-2 border-t border-border/50 relative z-10 mt-auto shrink-0 flex items-center gap-2">
+        <button onClick={onContact} className="btn-gold flex-1 py-2 text-[10px] uppercase tracking-[0.2em] rounded-sm flex items-center justify-center gap-1.5 hover:brightness-110">
           <Handshake size={12} />
           <span>{isEn ? "Request Introduction" : "Mise en relation"}</span>
         </button>
+        <img src="/assets/Badge/bne_partner_badge.png" alt="Partenaire BNE" className="h-8 w-auto object-contain opacity-90 drop-shadow-sm shrink-0" />
       </div>
     </div>
   );
