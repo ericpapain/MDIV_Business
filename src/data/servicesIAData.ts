@@ -17,6 +17,7 @@ export interface IAApp {
   badgeEn?: string;
   features?: string[];
   featuresEn?: string[];
+  releaseDate?: string;
 }
 
 export interface IACategory {
@@ -68,9 +69,9 @@ export const iaCategories: IACategory[] = [
     descEn: "Assess your digital maturity and build your AI roadmap.",
     icon: Search,
     apps: [
-      { id: "diag-express", name: "Diagnostic IA Express", nameEn: "Express AI Diagnostic", desc: "Questionnaire intelligent, score IA, rapport PDF", descEn: "Smart questionnaire, AI score, PDF report", tier: "free", features: ["Questionnaire intelligent", "Score IA", "Rapport PDF"], featuresEn: ["Smart questionnaire", "AI score", "PDF report"] },
-      { id: "calc-roi", name: "Calculateur ROI IA", nameEn: "AI ROI Calculator", desc: "Estimation des gains et calcul du temps économisé", descEn: "Gain estimation and time savings calculation", tier: "free", features: ["Estimation des gains", "Calcul du temps économisé"], featuresEn: ["Gain estimation", "Time savings calculation"] },
-      { id: "maturite", name: "Maturité Digitale", nameEn: "Digital Maturity", desc: "Benchmark de votre entreprise", descEn: "Benchmark your company", tier: "free", features: ["Benchmark entreprise"], featuresEn: ["Company benchmark"] },
+      { id: "diag-express", name: "Diagnostic IA Express", nameEn: "Express AI Diagnostic", desc: "Questionnaire intelligent, score IA, rapport PDF", descEn: "Smart questionnaire, AI score, PDF report", tier: "free", features: ["Questionnaire intelligent", "Score IA", "Rapport PDF"], featuresEn: ["Smart questionnaire", "AI score", "PDF report"], releaseDate: "2026-09-01T08:00:00" },
+      { id: "calc-roi", name: "Calculateur ROI IA", nameEn: "AI ROI Calculator", desc: "Estimation des gains et calcul du temps économisé", descEn: "Gain estimation and time savings calculation", tier: "free", features: ["Estimation des gains", "Calcul du temps économisé"], featuresEn: ["Gain estimation", "Time savings calculation"], releaseDate: "2026-09-03T08:00:00" },
+      { id: "maturite", name: "Maturité Digitale", nameEn: "Digital Maturity", desc: "Benchmark de votre entreprise", descEn: "Benchmark your company", tier: "free", features: ["Benchmark entreprise"], featuresEn: ["Company benchmark"], releaseDate: "2026-09-05T08:00:00" },
       { id: "audit-360", name: "Audit IA 360°", nameEn: "360° AI Audit", desc: "Analyse complète de vos processus et recommandations IA", descEn: "Complete process analysis and AI recommendations", tier: "premium" },
       { id: "roadmap", name: "Roadmap IA Entreprise", nameEn: "Enterprise AI Roadmap", desc: "Plan stratégique de déploiement IA personnalisé", descEn: "Customized AI deployment strategic plan", tier: "premium" },
       { id: "atelier-dir", name: "Atelier Direction IA", nameEn: "AI Leadership Workshop", desc: "Session de travail avec votre comité de direction", descEn: "Working session with your management team", tier: "premium" },
@@ -86,9 +87,9 @@ export const iaCategories: IACategory[] = [
     descEn: "Automate repetitive tasks and boost your productivity.",
     icon: Zap,
     apps: [
-      { id: "cr-ia", name: "Générateur de Comptes-Rendus IA", nameEn: "AI Meeting Notes Generator", desc: "Transformez vos réunions en comptes-rendus structurés", descEn: "Transform your meetings into structured notes", tier: "free" },
-      { id: "resumeur", name: "Résumeur de Documents IA", nameEn: "AI Document Summarizer", desc: "Résumez n'importe quel document en quelques secondes", descEn: "Summarize any document in seconds", tier: "free" },
-      { id: "email-ia", name: "Assistant Email IA", nameEn: "AI Email Assistant", desc: "Rédigez des emails professionnels en un clic", descEn: "Write professional emails in one click", tier: "free" },
+      { id: "cr-ia", name: "Générateur de Comptes-Rendus IA", nameEn: "AI Meeting Notes Generator", desc: "Transformez vos réunions en comptes-rendus structurés", descEn: "Transform your meetings into structured notes", tier: "free", releaseDate: "2026-09-07T08:00:00" },
+      { id: "resumeur", name: "Résumeur de Documents IA", nameEn: "AI Document Summarizer", desc: "Résumez n'importe quel document en quelques secondes", descEn: "Summarize any document in seconds", tier: "free", releaseDate: "2026-09-09T08:00:00" },
+      { id: "email-ia", name: "Assistant Email IA", nameEn: "AI Email Assistant", desc: "Rédigez des emails professionnels en un clic", descEn: "Write professional emails in one click", tier: "free", releaseDate: "2026-09-11T08:00:00" },
       { id: "workflow", name: "Workflow Builder IA", nameEn: "AI Workflow Builder", desc: "Créez des automatisations métier visuellement", descEn: "Create business automations visually", tier: "premium" },
       { id: "office-ia", name: "Assistant Office IA", nameEn: "AI Office Assistant", desc: "Votre assistant intelligent pour Word, Excel, PowerPoint", descEn: "Your intelligent assistant for Word, Excel, PowerPoint", tier: "premium" },
       { id: "doc-gen", name: "Générateur de Documents Pro", nameEn: "Pro Document Generator", desc: "Créez des documents professionnels automatiquement", descEn: "Create professional documents automatically", tier: "premium" },
@@ -107,9 +108,9 @@ export const iaCategories: IACategory[] = [
     badgeEn: "New",
     highlight: true,
     apps: [
-      { id: "devis-ia", name: "Devis IA", nameEn: "AI Quotes", desc: "Génération automatique de devis professionnels en PDF", descEn: "Automatic generation of professional quotes in PDF", tier: "free", features: ["Génération automatique", "Export PDF"], featuresEn: ["Automatic generation", "PDF export"] },
-      { id: "facture-ia", name: "Facture IA", nameEn: "AI Invoicing", desc: "Facturation avec calcul TVA et export PDF", descEn: "Invoicing with VAT calculation and PDF export", tier: "free", features: ["Calcul TVA", "Export PDF"], featuresEn: ["VAT calculation", "PDF export"] },
-      { id: "relance-ia", name: "Relance IA", nameEn: "AI Payment Reminders", desc: "Génération d'emails de relance automatiques", descEn: "Automatic payment reminder email generation", tier: "free", features: ["Génération d'emails de relance"], featuresEn: ["Reminder email generation"] },
+      { id: "devis-ia", name: "Devis IA", nameEn: "AI Quotes", desc: "Génération automatique de devis professionnels en PDF", descEn: "Automatic generation of professional quotes in PDF", tier: "free", features: ["Génération automatique", "Export PDF"], featuresEn: ["Automatic generation", "PDF export"], releaseDate: "2026-09-13T08:00:00" },
+      { id: "facture-ia", name: "Facture IA", nameEn: "AI Invoicing", desc: "Facturation avec calcul TVA et export PDF", descEn: "Invoicing with VAT calculation and PDF export", tier: "free", features: ["Calcul TVA", "Export PDF"], featuresEn: ["VAT calculation", "PDF export"], releaseDate: "2026-09-15T08:00:00" },
+      { id: "relance-ia", name: "Relance IA", nameEn: "AI Payment Reminders", desc: "Génération d'emails de relance automatiques", descEn: "Automatic payment reminder email generation", tier: "free", features: ["Génération d'emails de relance"], featuresEn: ["Reminder email generation"], releaseDate: "2026-09-17T08:00:00" },
       { id: "suite-fact", name: "Suite Facturation Intelligente", nameEn: "Smart Billing Suite", desc: "Devis, factures, acomptes et avoirs — tout en un", descEn: "Quotes, invoices, deposits and credits — all in one", tier: "premium", features: ["Devis", "Factures", "Acomptes", "Avoirs"], featuresEn: ["Quotes", "Invoices", "Deposits", "Credits"] },
       { id: "fact-elec", name: "Facturation Électronique 2026", nameEn: "2026 E-Invoicing", desc: "Conformité totale avec la réforme 2026", descEn: "Full compliance with the 2026 reform", tier: "premium" },
       { id: "tresorerie", name: "Trésorerie IA", nameEn: "AI Treasury", desc: "Suivi et prévisions de trésorerie intelligents", descEn: "Intelligent cash flow tracking and forecasting", tier: "premium" },
@@ -125,10 +126,10 @@ export const iaCategories: IACategory[] = [
     descEn: "Create impactful content and manage your online presence.",
     icon: Megaphone,
     apps: [
-      { id: "post-gen", name: "Générateur de Posts Réseaux Sociaux", nameEn: "Social Media Post Generator", desc: "Créez des posts engageants pour tous vos réseaux", descEn: "Create engaging posts for all your networks", tier: "free" },
-      { id: "slogan-gen", name: "Générateur de Slogans", nameEn: "Slogan Generator", desc: "Trouvez le slogan parfait pour votre marque", descEn: "Find the perfect slogan for your brand", tier: "free" },
-      { id: "pres-ia", name: "Créateur de Présentations IA", nameEn: "AI Presentation Creator", desc: "Créez des présentations professionnelles en minutes", descEn: "Create professional presentations in minutes", tier: "free" },
-      { id: "social-mgr", name: "Social Media Manager IA", nameEn: "AI Social Media Manager", desc: "Planifiez, créez et analysez votre contenu social", descEn: "Plan, create and analyze your social content", tier: "premium" },
+      { id: "post-gen", name: "Générateur de Contenu Multi-Canal", nameEn: "Multi-Channel Content Generator", desc: "Créez posts et visuels (LinkedIn, Web, Telegram) basés sur l'actualité", descEn: "Create posts and visuals (LinkedIn, Web, Telegram) based on news", tier: "free", releaseDate: "2026-09-19T08:00:00" },
+      { id: "slogan-gen", name: "Générateur de Slogans", nameEn: "Slogan Generator", desc: "Trouvez le slogan parfait pour votre marque", descEn: "Find the perfect slogan for your brand", tier: "free", releaseDate: "2026-09-21T08:00:00" },
+      { id: "pres-ia", name: "Créateur de Présentations IA", nameEn: "AI Presentation Creator", desc: "Créez des présentations professionnelles en minutes", descEn: "Create professional presentations in minutes", tier: "free", releaseDate: "2026-09-23T08:00:00" },
+      { id: "social-mgr", name: "Social Media Manager & Engagement", nameEn: "Social Media Manager & Engagement", desc: "Planifiez, automatisez les commentaires et vos réponses sous contrôle", descEn: "Plan, automate smart comments and your replies securely", tier: "premium" },
       { id: "seo-ia", name: "SEO Assistant IA", nameEn: "AI SEO Assistant", desc: "Optimisez votre référencement naturel", descEn: "Optimize your organic search ranking", tier: "premium" },
       { id: "content-factory", name: "Content Factory IA", nameEn: "AI Content Factory", desc: "Production de contenu à grande échelle", descEn: "Content production at scale", tier: "premium" },
       { id: "veille", name: "Veille Concurrentielle IA", nameEn: "AI Competitive Intelligence", desc: "Surveillez vos concurrents automatiquement", descEn: "Monitor your competitors automatically", tier: "premium" },
@@ -143,10 +144,12 @@ export const iaCategories: IACategory[] = [
     descEn: "Prospect more effectively and close more deals.",
     icon: TrendingUp,
     apps: [
-      { id: "lead-gen-free", name: "Générateur de Leads Qualifiés", nameEn: "Qualified Lead Generator", desc: "Trouvez des prospects qualifiés pour votre activité", descEn: "Find qualified prospects for your business", tier: "free", badge: "Nouveau", badgeEn: "New" },
+      { id: "lead-gen-free", name: "Générateur de Leads Qualifiés", nameEn: "Qualified Lead Generator", desc: "Trouvez des prospects qualifiés pour votre activité", descEn: "Find qualified prospects for your business", tier: "free", badge: "Nouveau", badgeEn: "New", releaseDate: "2026-09-25T08:00:00" },
       { id: "lead-gen-pro", name: "Générateur de Leads (Premium)", nameEn: "Lead Generator (Premium)", desc: "Recherche avancée multi-canaux et enrichissement des données B2B", descEn: "Advanced multi-channel search and B2B data enrichment", tier: "premium", badge: "Nouveau", badgeEn: "New" },
-      { id: "rdv-ia", name: "Préparation de RDV IA", nameEn: "AI Meeting Preparation", desc: "Préparez vos rendez-vous commerciaux en 2 minutes", descEn: "Prepare your sales meetings in 2 minutes", tier: "free" },
-      { id: "email-prosp", name: "Générateur d'Emails de Prospection", nameEn: "Prospecting Email Generator", desc: "Des emails de prospection qui convertissent", descEn: "Prospecting emails that convert", tier: "free" },
+      { id: "rdv-ia", name: "Préparation de RDV IA", nameEn: "AI Meeting Preparation", desc: "Préparez vos rendez-vous commerciaux en 2 minutes", descEn: "Prepare your sales meetings in 2 minutes", tier: "free", releaseDate: "2026-09-27T08:00:00" },
+      { id: "email-prosp", name: "Générateur d'Emails de Prospection", nameEn: "Prospecting Email Generator", desc: "Des emails de prospection qui convertissent", descEn: "Prospecting emails that convert", tier: "free", releaseDate: "2026-09-29T08:00:00" },
+      { id: "linkedin-auto", name: "Prospection Sociale VIP", nameEn: "VIP Social Prospecting", desc: "Invitations ciblées, relances et agent IA de messagerie (Type Connectly)", descEn: "Targeted invites, follow-ups and AI messaging agent", tier: "premium", badge: "Nouveau", badgeEn: "New" },
+      { id: "network-graph", name: "Graphe de Relations & Intros", nameEn: "Relationship Graph & Intros", desc: "Générez des recommandations qualifiées via votre réseau (Warm Intros)", descEn: "Generate qualified referrals through your network (Warm Intros)", tier: "premium", badge: "Nouveau", badgeEn: "New" },
       { id: "crm-ia", name: "CRM Intelligent", nameEn: "Smart CRM", desc: "CRM augmenté par l'intelligence artificielle", descEn: "CRM enhanced by artificial intelligence", tier: "premium" },
       { id: "assist-comm", name: "Assistant Commercial IA", nameEn: "AI Sales Assistant", desc: "Votre copilot commercial au quotidien", descEn: "Your daily sales copilot", tier: "premium" },
       { id: "appel-offres", name: "Assistant Appels d'Offres IA", nameEn: "AI Tender Assistant", desc: "Répondez aux appels d'offres plus rapidement", descEn: "Respond to tenders faster", tier: "premium" },

@@ -39,6 +39,12 @@ import ServicesIADiagnostic from "./pages/ServicesIADiagnostic";
 import SejoursBNE from "./pages/SejoursBNE";
 import AccompagnementBNE from "./pages/AccompagnementBNE";
 
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { Login } from "./pages/auth/Login";
+import { Register } from "./pages/auth/Register";
+import { Dashboard } from "./pages/auth/Dashboard";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -48,11 +54,22 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route element={<SiteLayout />}>
-                <Route path="/" element={<Home />} />
-                <Route path="/experience" element={<AIBuilder />} />
+          <AuthProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route element={<SiteLayout />}>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route 
+                    path="/dashboard" 
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route path="/experience" element={<AIBuilder />} />
                 <Route path="/resultat" element={<Result />} />
                 <Route path="/offres" element={<Offers />} />
                 <Route path="/experiences" element={<Experiences />} />
@@ -65,7 +82,14 @@ const App = () => (
                 <Route path="/avis" element={<Avis />} />
                 <Route path="/charte" element={<Charte />} />
                 <Route path="/services-ia" element={<ServicesIA />} />
-                <Route path="/services-ia/diagnostic" element={<ServicesIADiagnostic />} />
+                <Route 
+                  path="/services-ia/diagnostic" 
+                  element={
+                    <ProtectedRoute>
+                      <ServicesIADiagnostic />
+                    </ProtectedRoute>
+                  } 
+                />
                 <Route path="/services-ia/:category" element={<ServicesIACategory />} />
                 <Route path="/sejours-bne" element={<SejoursBNE />} />
                 <Route path="/accompagnement-bne" element={<AccompagnementBNE />} />
@@ -85,8 +109,9 @@ const App = () => (
               </Route>
               <Route path="/demo" element={<DemoFlow />} />
               <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>

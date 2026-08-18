@@ -4,10 +4,8 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { iaCategories, iaJourney } from "@/data/servicesIAData";
 import { ArrowRight, Sparkles, Zap, ChevronRight, Star, LayoutGrid, CreditCard, Route, ArrowDown, Search, Target, Users, Rocket, Quote, Cpu } from "lucide-react";
 import { motion } from "framer-motion";
-
 import { useEffect } from "react";
-
-
+import Countdown from "@/components/ui/Countdown";
 
 const AnimatedJourneyWidget = () => {
   const { language } = useLanguage();
@@ -290,6 +288,14 @@ export default function ServicesIA() {
             const Icon = cat.icon;
             const freeCount = cat.apps.filter(a => a.tier === "free").length;
             const premiumCount = cat.apps.filter(a => a.tier === "premium").length;
+            
+            // Trouver la date de sortie la plus proche dans cette catégorie
+            const earliestDateStr = cat.apps.reduce((earliest, app) => {
+              if (!app.releaseDate) return earliest;
+              if (!earliest) return app.releaseDate;
+              return new Date(app.releaseDate) < new Date(earliest) ? app.releaseDate : earliest;
+            }, undefined as string | undefined);
+
             return (
               <Link
                 key={cat.id}
@@ -306,10 +312,16 @@ export default function ServicesIA() {
                   <div className="w-12 h-12 rounded-xl ia-gradient-hero flex items-center justify-center text-foreground ia-float" style={{ animationDelay: `${idx * 0.5}s` }}>
                     <Icon size={22} />
                   </div>
-                  <div className="flex gap-1.5">
-                    <span className="ia-badge bg-slate-100 text-slate-500 border-slate-200 text-[10px] font-bold">
-                      {isEn ? "Coming soon" : "Arrive bientôt"}
-                    </span>
+                  <div className="flex flex-col items-end gap-1.5">
+                    {earliestDateStr ? (
+                      <div className="bg-white/80 backdrop-blur-sm px-2 py-1.5 rounded-lg border border-border shadow-sm">
+                        <Countdown targetDate={earliestDateStr} />
+                      </div>
+                    ) : (
+                      <span className="ia-badge bg-slate-100 text-slate-500 border-slate-200 text-[10px] font-bold">
+                        {isEn ? "Coming soon" : "Arrive bientôt"}
+                      </span>
+                    )}
                   </div>
                 </div>
 

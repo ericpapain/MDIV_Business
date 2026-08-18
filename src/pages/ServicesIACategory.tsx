@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { iaCategories } from "@/data/servicesIAData";
 import { ArrowLeft, ArrowRight, Check, Sparkles, Lock, Calendar, Users, Clock, ChevronRight } from "lucide-react";
+import Countdown from "@/components/ui/Countdown";
 
 export default function ServicesIACategory() {
   const { category } = useParams<{ category: string }>();
@@ -85,7 +86,6 @@ export default function ServicesIACategory() {
                 <h3 className="font-semibold text-base text-slate-500" style={{ fontFamily: "'Inter', sans-serif" }}>{isEn ? app.nameEn : app.name}</h3>
                 <div className="flex flex-col items-end gap-1 shrink-0 ml-2">
                   <span className="ia-badge ia-badge-free text-[10px]">{isEn ? "Free" : "Gratuit"}</span>
-                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">{isEn ? "Coming soon" : "Arrive bientôt"}</span>
                 </div>
               </div>
               <p className="text-sm mb-4 leading-relaxed flex-1 text-muted-foreground relative z-10">
@@ -100,8 +100,21 @@ export default function ServicesIACategory() {
                   ))}
                 </ul>
               )}
-              <div className="ia-btn-secondary text-xs py-2.5 px-4 justify-center mt-auto opacity-70 pointer-events-none relative z-10">
-                {isEn ? "Coming soon" : "Arrive bientôt"}
+              <div className="flex flex-col gap-3 mt-auto relative z-10 w-full">
+                {app.releaseDate ? (
+                  <>
+                    <div className="flex justify-center w-full bg-slate-50/50 rounded-lg py-2 border border-slate-100">
+                      <Countdown targetDate={app.releaseDate} />
+                    </div>
+                    <div className="ia-btn-secondary text-[11px] font-bold tracking-wide py-2.5 px-2 justify-center w-full opacity-70 pointer-events-none">
+                      {isEn ? "IN DEVELOPMENT" : "EN DÉVELOPPEMENT"}
+                    </div>
+                  </>
+                ) : (
+                  <div className="ia-btn-secondary text-[11px] font-bold tracking-wide py-2.5 px-2 justify-center w-full opacity-70 pointer-events-none">
+                    {isEn ? "COMING SOON" : "ARRIVE BIENTÔT"}
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -121,7 +134,7 @@ export default function ServicesIACategory() {
 
         <div className={`grid gap-5 ${isMarketplace ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-2 lg:grid-cols-3"}`}>
           {premiumApps.map((app, i) => (
-            <div key={app.id} className={`ia-card relative overflow-hidden p-6 flex flex-col ia-animate-in opacity-75 grayscale cursor-not-allowed hover:grayscale-0 hover:opacity-100 transition-all duration-300 ${isMarketplace ? "text-center" : ""}`} style={{ animationDelay: `${i * 0.08}s` }}>
+            <div key={app.id} className={`ia-card relative overflow-hidden p-6 flex flex-col ia-animate-in opacity-95 transition-all duration-300 hover:shadow-lg hover:border-gold/30 ${isMarketplace ? "text-center" : ""}`} style={{ animationDelay: `${i * 0.08}s` }}>
               {/* Decorative background icon */}
               <div className="ia-watermark-anim absolute -bottom-6 -right-6 w-32 h-32 opacity-0 group-hover:opacity-[0.08] transition-all pointer-events-none flex items-center justify-center text-slate-800" style={{ animationDelay: `${(i + freeApps.length) * 0.2}s` }}>
                 <Icon size={128} />
@@ -136,7 +149,7 @@ export default function ServicesIACategory() {
                 <h3 className="font-semibold text-base text-slate-500" style={{ fontFamily: "'Inter', sans-serif" }}>{isEn ? app.nameEn : app.name}</h3>
                 <div className={`flex flex-col gap-1 shrink-0 ${isMarketplace ? "items-center" : "items-end"}`}>
                   <span className="ia-badge ia-badge-premium text-[10px]">Premium</span>
-                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">{isEn ? "Coming soon" : "Arrive bientôt"}</span>
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">{isEn ? "On demand" : "À la demande"}</span>
                 </div>
               </div>
               <p className="text-sm mb-4 leading-relaxed flex-1 text-muted-foreground relative z-10">
@@ -151,9 +164,12 @@ export default function ServicesIACategory() {
                   ))}
                 </ul>
               )}
-              <div className="ia-btn-primary text-xs py-2.5 px-4 justify-center mt-auto opacity-70 pointer-events-none relative z-10">
-                {isEn ? "Coming soon" : "Arrive bientôt"}
-              </div>
+              <Link 
+                to={`/contact?subject=${encodeURIComponent(isEn ? `Premium App Request: ${app.nameEn}` : `Demande d'application Premium : ${app.name}`)}&msg=${encodeURIComponent(isEn ? `Hello,\n\nI am interested in the premium application "${app.nameEn}". Could you please provide me with more information about its deployment on demand?\n\nThank you.` : `Bonjour,\n\nJe suis intéressé par l'application premium "${app.name}". Pouvez-vous me donner plus d'informations sur son déploiement à la demande ?\n\nMerci.`)}`}
+                className="ia-btn-primary text-xs py-2.5 px-4 justify-center mt-auto relative z-10 hover:scale-[1.02] transition-transform"
+              >
+                {isEn ? "On demand" : "À la demande"}
+              </Link>
             </div>
           ))}
         </div>

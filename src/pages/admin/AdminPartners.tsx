@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { COUNTRIES } from "@/data/countries";
 import { Handshake, Trash2, Plus, Loader2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -147,15 +148,27 @@ export default function AdminPartners() {
                 <input value={category} onChange={e => setCategory(e.target.value)} type="text" placeholder="Tech, Finance..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Pays</label>
-                <input value={country} onChange={e => setCountry(e.target.value)} type="text" placeholder="France" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Emoji Drapeau</label>
-                <input value={flag} onChange={e => setFlag(e.target.value)} type="text" placeholder="🇫🇷" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
-              </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Pays / Drapeau</label>
+              <select value={country} onChange={e => {
+                const code = e.target.value;
+                setCountry(code);
+                if (code) {
+                  const countryObj = COUNTRIES.find(c => c.code === code);
+                  if (countryObj) {
+                    const emoji = [...countryObj.code].map(char => String.fromCodePoint(char.charCodeAt(0) + 127397)).join('');
+                    setFlag(emoji);
+                  }
+                } else {
+                  setFlag("");
+                }
+              }} className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm outline-none focus:border-gold/60">
+                <option value="">Sélectionner un pays</option>
+                {COUNTRIES.map(c => {
+                  const emoji = [...c.code].map(char => String.fromCodePoint(char.charCodeAt(0) + 127397)).join('');
+                  return <option key={c.code} value={c.code}>{emoji} {c.labelFr}</option>;
+                })}
+              </select>
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Site Internet</label>

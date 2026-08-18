@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { COUNTRIES } from "@/data/countries";
 import { Users, Trash2, Plus, Loader2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -124,12 +125,23 @@ export default function AdminMembers() {
             </div>
             <ImageUpload value={imageUrl} onChange={setImageUrl} label="Photo du Membre (Optionnel)" />
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Emoji Drapeau</label>
-              <input value={flag} onChange={e => setFlag(e.target.value)} type="text" placeholder="🇫🇷" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
-            </div>
-            <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Code Pays (ex: FR)</label>
-              <input value={countryCode} onChange={e => setCountryCode(e.target.value)} type="text" placeholder="FR" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
+              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Pays / Drapeau</label>
+              <select value={countryCode} onChange={e => {
+                const code = e.target.value;
+                setCountryCode(code);
+                if (code) {
+                  const emoji = [...code].map(char => String.fromCodePoint(char.charCodeAt(0) + 127397)).join('');
+                  setFlag(emoji);
+                } else {
+                  setFlag("");
+                }
+              }} className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm outline-none focus:border-gold/60">
+                <option value="">Sélectionner un pays</option>
+                {COUNTRIES.map(c => {
+                  const emoji = [...c.code].map(char => String.fromCodePoint(char.charCodeAt(0) + 127397)).join('');
+                  return <option key={c.code} value={c.code}>{emoji} {c.labelFr}</option>;
+                })}
+              </select>
             </div>
             
             <div className="flex gap-2">
