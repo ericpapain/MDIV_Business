@@ -354,22 +354,15 @@ Secteur : ${partner.sector || partner.category}\n\n`;
         return res;
       };
       
-      // Envoi séquentiel : Micke en premier, puis Eric
+      // Envoi uniquement à Micke
       const resMicke = await send("19268cb5-9f71-4363-9602-b6ad76d8d85b");
-      const resEric = await send("42f75cf0-743a-4f15-a419-1213f3de3cd8");
-      
       const resultMicke = await resMicke.json();
-      let resultEric = { success: false };
-      try { resultEric = await resEric.json(); } catch (e) {}
       
       if (!resMicke.ok || !resultMicke.success) {
         throw new Error(resultMicke.message || "Erreur lors de l'envoi");
       }
       
-      // On ignore silencieusement l'erreur d'Eric si Micke a réussi,
-      // car le jeton hCaptcha ne peut être utilisé qu'une seule fois.
-      console.log("Web3Forms (Micke):", resultMicke);
-      console.log("Web3Forms (Eric):", resultEric);
+      console.log("Web3Forms:", resultMicke);
 
       setSent(true);
       toast.success(t("partners.form.success"));

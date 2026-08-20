@@ -101,22 +101,13 @@ ${t("contact.form.msgOutro")}` : "");
                 });
               };
 
-              // Envoi séquentiel : Micke en premier, puis Eric
+              // Envoi uniquement à Micke
               const resMicke = await sendToWeb3Forms("19268cb5-9f71-4363-9602-b6ad76d8d85b");
-              const resEric = await sendToWeb3Forms("42f75cf0-743a-4f15-a419-1213f3de3cd8");
-
               const resultMicke = await resMicke.json();
-              const resultEric = await resEric.json();
 
-              // Si l'une des requêtes a échoué (ou les deux)
-              if (!resMicke.ok || !resultMicke.success || !resEric.ok || !resultEric.success) {
+              if (!resMicke.ok || !resultMicke.success) {
                 console.error("Web3Forms Erreur (Micke):", resultMicke);
-                console.error("Web3Forms Erreur (Eric):", resultEric);
-
-                // Si la requête de Micke passe (même si Eric échoue), on valide
-                if (!resMicke.ok && !resultMicke.success) {
-                  throw new Error(resultMicke.message || "Erreur lors de l'envoi");
-                }
+                throw new Error(resultMicke.message || "Erreur lors de l'envoi");
               }
 
               setSent(true);
