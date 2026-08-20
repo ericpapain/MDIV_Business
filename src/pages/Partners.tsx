@@ -359,7 +359,7 @@ Secteur : ${partner.sector || partner.category}\n\n`;
   ];
   const timelineSteps = [t("partners.section4.step1"), t("partners.section4.step2"), t("partners.section4.step3"), t("partners.section4.step4"), t("partners.section4.step5")];
 
-  const FormBlock = () => (
+  const renderFormBlock = () => (
     <form onSubmit={handleSubmit} className="partner-form-card glass-strong p-5 rounded-2xl relative" style={{ border: "1px solid hsl(42 60% 54% / 0.25)" }}>
       <div className="absolute top-2 left-2 w-4 h-4 border-l border-t" style={{ borderColor: "hsl(42 60% 54% / 0.5)" }} />
       <div className="absolute bottom-2 right-2 w-4 h-4 border-r border-b" style={{ borderColor: "hsl(42 60% 54% / 0.5)" }} />
@@ -612,10 +612,10 @@ Secteur : ${partner.sector || partner.category}\n\n`;
             <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gold/40 to-gold/60" /><div className="py-6 flex flex-col items-center relative"><div className="absolute w-12 h-12 bg-gold/5 rounded-full animate-pulse blur-md" /><div className="w-2 h-2 rotate-45 border border-gold/80 bg-background z-10" /></div><div className="w-px flex-1 bg-gradient-to-t from-transparent via-gold/40 to-gold/60" />
           </div>
           <div className="hidden lg:block relative h-full">
-            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-6"><FormBlock /></div>
+            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-6">{renderFormBlock()}</div>
           </div>
         </div>
-        <div className="lg:hidden mt-10"><FormBlock /></div>
+        <div className="lg:hidden mt-10">{renderFormBlock()}</div>
       </div>
     </div>
   );
