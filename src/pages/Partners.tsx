@@ -333,13 +333,41 @@ Secteur : ${partner.sector || partner.category}\n\n`;
     const data = Object.fromEntries(fd.entries());
     const typeLabel = applicationType === "ambassador" ? (isEn ? "Ambassador" : "Ambassadeur") : (isEn ? "Partner" : "Partenaire");
     const subject = `Candidature ${typeLabel} - M.DIV`;
+    
     try {
-      const baseData = { "h-captcha-response": captchaToken, subject, from_name: data.company || data.ambassadorName || data.name || "Candidature", replyto: data.email, "Type de candidature": typeLabel, ...data };
-      const send = (key: string) => fetch("https://api.web3forms.com/submit", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ access_key: key, ...baseData }) });
-      await Promise.all([send("19268cb5-9f71-4363-9602-b6ad76d8d85b"), send("42f75cf0-743a-4f15-a419-1213f3de3cd8")]);
+      const baseData = { 
+        "h-captcha-response": captchaToken, 
+        subject, 
+        from_name: data.company || data.ambassadorName || data.name || "Candidature", 
+        replyto: data.email, 
+        "Type de candidature": typeLabel, 
+        ...data 
+      };
+      
+      const send = async (key: string, includeCaptcha = true) => {
+        const payload = { access_key: key, ...baseData };
+        if (!includeCaptcha) delete payload["h-captcha-response"];
+        
+        const res = await fetch("https://api.web3forms.com/submit", { 
+          method: "POST", 
+          headers: { "Content-Type": "application/json", Accept: "application/json" }, 
+          body: JSON.stringify(payload) 
+        });
+        return res.json();
+      };
+      
+      // Envoi séquentiel pour éviter le conflit de consommation du token Captcha
+      const resultMicke = await send("19268cb5-9f71-4363-9602-b6ad76d8d85b", true);
+      const resultEric = await send("42f75cf0-743a-4f15-a419-1213f3de3cd8", false); // On omet le token pour le 2ème pour éviter l'erreur "already verified"
+      
+      if (!resultMicke.success) {
+        throw new Error(resultMicke.message || "Erreur lors de l'envoi");
+      }
+      
       setSent(true);
       toast.success(t("partners.form.success"));
     } catch (error: any) {
+      console.error("Web3Forms error:", error);
       toast.error("Erreur: " + (error.message || "Veuillez réessayer."));
     }
   };
