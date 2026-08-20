@@ -335,27 +335,24 @@ Secteur : ${partner.sector || partner.category}\n\n`;
     const subject = `Candidature ${typeLabel} - M.DIV`;
     
     try {
-      const baseData = { 
-        "h-captcha-response": captchaToken, 
-        subject, 
-        from_name: data.company || data.ambassadorName || data.name || "Candidature", 
-        replyto: data.email, 
-        "Type de candidature": typeLabel, 
-        ...data 
-      };
+      const formPayload = new FormData();
+      formPayload.append("access_key", "19268cb5-9f71-4363-9602-b6ad76d8d85b");
+      formPayload.append("h-captcha-response", captchaToken);
+      formPayload.append("subject", subject);
+      formPayload.append("from_name", (data.company || data.ambassadorName || data.name || "Candidature").toString());
+      formPayload.append("replyto", data.email.toString());
+      formPayload.append("Type de candidature", typeLabel);
       
-      const send = async (key: string) => {
-        const payload = { access_key: key, ...baseData };
-        const res = await fetch("https://api.web3forms.com/submit", { 
-          method: "POST", 
-          headers: { "Content-Type": "application/json", Accept: "application/json" }, 
-          body: JSON.stringify(payload) 
-        });
-        return res;
-      };
+      // Ajouter toutes les autres données saisies
+      Object.entries(data).forEach(([k, v]) => {
+        formPayload.append(k, v);
+      });
+
+      const resMicke = await fetch("https://api.web3forms.com/submit", { 
+        method: "POST", 
+        body: formPayload 
+      });
       
-      // Envoi uniquement à Micke
-      const resMicke = await send("19268cb5-9f71-4363-9602-b6ad76d8d85b");
       const resultMicke = await resMicke.json();
       
       if (!resMicke.ok || !resultMicke.success) {
@@ -367,7 +364,7 @@ Secteur : ${partner.sector || partner.category}\n\n`;
       setSent(true);
       toast.success(t("partners.form.success"));
     } catch (error: any) {
-      console.error("Web3Forms error:", error);
+      console.error("Erreur détaillée Web3Forms:", error);
       toast.error("Erreur: " + (error.message || "Veuillez réessayer."));
     }
   };

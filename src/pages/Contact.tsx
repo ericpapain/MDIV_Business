@@ -75,34 +75,24 @@ ${t("contact.form.msgOutro")}` : "");
             const subject = data.subject || t("contact.form.emailSubject");
 
             try {
-              const baseData = {
-                "h-captcha-response": captchaToken,
-                subject: subject,
-                from_name: `${data.fn || ''} ${data.ln || ''}`.trim() || "Nouveau Contact",
-                replyto: data.email,
-                Nom: data.fn,
-                Prénom: data.ln,
-                Téléphone: data.phone,
-                Profil: selectedProfile === t("contact.form.p4") ? `Autre - ${data.profile_other}` : data.profile,
-                Message: data.msg,
-              };
+              const formPayload = new FormData();
+              formPayload.append("access_key", "19268cb5-9f71-4363-9602-b6ad76d8d85b");
+              formPayload.append("h-captcha-response", captchaToken);
+              formPayload.append("subject", subject.toString());
+              formPayload.append("from_name", `${data.fn || ''} ${data.ln || ''}`.trim() || "Nouveau Contact");
+              formPayload.append("replyto", data.email.toString());
+              formPayload.append("Nom", (data.fn || '').toString());
+              formPayload.append("Prénom", (data.ln || '').toString());
+              if (data.phone) formPayload.append("Téléphone", data.phone.toString());
+              formPayload.append("Profil", selectedProfile === t("contact.form.p4") ? `Autre - ${data.profile_other}` : selectedProfile.toString());
+              formPayload.append("Message", data.msg.toString());
 
-              const sendToWeb3Forms = async (accessKey: string) => {
-                return fetch("https://api.web3forms.com/submit", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json"
-                  },
-                  body: JSON.stringify({
-                    access_key: accessKey,
-                    ...baseData
-                  })
-                });
-              };
-
-              // Envoi uniquement à Micke
-              const resMicke = await sendToWeb3Forms("19268cb5-9f71-4363-9602-b6ad76d8d85b");
+              // Envoi uniquement à Micke avec FormData
+              const resMicke = await fetch("https://api.web3forms.com/submit", { 
+                method: "POST", 
+                body: formPayload 
+              });
+              
               const resultMicke = await resMicke.json();
 
               if (!resMicke.ok || !resultMicke.success) {
