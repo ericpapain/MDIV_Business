@@ -42,7 +42,7 @@ function AIAppsBlock() {
           <div className="group relative bg-background/60 p-2.5 rounded-sm border border-border/50 hover:border-gold/30 transition-colors">
             <div className="flex justify-between items-start mb-1">
               <h4 className="font-display text-sm text-foreground group-hover:text-gold-light transition-colors">Diagnostic IA Express</h4>
-              <span className="text-[8px] uppercase tracking-wider text-muted-foreground bg-muted px-1 py-0.5 rounded-sm">Oct 2026</span>
+              <span className="text-[8px] uppercase tracking-wider text-muted-foreground bg-muted px-1 py-0.5 rounded-sm">Sept 2026</span>
             </div>
             <p className="text-[11px] text-muted-foreground mb-1.5 line-clamp-1">Audit rapide de votre maturité numérique et opportunités.</p>
             <Link to="/services-ia" className="text-[9px] uppercase tracking-wider text-primary hover:text-gold-light flex items-center gap-1 w-fit">
@@ -53,22 +53,10 @@ function AIAppsBlock() {
           {/* App 2 */}
           <div className="group relative bg-background/60 p-2.5 rounded-sm border border-border/50 hover:border-gold/30 transition-colors">
             <div className="flex justify-between items-start mb-1">
-              <h4 className="font-display text-sm text-foreground group-hover:text-gold-light transition-colors">Générateur Pitch Deck</h4>
-              <span className="text-[8px] uppercase tracking-wider text-muted-foreground bg-muted px-1 py-0.5 rounded-sm">Nov 2026</span>
+              <h4 className="font-display text-sm text-foreground group-hover:text-gold-light transition-colors">Devis & Facturation IA</h4>
+              <span className="text-[8px] uppercase tracking-wider text-muted-foreground bg-muted px-1 py-0.5 rounded-sm">Sept 2026</span>
             </div>
-            <p className="text-[11px] text-muted-foreground mb-1.5 line-clamp-1">Créez des présentations percutantes avec l'IA.</p>
-            <Link to="/services-ia" className="text-[9px] uppercase tracking-wider text-primary hover:text-gold-light flex items-center gap-1 w-fit">
-              Découvrir l'application <ArrowRight size={10} />
-            </Link>
-          </div>
-
-          {/* App 3 */}
-          <div className="group relative bg-background/60 p-2.5 rounded-sm border border-border/50 hover:border-gold/30 transition-colors">
-            <div className="flex justify-between items-start mb-1">
-              <h4 className="font-display text-sm text-foreground group-hover:text-gold-light transition-colors">Assistant Réseautage</h4>
-              <span className="text-[8px] uppercase tracking-wider text-muted-foreground bg-muted px-1 py-0.5 rounded-sm">Déc 2026</span>
-            </div>
-            <p className="text-[11px] text-muted-foreground mb-1.5 line-clamp-1">Préparez vos rencontres d'affaires intelligemment.</p>
+            <p className="text-[11px] text-muted-foreground mb-1.5 line-clamp-1">Génération automatique avec calcul TVA et export PDF.</p>
             <Link to="/services-ia" className="text-[9px] uppercase tracking-wider text-primary hover:text-gold-light flex items-center gap-1 w-fit">
               Découvrir l'application <ArrowRight size={10} />
             </Link>
@@ -76,13 +64,10 @@ function AIAppsBlock() {
         </div>
 
         <div className="mt-3 pt-2 border-t border-border/50">
-          <div className="text-[10px] text-muted-foreground mb-2 flex justify-between items-center">
+          <div className="text-[10px] text-muted-foreground flex justify-between items-center">
             <span>Dernière sortie : <strong>Moteur IA Stratégique</strong></span>
             <span className="text-success text-[9px] uppercase border border-success/30 px-1 rounded-sm">Live</span>
           </div>
-          <Link to="/services-ia" className="w-full btn-ghost-gold py-1.5 text-[9px] uppercase tracking-[0.1em] flex justify-center items-center gap-2 rounded-sm border-gold/30 hover:border-gold">
-            Découvrir nos applications IA gratuites développées <ArrowRight size={10} />
-          </Link>
         </div>
       </div>
     </div>
@@ -92,9 +77,9 @@ function AIAppsBlock() {
 function GlobalStatsBlock({ stats }: { stats: any }) {
   if (!stats) return null;
   return (
-    <section className="border-t border-b border-gold/10 bg-black/20 my-16 py-12 relative overflow-hidden">
+    <section className="border-t border-b border-gold/10 bg-black/20 my-8 py-4 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-transparent to-gold/5 pointer-events-none" />
-      <div className="container relative z-10 grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
+      <div className="container relative z-10 grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
         {[
           { label: "Ambassadeurs", value: stats.ambassadors_count },
           { label: "Partenaires", value: stats.partners_count },
@@ -102,9 +87,9 @@ function GlobalStatsBlock({ stats }: { stats: any }) {
           { label: "Séjours", value: stats.trips_count },
           { label: "Participants", value: stats.participants_count },
         ].map(s => (
-          <div key={s.label} className="flex flex-col items-center justify-center p-2 hover:scale-105 transition-transform duration-500">
-            <div className="text-4xl md:text-5xl font-display gold-text mb-2 drop-shadow-md">{s.value}</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">{s.label}</div>
+          <div key={s.label} className="flex flex-col items-center justify-center p-1 hover:scale-105 transition-transform duration-500">
+            <div className="text-2xl md:text-3xl font-display gold-text mb-1 drop-shadow-md">{s.value}</div>
+            <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">{s.label}</div>
           </div>
         ))}
       </div>
