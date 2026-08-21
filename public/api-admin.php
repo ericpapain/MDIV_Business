@@ -435,6 +435,23 @@ if ($action === 'stats' && $_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($action === 'get_site_stats' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $stmt = $pdo->query("SELECT * FROM site_stats WHERE id = 1");
     $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$stats) $stats = [];
+
+    // Auto-calcul
+    $stats['auto_ambassadors'] = (int)$pdo->query("SELECT COUNT(*) FROM ambassadors")->fetchColumn();
+    $stats['auto_partners'] = (int)$pdo->query("SELECT COUNT(*) FROM partners")->fetchColumn();
+    $stats['auto_events'] = (int)$pdo->query("SELECT COUNT(*) FROM events WHERE type != 'sejour' OR type IS NULL")->fetchColumn();
+    $stats['auto_trips'] = (int)$pdo->query("SELECT COUNT(*) FROM events WHERE type = 'sejour'")->fetchColumn();
+    
+    // Essayer de récupérer le nombre total de participants (nécessite une colonne participants_count)
+    try {
+        $stats['auto_participants'] = (int)$pdo->query("SELECT SUM(participants_count) FROM events")->fetchColumn();
+    } catch (PDOException $e) {
+        $stats['auto_participants'] = 0;
+        // Créer la colonne si elle manque
+        try { $pdo->exec("ALTER TABLE events ADD COLUMN participants_count INT DEFAULT 0"); } catch(PDOException $ex) {}
+    }
+
     echo json_encode(['success' => true, 'data' => $stats]); exit();
 }
 

@@ -42,11 +42,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (siteStats) {
       setFormData({
-        ambassadors_count: siteStats.ambassadors_count || 0,
-        partners_count: siteStats.partners_count || 0,
-        events_count: siteStats.events_count || 0,
-        trips_count: siteStats.trips_count || 0,
-        participants_count: siteStats.participants_count || 0,
+        ambassadors_count: Math.max(siteStats.ambassadors_count || 0, siteStats.auto_ambassadors || 0),
+        partners_count: Math.max(siteStats.partners_count || 0, siteStats.auto_partners || 0),
+        events_count: Math.max(siteStats.events_count || 0, siteStats.auto_events || 0),
+        trips_count: Math.max(siteStats.trips_count || 0, siteStats.auto_trips || 0),
+        participants_count: Math.max(siteStats.participants_count || 0, siteStats.auto_participants || 0),
         members_count: siteStats.members_count || 0,
         countries_count: siteStats.countries_count || 0,
         satisfaction_rate: siteStats.satisfaction_rate || '0%'
