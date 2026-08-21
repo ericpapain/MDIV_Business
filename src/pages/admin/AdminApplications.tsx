@@ -113,9 +113,26 @@ export default function AdminApplications() {
                   {parsedData.sector && <div><strong className="text-muted-foreground">Secteur:</strong> {parsedData.sector}</div>}
                 </div>
 
-                <div className="bg-muted/30 p-3 rounded-sm border border-border/50 text-sm italic">
-                  "{parsedData.motivation || parsedData.message || 'Aucune motivation fournie.'}"
-                </div>
+                {(parsedData.presentation || parsedData.motivation || parsedData.message) ? (
+                  <div className="space-y-2">
+                    {parsedData.presentation && (
+                      <div className="bg-muted/30 p-3 rounded-sm border border-border/50 text-sm">
+                        <strong className="text-muted-foreground block mb-1">Présentation :</strong>
+                        <span className="italic">"{parsedData.presentation}"</span>
+                      </div>
+                    )}
+                    {(parsedData.motivation || parsedData.message) && (
+                      <div className="bg-muted/30 p-3 rounded-sm border border-border/50 text-sm">
+                        <strong className="text-muted-foreground block mb-1">Motivation :</strong>
+                        <span className="italic">"{parsedData.motivation || parsedData.message}"</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-muted/30 p-3 rounded-sm border border-border/50 text-sm italic text-muted-foreground">
+                    Aucune présentation ou motivation fournie.
+                  </div>
+                )}
               </div>
 
               <div className="shrink-0 flex flex-row md:flex-col gap-2 w-full md:w-48">
