@@ -363,6 +363,17 @@ Secteur : ${partner.sector || partner.category}\n\n`;
       
       console.log("Web3Forms:", resultMicke);
 
+      // Sauvegarde silencieuse de la candidature dans la base de données
+      try {
+        await fetch("/api-public.php?action=submit_application", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: applicationType, data: data })
+        });
+      } catch (e) {
+          console.error("Erreur sauvegarde BDD:", e);
+      }
+
       setSent(true);
       toast.success(t("partners.form.success"));
     } catch (error: any) {

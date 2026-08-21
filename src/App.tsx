@@ -31,6 +31,7 @@ import AdminSejours from "./pages/admin/AdminSejours";
 import AdminPricing from "./pages/admin/AdminPricing";
 import AdminReplays from "./pages/admin/AdminReplays";
 import AdminAmbassadors from "./pages/admin/AdminAmbassadors";
+import AdminApplications from "./pages/admin/AdminApplications";
 import NotFound from "./pages/NotFound";
 import DemoFlow from "./pages/Demo/DemoFlow";
 import ServicesIA from "./pages/ServicesIA";
@@ -106,6 +107,7 @@ const App = () => (
                 <Route path="tarification" element={<AdminPricing />} />
                 <Route path="replays" element={<AdminReplays />} />
                 <Route path="ambassadors" element={<AdminAmbassadors />} />
+                <Route path="demandes" element={<AdminApplications />} />
               </Route>
               <Route path="/demo" element={<DemoFlow />} />
               <Route path="*" element={<NotFound />} />

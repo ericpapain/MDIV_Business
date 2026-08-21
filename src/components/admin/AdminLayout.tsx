@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const items = [
   { to: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard, end: true },
+  { to: "/admin/demandes", label: "Candidatures", icon: Star },
   { to: "/admin/members", label: "Membres", icon: Users },
   { to: "/admin/partners", label: "Partenaires", icon: Handshake },
   { to: "/admin/ambassadors", label: "Ambassadeurs", icon: Star },

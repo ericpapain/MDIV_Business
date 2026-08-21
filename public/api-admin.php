@@ -107,6 +107,14 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS reviews (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
+$pdo->exec("CREATE TABLE IF NOT EXISTS applications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    type VARCHAR(50),
+    status VARCHAR(50) DEFAULT 'pending',
+    data TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
 // --- Gestion des Vidéos ---
 if ($action === 'add_video' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $data->title ?? 'Sans titre';
@@ -365,6 +373,26 @@ if ($action === 'edit_review' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if ($action === 'delete_review' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare("DELETE FROM avis WHERE id = ?");
+    $stmt->execute([$data->id ?? 0]); echo json_encode(['success' => true]); exit();
+}
+
+// --- Gestion des Candidatures (Applications) ---
+if ($action === 'get_applications' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $stmt = $pdo->query("SELECT * FROM applications ORDER BY created_at DESC");
+    echo json_encode(['success' => true, 'data' => $stmt->fetchAll()]); exit();
+}
+
+if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $data->id ?? 0;
+    $status = $data->status ?? 'pending';
+    $stmt = $pdo->prepare("UPDATE applications SET status = ? WHERE id = ?");
+    if ($stmt->execute([$status, $id])) echo json_encode(['success' => true]);
+    else { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']); }
+    exit();
+}
+
+if ($action === 'delete_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $stmt = $pdo->prepare("DELETE FROM applications WHERE id = ?");
     $stmt->execute([$data->id ?? 0]); echo json_encode(['success' => true]); exit();
 }
 

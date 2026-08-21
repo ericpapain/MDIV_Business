@@ -66,5 +66,23 @@ if ($action === 'ambassadors') {
     exit();
 }
 
+if ($action === 'submit_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents("php://input"), true);
+    if (!$data) {
+        http_response_code(400); echo json_encode(['success' => false, 'error' => 'Données invalides']); exit();
+    }
+    
+    $type = $data['type'] ?? 'unknown';
+    $formData = json_encode($data['data'] ?? []);
+    
+    $stmt = $pdo->prepare("INSERT INTO applications (type, data) VALUES (?, ?)");
+    if ($stmt->execute([$type, $formData])) {
+        echo json_encode(['success' => true]);
+    } else {
+        http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']);
+    }
+    exit();
+}
+
 http_response_code(400);
 echo json_encode(['success' => false, 'error' => 'Action inconnue']);

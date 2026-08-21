@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { COUNTRIES } from "@/data/countries";
 import { Handshake, Trash2, Plus, Loader2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { useLocation } from "react-router-dom";
 
 export default function AdminPartners() {
+  const location = useLocation();
+  const prefillData = location.state?.prefillData;
+
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [country, setCountry] = useState("");
@@ -14,6 +18,24 @@ export default function AdminPartners() {
   const [website, setWebsite] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (prefillData) {
+      setName(prefillData.company || prefillData.name || "");
+      setSector(prefillData.sector || "");
+      if (prefillData.country) {
+        const countryName = prefillData.country.split(' ')[1] || prefillData.country;
+        const found = COUNTRIES.find(c => c.labelFr.toLowerCase() === countryName.toLowerCase());
+        if (found) {
+          setCountry(found.code);
+          const emoji = [...found.code].map(char => String.fromCodePoint(char.charCodeAt(0) + 127397)).join('');
+          setFlag(emoji);
+        }
+      }
+      // On efface le state pour ne pas re-préremplir au rafraichissement
+      window.history.replaceState({}, document.title);
+    }
+  }, [prefillData]);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
