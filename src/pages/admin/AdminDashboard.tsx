@@ -1,10 +1,15 @@
-import { TrendingUp, Users, Video, Calendar, ArrowUpRight, Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from "recharts";
+import { useState, useEffect } from "react";
+import { TrendingUp, Users, Video, Calendar, ArrowUpRight, Loader2, Save, BarChart2 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { useToast } from "@/hooks/use-toast";
 
 const COLORS = ["hsl(var(--gold))", "hsl(var(--gold-light))", "hsl(var(--gold-deep))", "hsl(var(--muted-foreground))"];
 
 export default function AdminDashboard() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: stats, isLoading } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
@@ -14,7 +19,67 @@ export default function AdminDashboard() {
     }
   });
 
-  if (isLoading) {
+  const { data: siteStats, isLoading: statsLoading } = useQuery({
+    queryKey: ["site-stats"],
+    queryFn: async () => {
+      const res = await fetch("/api-admin.php?action=get_site_stats");
+      const json = await res.json();
+      return json.data;
+    }
+  });
+
+  const [formData, setFormData] = useState({
+    ambassadors_count: 0,
+    partners_count: 0,
+    events_count: 0,
+    trips_count: 0,
+    participants_count: 0,
+    members_count: 10,
+    countries_count: 4,
+    satisfaction_rate: '87%'
+  });
+
+  useEffect(() => {
+    if (siteStats) {
+      setFormData({
+        ambassadors_count: siteStats.ambassadors_count || 0,
+        partners_count: siteStats.partners_count || 0,
+        events_count: siteStats.events_count || 0,
+        trips_count: siteStats.trips_count || 0,
+        participants_count: siteStats.participants_count || 0,
+        members_count: siteStats.members_count || 0,
+        countries_count: siteStats.countries_count || 0,
+        satisfaction_rate: siteStats.satisfaction_rate || '0%'
+      });
+    }
+  }, [siteStats]);
+
+  const updateStats = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await fetch("/api-admin.php?action=update_site_stats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const d = await res.json();
+      if (!d.success) throw new Error(d.error);
+      return d;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["site-stats"] });
+      toast({ title: "Statistiques mises à jour", description: "La page d'accueil reflète maintenant ces nouvelles valeurs." });
+    },
+    onError: (err: any) => {
+      toast({ variant: "destructive", title: "Erreur", description: err.message });
+    }
+  });
+
+  const handleStatsSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateStats.mutate(formData);
+  };
+
+  if (isLoading || statsLoading) {
     return <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-gold w-8 h-8" /></div>;
   }
 
@@ -32,7 +97,7 @@ export default function AdminDashboard() {
           { I: Users, t: "Visites Totales", v: stats?.total_visits || 0, d: "Historique", c: "text-success" },
           { I: Calendar, t: "Événements à venir", v: stats?.upcoming_events || 0, d: "Programme", c: "text-success" },
           { I: Video, t: "Vidéos en ligne", v: stats?.total_videos || 0, d: "Playlist", c: "text-gold" },
-          { I: TrendingUp, t: "Membres Cercle", v: "7", d: "Réseau", c: "text-success" }, // Fixé pour le moment via mock
+          { I: TrendingUp, t: "Membres inscrits", v: stats?.total_members || 0, d: "Réseau", c: "text-success" },
         ].map((s) => (
           <div key={s.t} className="luxe-card p-5 rounded-sm">
             <div className="flex items-start justify-between mb-4">
@@ -66,24 +131,52 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="luxe-card p-6 rounded-sm">
-          <div className="eyebrow mb-5">Actions Rapides CMS</div>
-          <div className="space-y-4 mt-6">
-            <a href="/admin/events" className="block p-4 bg-muted/30 border border-border rounded-sm hover:border-gold/50 transition-colors">
-              <div className="flex items-center gap-3 mb-2">
-                <Calendar className="text-gold" size={18} />
-                <h3 className="font-display text-lg">Gérer les événements</h3>
+        <div className="luxe-card p-6 rounded-sm flex flex-col">
+          <div className="eyebrow mb-5 flex items-center gap-2"><BarChart2 size={14} className="text-gold" /> Statistiques Globales (Accueil)</div>
+          <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
+            Ces valeurs sont affichées sur la page d'accueil du site pour présenter l'envergure du réseau. Vous pouvez les ajuster manuellement pour inclure votre historique.
+          </p>
+          <form onSubmit={handleStatsSubmit} className="space-y-4 flex-1 flex flex-col">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Ambassadeurs</label>
+                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.ambassadors_count} onChange={e => setFormData({...formData, ambassadors_count: parseInt(e.target.value) || 0})} />
               </div>
-              <p className="text-sm text-muted-foreground">Ajoutez de nouveaux séjours BNE ou événements locaux.</p>
-            </a>
-            <a href="/admin/videos" className="block p-4 bg-muted/30 border border-border rounded-sm hover:border-gold/50 transition-colors">
-              <div className="flex items-center gap-3 mb-2">
-                <Video className="text-gold" size={18} />
-                <h3 className="font-display text-lg">Gérer les vidéos</h3>
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Partenaires</label>
+                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.partners_count} onChange={e => setFormData({...formData, partners_count: parseInt(e.target.value) || 0})} />
               </div>
-              <p className="text-sm text-muted-foreground">Ajoutez des replays YouTube aux pages du site.</p>
-            </a>
-          </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Événements</label>
+                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.events_count} onChange={e => setFormData({...formData, events_count: parseInt(e.target.value) || 0})} />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Séjours</label>
+                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.trips_count} onChange={e => setFormData({...formData, trips_count: parseInt(e.target.value) || 0})} />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Membres (Hero)</label>
+                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.members_count} onChange={e => setFormData({...formData, members_count: parseInt(e.target.value) || 0})} />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Pays (Hero)</label>
+                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.countries_count} onChange={e => setFormData({...formData, countries_count: parseInt(e.target.value) || 0})} />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Satisfaction (Hero)</label>
+                <input type="text" className="input-field py-2 px-3 text-sm" value={formData.satisfaction_rate} onChange={e => setFormData({...formData, satisfaction_rate: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Participants Total</label>
+                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.participants_count} onChange={e => setFormData({...formData, participants_count: parseInt(e.target.value) || 0})} />
+              </div>
+            </div>
+            <div className="pt-2 mt-auto">
+              <button type="submit" disabled={updateStats.isPending} className="btn-gold w-full py-2.5 flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
+                {updateStats.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Enregistrer
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

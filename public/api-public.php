@@ -84,5 +84,12 @@ if ($action === 'submit_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
+if ($action === 'site_stats') {
+    $stmt = $pdo->query("SELECT * FROM site_stats WHERE id = 1");
+    $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+    echo json_encode(['success' => true, 'data' => $stats]);
+    exit();
+}
+
 http_response_code(400);
 echo json_encode(['success' => false, 'error' => 'Action inconnue']);

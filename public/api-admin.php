@@ -115,6 +115,26 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS applications (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
+// Table des statistiques globales du site
+$pdo->exec("CREATE TABLE IF NOT EXISTS site_stats (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ambassadors_count INT DEFAULT 0,
+    partners_count INT DEFAULT 0,
+    events_count INT DEFAULT 0,
+    trips_count INT DEFAULT 0,
+    participants_count INT DEFAULT 0,
+    members_count INT DEFAULT 10,
+    countries_count INT DEFAULT 4,
+    satisfaction_rate VARCHAR(50) DEFAULT '87%',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+// Initialisation de la ligne par défaut si la table est vide
+$stats_count = $pdo->query("SELECT COUNT(*) FROM site_stats")->fetchColumn();
+if ($stats_count == 0) {
+    $pdo->exec("INSERT INTO site_stats (id, ambassadors_count, partners_count, events_count, trips_count, participants_count, members_count, countries_count, satisfaction_rate) VALUES (1, 0, 0, 0, 0, 0, 10, 4, '87%')");
+}
+
 // --- Gestion des Vidéos ---
 if ($action === 'add_video' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $data->title ?? 'Sans titre';
@@ -409,6 +429,32 @@ if ($action === 'stats' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM partners"); $stats['total_partners'] = $stmt->fetch()['total'];
 
     echo json_encode(['success' => true, 'data' => $stats]); exit();
+}
+
+// --- Gestion des Statistiques Globales (Site Stats) ---
+if ($action === 'get_site_stats' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $stmt = $pdo->query("SELECT * FROM site_stats WHERE id = 1");
+    $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+    echo json_encode(['success' => true, 'data' => $stats]); exit();
+}
+
+if ($action === 'update_site_stats' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $stmt = $pdo->prepare("UPDATE site_stats SET ambassadors_count = ?, partners_count = ?, events_count = ?, trips_count = ?, participants_count = ?, members_count = ?, countries_count = ?, satisfaction_rate = ? WHERE id = 1");
+    if ($stmt->execute([
+        $data->ambassadors_count ?? 0,
+        $data->partners_count ?? 0,
+        $data->events_count ?? 0,
+        $data->trips_count ?? 0,
+        $data->participants_count ?? 0,
+        $data->members_count ?? 10,
+        $data->countries_count ?? 4,
+        $data->satisfaction_rate ?? '87%'
+    ])) {
+        echo json_encode(['success' => true]);
+    } else {
+        http_response_code(500); echo json_encode(['success' => false, 'error' => 'Erreur BDD']);
+    }
+    exit();
 }
 
 http_response_code(400);

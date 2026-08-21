@@ -21,6 +21,97 @@ const DEMO_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-buck
 const MONTHS_FR = ["JANV", "FÉVR", "MARS", "AVR", "MAI", "JUIN", "JUIL", "AOÛT", "SEPT", "OCT", "NOV", "DÉC"];
 const MONTHS_EN = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
+function AIAppsBlock() {
+  return (
+    <div className="glass-strong p-4 rounded-sm relative corner-deco flex flex-col mt-4 overflow-hidden shadow-[0_0_15px_rgba(212,175,55,0.1)]">
+      <div className="absolute inset-0 bg-gold/5 animate-pulse-soft pointer-events-none" />
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="flex items-center justify-between mb-3">
+          <Link to="/services-ia" className="eyebrow flex items-center gap-2 text-primary text-[13px] hover:text-gold-light transition-colors group">
+            <Sparkles size={12} className="animate-pulse text-gold" /> 
+            Découvrir nos services et app IA
+            <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <div className="text-[9px] uppercase tracking-[0.2em] bg-primary/20 text-primary border border-primary/30 px-1.5 py-0.5 rounded-sm animate-pulse-soft">
+            Coming Soon
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 overflow-y-auto pr-1" style={{ maxHeight: "160px" }}>
+          {/* App 1 */}
+          <div className="group relative bg-background/60 p-2.5 rounded-sm border border-border/50 hover:border-gold/30 transition-colors">
+            <div className="flex justify-between items-start mb-1">
+              <h4 className="font-display text-sm text-foreground group-hover:text-gold-light transition-colors">Diagnostic IA Express</h4>
+              <span className="text-[8px] uppercase tracking-wider text-muted-foreground bg-muted px-1 py-0.5 rounded-sm">Oct 2026</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground mb-1.5 line-clamp-1">Audit rapide de votre maturité numérique et opportunités.</p>
+            <Link to="/services-ia" className="text-[9px] uppercase tracking-wider text-primary hover:text-gold-light flex items-center gap-1 w-fit">
+              Découvrir l'application <ArrowRight size={10} />
+            </Link>
+          </div>
+          
+          {/* App 2 */}
+          <div className="group relative bg-background/60 p-2.5 rounded-sm border border-border/50 hover:border-gold/30 transition-colors">
+            <div className="flex justify-between items-start mb-1">
+              <h4 className="font-display text-sm text-foreground group-hover:text-gold-light transition-colors">Générateur Pitch Deck</h4>
+              <span className="text-[8px] uppercase tracking-wider text-muted-foreground bg-muted px-1 py-0.5 rounded-sm">Nov 2026</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground mb-1.5 line-clamp-1">Créez des présentations percutantes avec l'IA.</p>
+            <Link to="/services-ia" className="text-[9px] uppercase tracking-wider text-primary hover:text-gold-light flex items-center gap-1 w-fit">
+              Découvrir l'application <ArrowRight size={10} />
+            </Link>
+          </div>
+
+          {/* App 3 */}
+          <div className="group relative bg-background/60 p-2.5 rounded-sm border border-border/50 hover:border-gold/30 transition-colors">
+            <div className="flex justify-between items-start mb-1">
+              <h4 className="font-display text-sm text-foreground group-hover:text-gold-light transition-colors">Assistant Réseautage</h4>
+              <span className="text-[8px] uppercase tracking-wider text-muted-foreground bg-muted px-1 py-0.5 rounded-sm">Déc 2026</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground mb-1.5 line-clamp-1">Préparez vos rencontres d'affaires intelligemment.</p>
+            <Link to="/services-ia" className="text-[9px] uppercase tracking-wider text-primary hover:text-gold-light flex items-center gap-1 w-fit">
+              Découvrir l'application <ArrowRight size={10} />
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-3 pt-2 border-t border-border/50">
+          <div className="text-[10px] text-muted-foreground mb-2 flex justify-between items-center">
+            <span>Dernière sortie : <strong>Moteur IA Stratégique</strong></span>
+            <span className="text-success text-[9px] uppercase border border-success/30 px-1 rounded-sm">Live</span>
+          </div>
+          <Link to="/services-ia" className="w-full btn-ghost-gold py-1.5 text-[9px] uppercase tracking-[0.1em] flex justify-center items-center gap-2 rounded-sm border-gold/30 hover:border-gold">
+            Découvrir nos applications IA gratuites développées <ArrowRight size={10} />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GlobalStatsBlock({ stats }: { stats: any }) {
+  if (!stats) return null;
+  return (
+    <section className="border-t border-b border-gold/10 bg-black/20 my-16 py-12 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-transparent to-gold/5 pointer-events-none" />
+      <div className="container relative z-10 grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
+        {[
+          { label: "Ambassadeurs", value: stats.ambassadors_count },
+          { label: "Partenaires", value: stats.partners_count },
+          { label: "Événements", value: stats.events_count },
+          { label: "Séjours", value: stats.trips_count },
+          { label: "Participants", value: stats.participants_count },
+        ].map(s => (
+          <div key={s.label} className="flex flex-col items-center justify-center p-2 hover:scale-105 transition-transform duration-500">
+            <div className="text-4xl md:text-5xl font-display gold-text mb-2 drop-shadow-md">{s.value}</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">{s.label}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function AgendaBlock() {
   const { t, language } = useLanguage();
   const isEn = language === "en";
@@ -42,7 +133,7 @@ function AgendaBlock() {
   if (upcoming.length === 0) return null;
 
   return (
-    <div className="lg:col-span-5 flex flex-col gap-4 mt-8 lg:mt-0 animate-fade-up" style={{ animationDelay: "0.3s" }}>
+    <div className="flex flex-col gap-4 mt-8 lg:mt-0">
       <div className="glass-strong p-6 rounded-sm relative corner-deco flex flex-col">
         <div className="flex items-center justify-between mb-6">
           <div className="eyebrow flex items-center gap-2 text-primary text-[14px]">
@@ -105,6 +196,15 @@ export default function Home() {
   const [dbReviews, setDbReviews] = useState<any[]>([]);
   const [visitCount, setVisitCount] = useState(234);
   const localizedOffers = getOffers(t);
+
+  const { data: siteStats } = useQuery({
+    queryKey: ["site-stats"],
+    queryFn: async () => {
+      const res = await fetch("/api-public.php?action=site_stats");
+      const json = await res.json();
+      return json.data;
+    }
+  });
 
   useEffect(() => {
     fetchReviews();
@@ -187,9 +287,9 @@ export default function Home() {
 
             <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-xl">
               {[
-                { v: t("home.hero.stat1_val"), l: t("home.hero.stat1_label") },
-                { v: t("home.hero.stat2_val"), l: t("home.hero.stat2_label") },
-                { v: t("home.hero.stat3_val"), l: t("home.hero.stat3_label") },
+                { v: siteStats?.members_count ?? t("home.hero.stat1_val"), l: t("home.hero.stat1_label") },
+                { v: siteStats?.countries_count ?? t("home.hero.stat2_val"), l: t("home.hero.stat2_label") },
+                { v: siteStats?.satisfaction_rate ?? t("home.hero.stat3_val"), l: t("home.hero.stat3_label") },
               ].map((s) => (
                 <div key={s.l}>
                   <div className="font-display text-3xl gold-text">{s.v}</div>
@@ -203,7 +303,10 @@ export default function Home() {
             </div>
           </div>
 
-          <AgendaBlock />
+          <div className="lg:col-span-5 flex flex-col gap-0 animate-fade-up" style={{ animationDelay: "0.3s" }}>
+            <AgendaBlock />
+            <AIAppsBlock />
+          </div>
         </div>
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 opacity-60">
@@ -211,6 +314,9 @@ export default function Home() {
           <div className="w-px h-12 bg-gradient-to-b from-gold to-transparent" />
         </div>
       </section>
+
+      {/* STATISTIQUES GLOBALES */}
+      <GlobalStatsBlock stats={siteStats} />
 
       {/* QUI SOMMES NOUS */}
       <AboutBNE />
