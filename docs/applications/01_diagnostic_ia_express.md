@@ -14,7 +14,7 @@ Les prospects entendent parler de l'IA mais ne savent pas par où commencer ni c
 - **Discussion Multi-Agents** : Une fois les informations collectées, le système lance une discussion entre plusieurs "agents experts" (ex: Expert Stratégie, Expert Technique) qui échangent entre eux (environ 10 itérations) pour formuler le diagnostic.
 - **Interactions en cours de diagnostic** : Possibilité pour les agents de s'interrompre pour poser une question supplémentaire à l'utilisateur s'il manque une donnée cruciale.
 - **Effet "Wow" (Insights déduits)** : Le système déduit et révèle à l'utilisateur des problèmes ou caractéristiques de son entreprise qu'il n'a pas explicitement déclarés, prouvant ainsi la puissance de l'analyse IA.
-- **Analyse de documents (Optionnel mais recommandé)** : Le système peut demander ou permettre à l'utilisateur d'importer des documents d'entreprise (processus internes, organigrammes, exemples de factures ou de devis en PDF/Word). L'IA extrait le texte pour réaliser un audit en profondeur (un *vrai* diagnostic) ancré dans la réalité de l'entreprise, plutôt que des suppositions génériques. Cet import n'est jamais bloquant.
+- **Analyse de documents (Optionnel mais recommandé)** : Le système peut demander ou permettre à l'utilisateur d'importer des documents d'entreprise. **Restriction Freemium** : Le document est limité à **3 pages maximum** et doit être **uniquement au format PDF**. Si l'utilisateur tente d'importer un autre format (Word, Excel, etc.) ou un fichier trop long, un message non-bloquant l'informe que *"Cette fonctionnalité avancée est réservée aux utilisateurs Premium"*, lui permettant ainsi de continuer son diagnostic sans être bloqué. L'IA extrait le texte pour réaliser un audit en profondeur (un *vrai* diagnostic) ancré dans la réalité de l'entreprise, plutôt que des suppositions génériques. Cet import n'est jamais bloquant.
 - Restitution d'un score de maturité, d'un plan d'action (3 outils à tester) et des gains estimés issus de la synthèse des agents.
 - Enregistrement des résultats en base de données pour suivi commercial (génération de leads).
 
@@ -24,7 +24,11 @@ Les prospects entendent parler de l'IA mais ne savent pas par où commencer ni c
 3. Quand l'IA a assez d'infos, elle déclenche la phase "Panel d'experts". L'utilisateur voit (ou patiente pendant que) les agents IA discutent en arrière-plan.
 4. Si un agent a un doute ou s'il manque de matière pour être précis, il peut mettre la conversation en pause pour poser une question supplémentaire à l'utilisateur, ou lui proposer d'**importer un document métier** (ex: un workflow PDF) pour analyser concrètement le problème. L'utilisateur peut ignorer cette demande s'il ne souhaite pas fournir de document.
 5. Une fois les 10 tours de discussion terminés, le résultat s'affiche sous forme de tableau de bord esthétique (Score, Recommandations personnalisées, Synthèse des experts).
-6. (Optionnel) Possibilité de s'envoyer le rapport par email ou de prendre rendez-vous.
+6. **Actions de fin de diagnostic** :
+   - Le système affiche une proposition claire : *"Voulez-vous nous contacter pour un premier RDV, juste pour vous écouter gratuitement ?"* afin d'engager la conversion.
+   - Le rapport d'audit complet est généré automatiquement au **format PDF**.
+   - Le PDF est **envoyé directement sur la boîte mail** de l'utilisateur (grâce à son compte connecté).
+   - Une copie de ce rapport PDF est également envoyée à **l'email de l'administration (`contact@...`)** pour le suivi commercial.
 
 ## 6. Architecture technique
 
