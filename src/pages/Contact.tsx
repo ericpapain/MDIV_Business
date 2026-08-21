@@ -85,6 +85,13 @@ ${t("contact.form.msgOutro")}` : "");
               formPayload.append("Prénom", (data.ln || '').toString());
               if (data.phone) formPayload.append("Téléphone", data.phone.toString());
               formPayload.append("Profil", selectedProfile === t("contact.form.p4") ? `Autre - ${data.profile_other}` : selectedProfile.toString());
+              
+              // Ajouter toutes les autres données saisies en évitant les doublons
+              Object.entries(data).forEach(([k, v]) => {
+                if (k !== "h-captcha-response" && k !== "g-recaptcha-response" && k !== "subject" && k !== "email" && k !== "fn" && k !== "ln" && k !== "phone" && k !== "profile" && k !== "profile_other" && k !== "msg") {
+                  formPayload.append(k, v);
+                }
+              });
               formPayload.append("Message", data.msg.toString());
 
               // Envoi uniquement à Micke avec FormData

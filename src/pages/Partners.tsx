@@ -343,9 +343,11 @@ Secteur : ${partner.sector || partner.category}\n\n`;
       formPayload.append("replyto", data.email.toString());
       formPayload.append("Type de candidature", typeLabel);
       
-      // Ajouter toutes les autres données saisies
+      // Ajouter toutes les autres données saisies en évitant les doublons
       Object.entries(data).forEach(([k, v]) => {
-        formPayload.append(k, v);
+        if (k !== "h-captcha-response" && k !== "g-recaptcha-response") {
+          formPayload.append(k, v);
+        }
       });
 
       const resMicke = await fetch("https://api.web3forms.com/submit", { 
