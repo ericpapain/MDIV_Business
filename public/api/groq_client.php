@@ -1,5 +1,6 @@
 <?php
 // Fichier : /api/groq_client.php
+// Système de fallback multi-fournisseurs : Groq -> Mistral -> HuggingFace
 require_once __DIR__ . '/config.php';
 
 function callLlmProvider($url, $apiKey, $data, $providerName, $stream = false) {
@@ -13,7 +14,7 @@ function callLlmProvider($url, $apiKey, $data, $providerName, $stream = false) {
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
 
     if ($stream) {
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $chunk) {
@@ -48,7 +49,14 @@ function callLlmProvider($url, $apiKey, $data, $providerName, $stream = false) {
     }
 }
 
-function callGroqApi($messages, $model = 'mixtral-8x7b-32768', $stream = false) {
+/**
+ * Appel API avec fallback multi-fournisseurs.
+ * @param array $messages Les messages de la conversation
+ * @param string $model Le modèle Groq à utiliser (ignoré pour les fallbacks)
+ * @param bool $stream Mode streaming SSE
+ * @param bool $useJsonMode Activer le mode JSON strict (response_format)
+ */
+function callGroqApi($messages, $model = 'mixtral-8x7b-32768', $stream = false, $useJsonMode = true) {
     $errors = [];
     
     // 1. Essai avec Groq
@@ -58,43 +66,44 @@ function callGroqApi($messages, $model = 'mixtral-8x7b-32768', $stream = false) 
             'messages' => $messages,
             'stream' => $stream
         ];
-        if (!$stream) {
+        if (!$stream && $useJsonMode) {
             $data['response_format'] = ['type' => 'json_object'];
         }
         return callLlmProvider('https://api.groq.com/openai/v1/chat/completions', GROQ_API_KEY, $data, 'Groq', $stream);
     } catch (Exception $e) {
-        $errors[] = $e->getMessage();
+        $errors[] = 'Groq: ' . $e->getMessage();
     }
     
-    // 2. Essai avec Mistral en fallback (Drop-in replacement)
+    // 2. Essai avec Mistral en fallback
     try {
         $data = [
-            'model' => 'open-mistral-nemo', // Modèle standard Mistral rapide
+            'model' => 'open-mistral-nemo',
             'messages' => $messages,
             'stream' => $stream
         ];
-        if (!$stream) {
+        if (!$stream && $useJsonMode) {
             $data['response_format'] = ['type' => 'json_object'];
         }
         return callLlmProvider('https://api.mistral.ai/v1/chat/completions', MISTRAL_API_KEY, $data, 'Mistral', $stream);
     } catch (Exception $e) {
-        $errors[] = $e->getMessage();
+        $errors[] = 'Mistral: ' . $e->getMessage();
     }
     
-    // 3. Essai avec HuggingFace en dernier recours (Compatibilité OpenAI)
+    // 3. Essai avec HuggingFace en dernier recours
     try {
         $data = [
             'model' => 'mistralai/Mixtral-8x7B-Instruct-v0.1',
             'messages' => $messages,
-            'stream' => $stream
+            'stream' => $stream,
+            'max_tokens' => 1024
         ];
-        // HF ne gère pas toujours response_format, on l'omet pour éviter une erreur 400
+        // HF ne supporte pas response_format, on l'omet toujours
         return callLlmProvider('https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1/v1/chat/completions', HF_API_KEY, $data, 'HuggingFace', $stream);
     } catch (Exception $e) {
-        $errors[] = $e->getMessage();
+        $errors[] = 'HuggingFace: ' . $e->getMessage();
     }
 
     // Si tout échoue
-    throw new Exception("Toutes les APIs ont échoué : " . implode(" | ", $errors));
+    throw new Exception("Toutes les APIs IA ont échoué. Détails : " . implode(" | ", $errors));
 }
 ?>

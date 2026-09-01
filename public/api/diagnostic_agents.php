@@ -11,13 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
 header('Connection: keep-alive');
+header('X-Accel-Buffering: no'); // Pour Nginx/proxy
+
 // Désactiver le buffering de sortie
 if (function_exists('apache_setenv')) {
     apache_setenv('no-gzip', 1);
 }
 @ini_set('zlib.output_compression', 0);
 @ini_set('implicit_flush', 1);
-for ($i = 0; $i < ob_get_level(); $i++) { ob_end_flush(); }
+while (ob_get_level() > 0) { ob_end_flush(); }
 ob_implicit_flush(1);
 
 require_once __DIR__ . '/groq_client.php';
@@ -25,7 +27,7 @@ require_once __DIR__ . '/groq_client.php';
 // Fonction utilitaire pour envoyer un événement SSE
 function sendSSE($event, $data) {
     echo "event: $event\n";
-    echo "data: " . json_encode($data) . "\n\n";
+    echo "data: " . json_encode($data, JSON_UNESCAPED_UNICODE) . "\n\n";
     flush();
 }
 
@@ -40,7 +42,7 @@ try {
         exit;
     }
 
-    $profile_text = json_encode($context);
+    $profile_text = json_encode($context, JSON_UNESCAPED_UNICODE);
 
     // Initialisation de la conversation des experts
     $messages = [
@@ -64,8 +66,8 @@ try {
 
         $messages[] = ["role" => "user", "content" => $prompt];
         
-        // Appel à l'API Groq
-        $result = callGroqApi($messages, LLM_MODEL, false);
+        // Appel à l'API - les agents discutent en texte libre (pas de JSON mode)
+        $result = callGroqApi($messages, LLM_MODEL, false, false);
         $reply = $result['choices'][0]['message']['content'];
         
         // Vérifier si c'est une interruption
@@ -101,7 +103,8 @@ try {
         "content" => "Maintenant, génère la synthèse finale. Tu dois OBLIGATOIREMENT répondre en JSON avec ce format exact : { \"score\": 75, \"synthesis\": \"texte court\", \"deduced_insights\": [\"insight 1\", \"insight 2\"], \"recommendations\": [ { \"tool_name\": \"Nom Outil\", \"reason\": \"Raison...\"} ] }"
     ];
     
-    $result = callGroqApi($messages, 'llama-3.1-8b-instant', false);
+    // Pour la synthèse finale, on veut du JSON strict
+    $result = callGroqApi($messages, LLM_MODEL, false, true);
     $final_json = $result['choices'][0]['message']['content'];
     
     // Essayer de parser le JSON (le LLM peut ajouter du texte autour)
