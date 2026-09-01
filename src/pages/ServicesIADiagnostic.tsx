@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { ArrowLeft, ArrowRight, Check, BarChart3, Brain, Loader2, Upload, FileText, Download } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, BarChart3, Brain, Loader2, Upload, FileText, Download, Square, CheckSquare } from "lucide-react";
 import { fetchNextDiagnosticStep, startAgentsDiscussion, uploadDiagnosticDocument, DiagnosticMessage, AgentMessage, DiagnosticFinalReport } from "@/lib/diagnosticService";
 
 export default function ServicesIADiagnostic() {
@@ -10,10 +10,11 @@ export default function ServicesIADiagnostic() {
 
   // Form states
   const [history, setHistory] = useState<DiagnosticMessage[]>([]);
-  const [currentQuestion, setCurrentQuestion] = useState<{question: string, options: string[]} | null>(null);
-  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [currentQuestion, setCurrentQuestion] = useState<{question: string, options: string[], total_questions?: number} | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [otherText, setOtherText] = useState("");
   const [stepCount, setStepCount] = useState(1);
-  const MAX_STEPS = 5;
+  const [totalSteps, setTotalSteps] = useState(5); // Dynamique, mis à jour par l'IA
 
   // Phase management
   const [phase, setPhase] = useState<'form' | 'agents' | 'interrupt' | 'result'>('form');
@@ -41,7 +42,12 @@ export default function ServicesIADiagnostic() {
     try {
       const response = await fetchNextDiagnosticStep(currentHistory);
       setCurrentQuestion(response);
-      setSelectedOption("");
+      setSelectedOptions([]);
+      setOtherText("");
+      // Si l'IA indique un nombre total de questions, on le met à jour
+      if (response.total_questions && response.total_questions > 0) {
+        setTotalSteps(response.total_questions);
+      }
     } catch (err: any) {
       setError(err.message || "Erreur de connexion à l'IA.");
     } finally {
@@ -49,18 +55,53 @@ export default function ServicesIADiagnostic() {
     }
   };
 
+  const toggleOption = (opt: string) => {
+    setSelectedOptions(prev => {
+      if (prev.includes(opt)) {
+        // Décocher "Autre" => vider aussi le champ texte
+        if (isOtherOption(opt)) {
+          setOtherText("");
+        }
+        return prev.filter(o => o !== opt);
+      } else {
+        return [...prev, opt];
+      }
+    });
+  };
+
+  const isOtherOption = (opt: string) => {
+    const lower = opt.toLowerCase().trim();
+    return lower === "autre" || lower === "other" || lower.startsWith("autre ") || lower.startsWith("other ");
+  };
+
+  const hasOtherSelected = selectedOptions.some(isOtherOption);
+
+  const getAnswerText = () => {
+    const answers = selectedOptions.map(opt => {
+      if (isOtherOption(opt) && otherText.trim()) {
+        return `Autre : ${otherText.trim()}`;
+      }
+      return opt;
+    });
+    return answers.join(", ");
+  };
+
+  const canProceed = selectedOptions.length > 0 && (!hasOtherSelected || otherText.trim().length > 0);
+
   const handleNextStep = () => {
-    if (!currentQuestion || !selectedOption) return;
+    if (!currentQuestion || !canProceed) return;
+
+    const answerText = getAnswerText();
 
     const newHistory: DiagnosticMessage[] = [
       ...history,
       { role: 'assistant', content: JSON.stringify(currentQuestion) },
-      { role: 'user', content: selectedOption }
+      { role: 'user', content: answerText }
     ];
 
     setHistory(newHistory);
 
-    if (stepCount >= MAX_STEPS) {
+    if (stepCount >= totalSteps) {
       setPhase('agents');
       startAgentPhase(newHistory);
     } else {
@@ -97,10 +138,13 @@ export default function ServicesIADiagnostic() {
   const resetDiagnostic = () => {
     setHistory([]);
     setStepCount(1);
+    setTotalSteps(5);
     setPhase('form');
     setAgentMessages([]);
     setFinalReport(null);
     setInterruptData(null);
+    setSelectedOptions([]);
+    setOtherText("");
     loadNextQuestion([]);
   };
 
@@ -382,7 +426,7 @@ export default function ServicesIADiagnostic() {
   }
 
   // Phase: form
-  const progress = (stepCount / MAX_STEPS) * 100;
+  const progress = (stepCount / totalSteps) * 100;
 
   return (
     <div className="ia-page min-h-screen pt-32 pb-20">
@@ -405,7 +449,7 @@ export default function ServicesIADiagnostic() {
 
         <div className="mb-8">
           <div className="flex justify-between text-xs mb-2" style={{ color: "hsl(215 16% 47%)" }}>
-            <span>{isEn ? "Question" : "Question"} {stepCount}/{MAX_STEPS}</span>
+            <span>{isEn ? "Question" : "Question"} {stepCount}/{totalSteps}</span>
             <span>{Math.round(progress)}%</span>
           </div>
           <div className="h-2 rounded-full overflow-hidden" style={{ background: "hsl(214 32% 91%)" }}>
@@ -433,36 +477,60 @@ export default function ServicesIADiagnostic() {
               </div>
             ) : currentQuestion ? (
               <>
-                <h2 className="text-xl md:text-2xl font-bold mb-6 leading-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <h2 className="text-xl md:text-2xl font-bold mb-2 leading-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {currentQuestion.question}
                 </h2>
+                <p className="text-xs text-slate-400 mb-6">
+                  {isEn ? "You can select multiple answers" : "Vous pouvez sélectionner plusieurs réponses"}
+                </p>
 
                 <div className="space-y-3 flex-1">
-                  {currentQuestion.options.map((opt, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedOption(opt)}
-                      className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all flex items-center justify-between text-sm font-medium ${
-                        selectedOption === opt
-                          ? "border-[hsl(221,83%,53%)] bg-[hsl(221,83%,53%,0.05)] text-[hsl(221,83%,53%)]"
-                          : "border-[hsl(214,32%,91%)] hover:border-[hsl(221,83%,53%,0.3)] hover:bg-[hsl(221,83%,53%,0.02)] text-slate-700"
-                      }`}
-                    >
-                      <span>{opt}</span>
-                      {selectedOption === opt && (
-                        <Check size={18} style={{ color: "hsl(221 83% 53%)" }} />
-                      )}
-                    </button>
-                  ))}
+                  {currentQuestion.options.map((opt, i) => {
+                    const isSelected = selectedOptions.includes(opt);
+                    const isOther = isOtherOption(opt);
+                    return (
+                      <div key={i}>
+                        <button
+                          onClick={() => toggleOption(opt)}
+                          className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all flex items-center gap-3 text-sm font-medium ${
+                            isSelected
+                              ? "border-[hsl(221,83%,53%)] bg-[hsl(221,83%,53%,0.05)] text-[hsl(221,83%,53%)]"
+                              : "border-[hsl(214,32%,91%)] hover:border-[hsl(221,83%,53%,0.3)] hover:bg-[hsl(221,83%,53%,0.02)] text-slate-700"
+                          }`}
+                        >
+                          {isSelected ? (
+                            <CheckSquare size={20} className="shrink-0" style={{ color: "hsl(221 83% 53%)" }} />
+                          ) : (
+                            <Square size={20} className="shrink-0 text-slate-300" />
+                          )}
+                          <span className="flex-1">{opt}</span>
+                        </button>
+                        
+                        {/* Champ de saisie pour "Autre" */}
+                        {isOther && isSelected && (
+                          <div className="mt-2 ml-10 mr-2 ia-animate-in">
+                            <input
+                              type="text"
+                              value={otherText}
+                              onChange={(e) => setOtherText(e.target.value)}
+                              placeholder={isEn ? "Please specify..." : "Veuillez préciser..."}
+                              className="w-full px-4 py-3 border-2 border-[hsl(221,83%,53%,0.3)] rounded-xl text-sm focus:border-[hsl(221,83%,53%)] focus:ring-1 focus:ring-[hsl(221,83%,53%)] outline-none transition-all"
+                              autoFocus
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="flex justify-end mt-8 pt-4 border-t border-slate-100">
                   <button
                     onClick={handleNextStep}
-                    disabled={!selectedOption}
+                    disabled={!canProceed}
                     className="ia-btn-primary text-sm py-2.5 px-6 disabled:opacity-30 disabled:cursor-not-allowed group"
                   >
-                    {isEn ? (stepCount === MAX_STEPS ? "Analyze Profile" : "Next") : (stepCount === MAX_STEPS ? "Analyser mon profil" : "Suivant")} 
+                    {isEn ? (stepCount === totalSteps ? "Analyze Profile" : "Next") : (stepCount === totalSteps ? "Analyser mon profil" : "Suivant")} 
                     <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>

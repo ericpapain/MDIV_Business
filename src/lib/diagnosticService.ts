@@ -10,6 +10,7 @@ export interface DiagnosticMessage {
 export interface DiagnosticNextStepResponse {
   question: string;
   options: string[];
+  total_questions?: number;
 }
 
 export interface AgentMessage {
