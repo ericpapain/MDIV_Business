@@ -30,7 +30,7 @@ define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: 'gsk_hBbXDDQ0fCqv9wXueQLTWGdyb3
 define('LLM_API_URL', 'https://api.groq.com/openai/v1/chat/completions');
 // define('LLM_API_URL', 'https://api.openai.com/v1/chat/completions'); // SOLUTION PAYANTE (Décommenter pour basculer)
 
-define('LLM_MODEL', 'llama-3.1-8b-instant');
+define('LLM_MODEL', 'llama3-8b-8192');
 // define('LLM_MODEL', 'gpt-4o-mini'); // SOLUTION PAYANTE (Décommenter pour basculer)
 
 /**
