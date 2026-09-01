@@ -2,7 +2,7 @@
 // Fichier : /api/groq_client.php
 require_once __DIR__ . '/config.php';
 
-function callGroqApi($messages, $model = 'llama3-8b-8192', $stream = false) {
+function callGroqApi($messages, $model = 'llama-3.3-70b-versatile', $stream = false) {
     $url = 'https://api.groq.com/openai/v1/chat/completions';
     
     $data = [
