@@ -87,8 +87,12 @@ export function startAgentsDiscussion(
   onInterrupt: (data: {agent: string, question: string}) => void,
   onError: (error: Error) => void
 ): () => void {
-  // Encodage du contexte pour le passer en GET
-  const contextStr = btoa(JSON.stringify(context));
+  // Encodage du contexte pour le passer en GET (Unicode-safe base64)
+  const jsonStr = JSON.stringify(context);
+  // Convertir UTF-8 en base64 de manière sûre (supporte les accents français)
+  const utf8Bytes = new TextEncoder().encode(jsonStr);
+  const binaryStr = Array.from(utf8Bytes).map(b => String.fromCharCode(b)).join('');
+  const contextStr = encodeURIComponent(btoa(binaryStr));
   const eventSource = new EventSource(`${API_BASE_URL}/diagnostic_agents.php?context=${contextStr}`);
 
   eventSource.addEventListener('agent_message', (e) => {
