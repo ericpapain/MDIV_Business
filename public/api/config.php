@@ -76,10 +76,10 @@ function call_llm_api($messages, $jsonMode = false) {
 }
 
 // 3. CONFIGURATION DE LA BASE DE DONNÉES MYSQL (OVH)
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost'); // Remplacer par le serveur OVH en prod
-define('DB_NAME', getenv('DB_NAME') ?: 'mdiv_db');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
+define('DB_HOST', getenv('DB_HOST') ?: 'zwpvaah279.mysql.db');
+define('DB_NAME', getenv('DB_NAME') ?: 'zwpvaah279');
+define('DB_USER', getenv('DB_USER') ?: 'zwpvaah279');
+define('DB_PASS', getenv('DB_PASS') ?: 'Champion2018');
 
 /**
  * Fonction pour obtenir la connexion PDO à la base de données
