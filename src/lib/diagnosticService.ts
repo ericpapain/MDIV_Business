@@ -40,7 +40,12 @@ export async function fetchNextDiagnosticStep(history: DiagnosticMessage[]): Pro
   });
 
   if (!response.ok) {
-    throw new Error("Erreur lors de la récupération de la question suivante.");
+    let errorMsg = "Erreur lors de la récupération de la question suivante.";
+    try {
+      const data = await response.json();
+      if (data.error) errorMsg = data.error;
+    } catch (e) {}
+    throw new Error(errorMsg);
   }
 
   return response.json();
