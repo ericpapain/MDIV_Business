@@ -37,7 +37,12 @@ $company_id = 1; // Temporaire, à adapter avec l'auth
 
 try {
     $input_raw = $_GET['context'] ?? '{}'; // On passe le contexte via GET car SSE utilise GET
-    $context = json_decode(base64_decode($input_raw), true);
+    // Tenter d'abord le JSON direct (URL-encoded par le frontend)
+    $context = json_decode($input_raw, true);
+    // Fallback : ancien format base64
+    if (!$context) {
+        $context = json_decode(base64_decode($input_raw), true);
+    }
     
     if (!$context) {
         sendSSE('error', ['message' => 'Contexte manquant ou invalide.']);
