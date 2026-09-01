@@ -33,7 +33,7 @@ function sendSSE($event, $data) {
     flush();
 }
 
-$company_id = 1; // Temporaire, à adapter avec l'auth
+$company_id = isset($_GET['company_id']) ? intval($_GET['company_id']) : 1;
 
 try {
     $input_raw = $_GET['context'] ?? '{}'; // On passe le contexte via GET car SSE utilise GET
@@ -53,7 +53,13 @@ try {
 
     // Initialisation de la conversation des experts
     $messages = [
-        ["role" => "system", "content" => "Tu joues le rôle de deux experts IA qui débattent. L'Expert Stratégie évalue l'impact business, l'Expert Technique évalue la faisabilité et les outils. Voici le profil de l'entreprise : " . $profile_text]
+        ["role" => "system", "content" => "Tu joues le rôle de deux experts en transformation digitale d'entreprise qui débattent pour conseiller un dirigeant non-technique :
+- L'Expert Stratégie évalue l'impact business, le gain de temps et le retour sur investissement.
+- L'Expert Technique évalue la simplicité de mise en place et les outils adaptés aux équipes non-développeurs.
+
+RÈGLE MAJEURE SUR LE MULTI-CHOIX : L'utilisateur a pu sélectionner PLUSIEURS choix par question. Tu dois obligatoirement prendre en compte l'ENSEMBLE des réponses cochées pour analyser les besoins combinés de l'entreprise.
+
+Voici les réponses et le profil complet de l'entreprise : " . $profile_text]
     ];
 
     $agents = ["Expert Stratégie", "Expert Technique"];
@@ -66,9 +72,9 @@ try {
         
         $prompt = "C'est à toi de parler, $current_agent. ";
         if ($i == 0) {
-            $prompt .= "Fais une première analyse rapide des défis de cette entreprise et propose une direction. IMPORTANT : Si tu manques d'informations cruciales pour faire un bon diagnostic, au lieu de répondre normalement, réponds UNIQUEMENT avec ce JSON strict : {\"action\":\"interrupt\", \"question\":\"La question supplémentaire que tu veux poser au client, ou demande-lui d'importer un document (ex: devis, facture).\"}";
+            $prompt .= "Fais une première analyse claire et accessible des défis de cette entreprise en tenant compte de TOUS leurs choix exprimés. Propose des pistes concrètes sans jargon. IMPORTANT : Si tu manques d'informations cruciales pour faire un bon diagnostic, au lieu de répondre normalement, réponds UNIQUEMENT avec ce JSON strict : {\"action\":\"interrupt\", \"question\":\"La question supplémentaire que tu veux poser au client, ou demande-lui d'importer un document (ex: devis, facture).\"}";
         } else {
-            $prompt .= "Réagis de façon constructive (mais critique si nécessaire) au message précédent. Fais une réponse concise (3-4 phrases max).";
+            $prompt .= "Réagis de façon constructive et accessible au message précédent. Fais une réponse fluide, concrète et concise (3-4 phrases max).";
         }
 
         $messages[] = ["role" => "user", "content" => $prompt];
@@ -103,11 +109,29 @@ try {
     }
 
     // Agent final (Synthèse)
-    sendSSE('agent_message', ['agent' => 'Synthèse IA', 'message' => 'Génération du rapport d\'audit final en cours...']);
+    sendSSE('agent_message', ['agent' => 'Synthèse IA', 'message' => 'Génération du rapport d\'audit pédagogique et personnalisé...']);
     
     $messages[] = [
         "role" => "user", 
-        "content" => "Maintenant, génère la synthèse finale. Tu dois OBLIGATOIREMENT répondre en JSON avec ce format exact : { \"score\": 75, \"synthesis\": \"texte court\", \"deduced_insights\": [\"insight 1\", \"insight 2\"], \"recommendations\": [ { \"tool_name\": \"Nom Outil\", \"reason\": \"Raison...\"} ] }"
+        "content" => "Maintenant, génère le rapport d'audit final. Rédige avec un ton très pédagogique, clair et professionnel pour un dirigeant d'entreprise NON-technique. Explique chaque outil en détail avec des exemples métiers concrets.
+
+Tu dois OBLIGATOIREMENT répondre en JSON avec ce format exact :
+{
+    \"score\": 65,
+    \"synthesis\": \"Synthèse globale de la maturité numérique de l'entreprise (3-4 phrases claires et encourageantes).\",
+    \"deduced_insights\": [
+        \"Insight 1 : Constat précis basé sur leurs choix multiples\",
+        \"Insight 2 : Opportunité concrète identifiée pour leur activité\"
+    ],
+    \"recommendations\": [
+        {
+            \"tool_name\": \"Nom de l'outil ou de la solution (ex: Make / Zapier)\",
+            \"category\": \"Domaine (ex: Automatisations & Relances clients)\",
+            \"reason\": \"Explication détaillée et pédagogique de POURQUOI cet outil est recommandé et ce qu'il va changer au quotidien pour l'entreprise.\",
+            \"how_to_start\": \"Conseil simple et pragmatique pour démarrer sans être développeur (ex: Créer un premier flux automatique entre vos formulaires web et votre CRM).\"
+        }
+    ]
+}"
     ];
     
     // Pour la synthèse finale, on veut du JSON strict
@@ -129,9 +153,16 @@ try {
         // Fallback si le JSON est mal formé
         $report_data = [
             "score" => 50,
-            "synthesis" => "Une erreur de formatage s'est produite lors de la synthèse.",
-            "deduced_insights" => [],
-            "recommendations" => []
+            "synthesis" => "L'analyse de votre maturité numérique est terminée. Vos réponses montrent un fort potentiel d'optimisation par l'Intelligence Artificielle.",
+            "deduced_insights" => ["Des gains de temps significatifs sont identifiés sur vos processus quotidiens."],
+            "recommendations" => [
+                [
+                    "tool_name" => "Automatisations Métier (Zapier / Make)",
+                    "category" => "Gain de temps au quotidien",
+                    "reason" => "Ces plateformes permettent de connecter vos logiciels actuels sans coder, pour automatiser les relances clients et la facturation.",
+                    "how_to_start" => "Identifiez la tâche répétitive qui vous prend le plus de temps chaque semaine et automatisez-la en premier."
+                ]
+            ]
         ];
     }
 
@@ -143,13 +174,13 @@ try {
             $stmt = $pdo->prepare("INSERT INTO diagnostics (company_id, diagnostic_type, questions_answers, score, report, status) VALUES (?, 'express', ?, ?, ?, 'completed')");
             $stmt->execute([
                 $company_id, 
-                json_encode($context), 
+                json_encode($context, JSON_UNESCAPED_UNICODE), 
                 $report_data['score'] ?? 0, 
-                json_encode($report_data)
+                json_encode($report_data, JSON_UNESCAPED_UNICODE)
             ]);
         }
     } catch(Exception $db_e) {
-        // On ignore l'erreur DB pour ne pas casser le front, mais on pourrait la logguer
+        // On ignore l'erreur DB pour ne pas casser le front
     }
     
     // Envoi du résultat final

@@ -18,14 +18,18 @@ export interface AgentMessage {
   message: string;
 }
 
+export interface DiagnosticRecommendation {
+  tool_name: string;
+  category?: string;
+  reason: string;
+  how_to_start?: string;
+}
+
 export interface DiagnosticFinalReport {
   score: number;
   synthesis: string;
   deduced_insights: string[];
-  recommendations: Array<{
-    tool_name: string;
-    reason: string;
-  }>;
+  recommendations: DiagnosticRecommendation[];
 }
 
 /**
@@ -75,6 +79,7 @@ export async function uploadDiagnosticDocument(file: File): Promise<{status: str
 /**
  * Lance la discussion Multi-Agents via Server-Sent Events.
  * @param context Objet représentant les réponses de l'utilisateur.
+ * @param companyId ID de l'entreprise connectée.
  * @param onAgentMessage Callback appelé à chaque message d'un agent.
  * @param onComplete Callback appelé à la fin avec le rapport.
  * @param onInterrupt Callback appelé si un agent met en pause pour poser une question.
@@ -82,14 +87,16 @@ export async function uploadDiagnosticDocument(file: File): Promise<{status: str
  */
 export function startAgentsDiscussion(
   context: any,
+  companyId: number | undefined,
   onAgentMessage: (msg: AgentMessage) => void,
   onComplete: (report: DiagnosticFinalReport) => void,
   onInterrupt: (data: {agent: string, question: string}) => void,
   onError: (error: Error) => void
 ): () => void {
-  // Encodage du contexte pour le passer en GET (sans btoa pour éviter les problèmes Unicode)
+  // Encodage du contexte pour le passer en GET
   const contextStr = encodeURIComponent(JSON.stringify(context));
-  const eventSource = new EventSource(`${API_BASE_URL}/diagnostic_agents.php?context=${contextStr}`);
+  const cidParam = companyId ? `&company_id=${companyId}` : '';
+  const eventSource = new EventSource(`${API_BASE_URL}/diagnostic_agents.php?context=${contextStr}${cidParam}`);
 
   eventSource.addEventListener('agent_message', (e) => {
     try {
@@ -122,7 +129,6 @@ export function startAgentsDiscussion(
   });
 
   eventSource.addEventListener('error', (e: any) => {
-    // L'événement d'erreur par défaut ou personnalisé
     let errorMessage = "Erreur de connexion au flux d'analyse.";
     try {
        if(e.data) {
@@ -135,7 +141,6 @@ export function startAgentsDiscussion(
     eventSource.close();
   });
 
-  // Retourne une fonction pour fermer la connexion manuellement si l'utilisateur quitte la page
   return () => {
     eventSource.close();
   };

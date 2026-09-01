@@ -19,22 +19,25 @@ try {
         exit;
     }
 
-    $history = $input['history']; // Tableau du type [{role: "user", content: "je suis artisan"}, ...]
+    $history = $input['history']; // Tableau du type [{role: "user", content: "..."}, ...]
     
-    $system_prompt = "Tu es un expert en transformation digitale et en Intelligence Artificielle pour les TPE/PME.
-Ton objectif est de poser UNE SEULE question à la fois à l'utilisateur pour comprendre son besoin métier, ses défis et déterminer sa maturité numérique.
-À chaque tour, tu dois proposer 3 à 5 options de réponses sous forme de cases à cocher (courtes et pertinentes).
-L'utilisateur peut sélectionner PLUSIEURS options, donc les options ne doivent PAS être mutuellement exclusives.
-Tu dois TOUJOURS inclure une option \"Autre\" en dernière position pour laisser la possibilité à l'utilisateur de préciser quelque chose qui n'est pas dans la liste.
-Tu dois aussi évaluer dynamiquement combien de questions au total tu estimes nécessaires pour faire un bon diagnostic (entre 3 et 8 questions).
-Tu dois répondre STRICTEMENT en JSON avec la structure suivante :
+    $system_prompt = "Tu es un consultant senior en stratégie digitale et Intelligence Artificielle pour les TPE et PME.
+Ton rôle est de mener un diagnostic pragmatique, fluide et pertinent.
+Pose UNE SEULE question claire à la fois pour comprendre l'activité, les freins, les outils et les objectifs du dirigeant.
+
+RÈGLES CAPITALES :
+1. L'utilisateur peut cocher PLUSIEURS options dans ses réponses. Lorsque l'utilisateur sélectionne plusieurs éléments (ex: 'Gestion client, Relances factures, Rédaction de devis'), lis et analyse l'ENSEMBLE de ses choix pour poser une question suivante qui synthétise intelligemment ces besoins combinés.
+2. Propose toujours entre 3 et 5 choix de réponses concrètes et distinctes sous forme de cases à cocher.
+3. Termine TOUJOURS la liste des options par 'Autre (précisez)'.
+4. Détermine dynamiquement le nombre total de questions estimées nécessaires (entre 3 et 7 questions).
+
+Structure de réponse JSON STRICTE :
 {
-    \"question\": \"La question à poser\",
-    \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Autre\"],
+    \"question\": \"La question claire et accessible à poser\",
+    \"options\": [\"Choix 1\", \"Choix 2\", \"Choix 3\", \"Autre (précisez)\"],
     \"total_questions\": 5
 }
-Le champ total_questions doit être un entier entre 3 et 8 représentant le nombre total de questions que tu prévois de poser.
-Sois direct et n'ajoute pas de texte hors du JSON.";
+Ne génère AUCUN texte en dehors du JSON.";
 
     $messages = [
         ["role" => "system", "content" => $system_prompt]
@@ -54,7 +57,7 @@ Sois direct et n'ajoute pas de texte hors du JSON.";
     // Tenter de parser pour valider le JSON
     $parsed = json_decode($content, true);
     if ($parsed && isset($parsed['question']) && isset($parsed['options'])) {
-        // S'assurer que "Autre" est présent
+        // S'assurer que "Autre" est bien présent
         $hasAutre = false;
         foreach ($parsed['options'] as $opt) {
             $lower = strtolower(trim($opt));
@@ -64,10 +67,10 @@ Sois direct et n'ajoute pas de texte hors du JSON.";
             }
         }
         if (!$hasAutre) {
-            $parsed['options'][] = 'Autre';
+            $parsed['options'][] = 'Autre (précisez)';
         }
         // S'assurer que total_questions est valide
-        if (!isset($parsed['total_questions']) || $parsed['total_questions'] < 3 || $parsed['total_questions'] > 8) {
+        if (!isset($parsed['total_questions']) || $parsed['total_questions'] < 3 || $parsed['total_questions'] > 7) {
             $parsed['total_questions'] = 5;
         }
         echo json_encode($parsed, JSON_UNESCAPED_UNICODE);

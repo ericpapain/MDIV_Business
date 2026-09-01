@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { ArrowLeft, ArrowRight, Check, BarChart3, Brain, Loader2, Upload, FileText, Download, Square, CheckSquare } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { ArrowLeft, ArrowRight, Check, BarChart3, Brain, Loader2, Upload, FileText, Download, Square, CheckSquare, Wrench, Lightbulb, PlayCircle, Sparkles } from "lucide-react";
 import { fetchNextDiagnosticStep, startAgentsDiscussion, uploadDiagnosticDocument, DiagnosticMessage, AgentMessage, DiagnosticFinalReport } from "@/lib/diagnosticService";
 
 export default function ServicesIADiagnostic() {
   const { language } = useLanguage();
+  const { company } = useAuth();
   const isEn = language === "en";
 
   // Form states
@@ -58,7 +60,6 @@ export default function ServicesIADiagnostic() {
   const toggleOption = (opt: string) => {
     setSelectedOptions(prev => {
       if (prev.includes(opt)) {
-        // Décocher "Autre" => vider aussi le champ texte
         if (isOtherOption(opt)) {
           setOtherText("");
         }
@@ -71,18 +72,22 @@ export default function ServicesIADiagnostic() {
 
   const isOtherOption = (opt: string) => {
     const lower = opt.toLowerCase().trim();
-    return lower === "autre" || lower === "other" || lower.startsWith("autre ") || lower.startsWith("other ");
+    return lower === "autre" || lower === "other" || lower.startsWith("autre") || lower.startsWith("other");
   };
 
   const hasOtherSelected = selectedOptions.some(isOtherOption);
 
-  const getAnswerText = () => {
+  const getFormattedAnswerText = () => {
     const answers = selectedOptions.map(opt => {
       if (isOtherOption(opt) && otherText.trim()) {
         return `Autre : ${otherText.trim()}`;
       }
       return opt;
     });
+
+    if (answers.length > 1) {
+      return `Choix multiples sélectionnés (${answers.length}) : [${answers.join(" + ")}]`;
+    }
     return answers.join(", ");
   };
 
@@ -91,7 +96,7 @@ export default function ServicesIADiagnostic() {
   const handleNextStep = () => {
     if (!currentQuestion || !canProceed) return;
 
-    const answerText = getAnswerText();
+    const answerText = getFormattedAnswerText();
 
     const newHistory: DiagnosticMessage[] = [
       ...history,
@@ -113,11 +118,12 @@ export default function ServicesIADiagnostic() {
   const startAgentPhase = (finalHistory: DiagnosticMessage[]) => {
     const contextStr = finalHistory
       .filter(h => h.role === 'user')
-      .map((h, i) => `Réponse/Info ${i+1}: ${h.content}`)
+      .map((h, i) => `Étape ${i+1}: ${h.content}`)
       .join(" | ");
 
     startAgentsDiscussion(
-      { history: contextStr },
+      { history: contextStr, company_name: company?.name },
+      company?.id,
       (msg) => {
         setAgentMessages(prev => [...prev, msg]);
       },
@@ -194,11 +200,10 @@ export default function ServicesIADiagnostic() {
   const downloadPDF = () => {
     if (!finalReport) return;
     
-    // Create a hidden form to submit the data to the PHP endpoint
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = import.meta.env.PROD ? '/api/diagnostic_pdf.php' : 'http://localhost/mdiv_business/api/diagnostic_pdf.php';
-    form.target = '_blank'; // Open in new tab for download
+    form.target = '_blank';
     
     const input = document.createElement('input');
     input.type = 'hidden';
@@ -212,18 +217,18 @@ export default function ServicesIADiagnostic() {
   };
 
   const getLevel = (score: number) => {
-    if (score < 30) return { label: isEn ? "Beginner" : "Débutant", color: "hsl(25 95% 53%)", desc: isEn ? "You have significant room for growth. Our free tools are perfect to get started." : "Vous avez un potentiel de croissance important. Nos outils gratuits sont parfaits pour démarrer." };
-    if (score < 60) return { label: isEn ? "Intermediate" : "Intermédiaire", color: "hsl(221 83% 53%)", desc: isEn ? "You're on the right track. Our Pro plan would accelerate your transformation." : "Vous êtes sur la bonne voie. Notre plan Pro accélérerait votre transformation." };
-    return { label: isEn ? "Advanced" : "Avancé", color: "hsl(160 84% 39%)", desc: isEn ? "Impressive maturity! Our Business or Enterprise plans will maximize your ROI." : "Maturité impressionnante ! Nos plans Business ou Entreprise maximiseront votre ROI." };
+    if (score < 35) return { label: isEn ? "Beginner / Immediate Potential" : "Débutant (Potentiel élevé)", color: "hsl(25 95% 53%)" };
+    if (score < 65) return { label: isEn ? "Intermediate / Good Foundation" : "Intermédiaire (Bonnes bases)", color: "hsl(221 83% 53%)" };
+    return { label: isEn ? "Advanced / Optimization Stage" : "Avancé (Optimisation & ROI)", color: "hsl(160 84% 39%)" };
   };
 
   if (phase === 'result' && finalReport) {
     const level = getLevel(finalReport.score);
     return (
       <div className="ia-page min-h-screen pt-32 pb-20">
-        <div className="container max-w-3xl mx-auto">
-          <Link to="/services-ia" className="inline-flex items-center gap-2 text-sm mb-8 hover:gap-3 transition-all" style={{ color: "hsl(221 83% 53%)" }}>
-            <ArrowLeft size={14} /> {isEn ? "Back to AI Services" : "Retour aux Services IA"}
+        <div className="container max-w-4xl mx-auto">
+          <Link to="/services-ia" className="inline-flex items-center gap-2 text-sm mb-8 hover:gap-3 transition-all font-semibold" style={{ color: "hsl(221 83% 53%)" }}>
+            <ArrowLeft size={16} /> {isEn ? "Back to AI Services" : "Retour aux Services IA"}
           </Link>
 
           <div className="ia-card relative overflow-hidden p-8 md:p-12 text-center ia-animate-in">
@@ -232,67 +237,107 @@ export default function ServicesIADiagnostic() {
             </div>
 
             <div className="relative z-10">
-              <div className="w-20 h-20 rounded-full ia-gradient-hero flex items-center justify-center text-foreground mx-auto mb-6">
+              <div className="w-20 h-20 rounded-full ia-gradient-hero flex items-center justify-center text-foreground mx-auto mb-4 shadow-lg">
                 <BarChart3 size={32} />
               </div>
 
+              {company?.name && (
+                <div className="text-xs uppercase tracking-widest font-semibold text-blue-600 mb-1">
+                  Entreprise : {company.name}
+                </div>
+              )}
+
               <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {isEn ? "Your AI Score" : "Votre Score IA"}
+                {isEn ? "Your AI Diagnostic Report" : "Rapport de Diagnostic IA"}
               </h1>
 
-              <div className="my-8">
-                <div className="text-7xl font-bold ia-gradient-text mb-2">{finalReport.score}</div>
-                <div className="text-lg font-semibold" style={{ color: level.color }}>{level.label}</div>
+              <div className="my-6">
+                <div className="text-6xl md:text-7xl font-bold ia-gradient-text mb-2">{finalReport.score} <span className="text-2xl text-slate-400 font-normal">/100</span></div>
+                <div className="text-base font-semibold px-4 py-1.5 rounded-full inline-block" style={{ color: level.color, backgroundColor: `${level.color}15` }}>{level.label}</div>
               </div>
 
-              <div className="max-w-sm mx-auto mb-8">
+              <div className="max-w-md mx-auto mb-8">
                 <div className="h-3 rounded-full overflow-hidden" style={{ background: "hsl(214 32% 91%)" }}>
                   <div className="h-full rounded-full ia-gradient-hero transition-all duration-1000" style={{ width: `${finalReport.score}%` }} />
                 </div>
               </div>
             </div>
 
-            <p className="text-base leading-relaxed mb-6 max-w-md mx-auto relative z-10 font-medium" style={{ color: "hsl(215 16% 47%)" }}>
-              {finalReport.synthesis}
-            </p>
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 text-left mb-8 relative z-10">
+              <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                <Sparkles size={18} className="text-blue-600" /> {isEn ? "Synthesis" : "Synthèse de l'évaluation"}
+              </h3>
+              <p className="text-sm leading-relaxed text-slate-600 font-medium">
+                {finalReport.synthesis}
+              </p>
+            </div>
 
             {finalReport.deduced_insights && finalReport.deduced_insights.length > 0 && (
               <div className="ia-card p-6 text-left mb-8 bg-blue-50/50 border-blue-100 relative z-10">
                 <h3 className="font-bold mb-3 flex items-center gap-2 text-blue-800">
-                  <Brain size={18} /> {isEn ? "AI Insights" : "Déductions de l'IA"}
+                  <Brain size={18} /> {isEn ? "Key Insights" : "Constats & Opportunités Clés"}
                 </h3>
                 <ul className="space-y-2">
                   {finalReport.deduced_insights.map((r, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-blue-700">
-                      • {r}
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-blue-900 font-medium">
+                      <span className="text-blue-500 font-bold">•</span>
+                      <span>{r}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {/* Recommendations */}
-            <div className="ia-card p-6 text-left mb-8 ia-gradient-hero-subtle relative z-10">
-              <h3 className="font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {isEn ? "Our recommendations" : "Nos recommandations"}
+            {/* Recommandations Pédagogiques et Métier */}
+            <div className="text-left mb-8 relative z-10">
+              <h3 className="font-bold text-xl mb-4 text-slate-900 flex items-center gap-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <Wrench size={20} className="text-blue-600" /> {isEn ? "Recommended Solutions & Action Plan" : "Recommandations d'Outils & Plan d'Action"}
               </h3>
-              <ul className="space-y-4">
+              <div className="space-y-4">
                 {finalReport.recommendations.map((r, i) => (
-                  <li key={i} className="flex flex-col gap-1 text-sm">
-                    <div className="flex items-center gap-2 font-semibold">
-                      <Check size={16} className="shrink-0" style={{ color: "hsl(160 84% 39%)" }} /> {r.tool_name}
+                  <div key={i} className="ia-card p-6 border-l-4 border-l-blue-600 bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2 font-bold text-base text-slate-900">
+                        <Check size={18} className="shrink-0 text-emerald-600" />
+                        <span>{r.tool_name}</span>
+                      </div>
+                      {r.category && (
+                        <span className="text-xs px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100">
+                          {r.category}
+                        </span>
+                      )}
                     </div>
-                    <p className="pl-6 text-slate-500">{r.reason}</p>
-                  </li>
+                    
+                    {/* Raison / Pourquoi cet outil */}
+                    <div className="mb-3 text-sm text-slate-600 leading-relaxed pl-6">
+                      <strong className="text-slate-800 block mb-1 flex items-center gap-1.5 text-xs uppercase tracking-wider">
+                        <Lightbulb size={14} className="text-amber-500" /> Pourquoi cet outil ?
+                      </strong>
+                      <p>{r.reason}</p>
+                    </div>
+
+                    {/* Comment démarrer simplement */}
+                    {r.how_to_start && (
+                      <div className="pl-6 pt-2 border-t border-slate-100">
+                        <div className="p-3 rounded-xl bg-slate-50 text-xs text-slate-700 border border-slate-200/60 leading-relaxed flex items-start gap-2">
+                          <PlayCircle size={15} className="text-blue-600 shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold text-blue-900">Comment démarrer simplement : </span>
+                            {r.how_to_start}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-              <button onClick={downloadPDF} className="ia-btn-primary flex justify-center items-center gap-2">
-                <Download size={18} /> {isEn ? "Download PDF Report" : "Télécharger mon PDF"}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10 pt-4 border-t border-slate-100">
+              <button onClick={downloadPDF} className="ia-btn-primary flex justify-center items-center gap-2 text-sm py-3 px-6">
+                <Download size={18} /> {isEn ? "Download Complete PDF" : "Télécharger mon rapport PDF"}
               </button>
-              <button className="ia-btn-secondary" onClick={resetDiagnostic}>
+              <button className="ia-btn-secondary text-sm py-3 px-6" onClick={resetDiagnostic}>
                 {isEn ? "Retake diagnostic" : "Refaire le diagnostic"}
               </button>
             </div>
@@ -480,8 +525,9 @@ export default function ServicesIADiagnostic() {
                 <h2 className="text-xl md:text-2xl font-bold mb-2 leading-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {currentQuestion.question}
                 </h2>
-                <p className="text-xs text-slate-400 mb-6">
-                  {isEn ? "You can select multiple answers" : "Vous pouvez sélectionner plusieurs réponses"}
+                <p className="text-xs text-blue-600 font-semibold mb-6 flex items-center gap-1.5">
+                  <CheckSquare size={14} />
+                  {isEn ? "You can select multiple options below" : "Plusieurs réponses possibles — cochez tout ce qui s'applique"}
                 </p>
 
                 <div className="space-y-3 flex-1">
@@ -494,7 +540,7 @@ export default function ServicesIADiagnostic() {
                           onClick={() => toggleOption(opt)}
                           className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all flex items-center gap-3 text-sm font-medium ${
                             isSelected
-                              ? "border-[hsl(221,83%,53%)] bg-[hsl(221,83%,53%,0.05)] text-[hsl(221,83%,53%)]"
+                              ? "border-[hsl(221,83%,53%)] bg-[hsl(221,83%,53%,0.05)] text-[hsl(221,83%,53%)] shadow-sm"
                               : "border-[hsl(214,32%,91%)] hover:border-[hsl(221,83%,53%,0.3)] hover:bg-[hsl(221,83%,53%,0.02)] text-slate-700"
                           }`}
                         >
@@ -508,13 +554,13 @@ export default function ServicesIADiagnostic() {
                         
                         {/* Champ de saisie pour "Autre" */}
                         {isOther && isSelected && (
-                          <div className="mt-2 ml-10 mr-2 ia-animate-in">
+                          <div className="mt-2 ml-9 mr-1 ia-animate-in">
                             <input
                               type="text"
                               value={otherText}
                               onChange={(e) => setOtherText(e.target.value)}
-                              placeholder={isEn ? "Please specify..." : "Veuillez préciser..."}
-                              className="w-full px-4 py-3 border-2 border-[hsl(221,83%,53%,0.3)] rounded-xl text-sm focus:border-[hsl(221,83%,53%)] focus:ring-1 focus:ring-[hsl(221,83%,53%)] outline-none transition-all"
+                              placeholder={isEn ? "Please specify your details here..." : "Veuillez préciser votre situation ou besoin ici..."}
+                              className="w-full px-4 py-3 border-2 border-[hsl(221,83%,53%,0.4)] rounded-xl text-sm focus:border-[hsl(221,83%,53%)] focus:ring-1 focus:ring-[hsl(221,83%,53%)] outline-none transition-all shadow-sm"
                               autoFocus
                             />
                           </div>
@@ -539,6 +585,6 @@ export default function ServicesIADiagnostic() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
