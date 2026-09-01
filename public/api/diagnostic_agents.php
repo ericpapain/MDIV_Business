@@ -1,177 +1,155 @@
 <?php
-require_once 'config.php';
-require_once 'mail/mailer.php';
+// Fichier : /api/diagnostic_agents.php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type");
 
-// Désactiver le buffer de sortie pour pouvoir envoyer les données en temps réel (SSE / Streaming)
-ob_implicit_flush(1);
-while (ob_get_level()) {
-    ob_end_clean();
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
 }
 
-// Le frontend va faire un POST en utilisant fetch et récupérer le flux en continu.
+// Configuration SSE
 header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
 header('Connection: keep-alive');
-
-$inputData = json_decode(file_get_contents("php://input"), true);
-$history = $inputData['history'] ?? [];
-$services = $inputData['services'] ?? "Outils non fournis.";
-
-// --- SÉCURITÉ : VÉRIFICATION DU TOKEN JWT ---
-$token = get_bearer_token();
-if (!$token) {
-    http_response_code(401);
-    send_sse_event('error', ['message' => 'Accès refusé. Aucun token fourni.']);
-    exit;
+// Désactiver le buffering de sortie
+if (function_exists('apache_setenv')) {
+    apache_setenv('no-gzip', 1);
 }
+@ini_set('zlib.output_compression', 0);
+@ini_set('implicit_flush', 1);
+for ($i = 0; $i < ob_get_level(); $i++) { ob_end_flush(); }
+ob_implicit_flush(1);
 
-$payload = verify_jwt($token);
-if (!$payload || !isset($payload['company_id'])) {
-    http_response_code(401);
-    send_sse_event('error', ['message' => 'Token invalide ou expiré. Veuillez vous reconnecter.']);
-    exit;
-}
-$company_id = $payload['company_id'];
-$company_name = $payload['company_name'] ?? 'Entreprise';
-$company_email = $payload['email'] ?? '';
-// --------------------------------------------- // La liste des services IA du site envoyée par le frontend
+require_once __DIR__ . '/groq_client.php';
 
-/**
- * Fonction utilitaire pour envoyer un événement SSE au frontend
- */
-function send_sse_event($event, $data) {
+// Fonction utilitaire pour envoyer un événement SSE
+function sendSSE($event, $data) {
     echo "event: $event\n";
-    echo "data: " . json_encode($data, JSON_UNESCAPED_UNICODE) . "\n\n";
+    echo "data: " . json_encode($data) . "\n\n";
     flush();
 }
 
+$company_id = 1; // Temporaire, à adapter avec l'auth
+
 try {
-    send_sse_event('status', ['message' => 'Lancement de la phase d\'analyse par les experts...']);
+    $input_raw = $_GET['context'] ?? '{}'; // On passe le contexte via GET car SSE utilise GET
+    $context = json_decode(base64_decode($input_raw), true);
     
-    // On construit le contexte global du profil (Persona) à partir de l'historique
-    $persona = "";
-    foreach ($history as $msg) {
-        if ($msg['role'] === 'user') {
-            $persona .= "- Réponse utilisateur : " . (is_array($msg['content']) ? implode(", ", $msg['content']) : $msg['content']) . "\n";
-        } elseif ($msg['role'] === 'assistant') {
-            $content = json_decode($msg['content'], true);
-            if ($content && isset($content['question'])) {
-                $persona .= "- Question : " . $content['question'] . "\n";
+    if (!$context) {
+        sendSSE('error', ['message' => 'Contexte manquant ou invalide.']);
+        exit;
+    }
+
+    $profile_text = json_encode($context);
+
+    // Initialisation de la conversation des experts
+    $messages = [
+        ["role" => "system", "content" => "Tu joues le rôle de deux experts IA qui débattent. L'Expert Stratégie évalue l'impact business, l'Expert Technique évalue la faisabilité et les outils. Voici le profil de l'entreprise : " . $profile_text]
+    ];
+
+    $agents = ["Expert Stratégie", "Expert Technique"];
+    $turns = 4; // On limite à 4 échanges pour que ce soit rapide et pertinent
+    
+    $full_discussion = "";
+
+    for ($i = 0; $i < $turns; $i++) {
+        $current_agent = $agents[$i % 2];
+        
+        $prompt = "C'est à toi de parler, $current_agent. ";
+        if ($i == 0) {
+            $prompt .= "Fais une première analyse rapide des défis de cette entreprise et propose une direction. IMPORTANT : Si tu manques d'informations cruciales pour faire un bon diagnostic, au lieu de répondre normalement, réponds UNIQUEMENT avec ce JSON strict : {\"action\":\"interrupt\", \"question\":\"La question supplémentaire que tu veux poser au client, ou demande-lui d'importer un document (ex: devis, facture).\"}";
+        } else {
+            $prompt .= "Réagis de façon constructive (mais critique si nécessaire) au message précédent. Fais une réponse concise (3-4 phrases max).";
+        }
+
+        $messages[] = ["role" => "user", "content" => $prompt];
+        
+        // Appel à l'API Groq
+        $result = callGroqApi($messages, 'llama-3.1-8b-instant', false);
+        $reply = $result['choices'][0]['message']['content'];
+        
+        // Vérifier si c'est une interruption
+        if (strpos(trim($reply), '{"action"') === 0 || strpos(trim($reply), '{"action":') !== false) {
+            $interrupt_data = json_decode(trim($reply), true);
+            if ($interrupt_data && isset($interrupt_data['action']) && $interrupt_data['action'] === 'interrupt') {
+                sendSSE('interrupt', [
+                    'agent' => $current_agent,
+                    'question' => $interrupt_data['question']
+                ]);
+                exit; // On arrête l'exécution, le front reprendra avec le nouveau contexte
             }
         }
-    }
-
-    $agents = [
-        ["name" => "Agent Stratège", "role" => "Analyser la vision globale, le ROI et la compétitivité."],
-        ["name" => "Agent Technique", "role" => "Analyser la faisabilité technique, les outils et l'automatisation."],
-        ["name" => "Agent Financier", "role" => "Évaluer les coûts, le budget et la rentabilité."]
-    ];
-
-    $discussionHistory = "Profil établi :\n$persona\n\nDébut de la discussion :\n";
-    
-    // Boucle de discussion (simulation de 3 tours pour rester dans un temps raisonnable, max 10 si nécessaire)
-    $tours = 3; 
-
-    for ($i = 0; $i < $tours; $i++) {
-        foreach ($agents as $agent) {
-            $prompt = "
-            Tu joues le rôle de l'{$agent['name']} ({$agent['role']}).
-            Voici le profil du prospect et la discussion en cours :
-            $discussionHistory
-            
-            DONNE TON AVIS en 1 paragraphe très percutant (pas de blabla). Réagis à ce qui vient d'être dit si tu n'es pas d'accord, ou apporte un nouvel angle.
-            ";
-
-            $messages = [
-                ["role" => "system", "content" => "Tu es un expert dans un panel de diagnostic IA."],
-                ["role" => "user", "content" => $prompt]
-            ];
-
-            // Appel au LLM (Groq) SANS mode JSON pour avoir du texte pur
-            $response = call_llm_api($messages, false);
-            $agentSpeech = $response['choices'][0]['message']['content'];
-            
-            $discussionHistory .= "{$agent['name']} : $agentSpeech\n";
-            
-            // Envoi en temps réel au frontend
-            send_sse_event('agent_message', [
-                'agent' => $agent['name'],
-                'message' => $agentSpeech
-            ]);
-            
-            // On attend 1 seconde pour éviter de se faire bloquer par l'API pour spam
-            sleep(1); 
-        }
-    }
-
-    send_sse_event('status', ['message' => 'Synthèse et recommandation en cours...']);
-
-    // Agent final qui génère le rapport structuré
-    $finalPrompt = "
-    En tant que Coordinateur Principal, lis la discussion suivante :
-    $discussionHistory
-    
-    Et connaissant les services IA que nous proposons :
-    $services
-    
-    TA MISSION :
-    1. Fais une synthèse.
-    2. DÉDUIS des informations que l'utilisateur N'A PAS déclarées explicitement mais que tu devines grâce à ton expertise (ex: goulots d'étranglements cachés, pertes financières probables liées à son secteur). C'est l'effet 'Wow' qui prouve qu'on comprend son business mieux que lui-même.
-    3. Recommande des outils de notre catalogue pertinents.
-
-    Génère le rapport final au format JSON strict avec la structure suivante :
-    {
-        \"score\": 85, // Note sur 100 de maturité IA
-        \"synthesis\": \"Synthèse globale du panel...\",
-        \"deduced_insights\": [
-            \"Je remarque que bien que vous ne l'ayez pas mentionné, la gestion de vos devis dans votre secteur engendre probablement une perte de 5h par semaine...\"
-        ],
-        \"recommendations\": [
-            { \"tool_name\": \"Nom d'un outil de notre catalogue pertinent\", \"reason\": \"Pourquoi c'est pertinent\" }
-        ]
-    }
-    ";
-
-    $finalMessages = [
-        ["role" => "system", "content" => "Tu es le coordinateur qui génère le JSON final."],
-        ["role" => "user", "content" => $finalPrompt]
-    ];
-
-    // Appel avec mode JSON forcé
-    $finalResponse = call_llm_api($finalMessages, true);
-    $finalJson = json_decode($finalResponse['choices'][0]['message']['content'], true);
-
-    // Envoi du rapport final
-    send_sse_event('final_report', $finalJson);
-    
-    // --- SAUVEGARDE DANS LA BASE DE DONNÉES ---
-    try {
-        $pdo = get_db_connection();
-        $stmt = $pdo->prepare("
-            INSERT INTO diagnostics (company_id, diagnostic_type, questions_answers, score, report, status) 
-            VALUES (?, 'express', ?, ?, ?, 'completed')
-        ");
         
-        // On sauvegarde l'historique complet en JSON et le rapport final en JSON
-        $stmt->execute([
-            $company_id,
-            json_encode($history, JSON_UNESCAPED_UNICODE),
-            $finalJson['score'] ?? 0,
-            json_encode($finalJson, JSON_UNESCAPED_UNICODE)
+        $messages[] = ["role" => "assistant", "content" => $reply];
+        
+        sendSSE('agent_message', [
+            'agent' => $current_agent,
+            'message' => $reply
         ]);
         
-        // --- ENVOI DE L'E-MAIL ---
-        if (!empty($company_email)) {
-            send_diagnostic_report($company_email, $company_name, $finalJson);
-        }
-
-    } catch (Exception $dbError) {
-        // On n'interrompt pas le flux pour l'utilisateur, mais on peut logguer l'erreur côté serveur
-        error_log("Erreur de sauvegarde DB : " . $dbError->getMessage());
+        $full_discussion .= "**$current_agent**: " . $reply . "\n\n";
+        
+        // Petite pause pour que le front puisse animer
+        usleep(500000); // 0.5 sec
     }
 
-    send_sse_event('status', ['message' => 'Terminé']);
+    // Agent final (Synthèse)
+    sendSSE('agent_message', ['agent' => 'Synthèse IA', 'message' => 'Génération du rapport d\'audit final en cours...']);
     
+    $messages[] = [
+        "role" => "user", 
+        "content" => "Maintenant, génère la synthèse finale. Tu dois OBLIGATOIREMENT répondre en JSON avec ce format exact : { \"score\": 75, \"synthesis\": \"texte court\", \"deduced_insights\": [\"insight 1\", \"insight 2\"], \"recommendations\": [ { \"tool_name\": \"Nom Outil\", \"reason\": \"Raison...\"} ] }"
+    ];
+    
+    $result = callGroqApi($messages, 'llama-3.1-8b-instant', false);
+    $final_json = $result['choices'][0]['message']['content'];
+    
+    // Essayer de parser le JSON (le LLM peut ajouter du texte autour)
+    $start = strpos($final_json, '{');
+    $end = strrpos($final_json, '}');
+    if ($start !== false && $end !== false) {
+        $final_json_clean = substr($final_json, $start, $end - $start + 1);
+    } else {
+        $final_json_clean = $final_json;
+    }
+    
+    $report_data = json_decode($final_json_clean, true);
+
+    if (!$report_data) {
+        // Fallback si le JSON est mal formé
+        $report_data = [
+            "score" => 50,
+            "synthesis" => "Une erreur de formatage s'est produite lors de la synthèse.",
+            "deduced_insights" => [],
+            "recommendations" => []
+        ];
+    }
+
+    // Sauvegarde en Base de données
+    try {
+        require_once __DIR__ . '/config.php';
+        
+        if (isset($pdo)) {
+            $stmt = $pdo->prepare("INSERT INTO diagnostics (company_id, diagnostic_type, questions_answers, score, report, status) VALUES (?, 'express', ?, ?, ?, 'completed')");
+            $stmt->execute([
+                $company_id, 
+                json_encode($context), 
+                $report_data['score'] ?? 0, 
+                json_encode($report_data)
+            ]);
+        }
+    } catch(Exception $db_e) {
+        // On ignore l'erreur DB pour ne pas casser le front, mais on pourrait la logguer
+    }
+    
+    // Envoi du résultat final
+    sendSSE('complete', $report_data);
+
 } catch (Exception $e) {
-    send_sse_event('error', ['message' => $e->getMessage()]);
+    sendSSE('error', ['message' => $e->getMessage()]);
 }
+
+// Fermeture de la connexion SSE
+echo "event: close\ndata: {}\n\n";
+flush();
+?>

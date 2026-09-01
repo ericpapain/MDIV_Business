@@ -44,11 +44,8 @@ jobs:
 
       - name: Install PHP dependencies
         run: |
-          cd api
+          cd dist/api
           composer install --no-dev --optimize-autoloader
-
-      - name: Copy API to dist
-        run: cp -r api ./dist/api
 
 
       # 5ème étape finale : Envoyer le site construit sur votre serveur OVH via FTP.

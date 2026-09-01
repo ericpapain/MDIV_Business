@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // par "https://api.openai.com/v1/chat/completions" et de mettre une clé OpenAI.
 // Le format de la requête et de la réponse est exactement le même !
 
-define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: 'votre_cle_groq_ici'); 
+define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: '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'); 
 // NOTE: En production, utilisez des variables d'environnement (.env) via le serveur OVH.
 define('LLM_API_URL', 'https://api.groq.com/openai/v1/chat/completions');
 // define('LLM_API_URL', 'https://api.openai.com/v1/chat/completions'); // SOLUTION PAYANTE (Décommenter pour basculer)
@@ -76,22 +76,50 @@ function call_llm_api($messages, $jsonMode = false) {
 }
 
 // 3. CONFIGURATION DE LA BASE DE DONNÉES MYSQL (OVH)
-define('DB_HOST', 'localhost'); // Remplacer par le serveur OVH en prod
-define('DB_NAME', 'mdiv_db');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost'); // Remplacer par le serveur OVH en prod
+define('DB_NAME', getenv('DB_NAME') ?: 'mdiv_db');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: '');
 
 /**
  * Fonction pour obtenir la connexion PDO à la base de données
  */
 function get_db_connection() {
     try {
-        $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8", DB_USER, DB_PASS);
+        $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Auto-création des tables si elles n'existent pas
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `companies` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_name` VARCHAR(255) NOT NULL,
+              `email` VARCHAR(255) NOT NULL UNIQUE,
+              `password_hash` VARCHAR(255) NOT NULL,
+              `status` ENUM('active', 'inactive', 'banned') DEFAULT 'active',
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+        
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `diagnostics` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `diagnostic_type` VARCHAR(100) NOT NULL DEFAULT 'express',
+              `questions_answers` JSON NOT NULL COMMENT 'Historique de la conversation',
+              `score` INT NOT NULL,
+              `report` JSON NOT NULL COMMENT 'Synthèse, insights et recommandations',
+              `status` ENUM('completed', 'failed', 'pending') DEFAULT 'completed',
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              CONSTRAINT `fk_company_diagnostic` FOREIGN KEY (`company_id`) REFERENCES `companies`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
         return $pdo;
     } catch (PDOException $e) {
         // En prod, ne pas afficher le vrai message d'erreur pour des raisons de sécurité
-        throw new Exception("Erreur de connexion à la base de données.");
+        throw new Exception("Erreur de connexion à la base de données: " . $e->getMessage());
     }
 }
 
