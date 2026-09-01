@@ -42,6 +42,15 @@ jobs:
         # Exécute la commande de build qui crée le dossier "dist" contenant la version optimisée et finale du site.
         run: npm run build
 
+      - name: Install PHP dependencies
+        run: |
+          cd api
+          composer install --no-dev --optimize-autoloader
+
+      - name: Copy API to dist
+        run: cp -r api ./dist/api
+
+
       # 5ème étape finale : Envoyer le site construit sur votre serveur OVH via FTP.
       - name: Deploy via FTP
         # Utilise une action pré-faite par la communauté qui gère les transferts FTP.

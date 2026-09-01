@@ -18,6 +18,7 @@ export interface IAApp {
   features?: string[];
   featuresEn?: string[];
   releaseDate?: string;
+  href?: string;
 }
 
 export interface IACategory {
@@ -69,7 +70,7 @@ export const iaCategories: IACategory[] = [
     descEn: "Assess your digital maturity and build your AI roadmap.",
     icon: Search,
     apps: [
-      { id: "diag-express", name: "Diagnostic IA Express", nameEn: "Express AI Diagnostic", desc: "Questionnaire intelligent, score IA, rapport PDF", descEn: "Smart questionnaire, AI score, PDF report", tier: "free", features: ["Questionnaire intelligent", "Score IA", "Rapport PDF"], featuresEn: ["Smart questionnaire", "AI score", "PDF report"], releaseDate: "2026-09-01T08:00:00" },
+      { id: "diag-express", name: "Diagnostic IA Express", nameEn: "Express AI Diagnostic", desc: "Questionnaire intelligent, score IA, rapport PDF", descEn: "Smart questionnaire, AI score, PDF report", tier: "free", features: ["Questionnaire intelligent", "Score IA", "Rapport PDF"], featuresEn: ["Smart questionnaire", "AI score", "PDF report"], href: "/services-ia/diagnostic" },
       { id: "calc-roi", name: "Calculateur ROI IA", nameEn: "AI ROI Calculator", desc: "Estimation des gains et calcul du temps économisé", descEn: "Gain estimation and time savings calculation", tier: "free", features: ["Estimation des gains", "Calcul du temps économisé"], featuresEn: ["Gain estimation", "Time savings calculation"], releaseDate: "2026-09-03T08:00:00" },
       { id: "maturite", name: "Maturité Digitale", nameEn: "Digital Maturity", desc: "Benchmark de votre entreprise", descEn: "Benchmark your company", tier: "free", features: ["Benchmark entreprise"], featuresEn: ["Company benchmark"], releaseDate: "2026-09-05T08:00:00" },
       { id: "audit-360", name: "Audit IA 360°", nameEn: "360° AI Audit", desc: "Analyse complète de vos processus et recommandations IA", descEn: "Complete process analysis and AI recommendations", tier: "premium" },

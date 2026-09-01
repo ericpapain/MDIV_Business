@@ -1,0 +1,10 @@
+{
+    "name": "mdiv/api",
+    "description": "Backend API for MDIV Business",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "smalot/pdfparser": "^2.10",
+        "tecnickcom/tcpdf": "^6.6"
+    }
+}

@@ -289,18 +289,19 @@ export default function ServicesIA() {
             const freeCount = cat.apps.filter(a => a.tier === "free").length;
             const premiumCount = cat.apps.filter(a => a.tier === "premium").length;
             
-            // Trouver la date de sortie la plus proche dans cette catégorie
             const earliestDateStr = cat.apps.reduce((earliest, app) => {
               if (!app.releaseDate) return earliest;
               if (!earliest) return app.releaseDate;
               return new Date(app.releaseDate) < new Date(earliest) ? app.releaseDate : earliest;
             }, undefined as string | undefined);
 
+            const hasActiveApps = cat.apps.some(a => !!a.href);
+
             return (
               <Link
                 key={cat.id}
                 to={`/services-ia/${cat.slug}`}
-                className="ia-card relative overflow-hidden p-7 flex flex-col group opacity-75 grayscale transition-all duration-300 hover:grayscale-0 hover:opacity-100"
+                className={`ia-card relative overflow-hidden p-7 flex flex-col group transition-all duration-300 ${hasActiveApps ? 'hover:shadow-lg hover:border-[hsl(221,83%,53%)]/30' : 'opacity-75 grayscale hover:grayscale-0 hover:opacity-100'}`}
                 style={{ animationDelay: `${idx * 0.06}s` }}
               >
                 {/* Decorative background icon in bottom right */}

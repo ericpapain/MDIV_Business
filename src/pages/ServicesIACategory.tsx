@@ -75,49 +75,66 @@ export default function ServicesIACategory() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {freeApps.map((app, i) => (
-            <div key={app.id} className="ia-card relative overflow-hidden p-6 flex flex-col ia-animate-in opacity-75 grayscale cursor-not-allowed hover:grayscale-0 hover:opacity-100 transition-all duration-300" style={{ animationDelay: `${i * 0.08}s` }}>
-              {/* Decorative background icon */}
-              <div className="ia-watermark-anim absolute -bottom-6 -right-6 w-32 h-32 opacity-0 group-hover:opacity-[0.08] transition-all pointer-events-none flex items-center justify-center text-slate-800" style={{ animationDelay: `${i * 0.2}s` }}>
-                <Icon size={128} />
-              </div>
-              
-              <div className="flex items-start justify-between mb-3 relative z-10">
-                <h3 className="font-semibold text-base text-slate-500" style={{ fontFamily: "'Inter', sans-serif" }}>{isEn ? app.nameEn : app.name}</h3>
-                <div className="flex flex-col items-end gap-1 shrink-0 ml-2">
-                  <span className="ia-badge ia-badge-free text-[10px]">{isEn ? "Free" : "Gratuit"}</span>
+          {freeApps.map((app, i) => {
+            const isActive = !!app.href;
+            const CardWrapper = isActive ? Link : 'div';
+            const cardProps = isActive ? { to: app.href } : {};
+
+            return (
+              <CardWrapper 
+                key={app.id} 
+                {...cardProps}
+                className={`ia-card relative overflow-hidden p-6 flex flex-col ia-animate-in transition-all duration-300 ${isActive ? 'hover:shadow-lg hover:border-[hsl(221,83%,53%)]/30 group' : 'opacity-75 grayscale cursor-not-allowed hover:grayscale-0 hover:opacity-100'}`} 
+                style={{ animationDelay: `${i * 0.08}s` }}
+              >
+                {/* Decorative background icon */}
+                <div className="ia-watermark-anim absolute -bottom-6 -right-6 w-32 h-32 opacity-0 group-hover:opacity-[0.08] transition-all pointer-events-none flex items-center justify-center text-slate-800" style={{ animationDelay: `${i * 0.2}s` }}>
+                  <Icon size={128} />
                 </div>
-              </div>
-              <p className="text-sm mb-4 leading-relaxed flex-1 text-muted-foreground relative z-10">
-                {isEn ? app.descEn : app.desc}
-              </p>
-              {app.features && (
-                <ul className="space-y-1.5 mb-4 opacity-70 relative z-10">
-                  {(isEn ? app.featuresEn : app.features)?.map((f, j) => (
-                    <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Check size={12} style={{ color: "hsl(160 84% 39%)" }} /> {f}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <div className="flex flex-col gap-3 mt-auto relative z-10 w-full">
-                {app.releaseDate ? (
-                  <>
-                    <div className="flex justify-center w-full bg-slate-50/50 rounded-lg py-2 border border-slate-100">
-                      <Countdown targetDate={app.releaseDate} />
-                    </div>
-                    <div className="ia-btn-secondary text-[11px] font-bold tracking-wide py-2.5 px-2 justify-center w-full opacity-70 pointer-events-none">
-                      {isEn ? "IN DEVELOPMENT" : "EN DÉVELOPPEMENT"}
-                    </div>
-                  </>
-                ) : (
-                  <div className="ia-btn-secondary text-[11px] font-bold tracking-wide py-2.5 px-2 justify-center w-full opacity-70 pointer-events-none">
-                    {isEn ? "COMING SOON" : "ARRIVE BIENTÔT"}
+                
+                <div className="flex items-start justify-between mb-3 relative z-10">
+                  <h3 className={`font-semibold text-base ${isActive ? 'text-foreground group-hover:text-[hsl(221,83%,53%)] transition-colors' : 'text-slate-500'}`} style={{ fontFamily: "'Inter', sans-serif" }}>
+                    {isEn ? app.nameEn : app.name}
+                  </h3>
+                  <div className="flex flex-col items-end gap-1 shrink-0 ml-2">
+                    <span className="ia-badge ia-badge-free text-[10px]">{isEn ? "Free" : "Gratuit"}</span>
                   </div>
+                </div>
+                <p className="text-sm mb-4 leading-relaxed flex-1 text-muted-foreground relative z-10">
+                  {isEn ? app.descEn : app.desc}
+                </p>
+                {app.features && (
+                  <ul className="space-y-1.5 mb-4 opacity-70 relative z-10">
+                    {(isEn ? app.featuresEn : app.features)?.map((f, j) => (
+                      <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Check size={12} style={{ color: "hsl(160 84% 39%)" }} /> {f}
+                      </li>
+                    ))}
+                  </ul>
                 )}
-              </div>
-            </div>
-          ))}
+                <div className="flex flex-col gap-3 mt-auto relative z-10 w-full">
+                  {isActive ? (
+                    <div className="ia-btn-primary text-xs font-bold tracking-wide py-2.5 px-2 justify-center w-full group-hover:scale-[1.02] transition-transform">
+                      {isEn ? "Launch App" : "Lancer l'application"}
+                    </div>
+                  ) : app.releaseDate ? (
+                    <>
+                      <div className="flex justify-center w-full bg-slate-50/50 rounded-lg py-2 border border-slate-100">
+                        <Countdown targetDate={app.releaseDate} />
+                      </div>
+                      <div className="ia-btn-secondary text-[11px] font-bold tracking-wide py-2.5 px-2 justify-center w-full opacity-70 pointer-events-none">
+                        {isEn ? "IN DEVELOPMENT" : "EN DÉVELOPPEMENT"}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="ia-btn-secondary text-[11px] font-bold tracking-wide py-2.5 px-2 justify-center w-full opacity-70 pointer-events-none">
+                      {isEn ? "COMING SOON" : "ARRIVE BIENTÔT"}
+                    </div>
+                  )}
+                </div>
+              </CardWrapper>
+            );
+          })}
         </div>
       </section>
 

@@ -44,7 +44,8 @@ export const Register = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register.php', {
+      const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost/mdiv_business/api';
+      const response = await fetch(`${API_BASE_URL}/auth/register.php`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
