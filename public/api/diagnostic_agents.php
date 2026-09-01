@@ -1,5 +1,7 @@
 <?php
 // Fichier : /api/diagnostic_agents.php
+// Empêcher config.php d'écraser les headers SSE
+define('SKIP_DEFAULT_HEADERS', true);
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 

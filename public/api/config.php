@@ -10,14 +10,17 @@
 
 // 1. GESTION DE LA SÉCURITÉ (CORS)
 // Permet au frontend React (même s'il tourne sur localhost:5173 en dev) de communiquer avec PHP.
-header("Access-Control-Allow-Origin: *"); 
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Content-Type: application/json; charset=UTF-8");
+// On ne définit les headers que si un script parent (ex: SSE) ne les a pas déjà définis.
+if (!defined('SKIP_DEFAULT_HEADERS')) {
+    header("Access-Control-Allow-Origin: *"); 
+    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type");
+    header("Content-Type: application/json; charset=UTF-8");
 
-// Si c'est une requête de pré-vérification (OPTIONS), on arrête ici.
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(0);
+    // Si c'est une requête de pré-vérification (OPTIONS), on arrête ici.
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        exit(0);
+    }
 }
 
 // 2. CONFIGURATION DE L'IA (GROQ / OPENAI)
