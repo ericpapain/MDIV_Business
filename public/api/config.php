@@ -25,12 +25,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // par "https://api.openai.com/v1/chat/completions" et de mettre une clé OpenAI.
 // Le format de la requête et de la réponse est exactement le même !
 
-define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: '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'); 
+define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: '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');
+define('MISTRAL_API_KEY', getenv('MISTRAL_API_KEY') ?: '2RsUw0IQ6M92JpoQ7HqxxJVewplS3doh');
+define('HF_API_KEY', getenv('HF_API_KEY') ?: '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'); 
 // NOTE: En production, utilisez des variables d'environnement (.env) via le serveur OVH.
 define('LLM_API_URL', 'https://api.groq.com/openai/v1/chat/completions');
 // define('LLM_API_URL', 'https://api.openai.com/v1/chat/completions'); // SOLUTION PAYANTE (Décommenter pour basculer)
 
-define('LLM_MODEL', 'llama-3.3-70b-versatile');
+define('LLM_MODEL', 'mixtral-8x7b-32768');
 // define('LLM_MODEL', 'gpt-4o-mini'); // SOLUTION PAYANTE (Décommenter pour basculer)
 
 /**

@@ -65,7 +65,7 @@ try {
         $messages[] = ["role" => "user", "content" => $prompt];
         
         // Appel à l'API Groq
-        $result = callGroqApi($messages, 'llama-3.1-8b-instant', false);
+        $result = callGroqApi($messages, LLM_MODEL, false);
         $reply = $result['choices'][0]['message']['content'];
         
         // Vérifier si c'est une interruption
