@@ -14,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Configurer PHP et Composer avec toutes les extensions nécessaires (TCPDF, PDFParser)
+      # 2. Configurer PHP et Composer avec toutes les extensions nécessaires
       - name: Setup PHP & Composer
         uses: shivammathur/setup-php@v2
         with:
@@ -22,13 +22,13 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, json, curl, zip
           coverage: none
 
-      # 3. Installer les dépendances PHP (Composer) dans public/api
+      # 3. Installer les dépendances PHP dans public/api
       - name: Install PHP dependencies
         run: |
           cd public/api
           composer install --no-dev --optimize-autoloader
 
-      # 4. Installer Node.js
+      # 4. Installer Node.js 22
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -39,7 +39,7 @@ jobs:
       - name: Install Node dependencies
         run: npm install
 
-      # 6. Compiler l'application React/Vite (copie automatiquement public/ vers dist/)
+      # 6. Compiler l'application React/Vite (copie public/ vers dist/)
       - name: Build project
         run: npm run build
 
@@ -50,8 +50,9 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp
           local-dir: ./dist/
           server-dir: ./www/
           dangerous-clean-slate: false
-          exclude: |
-            **/assets/uploads/**
+          log-level: verbose
