@@ -1,10 +1,15 @@
 {
     "name": "mdiv/api",
-    "description": "Backend API for MDIV Business",
+    "description": "Backend API dependencies for MDIV Business AI Diagnostics",
     "type": "project",
     "require": {
         "php": ">=7.4",
-        "smalot/pdfparser": "^2.10",
-        "tecnickcom/tcpdf": "^6.6"
+        "tecnickcom/tcpdf": "^6.6",
+        "smalot/pdfparser": "^2.6"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
     }
 }
