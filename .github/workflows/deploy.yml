@@ -1,71 +1,57 @@
-# Définit le nom de cette automatisation (workflow) tel qu'il apparaîtra dans l'onglet "Actions" de GitHub.
 name: Deploy Website to OVH
 
-# Cette section définit l'événement "déclencheur" (quand est-ce que ce script doit s'exécuter).
 on:
-  # Le déclencheur est un "push" (un envoi de code sur GitHub).
   push:
-    # Plus précisément, ce script s'exécutera uniquement quand vous poussez du code sur la branche "main".
     branches:
       - main
 
-# Début de la déclaration des "jobs" (les différentes tâches à accomplir).
 jobs:
-  # Le nom de notre job principal.
   build-and-deploy:
-    # Définit l'environnement sur lequel ce job va s'exécuter (un serveur virtuel sous Linux Ubuntu).
     runs-on: ubuntu-latest
 
-    # Début de la liste des étapes ("steps") que le serveur Ubuntu va exécuter les unes après les autres.
     steps:
-      # 1ère étape : Récupérer le code
+      # 1. Récupérer le code source
       - name: Checkout code
-        # Utilise une action officielle de GitHub pour que le serveur télécharge et lise le code de votre dépôt.
         uses: actions/checkout@v4
 
-      # 2ème étape : Installer l'environnement Node.js (nécessaire pour React/Vite).
+      # 2. Configurer PHP et Composer avec toutes les extensions nécessaires (TCPDF, PDFParser)
+      - name: Setup PHP & Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, json, curl, zip
+          coverage: none
+
+      # 3. Installer les dépendances PHP (Composer) dans public/api
+      - name: Install PHP dependencies
+        run: |
+          cd public/api
+          composer install --no-dev --optimize-autoloader
+
+      # 4. Installer Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          # Installe spécifiquement la version 20 de Node.js.
           node-version: 20
-          # Met en cache les paquets "npm" pour que les prochains déploiements soient beaucoup plus rapides.
           cache: 'npm'
 
-      # 3ème étape : Télécharger les dépendances du projet (React, Tailwind, etc.).
-      - name: Install dependencies
-        # Exécute la commande d'installation dans le terminal du serveur.
+      # 5. Installer les dépendances npm
+      - name: Install Node dependencies
         run: npm install
 
-      # 4ème étape : Compiler et construire le projet pour la production.
+      # 6. Compiler l'application React/Vite (copie automatiquement public/ vers dist/)
       - name: Build project
-        # Exécute la commande de build qui crée le dossier "dist" contenant la version optimisée et finale du site.
         run: npm run build
 
-      - name: Install PHP dependencies
-        run: |
-          cd dist/api
-          composer install --no-dev --optimize-autoloader
-
-
-      # 5ème étape finale : Envoyer le site construit sur votre serveur OVH via FTP.
+      # 7. Déploiement FTP vers OVH
       - name: Deploy via FTP
-        # Utilise une action pré-faite par la communauté qui gère les transferts FTP.
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          # L'adresse du serveur FTP lue depuis les "Secrets" du dépôt GitHub de façon sécurisée.
           server: ${{ secrets.FTP_SERVER }}
-          # L'identifiant FTP lu dans les Secrets.
           username: ${{ secrets.FTP_USERNAME }}
-          # Le mot de passe FTP lu dans les Secrets.
           password: ${{ secrets.FTP_PASSWORD }}
-          # Le dossier local (sur le serveur GitHub) contenant les fichiers à envoyer (le dossier "dist").
           local-dir: ./dist/
-          # Le dossier de destination sur votre serveur OVH où les fichiers doivent atterrir.
           server-dir: ./www/
-          # ⚠️ DÉSACTIVÉ : ne pas supprimer les fichiers existants sur OVH
-          # Cela préserve les images uploadées (assets/uploads/) et les données du site
           dangerous-clean-slate: false
-          # Exclure les dossiers qui doivent persister entre les déploiements
           exclude: |
             **/assets/uploads/**
