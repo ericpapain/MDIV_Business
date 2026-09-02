@@ -10,49 +10,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Récupérer le code source
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Configurer PHP et Composer avec toutes les extensions nécessaires
-      - name: Setup PHP & Composer
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, json, curl, zip
-          coverage: none
-
-      # 3. Installer les dépendances PHP dans public/api
-      - name: Install PHP dependencies
-        run: |
-          cd public/api
-          composer install --no-dev --optimize-autoloader
-
-      # 4. Installer Node.js 22
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: 'npm'
 
-      # 5. Installer les dépendances npm
-      - name: Install Node dependencies
+      - name: Install dependencies
         run: npm install
 
-      # 6. Compiler l'application React/Vite (copie public/ vers dist/)
       - name: Build project
         run: npm run build
 
-      # 7. Déploiement FTP vers OVH (Support du SSL/TLS OVH via security: untrusted)
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          security: untrusted
           local-dir: ./dist/
           server-dir: ./www/
           dangerous-clean-slate: false
-          log-level: verbose
+          exclude: |
+            **/assets/uploads/**
