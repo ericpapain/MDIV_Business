@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: 'npm'
 
       - name: Install dependencies
@@ -25,21 +25,25 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Deploy via LFTP
+      # Étape de diagnostic pour tester la connexion FTP vers OVH
+      - name: Test FTP Connection
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          sudo apt-get install -y lftp || true
           CLEAN_SERVER=$(echo "$FTP_SERVER" | sed -e 's|^[^:]*://||' -e 's|/*$||')
-          echo "Connecting to host: $CLEAN_SERVER with user: $FTP_USERNAME"
-          lftp -e "
-            set ftp:ssl-allow no;
-            set ftp:passive-mode true;
-            set net:timeout 20;
-            set net:max-retries 2;
-            open -u \"$FTP_USERNAME\",\"$FTP_PASSWORD\" \"$CLEAN_SERVER\";
-            mirror --reverse --verbose --exclude-glob assets/uploads/ ./dist/ ./www/;
-            quit;
-          "
+          echo "Testing FTP connection to $CLEAN_SERVER with user $FTP_USERNAME..."
+          curl -v --connect-timeout 10 "ftp://$CLEAN_SERVER/" --user "$FTP_USERNAME:$FTP_PASSWORD" || echo "FTP Connection Test completed"
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: ./www/
+          dangerous-clean-slate: false
+          exclude: |
+            **/assets/uploads/**
