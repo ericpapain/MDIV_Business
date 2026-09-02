@@ -25,6 +25,7 @@ while (ob_get_level() > 0) { ob_end_flush(); }
 ob_implicit_flush(1);
 
 require_once __DIR__ . '/groq_client.php';
+require_once __DIR__ . '/website_scraper.php';
 
 // Fonction utilitaire pour envoyer un événement SSE
 function sendSSE($event, $data) {
@@ -49,7 +50,16 @@ try {
         exit;
     }
 
-    $profile_text = json_encode($context, JSON_UNESCAPED_UNICODE);
+    $website_url = $context['website_url'] ?? '';
+    $website_extra = "";
+    if (!empty($website_url)) {
+        $scraped = scrape_website_content($website_url);
+        if ($scraped) {
+            $website_extra = "\n\nCONTENU EXTRAIT DE LEUR SITE WEB (" . $website_url . ") :\n" . $scraped;
+        }
+    }
+
+    $profile_text = json_encode($context, JSON_UNESCAPED_UNICODE) . $website_extra;
 
     // Initialisation de la conversation des experts
     $messages = [
@@ -59,7 +69,7 @@ try {
 
 RÈGLE MAJEURE SUR LE MULTI-CHOIX : L'utilisateur a pu sélectionner PLUSIEURS choix par question. Tu dois obligatoirement prendre en compte l'ENSEMBLE des réponses cochées pour analyser les besoins combinés de l'entreprise.
 
-Voici les réponses et le profil complet de l'entreprise : " . $profile_text]
+Voici les réponses et le profil complet de l'entreprise (incluant le contenu analysé de leur site web si disponible) : " . $profile_text]
     ];
 
     $agents = ["Expert Stratégie", "Expert Technique"];
@@ -72,7 +82,7 @@ Voici les réponses et le profil complet de l'entreprise : " . $profile_text]
         
         $prompt = "C'est à toi de parler, $current_agent. ";
         if ($i == 0) {
-            $prompt .= "Fais une première analyse claire et accessible des défis de cette entreprise en tenant compte de TOUS leurs choix exprimés. Propose des pistes concrètes sans jargon. IMPORTANT : Si tu manques d'informations cruciales pour faire un bon diagnostic, au lieu de répondre normalement, réponds UNIQUEMENT avec ce JSON strict : {\"action\":\"interrupt\", \"question\":\"La question supplémentaire que tu veux poser au client, ou demande-lui d'importer un document (ex: devis, facture).\"}";
+            $prompt .= "Fais une première analyse claire et accessible des défis de cette entreprise en tenant compte de TOUS leurs choix exprimés et des informations tirées de leur site web. Propose des pistes concrètes sans jargon. IMPORTANT : Si tu manques d'informations cruciales pour faire un bon diagnostic, au lieu de répondre normalement, réponds UNIQUEMENT avec ce JSON strict : {\"action\":\"interrupt\", \"question\":\"La question supplémentaire que tu veux poser au client, ou demande-lui d'importer un document (ex: devis, facture).\"}";
         } else {
             $prompt .= "Réagis de façon constructive et accessible au message précédent. Fais une réponse fluide, concrète et concise (3-4 phrases max).";
         }
@@ -120,7 +130,7 @@ Tu dois OBLIGATOIREMENT répondre en JSON avec ce format exact :
     \"score\": 65,
     \"synthesis\": \"Synthèse globale de la maturité numérique de l'entreprise (3-4 phrases claires et encourageantes).\",
     \"deduced_insights\": [
-        \"Insight 1 : Constat précis basé sur leurs choix multiples\",
+        \"Insight 1 : Constat précis basé sur leurs choix multiples et leur site web\",
         \"Insight 2 : Opportunité concrète identifiée pour leur activité\"
     ],
     \"recommendations\": [

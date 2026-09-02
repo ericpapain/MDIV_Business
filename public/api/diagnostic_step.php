@@ -5,6 +5,7 @@ header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
 require_once __DIR__ . '/groq_client.php';
+require_once __DIR__ . '/website_scraper.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
@@ -20,10 +21,19 @@ try {
     }
 
     $history = $input['history']; // Tableau du type [{role: "user", content: "..."}, ...]
+    $website_url = $input['website_url'] ?? '';
+    
+    $website_info = "";
+    if (!empty($website_url)) {
+        $scraped = scrape_website_content($website_url);
+        if ($scraped) {
+            $website_info = "\n\nDONNÉES EXTRAITES DU SITE WEB DE L'ENTREPRISE (" . $website_url . ") :\n" . $scraped . "\nUtilise ces informations réelles pour poser des questions hyper-ciblées sur l'activité spécifique de l'entreprise.";
+        }
+    }
     
     $system_prompt = "Tu es un consultant senior en stratégie digitale et Intelligence Artificielle pour les TPE et PME.
 Ton rôle est de mener un diagnostic pragmatique, fluide et pertinent.
-Pose UNE SEULE question claire à la fois pour comprendre l'activité, les freins, les outils et les objectifs du dirigeant.
+Pose UNE SEULE question claire à la fois pour comprendre l'activité, les freins, les outils et les objectifs du dirigeant." . $website_info . "
 
 RÈGLES CAPITALES :
 1. L'utilisateur peut cocher PLUSIEURS options dans ses réponses. Lorsque l'utilisateur sélectionne plusieurs éléments (ex: 'Gestion client, Relances factures, Rédaction de devis'), lis et analyse l'ENSEMBLE de ses choix pour poser une question suivante qui synthétise intelligemment ces besoins combinés.

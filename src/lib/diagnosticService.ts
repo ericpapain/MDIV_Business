@@ -35,13 +35,13 @@ export interface DiagnosticFinalReport {
 /**
  * Appelle l'API pour générer la prochaine question dynamique.
  */
-export async function fetchNextDiagnosticStep(history: DiagnosticMessage[]): Promise<DiagnosticNextStepResponse> {
+export async function fetchNextDiagnosticStep(history: DiagnosticMessage[], websiteUrl?: string): Promise<DiagnosticNextStepResponse> {
   const response = await fetch(`${API_BASE_URL}/diagnostic_step.php`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ history }),
+    body: JSON.stringify({ history, website_url: websiteUrl }),
   });
 
   if (!response.ok) {

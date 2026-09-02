@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, ArrowRight, Check, BarChart3, Brain, Loader2, Upload, FileText, Download, Square, CheckSquare, Wrench, Lightbulb, PlayCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, BarChart3, Brain, Loader2, Upload, FileText, Download, Square, CheckSquare, Wrench, Lightbulb, PlayCircle, Sparkles, Globe } from "lucide-react";
 import { fetchNextDiagnosticStep, startAgentsDiscussion, uploadDiagnosticDocument, DiagnosticMessage, AgentMessage, DiagnosticFinalReport } from "@/lib/diagnosticService";
 
 export default function ServicesIADiagnostic() {
@@ -15,6 +15,7 @@ export default function ServicesIADiagnostic() {
   const [currentQuestion, setCurrentQuestion] = useState<{question: string, options: string[], total_questions?: number} | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [otherText, setOtherText] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
   const [stepCount, setStepCount] = useState(1);
   const [totalSteps, setTotalSteps] = useState(5); // Dynamique, mis à jour par l'IA
 
@@ -42,11 +43,10 @@ export default function ServicesIADiagnostic() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchNextDiagnosticStep(currentHistory);
+      const response = await fetchNextDiagnosticStep(currentHistory, websiteUrl);
       setCurrentQuestion(response);
       setSelectedOptions([]);
       setOtherText("");
-      // Si l'IA indique un nombre total de questions, on le met à jour
       if (response.total_questions && response.total_questions > 0) {
         setTotalSteps(response.total_questions);
       }
@@ -122,7 +122,7 @@ export default function ServicesIADiagnostic() {
       .join(" | ");
 
     startAgentsDiscussion(
-      { history: contextStr, company_name: company?.name },
+      { history: contextStr, website_url: websiteUrl, company_name: company?.name },
       company?.id,
       (msg) => {
         setAgentMessages(prev => [...prev, msg]);
@@ -145,6 +145,7 @@ export default function ServicesIADiagnostic() {
     setHistory([]);
     setStepCount(1);
     setTotalSteps(5);
+    setWebsiteUrl("");
     setPhase('form');
     setAgentMessages([]);
     setFinalReport(null);
@@ -244,6 +245,12 @@ export default function ServicesIADiagnostic() {
               {company?.name && (
                 <div className="text-xs uppercase tracking-widest font-semibold text-blue-600 mb-1">
                   Entreprise : {company.name}
+                </div>
+              )}
+
+              {websiteUrl && (
+                <div className="text-xs text-slate-500 mb-3 flex items-center justify-center gap-1 font-medium">
+                  <Globe size={13} className="text-blue-600" /> Site exploré : <span className="underline">{websiteUrl}</span>
                 </div>
               )}
 
@@ -491,6 +498,30 @@ export default function ServicesIADiagnostic() {
             {isEn ? "Our AI adapts questions in real-time based on your answers." : "Notre IA adapte ses questions en temps réel selon vos réponses."}
           </p>
         </div>
+
+        {/* Champ Optionnel de Site Web d'entreprise */}
+        {stepCount === 1 && (
+          <div className="mb-8 p-5 bg-gradient-to-r from-blue-50 to-indigo-50/40 rounded-2xl border border-blue-100 shadow-sm ia-animate-in">
+            <label className="block text-xs font-bold uppercase tracking-wider text-blue-900 mb-1.5 flex items-center gap-1.5">
+              <Globe size={15} className="text-blue-600" />
+              {isEn ? "Company Website URL (Optional)" : "Site web de votre entreprise (Optionnel)"}
+            </label>
+            <div className="relative">
+              <Globe className="absolute left-3.5 top-3 text-slate-400" size={16} />
+              <input
+                type="url"
+                value={websiteUrl}
+                onChange={(e) => setWebsiteUrl(e.target.value)}
+                placeholder="https://votre-entreprise.fr"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all"
+              />
+            </div>
+            <p className="text-xs text-blue-700/80 mt-2 flex items-center gap-1 font-medium">
+              <Sparkles size={13} className="text-blue-600 shrink-0" />
+              <span>{isEn ? "Our AI will analyze your site to tailor the diagnostic directly to your services!" : "Nos modèles IA exploreront directement votre site pour personnaliser l'audit à vos activités réelles !"}</span>
+            </p>
+          </div>
+        )}
 
         <div className="mb-8">
           <div className="flex justify-between text-xs mb-2" style={{ color: "hsl(215 16% 47%)" }}>
