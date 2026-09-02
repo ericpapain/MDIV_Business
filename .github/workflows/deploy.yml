@@ -43,15 +43,15 @@ jobs:
       - name: Build project
         run: npm run build
 
-      # 7. Déploiement FTP vers OVH
+      # 7. Déploiement FTP vers OVH (Support du SSL/TLS OVH via security: untrusted)
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          protocol: ftp
+          protocol: ftps
+          security: untrusted
           local-dir: ./dist/
           server-dir: ./www/
           dangerous-clean-slate: false
