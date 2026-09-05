@@ -233,7 +233,7 @@ export default function ServicesIADiagnostic() {
           </Link>
 
           <div className="ia-card relative overflow-hidden p-8 md:p-12 text-center ia-animate-in">
-            <div className="ia-watermark-anim absolute -bottom-10 -right-10 w-48 h-48 opacity-[0.03] pointer-events-none flex items-center justify-center text-slate-800" style={{ animationDelay: '0s' }}>
+            <div className="ia-watermark-anim absolute -bottom-10 -right-10 w-48 h-48 opacity-[0.03] pointer-events-none flex items-center justify-center text-slate-800" style={{ animationDelay: "0s" }}>
               <BarChart3 size={192} />
             </div>
 
@@ -447,7 +447,7 @@ export default function ServicesIADiagnostic() {
             
             <div className="space-y-6 min-h-[300px]">
               {agentMessages.map((msg, i) => (
-                <div key={i} className={`flex flex-col ${msg.agent.includes('Strat') ? 'items-start' : (msg.agent.includes('Synthèse') ? 'items-center' : 'items-end')} ia-animate-in`} style={{ animationDelay: '0.1s' }}>
+                <div key={i} className={`flex flex-col ${msg.agent.includes('Strat') ? 'items-start' : (msg.agent.includes('Synthèse') ? 'items-center' : 'items-end')} ia-animate-in`} style={{ animationDelay: `${i * 100}ms` }}>
                   <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1 px-2">{msg.agent}</span>
                   <div className={`p-4 rounded-2xl max-w-[85%] text-sm leading-relaxed ${
                     msg.agent.includes('Strat') ? 'bg-slate-100 text-slate-800 rounded-tl-sm' : 
@@ -483,7 +483,7 @@ export default function ServicesIADiagnostic() {
   return (
     <div className="ia-page min-h-screen pt-32 pb-20">
       <div className="container max-w-3xl mx-auto">
-        <Link to="/services-ia" className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground/80 backdrop-blur-md text-[hsl(221,83%,53%)] font-semibold rounded-full shadow-sm hover:shadow-md border border-slate-200 hover:bg-white hover:-translate-x-1 transition-all mb-8 text-sm group">
+        <Link to="/services-ia" className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground/80 backdrop-blur-md text-[hsl(221,83%,53%)] font-semibold rounded-full shadow-sm hover:shadow-md transition-all group">
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> {isEn ? "Back to AI Services" : "Retour aux Services IA"}
         </Link>
 
@@ -518,7 +518,7 @@ export default function ServicesIADiagnostic() {
             </div>
             <p className="text-xs text-blue-700/80 mt-2 flex items-center gap-1 font-medium">
               <Sparkles size={13} className="text-blue-600 shrink-0" />
-              <span>{isEn ? "Our AI will analyze your site to tailor the diagnostic directly to your services!" : "Nos modèles IA exploreront directement votre site pour personnaliser l'audit à vos activités réelles !"}</span>
+              <span>{isEn ? "Our AI will analyze your site to tailor the diagnostic directly to your services!" : "Nos modèles IA exploreront directement votre site pour personnaliser l'audit à vos services !"}</span>
             </p>
           </div>
         )}
@@ -534,7 +534,7 @@ export default function ServicesIADiagnostic() {
         </div>
 
         <div className="ia-card relative overflow-hidden p-8 md:p-10 ia-animate-in">
-          <div className="ia-watermark-anim absolute -bottom-10 -right-10 w-48 h-48 opacity-[0.03] pointer-events-none flex items-center justify-center text-slate-800" style={{ animationDelay: '0.2s' }}>
+          <div className="ia-watermark-anim absolute -bottom-10 -right-10 w-48 h-48 opacity-[0.03] pointer-events-none flex items-center justify-center text-slate-800" style={{ animationDelay: "0s" }}>
             <Brain size={192} />
           </div>
 
@@ -591,7 +591,7 @@ export default function ServicesIADiagnostic() {
                               value={otherText}
                               onChange={(e) => setOtherText(e.target.value)}
                               placeholder={isEn ? "Please specify your details here..." : "Veuillez préciser votre situation ou besoin ici..."}
-                              className="w-full px-4 py-3 border-2 border-[hsl(221,83%,53%,0.4)] rounded-xl text-sm focus:border-[hsl(221,83%,53%)] focus:ring-1 focus:ring-[hsl(221,83%,53%)] outline-none transition-all shadow-sm"
+                              className="w-full px-4 py-3 border-2 border-[hsl(221,83%,53%,0.4)] rounded-xl text-sm focus:border-[hsl(221,83%,53%)] focus:ring-1 focus:ring-[hsl(221,83%,53%)] outline-none transition-all"
                               autoFocus
                             />
                           </div>
@@ -616,5 +616,6 @@ export default function ServicesIADiagnostic() {
           </div>
         </div>
       </div>
-    );
+    </div>
+  );
 }
