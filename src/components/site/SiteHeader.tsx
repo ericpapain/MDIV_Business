@@ -95,84 +95,24 @@ export function SiteHeader() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
-            {/* Auth Dropdown */}
-            {isAuthenticated ? (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-md transition-all border border-blue-500/30"
-                >
-                  <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-[10px]">
-                    {company?.name ? company.name.substring(0, 2).toUpperCase() : 'EP'}
-                  </div>
-                  <span className="max-w-[120px] truncate">{company?.name || 'Mon Espace'}</span>
-                  <ChevronDown size={14} className={`transition-transform duration-200 ${userDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Menu déroulant profil */}
-                {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 py-2 animate-fade-in z-50">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-                      <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{company?.name}</p>
-                      <p className="text-[11px] text-slate-400 truncate">{company?.email}</p>
-                    </div>
-
-                    <div className="py-1">
-                      <button
-                        onClick={() => openModal('profile')}
-                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors"
-                      >
-                        <Settings size={15} className="text-blue-600" />
-                        <span>Modifier mes informations</span>
-                      </button>
-
-                      <button
-                        onClick={() => openModal('reports')}
-                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors"
-                      >
-                        <FileText size={15} className="text-blue-600" />
-                        <span>Mes Rapports générés</span>
-                      </button>
-
-                      <Link
-                        to="/dashboard"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors"
-                      >
-                        <Building2 size={15} className="text-blue-600" />
-                        <span>Tableau de bord</span>
-                      </Link>
-                    </div>
-
-                    <div className="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
-                      <button
-                        onClick={() => { logout(); setUserDropdownOpen(false); }}
-                        className="w-full text-left px-4 py-2 text-xs font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 transition-colors"
-                      >
-                        <LogOut size={15} />
-                        <span>Se déconnecter</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
+            {!isAuthenticated && (
               <div className="flex items-center gap-2">
                 <Link 
                   to="/login"
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                     isIAPage 
                       ? "border-blue-600 text-blue-600 hover:bg-blue-50" 
-                      : "border-gold/40 text-gold-light hover:bg-gold/10"
+                      : "border-primary/40 text-primary hover:bg-primary/10"
                   }`}
                 >
-                  <LogIn size={13} />
+                  <LogIn size={14} />
                   {isEn ? "Login" : "Connexion"}
                 </Link>
                 <Link 
                   to="/register"
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-sm"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-md transition-all"
                 >
+                  <Building2 size={14} />
                   {isEn ? "Register" : "Créer un compte"}
                 </Link>
               </div>
