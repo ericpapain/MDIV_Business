@@ -4,7 +4,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserProfileModal } from "@/components/auth/UserProfileModal";
 import { iaCategories, iaJourney } from "@/data/servicesIAData";
-import { ArrowRight, Sparkles, Zap, ChevronRight, Star, LayoutGrid, CreditCard, Route, ArrowDown, Search, Target, Users, Rocket, Quote, Cpu, ChevronDown, Settings, FileText, Building2, LogOut } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, ChevronRight, Star, LayoutGrid, CreditCard, Route, ArrowDown, Search, Target, Users, Rocket, Quote, Cpu, ChevronDown, Settings, FileText, Building2, LogOut, LogIn } from "lucide-react";
 import { motion } from "framer-motion";
 import Countdown from "@/components/ui/Countdown";
 
@@ -241,69 +241,98 @@ export default function ServicesIA() {
           {/* Decorative gold hairline */}
           <div className="h-px mb-8" style={{ background: "linear-gradient(90deg, transparent, hsl(42 55% 56% / 0.35), transparent)" }} />
 
-          {/* Profil utilisateur connecté directement dans la section de page */}
-          {isAuthenticated && (
-            <div className="flex justify-end mb-4">
+          {/* Zone Auth & Profil Entreprise intégrée dans la section de page */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 px-1">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center gap-1.5 mb-1">
+                <Sparkles size={14} /> {isEn ? "Enterprise Portal" : "Espace Entreprise & IA"}
+              </span>
+              <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
+                {isEn ? "Explore application modules" : "Explorez les modules applicatifs"}
+              </h2>
+            </div>
+
+            {isAuthenticated ? (
+              /* Menu déroulant profil si connecté */
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2.5 px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-md transition-all border border-blue-500/30 cursor-pointer shadow-sm"
+                  className="flex items-center gap-3 px-5 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white hover:shadow-lg hover:shadow-blue-500/25 transition-all transform hover:-translate-y-0.5 border border-blue-400/40 cursor-pointer shadow-md"
                 >
-                  <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-[10px]">
+                  <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center font-extrabold text-xs shadow-inner">
                     {company?.name ? company.name.substring(0, 2).toUpperCase() : 'EP'}
                   </div>
-                  <span className="max-w-[140px] truncate">{company?.name || 'Mon Espace'}</span>
-                  <ChevronDown size={14} className={`transition-transform duration-200 ${userDropdownOpen ? 'rotate-180' : ''}`} />
+                  <span className="max-w-[150px] truncate text-sm">{company?.name || 'Mon Espace'}</span>
+                  <ChevronDown size={16} className={`transition-transform duration-200 ${userDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 py-2 animate-fade-in z-50">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                  <div className="absolute right-0 mt-2 w-68 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 py-2 animate-fade-in z-50">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 rounded-t-2xl">
                       <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{company?.name}</p>
                       <p className="text-[11px] text-slate-400 truncate">{company?.email}</p>
                     </div>
 
-                    <div className="py-1">
+                    <div className="py-1.5">
                       <button
                         onClick={() => { setUserDropdownOpen(false); setModalState({ isOpen: true, tab: 'profile' }); }}
-                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
+                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-blue-50/80 dark:hover:bg-slate-800 hover:text-blue-600 flex items-center gap-3 transition-colors cursor-pointer"
                       >
-                        <Settings size={15} className="text-blue-600" />
+                        <Settings size={16} className="text-blue-600" />
                         <span>{isEn ? "Edit profile info" : "Modifier mes informations"}</span>
                       </button>
 
                       <button
                         onClick={() => { setUserDropdownOpen(false); setModalState({ isOpen: true, tab: 'reports' }); }}
-                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors cursor-pointer"
+                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-blue-50/80 dark:hover:bg-slate-800 hover:text-blue-600 flex items-center gap-3 transition-colors cursor-pointer"
                       >
-                        <FileText size={15} className="text-blue-600" />
+                        <FileText size={16} className="text-blue-600" />
                         <span>{isEn ? "My Generated Reports" : "Mes Rapports générés"}</span>
                       </button>
 
                       <Link
                         to="/dashboard"
                         onClick={() => setUserDropdownOpen(false)}
-                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition-colors"
+                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-blue-50/80 dark:hover:bg-slate-800 hover:text-blue-600 flex items-center gap-3 transition-colors"
                       >
-                        <Building2 size={15} className="text-blue-600" />
+                        <Building2 size={16} className="text-blue-600" />
                         <span>{isEn ? "Dashboard" : "Tableau de bord"}</span>
                       </Link>
                     </div>
 
-                    <div className="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
+                    <div className="border-t border-slate-100 dark:border-slate-800 pt-1.5 mt-1">
                       <button
                         onClick={() => { setUserDropdownOpen(false); logout(); }}
-                        className="w-full text-left px-4 py-2 text-xs font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 transition-colors cursor-pointer"
+                        className="w-full text-left px-4 py-2 text-xs font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-3 transition-colors cursor-pointer"
                       >
-                        <LogOut size={15} />
+                        <LogOut size={16} />
                         <span>{isEn ? "Log out" : "Se déconnecter"}</span>
                       </button>
                     </div>
                   </div>
                 )}
               </div>
-            </div>
-          )}
+            ) : (
+              /* Boutons Connexion & Créer un compte élégants et plus grands si non connecté */
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/login"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold border-2 border-blue-600/80 text-blue-600 hover:bg-blue-50/80 dark:hover:bg-blue-950/30 transition-all shadow-sm transform hover:-translate-y-0.5"
+                >
+                  <LogIn size={16} />
+                  {isEn ? "Sign in" : "Connexion"}
+                </Link>
+
+                <Link
+                  to="/register"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white hover:shadow-lg hover:shadow-blue-500/25 transition-all transform hover:-translate-y-0.5 border border-blue-400/30 shadow-md"
+                >
+                  <Building2 size={16} />
+                  {isEn ? "Create Account" : "Créer un compte"}
+                </Link>
+              </div>
+            )}
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {tabs.map((tab) => {
