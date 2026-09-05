@@ -95,29 +95,6 @@ export function SiteHeader() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
-            {!isAuthenticated && (
-              <div className="flex items-center gap-2">
-                <Link 
-                  to="/login"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                    isIAPage 
-                      ? "border-blue-600 text-blue-600 hover:bg-blue-50" 
-                      : "border-primary/40 text-primary hover:bg-primary/10"
-                  }`}
-                >
-                  <LogIn size={14} />
-                  {isEn ? "Login" : "Connexion"}
-                </Link>
-                <Link 
-                  to="/register"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-md transition-all"
-                >
-                  <Building2 size={14} />
-                  {isEn ? "Register" : "Créer un compte"}
-                </Link>
-              </div>
-            )}
-
             <ThemeToggle />
             <button onClick={toggleLanguage} className={`flex items-center text-[10px] uppercase tracking-[0.2em] font-semibold border rounded-sm overflow-hidden ${isIAPage ? "border-slate-300" : "border-border"}`}>
               <span className={`flex items-center gap-1.5 px-2 py-1.5 transition-colors ${language === 'fr' ? 'bg-gold/20 text-gold-light' : (isIAPage ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-muted text-muted-foreground')}`}>
