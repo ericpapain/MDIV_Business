@@ -18,7 +18,7 @@ export function TestimonialsCarousel({ reviews }: TestimonialsCarouselProps) {
   const { data: dbEvents } = useQuery({
     queryKey: ["carousel-events"],
     queryFn: async () => {
-      const res = await fetch("https://mdiv-network.com/api-public.php?action=events");
+      const res = await fetch("/api-public.php?action=events");
       const json = await res.json();
       if (json.data && !Array.isArray(json.data)) {
         return [...(json.data.upcoming || []), ...(json.data.past || [])];

@@ -32,7 +32,7 @@ export default function EventReplay() {
   const { data: dbAvis, isLoading: isAvisLoading } = useQuery({
     queryKey: ["public-avis"],
     queryFn: async () => {
-      const res = await fetch("https://mdiv-network.com/api-avis.php");
+      const res = await fetch("/api-avis.php");
       const json = await res.json();
       return json.success ? (json.data || []) : [];
     }

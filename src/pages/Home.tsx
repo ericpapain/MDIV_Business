@@ -198,7 +198,7 @@ export default function Home() {
 
   const incrementVisitCount = async () => {
     try {
-      const response = await fetch("https://mdiv-network.com/api-visites.php");
+      const response = await fetch("/api-visites.php");
       if (!response.ok) throw new Error("Erreur réseau");
       
       const result = await response.json();
@@ -207,14 +207,14 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error fetching visit count:', error);
-      // Fallback à 234 si on est en local et que le backend distant est indisponible
+      // Fallback à 234 si le backend est indisponible
       setVisitCount(234);
     }
   };
 
   const fetchReviews = async () => {
     try {
-      const response = await fetch("https://mdiv-network.com/api-avis.php");
+      const response = await fetch("/api-avis.php");
       if (!response.ok) throw new Error("API Network error");
       
       const result = await response.json();

@@ -54,7 +54,7 @@ export default function Avis() {
   const [loading, setLoading] = useState(true);
 
   // URL of the OVH API
-  const API_URL = "https://mdiv-network.com/api-avis.php";
+  const API_URL = "/api-avis.php";
 
   useEffect(() => {
     fetchReviews();
@@ -63,7 +63,7 @@ export default function Avis() {
 
   const fetchAllEvents = async () => {
     try {
-      const response = await fetch("https://mdiv-network.com/api-public.php?action=events");
+      const response = await fetch("/api-public.php?action=events");
       if (!response.ok) throw new Error("Erreur réseau");
       const result = await response.json();
       if (result.data) {
