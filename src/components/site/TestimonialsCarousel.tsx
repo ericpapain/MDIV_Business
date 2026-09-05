@@ -125,8 +125,8 @@ export function TestimonialsCarousel({ reviews }: TestimonialsCarouselProps) {
       )}
 
       <div className="flex justify-center mt-12">
-        <Link to="/avis" className="btn-ghost-gold inline-flex px-8 py-3.5 text-[10px] uppercase tracking-[0.24em] rounded-sm items-center gap-3">
-          {t("home.testimonials.btn")} <ArrowRight size={14} />
+        <Link to="/avis" className="btn-gold-pulse">
+          {t("home.testimonials.btn")} <ArrowRight size={18} />
         </Link>
       </div>
     </section>
