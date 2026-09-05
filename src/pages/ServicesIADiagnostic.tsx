@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { EnterpriseAuthBar } from "@/components/site/EnterpriseAuthBar";
 import { ArrowLeft, ArrowRight, Check, BarChart3, Brain, Loader2, Upload, FileText, Download, Square, CheckSquare, Wrench, Lightbulb, PlayCircle, Sparkles, Globe } from "lucide-react";
 import { fetchNextDiagnosticStep, startAgentsDiscussion, uploadDiagnosticDocument, DiagnosticMessage, AgentMessage, DiagnosticFinalReport } from "@/lib/diagnosticService";
 
@@ -228,6 +229,7 @@ export default function ServicesIADiagnostic() {
     return (
       <div className="ia-page min-h-screen pt-32 pb-20">
         <div className="container max-w-4xl mx-auto">
+          <EnterpriseAuthBar className="mb-8" />
           <Link to="/services-ia" className="inline-flex items-center gap-2 text-sm mb-8 hover:gap-3 transition-all font-semibold" style={{ color: "hsl(221 83% 53%)" }}>
             <ArrowLeft size={16} /> {isEn ? "Back to AI Services" : "Retour aux Services IA"}
           </Link>
@@ -358,6 +360,7 @@ export default function ServicesIADiagnostic() {
     return (
       <div className="ia-page min-h-screen pt-32 pb-20">
         <div className="container max-w-3xl mx-auto">
+          <EnterpriseAuthBar className="mb-8" />
           <div className="ia-card p-8 md:p-12 ia-animate-in border-[hsl(221,83%,53%)] shadow-[0_0_40px_rgba(37,99,235,0.1)]">
             <div className="text-center mb-8">
               <div className="w-16 h-16 rounded-full bg-blue-100 text-[hsl(221,83%,53%)] flex items-center justify-center mx-auto mb-4 animate-pulse">
@@ -432,6 +435,7 @@ export default function ServicesIADiagnostic() {
     return (
       <div className="ia-page min-h-screen pt-32 pb-20">
         <div className="container max-w-3xl mx-auto">
+          <EnterpriseAuthBar className="mb-8" />
           <div className="ia-card p-8 md:p-12 ia-animate-in">
             <div className="text-center mb-10">
               <div className="w-16 h-16 rounded-full ia-gradient-hero flex items-center justify-center text-foreground mx-auto mb-4 animate-pulse">
@@ -483,6 +487,7 @@ export default function ServicesIADiagnostic() {
   return (
     <div className="ia-page min-h-screen pt-32 pb-20">
       <div className="container max-w-3xl mx-auto">
+        <EnterpriseAuthBar className="mb-8" />
         <Link to="/services-ia" className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground/80 backdrop-blur-md text-[hsl(221,83%,53%)] font-semibold rounded-full shadow-sm hover:shadow-md transition-all group">
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> {isEn ? "Back to AI Services" : "Retour aux Services IA"}
         </Link>
