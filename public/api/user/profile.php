@@ -25,7 +25,7 @@ try {
     $pdo = get_db_connection();
     
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        $stmt = $pdo->prepare("SELECT id, name, email, created_at FROM companies WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT id, company_name AS name, email, created_at FROM companies WHERE id = ?");
         $stmt->execute([$company_id]);
         $company = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -71,10 +71,10 @@ try {
                 exit;
             }
             $password_hash = password_hash($new_password, PASSWORD_BCRYPT);
-            $stmt = $pdo->prepare("UPDATE companies SET name = ?, email = ?, password = ? WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE companies SET company_name = ?, email = ?, password_hash = ? WHERE id = ?");
             $stmt->execute([$name, $email, $password_hash, $company_id]);
         } else {
-            $stmt = $pdo->prepare("UPDATE companies SET name = ?, email = ? WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE companies SET company_name = ?, email = ? WHERE id = ?");
             $stmt->execute([$name, $email, $company_id]);
         }
         

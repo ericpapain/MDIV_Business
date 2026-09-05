@@ -179,8 +179,8 @@ Tu dois OBLIGATOIREMENT répondre en JSON avec ce format exact :
     // Sauvegarde en Base de données
     try {
         require_once __DIR__ . '/config.php';
-        
-        if (isset($pdo)) {
+        $pdo = get_db_connection();
+        if ($pdo) {
             $stmt = $pdo->prepare("INSERT INTO diagnostics (company_id, diagnostic_type, questions_answers, score, report, status) VALUES (?, 'express', ?, ?, ?, 'completed')");
             $stmt->execute([
                 $company_id, 

@@ -13,6 +13,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup PHP & Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, json, curl, zip
+          coverage: none
+
+      - name: Install PHP API dependencies
+        run: |
+          cd public/api
+          composer install --no-dev --optimize-autoloader
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -25,21 +37,17 @@ jobs:
       - name: Build project
         run: npm run build
 
-      # Étape de diagnostic pour tester la connexion FTP vers OVH
-      - name: Test FTP Connection
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      - name: Sanitize FTP Server Host
+        id: clean_ftp
         run: |
-          CLEAN_SERVER=$(echo "$FTP_SERVER" | sed -e 's|^[^:]*://||' -e 's|/*$||')
-          echo "Testing FTP connection to $CLEAN_SERVER with user $FTP_USERNAME..."
-          curl -v --connect-timeout 10 "ftp://$CLEAN_SERVER/" --user "$FTP_USERNAME:$FTP_PASSWORD" || echo "FTP Connection Test completed"
+          CLEAN_HOST=$(echo "${{ secrets.FTP_SERVER }}" | sed -e 's|^[^:]*://||' -e 's|/*$||')
+          echo "Clean FTP Host: $CLEAN_HOST"
+          echo "host=$CLEAN_HOST" >> $GITHUB_OUTPUT
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
+          server: ${{ steps.clean_ftp.outputs.host }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
@@ -47,3 +55,4 @@ jobs:
           dangerous-clean-slate: false
           exclude: |
             **/assets/uploads/**
+
