@@ -617,5 +617,4 @@ export default function ServicesIADiagnostic() {
         </div>
       </div>
     );
-  }
 }
