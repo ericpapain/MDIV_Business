@@ -214,7 +214,10 @@ if ($action === 'scan_directory' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (empty($folder_path) || !is_dir($target_dir)) {
         http_response_code(400); 
-        echo json_encode(['success' => false, 'error' => 'Dossier introuvable ou chemin invalide']);
+        echo json_encode([
+            'success' => false, 
+            'error' => 'Dossier introuvable. Indiquez un dossier situé dans public (ex: assets/events/namaste) ou utilisez l\'import direct de photos.'
+        ]);
         exit();
     }
     

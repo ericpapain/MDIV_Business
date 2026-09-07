@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Edit, Save, Loader2, Image as ImageIcon, Video, FileText, Quote, Users, Clock, Award, FolderSearch, Check } from "lucide-react";
+import { Plus, Trash2, Edit, Save, Loader2, Image as ImageIcon, Video, FileText, Quote, Users, Clock, Award, FolderSearch, Check, Upload, FolderPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 
@@ -34,6 +34,8 @@ export default function AdminReplays() {
   const [selectedEventId, setSelectedEventId] = useState<string>("");
   const [formData, setFormData] = useState<ReplayData>(defaultReplayData);
   const [scanPath, setScanPath] = useState<string>("");
+  const [isBatchUploading, setIsBatchUploading] = useState(false);
+  const batchFileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: eventsData, isLoading } = useQuery({
     queryKey: ["admin-events"],
@@ -94,6 +96,54 @@ export default function AdminReplays() {
   const extractYouTubeId = (url: string) => {
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/))([^"&?\/\s]{11})/);
     return match ? match[1] : url; // Retourne l'URL si ce n'est pas un lien standard
+  };
+
+  const handleBatchUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsBatchUploading(true);
+    const uploadedUrls: string[] = [];
+    let errorCount = 0;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const data = new FormData();
+      data.append("file", file);
+
+      try {
+        const res = await fetch("/api-admin.php?action=upload_image", {
+          method: "POST",
+          body: data
+        });
+        const json = await res.json();
+        if (json.success && json.url) {
+          uploadedUrls.push(json.url);
+        } else {
+          errorCount++;
+        }
+      } catch (err) {
+        errorCount++;
+      }
+    }
+
+    setIsBatchUploading(false);
+    if (batchFileInputRef.current) batchFileInputRef.current.value = "";
+
+    if (uploadedUrls.length > 0) {
+      toast({
+        title: "Photos téléversées !",
+        description: `${uploadedUrls.length} photo(s) ajoutée(s) avec succès.${errorCount > 0 ? ` (${errorCount} erreur(s))` : ''}`
+      });
+      const currentPhotos = formData.photos.filter(p => p.trim() !== "");
+      setFormData(prev => ({ ...prev, photos: [...currentPhotos, ...uploadedUrls] }));
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Erreur d'envoi",
+        description: "Aucune photo n'a pu être téléversée."
+      });
+    }
   };
 
   const scanMutation = useMutation({
@@ -193,22 +243,56 @@ export default function AdminReplays() {
 
           {/* PHOTOS (Masonry) */}
           <div className="glass-strong p-6 rounded-sm border border-border space-y-4">
-            <h2 className="text-xl font-display text-gold flex items-center gap-2"><ImageIcon size={20} /> Galerie Photos (URLs)</h2>
+            <h2 className="text-xl font-display text-gold flex items-center gap-2"><ImageIcon size={20} /> Galerie Photos ({formData.photos.filter(p => p.trim() !== "").length})</h2>
             
-            <div className="bg-black/20 p-4 rounded-sm border border-border/50 mb-6">
-              <h3 className="text-sm font-bold mb-2">Récupération automatique</h3>
-              <p className="text-xs text-muted-foreground mb-3">Si vos images sont stockées sur le serveur (ex: dans public), entrez le chemin du dossier pour récupérer toutes les images d'un coup.</p>
-              <div className="flex gap-2">
-                <input type="text" className="flex-1 bg-[#0a0d0f] border border-border rounded-sm px-4 py-2 text-sm"
-                  placeholder="Ex: assets/events/namaste" value={scanPath}
-                  onChange={e => setScanPath(e.target.value)} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="bg-gradient-to-r from-blue-950/40 to-indigo-950/40 p-4 rounded-sm border border-blue-500/30">
+                <h3 className="text-sm font-bold text-blue-400 mb-1 flex items-center gap-2">
+                  <Upload size={16} /> Importer des photos depuis votre ordinateur
+                </h3>
+                <p className="text-xs text-muted-foreground mb-3">Sélectionnez plusieurs photos à la fois depuis votre PC pour les téléverser automatiquement.</p>
+                <input 
+                  type="file" 
+                  multiple 
+                  accept="image/*" 
+                  ref={batchFileInputRef}
+                  className="hidden" 
+                  onChange={handleBatchUpload}
+                />
                 <button 
-                  className="btn-gold px-4 py-2 text-xs rounded-sm flex items-center gap-2 font-bold"
-                  onClick={() => scanMutation.mutate()}
-                  disabled={scanMutation.isPending}
+                  className="btn-gold w-full py-2.5 text-xs rounded-sm flex items-center justify-center gap-2 font-bold cursor-pointer"
+                  onClick={() => batchFileInputRef.current?.click()}
+                  disabled={isBatchUploading}
                 >
-                  {scanMutation.isPending ? <Loader2 className="animate-spin" size={14} /> : <Plus size={14} />}
-                  Scanner le dossier
+                  {isBatchUploading ? <Loader2 className="animate-spin" size={16} /> : <FolderPlus size={16} />}
+                  {isBatchUploading ? "Téléversement des photos en cours..." : "Sélectionner des fichiers sur mon PC"}
+                </button>
+              </div>
+
+              <div className="bg-black/20 p-4 rounded-sm border border-border/50">
+                <h3 className="text-sm font-bold mb-1 flex items-center gap-2">
+                  <FolderSearch size={16} /> Récupérer depuis un dossier serveur
+                </h3>
+                <p className="text-xs text-muted-foreground mb-3">Chemin du dossier dans le projet (ex: <code>assets/events/namaste</code>)</p>
+                <div className="flex gap-2">
+                  <input type="text" className="flex-1 bg-[#0a0d0f] border border-border rounded-sm px-3 py-2 text-xs"
+                    placeholder="Ex: assets/events/namaste" value={scanPath}
+                    onChange={e => setScanPath(e.target.value)} />
+                  <button 
+                    className="btn-ghost-gold px-3 py-2 text-xs rounded-sm flex items-center gap-1.5 font-bold shrink-0 cursor-pointer"
+                    onClick={() => scanMutation.mutate()}
+                    disabled={scanMutation.isPending}
+                  >
+                    {scanMutation.isPending ? <Loader2 className="animate-spin" size={14} /> : <Plus size={14} />}
+                    Scanner
+                  </button>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => { setScanPath("assets/events/namaste"); scanMutation.mutate(); }}
+                  className="text-[11px] text-gold hover:underline mt-2 inline-flex items-center gap-1 cursor-pointer"
+                >
+                  ✨ Charger les 34 photos du dossier Namaste
                 </button>
               </div>
             </div>
