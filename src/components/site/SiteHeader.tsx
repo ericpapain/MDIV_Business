@@ -68,11 +68,11 @@ export function SiteHeader() {
 
         <div className="hidden lg:flex items-center gap-3">
           <ThemeToggle />
-          <button onClick={toggleLanguage} className={`flex items-center text-[10px] uppercase tracking-[0.2em] font-semibold border rounded-sm overflow-hidden ${isIAPage ? "border-slate-300" : "border-gold/40"}`}>
-            <span className={`flex items-center gap-1.5 px-2 py-1.5 transition-colors ${language === 'fr' ? 'bg-gold/20 text-gold-light' : (isIAPage ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-gold/10 text-foreground/60')}`}>
+          <button onClick={toggleLanguage} className={`flex items-center text-[10px] uppercase tracking-[0.2em] font-semibold border rounded-sm overflow-hidden ${isIAPage ? "border-slate-300" : "border-gold/30"}`}>
+            <span className={`flex items-center gap-1.5 px-2 py-1.5 transition-colors ${language === 'fr' ? 'bg-gold/20 text-gold-light' : (isIAPage ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-gold/10 text-foreground/70')}`}>
               <img src="https://flagcdn.com/w20/fr.png" alt="FR" className="w-3.5 h-[10px] object-cover rounded-[2px]" /> FR
             </span>
-            <span className={`flex items-center gap-1.5 px-2 py-1.5 transition-colors ${language === 'en' ? 'bg-gold/20 text-gold-light' : (isIAPage ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-gold/10 text-foreground/60')}`}>
+            <span className={`flex items-center gap-1.5 px-2 py-1.5 transition-colors ${language === 'en' ? 'bg-gold/20 text-gold-light' : (isIAPage ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-gold/10 text-foreground/70')}`}>
               <img src="https://flagcdn.com/w20/gb.png" alt="EN" className="w-3.5 h-[10px] object-cover rounded-[2px]" /> EN
             </span>
           </button>
@@ -89,11 +89,11 @@ export function SiteHeader() {
           <div className="container py-6 flex flex-col gap-4">
             <div className="flex justify-end items-center mb-2 pb-3 border-b border-slate-100 gap-3">
               <ThemeToggle />
-              <button onClick={toggleLanguage} className={`flex items-center text-xs uppercase tracking-[0.2em] font-semibold border rounded-sm overflow-hidden ${isIAPage ? "border-slate-300" : "border-gold/40"}`}>
-                <span className={`flex items-center gap-2 px-3 py-1.5 transition-colors ${language === 'fr' ? 'bg-gold/20 text-gold-light' : (isIAPage ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-gold/10 text-foreground/60')}`}>
+              <button onClick={toggleLanguage} className={`flex items-center text-xs uppercase tracking-[0.2em] font-semibold border rounded-sm overflow-hidden ${isIAPage ? "border-slate-300" : "border-gold/30"}`}>
+                <span className={`flex items-center gap-2 px-3 py-1.5 transition-colors ${language === 'fr' ? 'bg-gold/20 text-gold-light' : (isIAPage ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-gold/10 text-foreground/70')}`}>
                   <img src="https://flagcdn.com/w20/fr.png" alt="FR" className="w-4 h-3 object-cover rounded-[2px]" /> FR
                 </span>
-                <span className={`flex items-center gap-2 px-3 py-1.5 transition-colors ${language === 'en' ? 'bg-gold/20 text-gold-light' : (isIAPage ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-gold/10 text-foreground/60')}`}>
+                <span className={`flex items-center gap-2 px-3 py-1.5 transition-colors ${language === 'en' ? 'bg-gold/20 text-gold-light' : (isIAPage ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-gold/10 text-foreground/70')}`}>
                   <img src="https://flagcdn.com/w20/gb.png" alt="EN" className="w-4 h-3 object-cover rounded-[2px]" /> EN
                 </span>
               </button>
