@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserProfileModal } from "@/components/auth/UserProfileModal";
+import { EnterpriseAuthBar } from "@/components/site/EnterpriseAuthBar";
 import { iaCategories, iaJourney } from "@/data/servicesIAData";
 import { ArrowRight, Sparkles, Zap, ChevronRight, Star, LayoutGrid, CreditCard, Route, ArrowDown, Search, Target, Users, Rocket, Quote, Cpu, ChevronDown, Settings, FileText, Building2, LogOut, LogIn } from "lucide-react";
 import { motion } from "framer-motion";
