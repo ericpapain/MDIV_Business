@@ -16,6 +16,11 @@ DirectoryIndex index.html
   RewriteEngine On
   RewriteBase /
   
+  # Force HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  
   # Pass Authorization header to PHP (OVH strips it by default)
   RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
   
