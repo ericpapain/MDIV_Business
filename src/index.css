@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&family=Ubuntu:ital,wght@0,400;0,500;0,700;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -41,7 +41,8 @@
     --input: 218 20% 85%;
     --ring: 42 55% 45%;
 
-    --radius: 0.25rem;
+    /* Radius standard SaaS 2026 (12px) */
+    --radius: 0.75rem;
 
     --gold: 42 55% 45%;
     --gold-light: 45 70% 60%;
@@ -101,7 +102,7 @@
     --input: 218 30% 18%;
     --ring: 42 55% 56%;
 
-    --radius: 0.25rem;
+    --radius: 0.75rem;
 
     /* Couleurs custom luxe */
     --gold: 42 55% 56%;
@@ -141,7 +142,9 @@
 
   body {
     @apply bg-background text-foreground font-body antialiased;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-attachment: fixed;
+    letter-spacing: -0.01em;
   }
   
   .dark body {
@@ -157,7 +160,154 @@
       radial-gradient(ellipse 60% 50% at 100% 100%, hsl(42 40% 80% / 0.3) 0%, transparent 60%);
   }
 
-  h1, h2, h3, h4, h5, h6 { @apply font-display tracking-tight; font-feature-settings: "liga", "kern"; }
+  /* Modern Title Hierarchy & Typography SaaS 2026 */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.025em;
+    font-feature-settings: "liga", "kern";
+    color: inherit;
+  }
+  h1 {
+    font-weight: 800;
+    font-size: clamp(2rem, 3.8vw, 2.75rem);
+    line-height: 1.15;
+  }
+  h2 {
+    font-weight: 750;
+    font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+    line-height: 1.25;
+  }
+  h3 {
+    font-weight: 700;
+    font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+    line-height: 1.35;
+  }
+  h4 {
+    font-weight: 650;
+    font-size: 1.15rem;
+    line-height: 1.4;
+  }
+  h5, h6 {
+    font-weight: 600;
+  }
+
+  /* Universal SaaS Form Inputs (Hauteur 48-52px, coins 12px, bordure 1px #D9D9D9, fond blanc, hover doux, focus bleu/or) */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style) {
+    min-height: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid #D9D9D9;
+    background-color: #ffffff;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    color: #0f172a;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  }
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style) {
+    border-color: rgba(217, 217, 217, 0.25);
+    background-color: rgba(15, 23, 42, 0.9);
+    color: #f8fafc;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style):hover {
+    border-color: #94a3b8;
+    background-color: rgba(248, 250, 252, 0.8);
+  }
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style):hover {
+    border-color: #64748b;
+    background-color: rgba(30, 41, 59, 0.8);
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style):focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  }
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style):focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+  }
+
+  /* Universal Textareas avec étirement souris (resize: vertical) et texte ultra-lisible */
+  textarea {
+    resize: vertical !important;
+    min-height: 110px;
+    border-radius: 12px;
+    border: 1px solid #D9D9D9;
+    background-color: #ffffff;
+    padding: 0.875rem 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: #0f172a;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  }
+  .dark textarea {
+    border-color: rgba(217, 217, 217, 0.25);
+    background-color: rgba(15, 23, 42, 0.9);
+    color: #f8fafc;
+  }
+  textarea:hover {
+    border-color: #94a3b8;
+  }
+  .dark textarea:hover {
+    border-color: #64748b;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  }
+  .dark textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+  }
+
+  /* Placeholders haute lisibilité */
+  input::placeholder, textarea::placeholder {
+    color: #94a3b8;
+    opacity: 0.95;
+    font-weight: 400;
+  }
+  .dark input::placeholder, .dark textarea::placeholder {
+    color: #64748b;
+    opacity: 0.95;
+  }
+
+  /* Labels semi-gras au-dessus des champs */
+  label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+    color: #1e293b;
+    letter-spacing: -0.01em;
+  }
+  .dark label {
+    color: #e2e8f0;
+  }
+
+  /* Selects modernisés */
+  select {
+    min-height: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid #D9D9D9;
+    background-color: #ffffff;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    color: #0f172a;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .dark select {
+    border-color: rgba(217, 217, 217, 0.25);
+    background-color: rgba(15, 23, 42, 0.9);
+    color: #f8fafc;
+  }
+  select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  }
 
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: hsl(var(--background)); }
@@ -593,3 +743,75 @@
 .ia-watermark-anim {
   animation: ia-watermark 4s ease-in-out infinite;
 }
+
+/* ==============================================================================
+   CHAMPS DE SAISIE UNIFIÉS (FOND NOIR / TEXTE BLANC / LISIBILITÉ OPTIMALE)
+   ============================================================================== */
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]),
+textarea,
+select,
+[contenteditable="true"] {
+  background-color: #0b0d14 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  caret-color: #d4af37 !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"])::placeholder,
+textarea::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]):focus,
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]):focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible,
+[contenteditable="true"]:focus {
+  background-color: #05060a !important;
+  color: #ffffff !important;
+  border-color: #d4af37 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.35) !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]):hover,
+textarea:hover,
+select:hover {
+  border-color: rgba(255, 255, 255, 0.32) !important;
+}
+
+/* Autofill navigateur (Chrome, Edge, Safari) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px #0b0d14 inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+  caret-color: #d4af37 !important;
+}
+
+/* État désactivé */
+input:disabled,
+textarea:disabled,
+select:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  background-color: #12141c !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Sélection de texte dans les champs */
+input::selection,
+textarea::selection {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+

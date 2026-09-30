@@ -203,12 +203,12 @@ export default function AdminEvents() {
               {/* Description FR */}
               <div>
                 <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Description (FR)</label>
-                <textarea required value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm resize-none" />
+                <textarea required value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full px-3.5 py-2.5 bg-muted/30 border border-border rounded-xl text-sm resize-y min-h-[80px]" />
               </div>
               {/* Description EN */}
               <div>
                 <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Description (EN) <span className="text-gold/50">optionnel</span></label>
-                <textarea value={descriptionEn} onChange={e => setDescriptionEn(e.target.value)} rows={3} placeholder="English description..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm resize-none" />
+                <textarea value={descriptionEn} onChange={e => setDescriptionEn(e.target.value)} rows={3} placeholder="English description..." className="w-full px-3.5 py-2.5 bg-muted/30 border border-border rounded-xl text-sm resize-y min-h-[80px]" />
               </div>
 
               {/* Programme Section */}

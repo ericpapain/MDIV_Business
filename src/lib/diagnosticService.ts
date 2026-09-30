@@ -1,6 +1,6 @@
 // Fichier : src/lib/diagnosticService.ts
 
-const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost/mdiv_business/api'; // Adapter si besoin pour le dev local
+import { getApiUrl } from './apiConfig';
 
 export interface DiagnosticMessage {
   role: 'user' | 'assistant';
@@ -36,7 +36,7 @@ export interface DiagnosticFinalReport {
  * Appelle l'API pour générer la prochaine question dynamique.
  */
 export async function fetchNextDiagnosticStep(history: DiagnosticMessage[], websiteUrl?: string): Promise<DiagnosticNextStepResponse> {
-  const response = await fetch(`${API_BASE_URL}/diagnostic_step.php`, {
+  const response = await fetch(getApiUrl('diagnostic_step.php'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ export async function uploadDiagnosticDocument(file: File): Promise<{status: str
   const formData = new FormData();
   formData.append('document', file);
 
-  const response = await fetch(`${API_BASE_URL}/diagnostic_upload.php`, {
+  const response = await fetch(getApiUrl('diagnostic_upload.php'), {
     method: 'POST',
     body: formData,
   });
@@ -96,7 +96,7 @@ export function startAgentsDiscussion(
   // Encodage du contexte pour le passer en GET
   const contextStr = encodeURIComponent(JSON.stringify(context));
   const cidParam = companyId ? `&company_id=${companyId}` : '';
-  const eventSource = new EventSource(`${API_BASE_URL}/diagnostic_agents.php?context=${contextStr}${cidParam}`);
+  const eventSource = new EventSource(`${getApiUrl('diagnostic_agents.php')}?context=${contextStr}${cidParam}`);
 
   eventSource.addEventListener('agent_message', (e) => {
     try {

@@ -12,9 +12,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Playfair Display"', 'serif'],
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'Manrope', 'system-ui', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+        body: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+        heading: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
         serif: ['"Cormorant Garamond"', 'serif'],
-        body: ['Inter', 'sans-serif'],
         ubuntu: ['Ubuntu', 'sans-serif'],
         mono: ['ui-monospace', 'monospace'],
       },

@@ -23,68 +23,87 @@ if (!defined('SKIP_DEFAULT_HEADERS')) {
     }
 }
 
-// 2. CONFIGURATION DE L'IA (GROQ / OPENAI)
-// Pour switcher vers la version payante (OpenAI), il suffira de changer la constante API_URL 
-// par "https://api.openai.com/v1/chat/completions" et de mettre une clé OpenAI.
-// Le format de la requête et de la réponse est exactement le même !
+// 0. CHARGEMENT DYNAMIQUE DES VARIABLES D'ENVIRONNEMENT (.env)
+$possible_env_files = [
+    __DIR__ . '/../../.env',
+    __DIR__ . '/../.env',
+    __DIR__ . '/.env'
+];
+foreach ($possible_env_files as $env_file) {
+    if (file_exists($env_file) && is_readable($env_file)) {
+        $lines = file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line) || strpos($line, '#') === 0) continue;
+            if (strpos($line, '=') !== false) {
+                list($key, $val) = explode('=', $line, 2);
+                $key = trim($key);
+                $val = trim($val, " \t\n\r\0\x0B\"'");
+                if (!getenv($key)) {
+                    putenv("$key=$val");
+                    $_ENV[$key] = $val;
+                    $_SERVER[$key] = $val;
+                }
+            }
+        }
+        break;
+    }
+}
 
-define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: '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');
-define('MISTRAL_API_KEY', getenv('MISTRAL_API_KEY') ?: '2RsUw0IQ6M92JpoQ7HqxxJVewplS3doh');
-define('HF_API_KEY', getenv('HF_API_KEY') ?: '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'); 
-// NOTE: En production, utilisez des variables d'environnement (.env) via le serveur OVH.
+// 2. CONFIGURATION DE L'IA (GROQ / OPENAI / MISTRAL)
+define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: '');
+define('OPENAI_API_KEY', getenv('OPENAI_API_KEY') ?: '');
+define('MISTRAL_API_KEY', getenv('MISTRAL_API_KEY') ?: '');
+define('HF_API_KEY', getenv('HF_API_KEY') ?: '');
 define('LLM_API_URL', 'https://api.groq.com/openai/v1/chat/completions');
-// define('LLM_API_URL', 'https://api.openai.com/v1/chat/completions'); // SOLUTION PAYANTE (Décommenter pour basculer)
-
-define('LLM_MODEL', 'mixtral-8x7b-32768');
-// define('LLM_MODEL', 'gpt-4o-mini'); // SOLUTION PAYANTE (Décommenter pour basculer)
+define('LLM_MODEL', getenv('LLM_MODEL') ?: 'qwen/qwen3.8-27b');
 
 /**
- * Fonction utilitaire pour interroger l'IA (Groq ou OpenAI)
+ * Récupère dynamiquement les réglages configurés par l'administrateur dans le panel
+ */
+function get_active_ai_settings() {
+    $possible_files = [
+        __DIR__ . '/ai_settings.json',
+        __DIR__ . '/../../dev_db.json'
+    ];
+    $defaults = [
+        'primaryProvider' => 'groq',
+        'groqModel' => 'qwen/qwen3.8-27b',
+        'openaiModel' => 'gpt-4o-mini',
+        'mistralModel' => 'mistral-small-latest',
+        'temperature' => 0.7,
+        'fallbackEnabled' => true
+    ];
+    foreach ($possible_files as $file) {
+        if (file_exists($file)) {
+            $content = json_decode(file_get_contents($file), true);
+            if (isset($content['aiSettings'])) {
+                return array_merge($defaults, $content['aiSettings']);
+            } elseif (is_array($content) && isset($content['primaryProvider'])) {
+                return array_merge($defaults, $content);
+            }
+        }
+    }
+    return $defaults;
+}
+
+/**
+ * Fonction universelle d'appel IA multi-fournisseurs pilotée par l'Administration
  * 
  * @param array $messages Le tableau des messages (System, User, Assistant)
  * @param bool $jsonMode Faut-il forcer l'IA à répondre en JSON strict ?
  * @return array La réponse décodée de l'IA
  */
 function call_llm_api($messages, $jsonMode = false) {
-    $data = [
-        "model" => LLM_MODEL,
-        "messages" => $messages,
-        "temperature" => 0.7
-    ];
-
-    if ($jsonMode) {
-        $data["response_format"] = ["type" => "json_object"];
-    }
-
-    $ch = curl_init(LLM_API_URL);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . GROQ_API_KEY
-    ]);
-
-    // Évite les timeouts PHP trop rapides sur l'hébergement mutualisé
-    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $error = curl_error($ch);
-    curl_close($ch);
-
-    if ($httpCode !== 200) {
-        throw new Exception("Erreur API IA ($httpCode) : " . ($response ?: $error));
-    }
-
-    return json_decode($response, true);
+    require_once __DIR__ . '/groq_client.php';
+    return callGroqApi($messages, null, false, $jsonMode);
 }
 
 // 3. CONFIGURATION DE LA BASE DE DONNÉES MYSQL (OVH)
-define('DB_HOST', getenv('DB_HOST') ?: 'zwpvaah279.mysql.db');
-define('DB_NAME', getenv('DB_NAME') ?: 'zwpvaah279');
-define('DB_USER', getenv('DB_USER') ?: 'zwpvaah279');
-define('DB_PASS', getenv('DB_PASS') ?: 'Champion2018');
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_NAME', getenv('DB_NAME') ?: 'mdiv_business');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: '');
 
 /**
  * Fonction pour obtenir la connexion PDO à la base de données
@@ -121,6 +140,100 @@ function get_db_connection() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
 
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `clients` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `name` VARCHAR(255) NOT NULL,
+              `email` VARCHAR(255) NOT NULL,
+              `phone` VARCHAR(50) DEFAULT NULL,
+              `company` VARCHAR(255) DEFAULT NULL,
+              `address` TEXT DEFAULT NULL,
+              `notes` TEXT DEFAULT NULL,
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `products` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `name` VARCHAR(255) NOT NULL,
+              `description` TEXT DEFAULT NULL,
+              `default_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+              `vat_rate` DECIMAL(5,2) NOT NULL DEFAULT 20.00,
+              `category` VARCHAR(100) DEFAULT 'service',
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `quotes` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `client_id` INT DEFAULT NULL,
+              `quote_number` VARCHAR(100) NOT NULL,
+              `status` ENUM('draft', 'sent', 'accepted', 'rejected') DEFAULT 'draft',
+              `total_ht` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+              `total_vat` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+              `total_ttc` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+              `executive_summary` TEXT DEFAULT NULL,
+              `payment_terms` VARCHAR(255) DEFAULT '30 jours net',
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `invoices` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `client_id` INT DEFAULT NULL,
+              `quote_id` INT DEFAULT NULL,
+              `invoice_number` VARCHAR(100) NOT NULL,
+              `date` DATE NOT NULL,
+              `due_date` DATE NOT NULL,
+              `amount_ht` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+              `amount_vat` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+              `amount_ttc` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+              `status` ENUM('pending', 'paid', 'overdue', 'cancelled') DEFAULT 'pending',
+              `legal_check_result` JSON DEFAULT NULL,
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `followups` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `type` ENUM('invoice', 'quote', 'meeting', 'inactive_client') DEFAULT 'invoice',
+              `reference` VARCHAR(100) NOT NULL,
+              `client_name` VARCHAR(255) NOT NULL,
+              `amount` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+              `days_pending` INT NOT NULL DEFAULT 0,
+              `status` ENUM('pending', 'sent', 'escalated', 'resolved') DEFAULT 'pending',
+              `tone` VARCHAR(50) DEFAULT 'cordial',
+              `generated_email` TEXT DEFAULT NULL,
+              `last_sent_at` DATETIME DEFAULT NULL,
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `projects` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `client_id` INT DEFAULT NULL,
+              `quote_id` INT DEFAULT NULL,
+              `title` VARCHAR(255) NOT NULL,
+              `description` TEXT DEFAULT NULL,
+              `budget` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+              `status` ENUM('draft', 'in_progress', 'completed', 'cancelled') DEFAULT 'in_progress',
+              `start_date` DATE DEFAULT NULL,
+              `end_date` DATE DEFAULT NULL,
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
         return $pdo;
     } catch (PDOException $e) {
         // En prod, ne pas afficher le vrai message d'erreur pour des raisons de sécurité
@@ -130,7 +243,7 @@ function get_db_connection() {
 
 // 4. SÉCURITÉ & AUTHENTIFICATION (JWT)
 // Clé secrète pour signer les tokens (À METTRE DANS LES VARIABLES D'ENVIRONNEMENT EN PROD !)
-define('JWT_SECRET', getenv('JWT_SECRET') ?: 'SuperSecretKey_MDIV_Business_2026!');
+define('JWT_SECRET', getenv('JWT_SECRET') ?: 'default_jwt_secret_mdiv_2026_change_in_production');
 
 /**
  * Encode un tableau en base64url

@@ -122,7 +122,7 @@ export default function AdminReviews() {
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Citation / Avis</label>
-              <textarea required value={quote} onChange={e => setQuote(e.target.value)} rows={4} className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm resize-none" />
+              <textarea required value={quote} onChange={e => setQuote(e.target.value)} rows={4} className="w-full px-3.5 py-2.5 bg-muted/30 border border-border rounded-xl text-sm resize-y min-h-[90px]" />
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Pays (ex: France, Suisse)</label>

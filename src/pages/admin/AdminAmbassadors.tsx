@@ -187,7 +187,7 @@ export default function AdminAmbassadors() {
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Domaines d'expertise (séparés par des virgules)</label>
-              <textarea value={expertises} onChange={e => setExpertises(e.target.value)} rows={3} placeholder="Développement Commercial, Commerce International, Investissement" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm resize-none" />
+              <textarea value={expertises} onChange={e => setExpertises(e.target.value)} rows={3} placeholder="Développement Commercial, Commerce International, Investissement" className="w-full px-3.5 py-2.5 bg-muted/30 border border-border rounded-xl text-sm resize-y min-h-[80px]" />
             </div>
             <ImageUpload value={logoUrl} onChange={setLogoUrl} label="Logo de l'Ambassadeur / Structure" />
 

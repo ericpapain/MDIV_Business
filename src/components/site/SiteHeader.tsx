@@ -11,6 +11,7 @@ const navKeys = [
   { to: "/evenements", key: "nav.events" },
   { to: "/partenaires", key: "nav.partners", labelFr: "Partenaires & Ambassadeurs", labelEn: "Partners & Ambassadors" },
   { to: "/contact", key: "nav.contact" },
+  { to: "/blog", key: "Blog" },
   { to: "/charte", key: "La Charte" },
 ];
 

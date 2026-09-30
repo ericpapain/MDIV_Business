@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { getApiUrl } from '@/lib/apiConfig';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,8 +45,7 @@ export const Register = () => {
     setIsLoading(true);
 
     try {
-      const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost/mdiv_business/api';
-      const response = await fetch(`${API_BASE_URL}/auth/register.php`, {
+      const response = await fetch(getApiUrl('auth/register.php'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

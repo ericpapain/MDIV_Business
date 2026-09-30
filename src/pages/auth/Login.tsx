@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getApiUrl } from '@/lib/apiConfig';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,8 +35,7 @@ export const Login = () => {
     setIsLoading(true);
 
     try {
-      const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost/mdiv_business/api';
-      const response = await fetch(`${API_BASE_URL}/auth/login.php`, {
+      const response = await fetch(getApiUrl('auth/login.php'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

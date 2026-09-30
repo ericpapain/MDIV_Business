@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnterpriseAuthBar } from "@/components/site/EnterpriseAuthBar";
-import { ArrowLeft, ArrowRight, Check, BarChart3, Brain, Loader2, Upload, FileText, Download, Square, CheckSquare, Wrench, Lightbulb, PlayCircle, Sparkles, Globe } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, BarChart3, Brain, Loader2, Upload, FileText, Download, Square, CheckSquare, Wrench, Lightbulb, PlayCircle, Sparkles, Globe, Camera } from "lucide-react";
 import { fetchNextDiagnosticStep, startAgentsDiscussion, uploadDiagnosticDocument, DiagnosticMessage, AgentMessage, DiagnosticFinalReport } from "@/lib/diagnosticService";
+import { getApiUrl } from "@/lib/apiConfig";
+import { DocumentUploadCapture } from "@/components/ui/DocumentUploadCapture";
 
 export default function ServicesIADiagnostic() {
   const { language } = useLanguage();
@@ -204,7 +206,7 @@ export default function ServicesIADiagnostic() {
     
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = import.meta.env.PROD ? '/api/diagnostic_pdf.php' : 'http://localhost/mdiv_business/api/diagnostic_pdf.php';
+    form.action = getApiUrl('diagnostic_pdf.php');
     form.target = '_blank';
     
     const input = document.createElement('input');
@@ -401,28 +403,23 @@ export default function ServicesIADiagnostic() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-2">Importer un document (PDF uniquement) :</label>
-                <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                   <input type="file" ref={fileInputRef} className="hidden" accept="application/pdf" onChange={handleFileUpload} />
-                   {uploading ? (
-                      <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
-                         <Loader2 className="animate-spin" size={24} />
-                         <span>Analyse du document...</span>
-                      </div>
-                   ) : (
-                     <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
-                        <Upload size={32} className="text-slate-300" />
-                        <p className="text-sm font-medium">Cliquez pour importer (Max 3 pages)</p>
-                        <p className="text-xs text-slate-400">PDF de moins de 2MB</p>
-                     </div>
-                   )}
-                </div>
+                <label className="block text-sm font-semibold mb-2">Importer ou photographier un document (PDF ou Photo OCR) :</label>
+                <DocumentUploadCapture 
+                  label="Importer un justificatif ou prendre une photo (OCR)"
+                  acceptedFormats=".pdf,.jpg,.jpeg,.png,.webp,.txt"
+                  onDocumentProcessed={({ text: extractedDocText, file: uploadedDocFile }) => {
+                    const docInfo = extractedDocText 
+                      ? "Document transmis (OCR) : " + extractedDocText 
+                      : `Fichier ${uploadedDocFile.name} importé pour précision.`;
+                    setInterruptText(prev => (prev ? prev + "\n\n" : "") + docInfo);
+                  }}
+                />
               </div>
 
               <div className="flex justify-end pt-4">
-                 <button onClick={handleInterruptSubmit} disabled={!interruptText.trim() && !uploading} className="ia-btn-primary py-2.5 px-6 disabled:opacity-50">
-                    Envoyer et continuer <ArrowRight size={16} className="ml-2 inline" />
-                 </button>
+                <button onClick={handleInterruptSubmit} disabled={!interruptText.trim() && !uploading} className="ia-btn-primary py-2.5 px-6 disabled:opacity-50">
+                  Envoyer et continuer <ArrowRight size={16} className="ml-2 inline" />
+                </button>
               </div>
             </div>
           </div>

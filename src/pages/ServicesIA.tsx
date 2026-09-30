@@ -313,7 +313,7 @@ export default function ServicesIA() {
             const premiumCount = cat.apps.filter(a => a.tier === "premium").length;
             
             const earliestDateStr = cat.apps.reduce((earliest, app) => {
-              if (!app.releaseDate) return earliest;
+              if (app.href || !app.releaseDate) return earliest;
               if (!earliest) return app.releaseDate;
               return new Date(app.releaseDate) < new Date(earliest) ? app.releaseDate : earliest;
             }, undefined as string | undefined);
@@ -341,6 +341,10 @@ export default function ServicesIA() {
                       <div className="bg-white/80 backdrop-blur-sm px-2 py-1.5 rounded-lg border border-border shadow-sm">
                         <Countdown targetDate={earliestDateStr} />
                       </div>
+                    ) : hasActiveApps ? (
+                      <span className="ia-badge bg-[hsl(221,83%,53%)]/10 text-[hsl(221,83%,53%)] border-[hsl(221,83%,53%)]/20 text-[10px] font-bold">
+                        {isEn ? "Available" : "Disponible"}
+                      </span>
                     ) : (
                       <span className="ia-badge bg-slate-100 text-slate-500 border-slate-200 text-[10px] font-bold">
                         {isEn ? "Coming soon" : "Arrive bientôt"}
