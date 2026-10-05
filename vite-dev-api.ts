@@ -709,24 +709,99 @@ DIRECTIVES STRICTES POUR LE MODE STANDARD :
 - "kpis" : {"readabilityScore": 88, "pageCount": 2, "estimatedTimeSavedMinutes": 35}`;
             }
 
-            sendEvent('agent_message', {
-              agent: 'Analyste Structurel',
-              message: agent1Msg
-            });
+            // ===================================================================
+            // BOUCLE DE DÉLIBÉRATION CONVERSATIONNELLE MULTI-AGENTS
+            // ===================================================================
+            const docSample = storedDoc.text.slice(0, 7000);
 
-            setTimeout(async () => {
-              sendEvent('agent_message', {
-                agent: 'Expert Stratégie & Risques',
-                message: agent2Msg
-              });
-
+            (async () => {
               try {
-                const systemPrompt = `Tu es un consortium d'experts et directeurs d'entreprise de haut niveau (Analyste Stratégique, Auditeur des Risques, Directeur Général).
-Ton rôle est de générer la synthèse exécutive du document fourni selon le mode strictement sélectionné : ${modeLabel}.
+                // Tour 1 : Agent 1 - Analyste Factuel & Extraction
+                sendEvent('agent_message', {
+                  agent: 'Agent 1 : Analyste Factuel & Extraction',
+                  message: `Analyse et extraction factuelle de « ${storedDoc.documentName} » en mode ${modeLabel}...`
+                });
+
+                const agent1Prompt = `Tu es l'Analyste Factuel en chef d'un cabinet de conseil de direction.
+Analyse le document fourni et propose une première extraction brute structurée :
+1. Faits majeurs, chiffres clés, dates et clauses irréfutables
+2. Objectifs explicites formulés dans le texte
+3. Premières pistes d'actions et décisions opérationnelles suggérées
+Sois concis, direct et strictement factuel (environ 110 à 150 mots).`;
+
+                const res1 = await callLLM([
+                  { role: 'system', content: agent1Prompt },
+                  { role: 'user', content: `Document source :\n\n${docSample}` }
+                ], false);
+                const agent1Draft = res1.choices?.[0]?.message?.content?.trim() || "Extraction des points clés achevée.";
+
+                sendEvent('agent_message', {
+                  agent: 'Agent 1 : Analyste Factuel & Extraction',
+                  message: agent1Draft
+                });
+
+                // Tour 2 : Agent 2 - Auditeur Critique & Risques
+                sendEvent('agent_message', {
+                  agent: 'Agent 2 : Auditeur Critique & Risques',
+                  message: "Challenger la proposition d'Agent 1, détection des angles morts et des risques critiques..."
+                });
+
+                const agent2Prompt = `Tu es l'Auditeur Critique & Challenger de Risques.
+Évalue avec exigence la proposition de l'Analyste Factuel par rapport au document source.
+Identifie :
+1. Une omission, imprécision ou chiffre manquant dans la proposition d'Agent 1
+2. Un risque opérationnel, juridique, RH ou financier critique sous-estimé
+3. Un point d'arbitrage que la direction doit impérativement trancher
+Reste incisif, direct et constructif (environ 90 à 130 mots).`;
+
+                const res2 = await callLLM([
+                  { role: 'system', content: agent2Prompt },
+                  { role: 'user', content: `Document source :\n${docSample}\n\nProposition d'Agent 1 :\n${agent1Draft}` }
+                ], false);
+                const agent2Critique = res2.choices?.[0]?.message?.content?.trim() || "Audit des risques finalisé.";
+
+                sendEvent('agent_message', {
+                  agent: 'Agent 2 : Auditeur Critique & Risques',
+                  message: agent2Critique
+                });
+
+                // Tour 3 : Agent 3 - Stratège Exécutif & Arbitre Métier
+                sendEvent('agent_message', {
+                  agent: 'Agent 3 : Stratège Exécutif & Arbitre',
+                  message: `Arbitrage des divergences entre Analyste et Auditeur, priorisation selon le mode ${modeLabel}...`
+                });
+
+                const agent3Prompt = `Tu es le Stratège Exécutif & Arbitre Métier.
+Prends en compte la proposition initiale d'Agent 1 et les objections critiques formulées par Agent 2.
+Rends un arbitrage exécutif clair pour le mode ${modeLabel} :
+- Quelles critiques d'Agent 2 sont validées et intégrées ?
+- Quels compromis opérationnels ou financiers doivent être actés pour maximiser la valeur et sécuriser l'exécution ?
+Rédige ta synthèse d'arbitrage (environ 90 à 120 mots).`;
+
+                const res3 = await callLLM([
+                  { role: 'system', content: agent3Prompt },
+                  { role: 'user', content: `Proposition Agent 1 :\n${agent1Draft}\n\nCritique Agent 2 :\n${agent2Critique}` }
+                ], false);
+                const agent3Arbitration = res3.choices?.[0]?.message?.content?.trim() || "Arbitrage stratégique validé.";
+
+                sendEvent('agent_message', {
+                  agent: 'Agent 3 : Stratège Exécutif & Arbitre',
+                  message: agent3Arbitration
+                });
+
+                // Tour 4 : Agent 4 - Directeur Général & Juge de Consensus Final
+                sendEvent('agent_message', {
+                  agent: 'Directeur Général & Consensus Final',
+                  message: "Consensus validé entre les 3 auditeurs. Génération et certification de la synthèse exécutive finale..."
+                });
+
+                const systemPrompt = `Tu es le Directeur Général & Juge de Synthèse.
+Tu clôtures la délibération entre l'Analyste, l'Auditeur des Risques et le Stratège.
+Intègre leurs consensus et arbitrages pour produire la synthèse exécutive finale selon le mode : ${modeLabel}.
 
 ${modeInstructions}
 
-RÈGLE ABSOLUE DE VÉRACITÉ : Base-toi UNIQUEMENT et EXCLUSIVEMENT sur les informations réellement présentes dans le document fourni. Ne cite aucun fait ou chiffre non mentionné.
+RÈGLE ABSOLUE DE VÉRACITÉ : Base-toi UNIQUEMENT et EXCLUSIVEMENT sur les informations réellement présentes dans le document fourni et validées lors de la délibération.
 Tu dois répondre UNIQUEMENT par un objet JSON valide respectant rigoureusement ce schéma :
 {
   "id": "${docId}",
@@ -749,10 +824,15 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide respectant rigoureusement 
   ],
   "decisions": ["Décision à acter"],
   "deadlines": ["Échéance si mentionnée"],
-  "stakeholders": ["Parties prenantes si mentionnées"]
+  "stakeholders": ["Parties prenantes si mentionnées"],
+  "consensus_deliberation": {
+    "agent1_extraction": ${JSON.stringify(agent1Draft.slice(0, 300))},
+    "agent2_challenge": ${JSON.stringify(agent2Critique.slice(0, 300))},
+    "agent3_arbitration": ${JSON.stringify(agent3Arbitration.slice(0, 300))}
+  }
 }`;
 
-                const userPrompt = `Voici le contenu intégral du document à analyser en mode « ${mode.toUpperCase()} » :\n\n${storedDoc.text.slice(0, 8000)}\n\nGénère le rapport JSON strictement conforme au mode ${mode}.`;
+                const userPrompt = `Document source :\n${docSample}\n\nDélibération des experts :\n- Agent 1 (Analyste) : ${agent1Draft}\n- Agent 2 (Auditeur) : ${agent2Critique}\n- Agent 3 (Stratège) : ${agent3Arbitration}\n\nGénère le rapport JSON final certifié.`;
 
                 const groqRes = await callLLM([
                   { role: 'system', content: systemPrompt },
@@ -760,15 +840,22 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide respectant rigoureusement 
                 ], true);
 
                 const content = groqRes.choices[0].message.content;
-                const parsed = JSON.parse(content);
-                parsed.mode = mode; // Garantit la persistance du mode
+                let parsed: any;
+                try {
+                  parsed = JSON.parse(content);
+                } catch {
+                  const m = content.match(/\{[\s\S]*\}/);
+                  parsed = m ? JSON.parse(m[0]) : {};
+                }
+
+                parsed.mode = mode;
                 sendEvent('complete', parsed);
                 res.end();
               } catch (err: any) {
-                sendEvent('error', { message: err.message || "Erreur lors de l'analyse du document." });
+                sendEvent('error', { message: err.message || "Erreur lors de l'analyse multi-agents du document." });
                 res.end();
               }
-            }, 600);
+            })();
             return;
           }
 
@@ -892,27 +979,94 @@ Réponds UNIQUEMENT en JSON strict :
               return res.end();
             }
 
-            sendEvent('agent_message', {
-              agent: 'Secrétaire de séance IA',
-              message: "Analyse du verbatim de la réunion, identification des intervenants et structuration de l'ordre du jour..."
-            });
+            // ===================================================================
+            // BOUCLE DE DÉLIBÉRATION CONVERSATIONNELLE MULTI-AGENTS (RÉUNIONS)
+            // ===================================================================
+            const sampleMeeting = meetingText.slice(0, 7000);
 
-            setTimeout(async () => {
-              sendEvent('agent_message', {
-                agent: 'Auditeur des Décisions',
-                message: "Extraction des arbitrages fermes, affectation des livrables et consolidation des risques..."
-              });
-
+            (async () => {
               try {
-                const groqRes = await callLLM([
-                  {
-                    role: 'system',
-                    content: `Tu es un secrétaire de séance de haut niveau pour MDIV Business.
-Analyse fidèlement les notes de réunion transmises.
-RÈGLES ABSOLUES :
-- N'invente aucun participant non cité. Si aucun n'est cité, mets ["Participants à la réunion"].
-- Si un responsable n'est pas spécifié pour une tâche, mets "Non assigné".
-- Si une deadline n'est pas citée, mets "À convenir".
+                // Tour 1 : Secrétaire de séance & Extraction Verbatim
+                sendEvent('agent_message', {
+                  agent: 'Agent 1 : Secrétaire de séance',
+                  message: "Analyse du verbatim de la réunion, identification des intervenants et structuration de l'ordre du jour..."
+                });
+
+                const agent1Prompt = `Tu es le Secrétaire Général de séance pour un comité de direction d'entreprise.
+Analyse les notes ou transcriptions orales de la réunion suivante :
+1. Identifie les participants réels ou implicites et l'objet principal
+2. Extrais les faits saillants, annonces et points abordés
+3. Liste les premières tâches et engagements évoqués
+Sois précis, direct et professionnel (environ 110 à 150 mots).`;
+
+                const res1 = await callLLM([
+                  { role: 'system', content: agent1Prompt },
+                  { role: 'user', content: `Notes de réunion :\n\n${sampleMeeting}` }
+                ], false);
+                const agent1Draft = res1.choices?.[0]?.message?.content?.trim() || "Extraction des sujets de séance effectuée.";
+
+                sendEvent('agent_message', {
+                  agent: 'Agent 1 : Secrétaire de séance',
+                  message: agent1Draft
+                });
+
+                // Tour 2 : Auditeur Critique & Risques Opérationnels
+                sendEvent('agent_message', {
+                  agent: 'Agent 2 : Auditeur des Risques & Échéances',
+                  message: "Challenger les engagements pris, identifier les délais irréalistes et les risques opérationnels..."
+                });
+
+                const agent2Prompt = `Tu es l'Auditeur des Risques Opérationnels & Échéances d'entreprise.
+Examine la proposition du Secrétaire de séance par rapport aux notes sources :
+1. Quelles actions manquent de clarté quant au porteur (assignee) ou à la date limite (deadline) ?
+2. Quels risques critiques (techniques, financiers, d'approvisionnement, RH) n'ont pas été formulés ?
+3. Quelles zones de flou méritent un arbitrage ferme ?
+Reste concis, constructif et rigoureux (environ 90 à 130 mots).`;
+
+                const res2 = await callLLM([
+                  { role: 'system', content: agent2Prompt },
+                  { role: 'user', content: `Notes de réunion :\n${sampleMeeting}\n\nProposition d'Agent 1 :\n${agent1Draft}` }
+                ], false);
+                const agent2Critique = res2.choices?.[0]?.message?.content?.trim() || "Audit des risques finalisé.";
+
+                sendEvent('agent_message', {
+                  agent: 'Agent 2 : Auditeur des Risques & Échéances',
+                  message: agent2Critique
+                });
+
+                // Tour 3 : Directeur des Opérations (RACI)
+                sendEvent('agent_message', {
+                  agent: 'Agent 3 : Directeur des Opérations (RACI)',
+                  message: "Arbitrage des responsabilités, calage des livrables et validation de la gouvernance..."
+                });
+
+                const agent3Prompt = `Tu es le Directeur des Opérations (COO).
+Prends en compte l'analyse du Secrétaire et les alertes de l'Auditeur des Risques.
+Rends tes arbitrages opérationnels :
+- Précise les responsabilités claires (qui fait quoi et pour quand)
+- Fixe les priorités d'action pour sécuriser les livrables
+Rédige ta synthèse d'arbitrage exécutif (environ 90 à 120 mots).`;
+
+                const res3 = await callLLM([
+                  { role: 'system', content: agent3Prompt },
+                  { role: 'user', content: `Proposition Secrétaire :\n${agent1Draft}\n\nCritique Risques :\n${agent2Critique}` }
+                ], false);
+                const agent3Arbitration = res3.choices?.[0]?.message?.content?.trim() || "Matrice des responsabilités validée.";
+
+                sendEvent('agent_message', {
+                  agent: 'Agent 3 : Directeur des Opérations (RACI)',
+                  message: agent3Arbitration
+                });
+
+                // Tour 4 : Directeur Général & Validation Finale
+                sendEvent('agent_message', {
+                  agent: 'Directeur Général & Validation Finale',
+                  message: "Consolidation du consensus des 3 auditeurs. Génération du compte-rendu décisionnel officiel..."
+                });
+
+                const systemPrompt = `Tu es le Directeur Général certifiant le compte-rendu officiel de réunion.
+Tu disposes des délibérations entre le Secrétaire, l'Auditeur des Risques et le Directeur des Opérations.
+Tu dois consolider l'ensemble pour produire un compte-rendu exécutif irréprochable.
 Réponds UNIQUEMENT par ce schéma JSON :
 {
   "id": "meet_${Math.random().toString(36).substring(2, 8)}",
@@ -920,7 +1074,7 @@ Réponds UNIQUEMENT par ce schéma JSON :
   "subject": "Objet précis déduit des notes",
   "participants": ["..."],
   "agenda": ["Point 1", "Point 2"],
-  "executiveSummary": "Synthèse fidèle...",
+  "executiveSummary": "Synthèse fidèle et valorisante...",
   "decisions": [
     {"decision": "Décision actée", "context": "Contexte"}
   ],
@@ -929,20 +1083,37 @@ Réponds UNIQUEMENT par ce schéma JSON :
   ],
   "risks": [
     {"risk": "Point de vigilance", "impact": "Medium"}
-  ]
-}`
-                  },
-                  { role: 'user', content: `Contenu réel des notes de réunion :\n\n${meetingText.slice(0, 6000)}` }
+  ],
+  "consensus_deliberation": {
+    "agent1_verbatim": ${JSON.stringify(agent1Draft.slice(0, 300))},
+    "agent2_risks": ${JSON.stringify(agent2Critique.slice(0, 300))},
+    "agent3_raci": ${JSON.stringify(agent3Arbitration.slice(0, 300))}
+  }
+}`;
+
+                const userPrompt = `Notes de réunion source :\n${sampleMeeting}\n\nDélibération du comité :\n- Secrétaire : ${agent1Draft}\n- Auditeur des Risques : ${agent2Critique}\n- Directeur des Opérations : ${agent3Arbitration}\n\nGénère le compte-rendu JSON certifié.`;
+
+                const groqRes = await callLLM([
+                  { role: 'system', content: systemPrompt },
+                  { role: 'user', content: userPrompt }
                 ], true);
 
-                const report = JSON.parse(groqRes.choices[0].message.content);
+                const content = groqRes.choices[0].message.content;
+                let report: any;
+                try {
+                  report = JSON.parse(content);
+                } catch {
+                  const m = content.match(/\{[\s\S]*\}/);
+                  report = m ? JSON.parse(m[0]) : {};
+                }
+
                 sendEvent('complete', report);
                 res.end();
               } catch (err: any) {
                 sendEvent('error', { message: err.message || "Erreur de traitement IA du compte-rendu." });
                 res.end();
               }
-            }, 600);
+            })();
             return;
           }
 

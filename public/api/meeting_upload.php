@@ -99,17 +99,24 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide conforme à cette structur
         }
 
         // Normalisation et sécurisation absolue des champs attendus par le frontend
-        $report = [
-            'id' => $data['id'] ?? ('meet_' . bin2hex(random_bytes(6))),
-            'date' => $data['date'] ?? date('Y-m-d'),
-            'subject' => !empty($data['subject']) ? $data['subject'] : 'Revue de projet & plan d\'action',
-            'participants' => (isset($data['participants']) && is_array($data['participants']) && count($data['participants']) > 0) ? $data['participants'] : ['Équipe Projet'],
-            'agenda' => (isset($data['agenda']) && is_array($data['agenda']) && count($data['agenda']) > 0) ? $data['agenda'] : ['Avancement et répartition des responsabilités'],
-            'executiveSummary' => $data['executiveSummary'] ?? ($data['summary'] ?? 'Synthèse des décisions opérationnelles et des objectifs fixés.'),
-            'decisions' => (isset($data['decisions']) && is_array($data['decisions'])) ? $data['decisions'] : [],
-            'actions' => (isset($data['actions']) && is_array($data['actions'])) ? $data['actions'] : [],
-            'risks' => (isset($data['risks']) && is_array($data['risks'])) ? $data['risks'] : []
+        $report_id = $data['id'] ?? ('meet_' . bin2hex(random_bytes(6)));
+        $report['id'] = $report_id;
+
+        // Persistance pour la délibération multi-agents en streaming SSE
+        $temp_file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'mdiv_meet_' . $report_id . '.json';
+        $local_temp_dir = __DIR__ . '/temp';
+        if (!is_dir($local_temp_dir)) {
+            @mkdir($local_temp_dir, 0777, true);
+        }
+        $local_temp_file = $local_temp_dir . '/mdiv_meet_' . $report_id . '.json';
+        $data_to_store = [
+            'id' => $report_id,
+            'raw_text' => $raw_text,
+            'report' => $report,
+            'created_at' => date('Y-m-d H:i:s')
         ];
+        @file_put_contents($temp_file, json_encode($data_to_store, JSON_UNESCAPED_UNICODE));
+        @file_put_contents($local_temp_file, json_encode($data_to_store, JSON_UNESCAPED_UNICODE));
 
         echo json_encode($report, JSON_UNESCAPED_UNICODE);
     } else {

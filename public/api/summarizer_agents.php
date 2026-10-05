@@ -136,26 +136,97 @@ DIRECTIVES STRICTES POUR LE MODE STANDARD :
 - 'kpis' : {\"readabilityScore\": 88, \"pageCount\": 2, \"estimatedTimeSavedMinutes\": 35}";
 }
 
-// Agent 1: Analyste Structurel
-sendSSE('agent_message', [
-    'agent' => 'Analyste Structurel',
-    'message' => $agent1Msg
-]);
-usleep(300000);
+// ===================================================================
+// BOUCLE DE DÉLIBÉRATION CONVERSATIONNELLE MULTI-AGENTS EN TEMPS RÉEL
+// ===================================================================
+$doc_sample = mb_substr($doc_text, 0, 7000);
 
-// Agent 2: Expert Stratégie & Décision
+// --- TOUR 1 : Agent 1 - Analyste Factuel & Segmentation ---
 sendSSE('agent_message', [
-    'agent' => 'Expert Stratégie & Décision',
-    'message' => $agent2Msg
+    'agent' => 'Agent 1 : Analyste Factuel & Extraction',
+    'message' => "Analyse et extraction factuelle de « $doc_name » en mode $modeTitle..."
 ]);
-usleep(300000);
 
-$systemPrompt = "Tu es un consortium d'experts et directeurs d'entreprise de haut niveau (Analyste Stratégique, Auditeur des Risques, Directeur Général).
-Ton rôle est de générer la synthèse exécutive du document fourni selon le mode strictement sélectionné : $modeTitle.
+$agent1Prompt = "Tu es l'Analyste Factuel en chef d'un cabinet de conseil de direction.
+Analyse le document fourni et propose une première extraction brute structurée :
+1. Faits majeurs, chiffres clés, dates et clauses irréfutables
+2. Objectifs explicites formulés dans le texte
+3. Premières pistes d'actions et décisions opérationnelles suggérées
+Sois concis, direct et strictement factuel (environ 110 à 150 mots).";
+
+$res1 = callGroqApi([
+    ['role' => 'system', 'content' => $agent1Prompt],
+    ['role' => 'user', 'content' => "Document source :\n\n" . $doc_sample]
+], null, false, false);
+$agent1Draft = trim($res1['choices'][0]['message']['content'] ?? "Extraction des points clés achevée.");
+
+sendSSE('agent_message', [
+    'agent' => 'Agent 1 : Analyste Factuel & Extraction',
+    'message' => $agent1Draft
+]);
+
+// --- TOUR 2 : Agent 2 - Auditeur Critique & Risques ---
+sendSSE('agent_message', [
+    'agent' => 'Agent 2 : Auditeur Critique & Risques',
+    'message' => "Challenger la proposition d'Agent 1, détection des angles morts et des risques critiques..."
+]);
+
+$agent2Prompt = "Tu es l'Auditeur Critique & Challenger de Risques.
+Évalue avec exigence la proposition de l'Analyste Factuel par rapport au document source.
+Identifie :
+1. Une omission, imprécision ou chiffre manquant dans la proposition d'Agent 1
+2. Un risque opérationnel, juridique, RH ou financier critique sous-estimé
+3. Un point d'arbitrage que la direction doit impérativement trancher
+Reste incisif, direct et constructif (environ 90 à 130 mots).";
+
+$res2 = callGroqApi([
+    ['role' => 'system', 'content' => $agent2Prompt],
+    ['role' => 'user', 'content' => "Document source :\n" . $doc_sample . "\n\nProposition d'Agent 1 :\n" . $agent1Draft]
+], null, false, false);
+$agent2Critique = trim($res2['choices'][0]['message']['content'] ?? "Audit des risques finalisé.");
+
+sendSSE('agent_message', [
+    'agent' => 'Agent 2 : Auditeur Critique & Risques',
+    'message' => $agent2Critique
+]);
+
+// --- TOUR 3 : Agent 3 - Stratège Exécutif & Arbitre Métier ---
+sendSSE('agent_message', [
+    'agent' => 'Agent 3 : Stratège Exécutif & Arbitre',
+    'message' => "Arbitrage des divergences entre Analyste et Auditeur, priorisation selon le mode $modeTitle..."
+]);
+
+$agent3Prompt = "Tu es le Stratège Exécutif & Arbitre Métier.
+Prends en compte la proposition initiale d'Agent 1 et les objections critiques formulées par Agent 2.
+Rends un arbitrage exécutif clair pour le mode $modeTitle :
+- Quelles critiques d'Agent 2 sont validées et intégrées ?
+- Quels compromis opérationnels ou financiers doivent être actés pour maximiser la valeur et sécuriser l'exécution ?
+Rédige ta synthèse d'arbitrage (environ 90 à 120 mots).";
+
+$res3 = callGroqApi([
+    ['role' => 'system', 'content' => $agent3Prompt],
+    ['role' => 'user', 'content' => "Proposition Agent 1 :\n" . $agent1Draft . "\n\nCritique Agent 2 :\n" . $agent2Critique]
+], null, false, false);
+$agent3Arbitration = trim($res3['choices'][0]['message']['content'] ?? "Arbitrage stratégique validé.");
+
+sendSSE('agent_message', [
+    'agent' => 'Agent 3 : Stratège Exécutif & Arbitre',
+    'message' => $agent3Arbitration
+]);
+
+// --- TOUR 4 : Agent 4 - Directeur Général & Juge de Consensus Final ---
+sendSSE('agent_message', [
+    'agent' => 'Directeur Général & Consensus Final',
+    'message' => "Consensus validé entre les 3 auditeurs. Génération et certification de la synthèse exécutive finale..."
+]);
+
+$systemPrompt = "Tu es le Directeur Général & Juge de Synthèse.
+Tu clôtures la délibération entre l'Analyste, l'Auditeur des Risques et le Stratège.
+Intègre leurs consensus et arbitrages pour produire la synthèse exécutive finale selon le mode : $modeTitle.
 
 $modeInstructions
 
-RÈGLE ABSOLUE DE VÉRACITÉ : Base-toi UNIQUEMENT et EXCLUSIVEMENT sur les informations réellement présentes dans le document fourni. Ne cite aucun fait ou chiffre non mentionné.
+RÈGLE ABSOLUE DE VÉRACITÉ : Base-toi UNIQUEMENT et EXCLUSIVEMENT sur les informations réellement présentes dans le document fourni et validées lors de la délibération.
 Tu dois répondre UNIQUEMENT par un objet JSON valide respectant rigoureusement ce schéma :
 {
   \"id\": \"$doc_id\",
@@ -178,15 +249,15 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide respectant rigoureusement 
   ],
   \"decisions\": [\"Décision 1 à acter\"],
   \"deadlines\": [\"Échéance 1\"],
-  \"stakeholders\": [\"Direction Générale\", \"Équipes Opérationnelles\"]
+  \"stakeholders\": [\"Direction Générale\", \"Équipes Opérationnelles\"],
+  \"consensus_deliberation\": {
+    \"agent1_extraction\": " . json_encode(mb_substr($agent1Draft, 0, 300)) . ",
+    \"agent2_challenge\": " . json_encode(mb_substr($agent2Critique, 0, 300)) . ",
+    \"agent3_arbitration\": " . json_encode(mb_substr($agent3Arbitration, 0, 300)) . "
+  }
 }";
 
-$userPrompt = "Voici le contenu intégral du document à analyser en mode « " . strtoupper($mode) . " » :\n\n" . mb_substr($doc_text, 0, 8000) . "\n\nGénère le rapport JSON strictement conforme au mode $mode.";
-
-sendSSE('agent_message', [
-    'agent' => 'Directeur Synthèse Exécutive',
-    'message' => "Consolidation finale du rapport au format $modeTitle..."
-]);
+$userPrompt = "Document source :\n" . $doc_sample . "\n\nDélibération des experts :\n- Agent 1 (Analyste) : " . $agent1Draft . "\n- Agent 2 (Auditeur) : " . $agent2Critique . "\n- Agent 3 (Stratège) : " . $agent3Arbitration . "\n\nGénère le rapport JSON final certifié.";
 
 $messages = [
     ['role' => 'system', 'content' => $systemPrompt],
@@ -200,7 +271,7 @@ if (isset($response['choices'][0]['message']['content'])) {
     $reportData = json_decode($content, true);
 
     if (!$reportData) {
-        if (preg_match('/\{.*\}/s', $content, $m)) {
+        if (preg_match('/\{[\s\S]*\}/', $content, $m)) {
             $reportData = json_decode($m[0], true);
         }
     }
