@@ -16,11 +16,12 @@
 
 require_once __DIR__ . '/config.php';
 
-function get_company_context($company_id = null, $query_text = '') {
+function get_company_context($company_id = null, $query_text = '', $tool_type = null) {
     $context = [
         'company' => null,
         'recent_works' => [],
         'vector_knowledge' => [],
+        'few_shot_examples' => [],
         'domain_expertise' => 'Généraliste Direction d\'Entreprise',
         'domain_rules' => '',
         'prompt_injection' => ''
@@ -90,7 +91,23 @@ function get_company_context($company_id = null, $query_text = '') {
                 // table non encore migrée ou vide
             }
 
-            // 4. Recherche sémantique dans la mémoire vectorielle (RAG Hermétique)
+            // 4. Exemples de référence validés par la direction (Human-in-the-Loop / Few-Shot Learning)
+            try {
+                $sqlFewShot = "SELECT title, correction_notes, human_approved_output FROM company_few_shot_examples WHERE company_id = ?";
+                $paramsFew = [intval($company_id)];
+                if (!empty($tool_type)) {
+                    $sqlFewShot .= " AND tool_type = ?";
+                    $paramsFew[] = $tool_type;
+                }
+                $sqlFewShot .= " ORDER BY id DESC LIMIT 2";
+                $stmtFew = $pdo->prepare($sqlFewShot);
+                $stmtFew->execute($paramsFew);
+                $context['few_shot_examples'] = $stmtFew->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $eFew) {
+                // table non encore migrée
+            }
+
+            // 5. Recherche sémantique dans la mémoire vectorielle (RAG Hermétique)
             if (!empty(trim($query_text))) {
                 try {
                     require_once __DIR__ . '/vector_store.php';
@@ -100,7 +117,7 @@ function get_company_context($company_id = null, $query_text = '') {
                 }
             }
 
-            // 5. Construction de la directive d'injection
+            // 6. Construction de la directive d'injection
             $promptInjection = "\n\n==================================================\n";
             $promptInjection .= "CONTEXTE DU COMPTE ENTREPRISE ACTIVE :\n";
             $promptInjection .= "- Raison Sociale : " . ($company['company_name'] ?? 'Entreprise Partenaire') . "\n";
@@ -110,6 +127,18 @@ function get_company_context($company_id = null, $query_text = '') {
             if (!empty($company['city'])) $promptInjection .= "- Siège / Implantation : " . $company['city'] . "\n";
             $promptInjection .= "- POSTURE EXPERTE ASSIGNÉE : " . $context['domain_expertise'] . "\n";
             $promptInjection .= "\n" . $context['domain_rules'] . "\n";
+
+            if (!empty($context['few_shot_examples'])) {
+                $promptInjection .= "\nDIRECTIVES & EXEMPLES DE RÉFÉRENCE VALIDÉS PAR LA DIRECTION (HUMAN-IN-THE-LOOP / FEW-SHOT) :\n";
+                $promptInjection .= "Voici comment les dirigeants de cette entreprise exigent que leurs livrables soient rédigés et arbitrés :\n";
+                foreach ($context['few_shot_examples'] as $fs) {
+                    $fsTitle = $fs['title'] ?? 'Exemple de référence';
+                    $fsNotes = !empty($fs['correction_notes']) ? " | Exigences du dirigeant : " . $fs['correction_notes'] : '';
+                    $fsSnippet = mb_substr(trim($fs['human_approved_output']), 0, 180);
+                    $promptInjection .= "  * [RÉFÉRENCE APPROUVÉE : {$fsTitle}{$fsNotes}] :\n    \"{$fsSnippet}...\"\n";
+                }
+                $promptInjection .= "-> Applique impérativement ce niveau d'exigence, ce style et ces arbitrages dans ta génération.\n";
+            }
 
             if (!empty($context['vector_knowledge'])) {
                 $promptInjection .= "\nEXTRAITS FACTUELS DE LA BASE DE CONNAISSANCES VECTORIELLE (RAG) :\n";

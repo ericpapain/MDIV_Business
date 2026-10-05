@@ -38,8 +38,8 @@ try {
         exit;
     }
 
-    // Chargement du profil de l'entreprise et des normes sectorielles
-    $companyContext = get_company_context($company_id);
+    // Chargement du profil de l'entreprise, des normes sectorielles, du RAG et des Few-Shots
+    $companyContext = get_company_context($company_id, $projectDescription, 'quote');
     $companyPromptInjection = $companyContext['prompt_injection'] ?? '';
 
     // ===================================================================

@@ -57,6 +57,10 @@ try {
         }
     }
 
+    // Rechargement dynamique du contexte d'entreprise avec le texte du document et les Few-Shots
+    $companyContext = get_company_context($company_id, mb_substr($doc_text, 0, 400), 'summarizer');
+    $companyPromptInjection = $companyContext['prompt_injection'] ?? '';
+
 // Configuration des modes spécialisés
 $modeTitle = "Standard";
 $agent1Msg = "Lecture approfondie de « $doc_name » en mode « $mode ». Extraction des métriques et segmentation textuelle...";

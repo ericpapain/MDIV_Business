@@ -361,6 +361,23 @@ function get_db_connection() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
 
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `company_few_shot_examples` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `tool_type` VARCHAR(50) NOT NULL,
+              `title` VARCHAR(255) DEFAULT 'Exemple validé par la direction',
+              `input_summary` TEXT NOT NULL,
+              `original_ai_output` TEXT DEFAULT NULL,
+              `human_approved_output` TEXT NOT NULL,
+              `correction_notes` TEXT DEFAULT NULL,
+              `rating` TINYINT DEFAULT 5,
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              INDEX `idx_fewshot_company_tool` (`company_id`, `tool_type`),
+              INDEX `idx_fewshot_created` (`company_id`, `created_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
         return $pdo;
     } catch (PDOException $e) {
         // En prod, ne pas afficher le vrai message d'erreur pour des raisons de sécurité

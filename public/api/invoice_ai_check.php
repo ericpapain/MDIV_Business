@@ -24,8 +24,8 @@ try {
     $vatAmount = floatval($input['vatAmount'] ?? 0);
     $company_id = intval($input['company_id'] ?? 1);
 
-    // Chargement du profil entreprise & règles métier
-    $companyContext = get_company_context($company_id);
+    // Chargement du profil entreprise, règles métier, RAG et Few-Shots
+    $companyContext = get_company_context($company_id, "$invoiceNumber $clientName", 'invoice');
     $companyPromptInjection = $companyContext['prompt_injection'] ?? '';
 
     // ===================================================================

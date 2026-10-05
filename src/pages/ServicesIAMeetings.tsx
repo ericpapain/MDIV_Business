@@ -28,6 +28,8 @@ import { VersionSelectorBar, VersionItem } from '@/components/common/VersionSele
 import { SavedWorkItem } from '@/lib/savedWorkService';
 import { classifyDocumentContent, ClassificationResult } from '@/lib/documentClassifierService';
 import { DocumentMismatchModal } from '@/components/common/DocumentMismatchModal';
+import { FeedbackCorrectionModal } from '@/components/common/FeedbackCorrectionModal';
+import { Brain } from 'lucide-react';
 
 export default function ServicesIAMeetings() {
   const { language } = useLanguage();
@@ -68,6 +70,7 @@ export default function ServicesIAMeetings() {
   const [mismatchResult, setMismatchResult] = useState<ClassificationResult | null>(null);
   const [isMismatchModalOpen, setIsMismatchModalOpen] = useState(false);
   const [isClassifying, setIsClassifying] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
   // Live Dictation State
   const [dictationStatus, setDictationStatus] = useState<'ready' | 'listening' | 'transcribing' | 'paused' | 'completed'>('ready');
@@ -805,8 +808,15 @@ export default function ServicesIAMeetings() {
                   <span className="font-semibold text-slate-600 flex items-center gap-2">
                     <CheckCircle2 className="text-emerald-500" size={20} /> Rapport généré avec succès
                   </span>
-                  
                   <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsFeedbackModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition-colors border border-purple-200"
+                    >
+                      <Brain className="w-3.5 h-3.5 text-purple-600" />
+                      Valider & Entraîner l'IA
+                    </button>
                     <button
                       type="button"
                       onClick={() => handleAnalyze(true)}
@@ -826,6 +836,17 @@ export default function ServicesIAMeetings() {
                 </div>
                 
                 <MeetingReportView report={currentReport} />
+
+                {/* Modal Human-in-the-Loop : Validation & Apprentissage continu */}
+                <FeedbackCorrectionModal
+                  isOpen={isFeedbackModalOpen}
+                  onClose={() => setIsFeedbackModalOpen(false)}
+                  companyId={company?.id ? Number(company.id) : 1}
+                  toolType="meeting"
+                  deliverableTitle={file?.name || "Compte-Rendu de Réunion"}
+                  originalAiOutput={currentReport}
+                  currentEditedOutput={currentReport}
+                />
               </div>
             )}
           </div>

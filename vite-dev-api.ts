@@ -3928,6 +3928,88 @@ Réponds EXCLUSIVEMENT avec un JSON valide suivant cette structure exacte, sans 
               results
             }));
           }
+
+          // ===================================================================
+          // 45. BRIQUE 6 : HUMAN-IN-THE-LOOP & APPRENTISSAGE CONTINU FEW-SHOT
+          // ===================================================================
+          if (pathname.endsWith('/feedback_loop.php')) {
+            const db = loadDevDb();
+            if (!(db as any).fewShotExamples) {
+              (db as any).fewShotExamples = [];
+            }
+
+            if (req.method === 'GET') {
+              const company_id = Number(urlObj.searchParams.get('company_id') || 0);
+              const tool_type = urlObj.searchParams.get('tool_type');
+
+              if (company_id <= 0) {
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json');
+                return res.end(JSON.stringify({ error: "company_id obligatoire." }));
+              }
+
+              const examples = ((db as any).fewShotExamples || []).filter((ex: any) => {
+                if (ex.company_id !== company_id) return false;
+                if (tool_type && ex.tool_type !== tool_type) return false;
+                return true;
+              });
+
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({
+                status: 'success',
+                company_id,
+                count: examples.length,
+                examples
+              }));
+            }
+
+            // POST : Enregistrement d'une correction / exemple Few-Shot
+            const { fields } = await parseBody(req);
+            const company_id = Number(fields.company_id || 0);
+            const tool_type = String(fields.tool_type || 'general');
+            const title = String(fields.title || 'Correction validée par la direction');
+            const input_summary = String(fields.input_summary || '');
+            const original_ai_output = fields.original_ai_output;
+            const human_approved_output = fields.human_approved_output;
+            const correction_notes = String(fields.correction_notes || '');
+            const rating = Number(fields.rating || 5);
+
+            if (company_id <= 0) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "company_id obligatoire pour garantir l'étanchéité multi-tenant." }));
+            }
+
+            if (!human_approved_output) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "human_approved_output obligatoire." }));
+            }
+
+            const newEx = {
+              id: Date.now(),
+              company_id,
+              tool_type,
+              title,
+              input_summary,
+              original_ai_output: typeof original_ai_output === 'object' ? JSON.stringify(original_ai_output) : String(original_ai_output || ''),
+              human_approved_output: typeof human_approved_output === 'object' ? JSON.stringify(human_approved_output) : String(human_approved_output),
+              correction_notes,
+              rating,
+              created_at: new Date().toISOString()
+            };
+
+            (db as any).fewShotExamples.unshift(newEx);
+            saveDevDb(db);
+
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify({
+              status: 'success',
+              few_shot_id: newEx.id,
+              company_id,
+              message: "La validation et les corrections du dirigeant ont été intégrées dans l'apprentissage continu de l'entreprise."
+            }));
+          }
           next();
         } catch (e: any) {
           res.statusCode = 500;

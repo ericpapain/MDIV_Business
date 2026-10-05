@@ -62,6 +62,10 @@ try {
         $meeting_text = "Réunion de coordination opérationnelle.";
     }
 
+    // Rechargement dynamique du profil de l'entreprise, des règles sectorielles et des Few-Shots
+    $companyContext = get_company_context($company_id, mb_substr($meeting_text, 0, 400), 'meeting');
+    $companyPromptInjection = $companyContext['prompt_injection'] ?? '';
+
     $sample = mb_substr($meeting_text, 0, 7000);
 
     // ===================================================================
