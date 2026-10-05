@@ -439,6 +439,138 @@ export function devApiPlugin(): Plugin {
               }));
             }
           }
+
+          // ===================================================================
+          // 0b. CLASSIFICATION DOCUMENTAIRE & GARDE-FOU D'INTENTION
+          // ===================================================================
+          if (pathname === '/api/classify_document.php') {
+            const { fields } = await parseRequestBody(req);
+            const rawText = (fields.text || fields.raw_text || '').trim();
+            const currentModule = (fields.current_module || '').trim();
+
+            if (!rawText) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "Aucun texte ou document fourni pour classification." }));
+            }
+
+            const sample = rawText.slice(0, 3000);
+            const systemPrompt = `Tu es un classifieur documentaire et routeur d'intention ultra-précis pour une plateforme IA d'entreprise.
+Analyse le texte fourni et détermine avec rigueur à quelle catégorie il appartient :
+Catégories autorisées :
+- 'Facture'
+- 'Devis'
+- 'Compte-rendu' (notes de réunion, transcriptions orales, ordres du jour)
+- 'Contrat' (accords, CGV, baux, contrats de travail ou de prestation)
+- 'Email' (correspondance, lettre professionnelle)
+- 'CV' (profil professionnel, candidature)
+- 'Rapport' (audit, diagnostic stratégique, bilan d'activité)
+- 'Autre'
+
+RÈGLES STRICTES :
+1. Attribue une distribution de probabilité en pourcentages (la somme des scores doit être égale à 100).
+2. Fournis un court extrait explicatif ('summary_snippet') qui justifie ton choix.
+3. Si le document appartient de façon évidente à une catégorie avec un score >= 75%, indique le module d'atterrissage recommandé et 2 à 3 actions logiques pour l'utilisateur.
+
+Tu dois répondre UNIQUEMENT par un objet JSON valide suivant exactement cette structure :
+{
+  "detected_type": "Facture",
+  "confidence": 94,
+  "scores": {
+    "Facture": 94,
+    "Devis": 3,
+    "Compte-rendu": 1,
+    "Contrat": 1,
+    "Email": 1,
+    "Autre": 0
+  },
+  "summary_snippet": "Facture avec numéro d'émission, mention de TVA et total à payer.",
+  "recommended_module": "/services-ia/facturation",
+  "suggested_actions": [
+    {"title": "Analyser et vérifier la facture", "route": "/services-ia/facturation"},
+    {"title": "Générer une relance client", "route": "/services-ia/relances"}
+  ]
+}`;
+
+            try {
+              const messages = [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: `Texte du document à classifier :\n\n${sample}` }
+              ];
+              const aiRes = await callLLM(messages, true);
+              const content = aiRes?.choices?.[0]?.message?.content || '{}';
+              let data: any = {};
+              try {
+                data = JSON.parse(content);
+              } catch {
+                const match = content.match(/\{[\s\S]*\}/);
+                if (match) data = JSON.parse(match[0]);
+              }
+
+              const typeMapping: Record<string, any> = {
+                'Facture': {
+                  route: '/services-ia/facturation',
+                  module_id: 'invoice',
+                  actions: [
+                    { title: 'Vérifier la conformité de cette facture', route: '/services-ia/facturation' },
+                    { title: 'Préparer une relance pour cette facture', route: '/services-ia/relances' }
+                  ]
+                },
+                'Devis': {
+                  route: '/services-ia/devis',
+                  module_id: 'quote',
+                  actions: [
+                    { title: 'Optimiser ou convertir ce devis', route: '/services-ia/devis' }
+                  ]
+                },
+                'Compte-rendu': {
+                  route: '/services-ia/comptes-rendus',
+                  module_id: 'meeting',
+                  actions: [
+                    { title: "Générer le compte-rendu décisionnel & plan d'action", route: '/services-ia/comptes-rendus' }
+                  ]
+                },
+                'Contrat': {
+                  route: '/services-ia/synthese',
+                  module_id: 'summarizer',
+                  actions: [
+                    { title: 'Auditer les clauses et risques du contrat', route: '/services-ia/synthese' }
+                  ]
+                },
+                'Email': {
+                  route: '/services-ia/emails',
+                  module_id: 'email',
+                  actions: [
+                    { title: 'Analyser le ton et rédiger une réponse', route: '/services-ia/emails' }
+                  ]
+                }
+              };
+
+              const detectedType = data.detected_type || 'Autre';
+              if (typeMapping[detectedType]) {
+                data.recommended_module = typeMapping[detectedType].route;
+                data.recommended_module_id = typeMapping[detectedType].module_id;
+                if (!data.suggested_actions || data.suggested_actions.length === 0) {
+                  data.suggested_actions = typeMapping[detectedType].actions;
+                }
+              }
+
+              let isMismatch = false;
+              if (currentModule && data.recommended_module_id) {
+                if (currentModule !== data.recommended_module_id && (data.confidence || 0) >= 70) {
+                  isMismatch = true;
+                }
+              }
+              data.is_mismatch = isMismatch;
+
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify(data));
+            } catch (err: any) {
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: 'Erreur classification: ' + err.message }));
+            }
+          }
           // ===================================================================
           // 1. RÉSUMEUR DE DOCUMENTS (TRAITEMENT RÉEL DU DOCUMENT)
           // ===================================================================

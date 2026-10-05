@@ -26,6 +26,8 @@ import { SaveWorkModal } from '@/components/saved-work/SaveWorkModal';
 import { SavedWorkDrawer } from '@/components/saved-work/SavedWorkDrawer';
 import { VersionSelectorBar, VersionItem } from '@/components/common/VersionSelectorBar';
 import { SavedWorkItem } from '@/lib/savedWorkService';
+import { classifyDocumentContent, ClassificationResult } from '@/lib/documentClassifierService';
+import { DocumentMismatchModal } from '@/components/common/DocumentMismatchModal';
 
 export default function ServicesIAMeetings() {
   const { language } = useLanguage();
@@ -61,6 +63,11 @@ export default function ServicesIAMeetings() {
   // Universal Save & History Drawer State
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
+
+  // Document Type & Intent Guardrail State
+  const [mismatchResult, setMismatchResult] = useState<ClassificationResult | null>(null);
+  const [isMismatchModalOpen, setIsMismatchModalOpen] = useState(false);
+  const [isClassifying, setIsClassifying] = useState(false);
 
   // Live Dictation State
   const [dictationStatus, setDictationStatus] = useState<'ready' | 'listening' | 'transcribing' | 'paused' | 'completed'>('ready');
@@ -237,7 +244,7 @@ export default function ServicesIAMeetings() {
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
 
-  const handleAnalyze = async (isNewVersion = false) => {
+  const handleAnalyze = async (isNewVersion = false, bypassMismatch = false) => {
     if (!file && !text.trim()) {
       toast.error("Veuillez importer un fichier ou coller une transcription.");
       return;
@@ -253,6 +260,24 @@ export default function ServicesIAMeetings() {
       if (isGibberish) {
         toast.error("Votre saisie semble incomplète ou incompréhensible. Pour synthétiser une réunion, veuillez fournir des notes contenant au minimum les sujets abordés, les participants ou les décisions clés prises.");
         return;
+      }
+
+      // Garde-fou d'adéquation de type de document (Brick 1)
+      if (!bypassMismatch && clean.length >= 25) {
+        setIsClassifying(true);
+        try {
+          const classif = await classifyDocumentContent(clean, 'meeting');
+          if (classif && classif.is_mismatch) {
+            setMismatchResult(classif);
+            setIsMismatchModalOpen(true);
+            setIsClassifying(false);
+            return;
+          }
+        } catch (e) {
+          console.warn("[Classification] Non-blocking classification error:", e);
+        } finally {
+          setIsClassifying(false);
+        }
       }
     }
 
@@ -704,10 +729,14 @@ export default function ServicesIAMeetings() {
                 <div className="flex justify-center pt-4">
                   <button 
                     onClick={() => handleAnalyze(false)}
-                    disabled={isAnalyzing || (!file && !text.trim())}
+                    disabled={isAnalyzing || isClassifying || (!file && !text.trim())}
                     className="ia-btn-primary px-8 py-4 text-base font-bold shadow-xl shadow-blue-500/20 flex items-center gap-3 disabled:opacity-50"
                   >
-                    {isAnalyzing ? (
+                    {isClassifying ? (
+                      <>
+                        <Loader2 className="animate-spin" size={20} /> Vérification du document...
+                      </>
+                    ) : isAnalyzing ? (
                       <>
                         <Loader2 className="animate-spin" size={20} /> Analyse en cours...
                       </>
@@ -898,13 +927,25 @@ export default function ServicesIAMeetings() {
         onSelectWork={handleLoadSavedWork}
       />
 
+      {/* Document Mismatch Guardrail Modal */}
+      <DocumentMismatchModal
+        isOpen={isMismatchModalOpen}
+        onClose={() => setIsMismatchModalOpen(false)}
+        onProceedAnyway={() => {
+          setIsMismatchModalOpen(false);
+          handleAnalyze(false, true);
+        }}
+        result={mismatchResult}
+        currentModule="meeting"
+      />
+
       {/* Modal Quota 3 Essais Atteints */}
       <AuthRequiredModal
         isOpen={isQuotaModalOpen}
         onClose={() => setIsQuotaModalOpen(false)}
         onSuccess={() => {
           setIsQuotaModalOpen(false);
-          handleAnalyze();
+          handleAnalyze(false, true);
         }}
         quotaLimitReached={isQuotaLimitReached}
         title="Vous avez utilisé vos 3 essais gratuits"
