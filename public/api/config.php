@@ -378,6 +378,29 @@ function get_db_connection() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
 
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `ai_audit_logs` (
+              `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `user_id` INT DEFAULT NULL,
+              `session_id` VARCHAR(100) NOT NULL,
+              `tool_type` VARCHAR(50) NOT NULL,
+              `document_name` VARCHAR(255) DEFAULT NULL,
+              `provider` VARCHAR(50) NOT NULL,
+              `model` VARCHAR(100) NOT NULL,
+              `total_latency_ms` INT NOT NULL,
+              `prompt_tokens` INT DEFAULT 0,
+              `completion_tokens` INT DEFAULT 0,
+              `total_tokens` INT DEFAULT 0,
+              `cost_estimate_eur` DECIMAL(10, 6) DEFAULT 0.000000,
+              `consensus_status` ENUM('UNANIMOUS', 'ARBITRATED', 'FLAGGED_RISK', 'FAILED') DEFAULT 'ARBITRATED',
+              `agents_trail_json` JSON NOT NULL,
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              INDEX `idx_audit_company` (`company_id`, `created_at`),
+              INDEX `idx_audit_tool` (`tool_type`, `created_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
         return $pdo;
     } catch (PDOException $e) {
         // En prod, ne pas afficher le vrai message d'erreur pour des raisons de sécurité

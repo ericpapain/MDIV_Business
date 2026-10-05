@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Cpu, Zap, Sparkles, Shield, RefreshCw, CheckCircle2, AlertTriangle, ArrowRight, Gauge, Save, Loader2, PlayCircle, Layers, Database, Server, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AIConsensusAuditDashboard } from "@/components/admin/AIConsensusAuditDashboard";
 
 interface AISettings {
   primaryProvider: "groq" | "openai" | "mistral" | "auto";
@@ -47,6 +48,8 @@ export default function AdminAISettings() {
   const [vectorTestResult, setVectorTestResult] = useState<{ loading: boolean; status?: "ok" | "error"; message?: string }>({
     loading: false,
   });
+
+  const [mainTab, setMainTab] = useState<"models" | "telemetry">("models");
 
   const testVectorRAG = async () => {
     setVectorTestResult({ loading: true });
@@ -277,6 +280,34 @@ export default function AdminAISettings() {
         </div>
       </div>
 
+      {/* Navigation par Onglets : Configuration vs Observabilité */}
+      <div className="flex items-center gap-2 p-1.5 bg-secondary/60 rounded-xl border border-border w-fit">
+        <button
+          onClick={() => setMainTab("models")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            mainTab === "models"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Cpu size={14} /> Modèles & Moteur Vectoriel
+        </button>
+        <button
+          onClick={() => setMainTab("telemetry")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            mainTab === "telemetry"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Layers size={14} /> Observabilité & Audit Trail
+        </button>
+      </div>
+
+      {mainTab === "telemetry" ? (
+        <AIConsensusAuditDashboard />
+      ) : (
+        <>
       {/* Mode Sélecteur Global */}
       <div className="bg-[#0e111a] border border-border rounded-2xl p-6 shadow-xl relative overflow-hidden">
         <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
@@ -594,6 +625,8 @@ export default function AdminAISettings() {
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

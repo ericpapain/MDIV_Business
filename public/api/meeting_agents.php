@@ -67,6 +67,7 @@ try {
     $companyPromptInjection = $companyContext['prompt_injection'] ?? '';
 
     $sample = mb_substr($meeting_text, 0, 7000);
+    $startTime = microtime(true);
 
     // ===================================================================
     // TOUR 1 : Agent 1 - Secrétaire de séance & Extraction Verbatim
@@ -217,6 +218,32 @@ Réponds UNIQUEMENT par un objet JSON valide suivant rigoureusement ce schéma :
             'risks' => (isset($data['risks']) && is_array($data['risks'])) ? $data['risks'] : [],
             'consensus_deliberation' => $data['consensus_deliberation'] ?? null
         ];
+
+        // Enregistrement de l'Observabilité & Token Economics (Brique 7)
+        try {
+            require_once __DIR__ . '/ai_telemetry.php';
+            $durationMs = intval((microtime(true) - $startTime) * 1000);
+            log_ai_deliberation([
+                'company_id' => $company_id,
+                'session_id' => $report['id'],
+                'tool_type' => 'meeting',
+                'document_name' => $report['subject'],
+                'provider' => 'groq',
+                'model' => LLM_MODEL,
+                'total_latency_ms' => $durationMs,
+                'prompt_tokens' => intval(mb_strlen($sample . $systemPrompt) / 4),
+                'completion_tokens' => intval(mb_strlen($content) / 4),
+                'consensus_status' => !empty($report['risks']) ? 'ARBITRATED' : 'UNANIMOUS',
+                'agents_trail_json' => [
+                    'agent1_factuel' => $agent1Draft,
+                    'agent2_critique' => $agent2Critique,
+                    'agent3_arbitre' => $agent3Arbitration,
+                    'agent4_dg' => $report['executiveSummary']
+                ]
+            ]);
+        } catch (Exception $eTel) {
+            // Télémétrie non-bloquante
+        }
 
         sendSSE('complete', $report);
     } else {

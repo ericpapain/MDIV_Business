@@ -4010,6 +4010,99 @@ Réponds EXCLUSIVEMENT avec un JSON valide suivant cette structure exacte, sans 
               message: "La validation et les corrections du dirigeant ont été intégrées dans l'apprentissage continu de l'entreprise."
             }));
           }
+
+          // ===================================================================
+          // 46. BRIQUE 7 : OBSERVABILITÉ, TOKEN ECONOMICS & CONSENSUS TRAIL
+          // ===================================================================
+          if (pathname.endsWith('/ai_telemetry.php')) {
+            const db = loadDevDb();
+            if (!(db as any).aiAuditLogs || (db as any).aiAuditLogs.length === 0) {
+              (db as any).aiAuditLogs = [
+                {
+                  id: 1,
+                  company_id: 1,
+                  session_id: "sess_revue_direction_01",
+                  tool_type: "meeting",
+                  document_name: "Comité de Direction Q4",
+                  provider: "groq",
+                  model: "qwen/qwen3.8-27b",
+                  total_latency_ms: 3820,
+                  prompt_tokens: 1450,
+                  completion_tokens: 680,
+                  total_tokens: 2130,
+                  cost_estimate_eur: 0.000383,
+                  consensus_status: "ARBITRATED",
+                  agents_trail: {
+                    agent1_factuel: "Extraction des budgets Q4 (450k€) et des 4 livrables prioritaires.",
+                    agent2_critique: "Alerte critique sur la surcharge backend à 120% et risque de retard de 2 semaines.",
+                    agent3_arbitre: "Arbitrage COO : Recrutement de 2 prestataires externes pour sécuriser la mise en production.",
+                    agent4_dg: "Synthèse exécutif certifiée et matrice RACI actée."
+                  },
+                  created_at: new Date(Date.now() - 3600000).toISOString()
+                },
+                {
+                  id: 2,
+                  company_id: 1,
+                  session_id: "sess_facturation_02",
+                  tool_type: "invoice",
+                  document_name: "Audit Facture FAC-2026-089",
+                  provider: "openai",
+                  model: "gpt-4o-mini",
+                  total_latency_ms: 2450,
+                  prompt_tokens: 890,
+                  completion_tokens: 410,
+                  total_tokens: 1300,
+                  cost_estimate_eur: 0.000350,
+                  consensus_status: "UNANIMOUS",
+                  agents_trail: {
+                    agent1_fiscal: "Mentions obligatoires vérifiées (TVA, numéro SIREN, pénalités L. 441-10).",
+                    agent2_recouvrement: "Conformité du délai de paiement à 30 jours net validée.",
+                    agent3_dg: "Facture déclarée 100% conforme pour transmission client."
+                  },
+                  created_at: new Date(Date.now() - 7200000).toISOString()
+                }
+              ];
+              saveDevDb(db);
+            }
+
+            const company_id = Number(urlObj.searchParams.get('company_id') || 0);
+            const tool_type = urlObj.searchParams.get('tool_type');
+            const limit = Math.min(100, Math.max(1, Number(urlObj.searchParams.get('limit') || 25)));
+
+            let logs: any[] = (db as any).aiAuditLogs || [];
+            if (company_id > 0) {
+              logs = logs.filter(l => l.company_id === company_id);
+            }
+            if (tool_type) {
+              logs = logs.filter(l => l.tool_type === tool_type);
+            }
+
+            const totalRuns = logs.length;
+            const totalTokens = logs.reduce((acc, l) => acc + (l.total_tokens || 0), 0);
+            const totalPromptTokens = logs.reduce((acc, l) => acc + (l.prompt_tokens || 0), 0);
+            const totalCompletionTokens = logs.reduce((acc, l) => acc + (l.completion_tokens || 0), 0);
+            const totalCostEur = logs.reduce((acc, l) => acc + (l.cost_estimate_eur || 0), 0);
+            const avgLatencyMs = totalRuns > 0 ? logs.reduce((acc, l) => acc + (l.total_latency_ms || 0), 0) / totalRuns : 0;
+            const arbitratedCount = logs.filter(l => l.consensus_status === 'ARBITRATED').length;
+            const unanimousCount = logs.filter(l => l.consensus_status === 'UNANIMOUS').length;
+
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify({
+              status: 'success',
+              company_id,
+              kpis: {
+                total_runs: totalRuns,
+                total_tokens: totalTokens,
+                total_prompt_tokens: totalPromptTokens,
+                total_completion_tokens: totalCompletionTokens,
+                total_cost_eur: Math.round(totalCostEur * 10000) / 10000,
+                avg_latency_ms: Math.round(avgLatencyMs),
+                arbitrated_rate: totalRuns > 0 ? Math.round((arbitratedCount / totalRuns) * 100) : 0,
+                unanimous_rate: totalRuns > 0 ? Math.round((unanimousCount / totalRuns) * 100) : 0
+              },
+              recent_logs: logs.slice(0, limit)
+            }));
+          }
           next();
         } catch (e: any) {
           res.statusCode = 500;
