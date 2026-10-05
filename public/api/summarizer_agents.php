@@ -22,6 +22,7 @@ while (ob_get_level() > 0) { ob_end_flush(); }
 ob_implicit_flush(1);
 
 require_once __DIR__ . '/groq_client.php';
+require_once __DIR__ . '/context_engine.php';
 
 function sendSSE($event, $data) {
     echo "event: $event\n";
@@ -32,6 +33,10 @@ function sendSSE($event, $data) {
 $doc_id = $_GET['doc_id'] ?? '';
 $mode = $_GET['mode'] ?? 'standard';
 $company_id = isset($_GET['company_id']) ? intval($_GET['company_id']) : 1;
+
+// Chargement du contexte entreprise & posture experte
+$companyContext = get_company_context($company_id);
+$companyPromptInjection = $companyContext['prompt_injection'] ?? '';
 
 try {
     $temp_file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'mdiv_sum_' . $doc_id . '.json';
@@ -152,7 +157,7 @@ Analyse le document fourni et propose une première extraction brute structurée
 1. Faits majeurs, chiffres clés, dates et clauses irréfutables
 2. Objectifs explicites formulés dans le texte
 3. Premières pistes d'actions et décisions opérationnelles suggérées
-Sois concis, direct et strictement factuel (environ 110 à 150 mots).";
+Sois concis, direct et strictement factuel (environ 110 à 150 mots)." . $companyPromptInjection;
 
 $res1 = callGroqApi([
     ['role' => 'system', 'content' => $agent1Prompt],
@@ -177,7 +182,7 @@ Identifie :
 1. Une omission, imprécision ou chiffre manquant dans la proposition d'Agent 1
 2. Un risque opérationnel, juridique, RH ou financier critique sous-estimé
 3. Un point d'arbitrage que la direction doit impérativement trancher
-Reste incisif, direct et constructif (environ 90 à 130 mots).";
+Reste incisif, direct et constructif (environ 90 à 130 mots)." . $companyPromptInjection;
 
 $res2 = callGroqApi([
     ['role' => 'system', 'content' => $agent2Prompt],
@@ -201,7 +206,7 @@ Prends en compte la proposition initiale d'Agent 1 et les objections critiques f
 Rends un arbitrage exécutif clair pour le mode $modeTitle :
 - Quelles critiques d'Agent 2 sont validées et intégrées ?
 - Quels compromis opérationnels ou financiers doivent être actés pour maximiser la valeur et sécuriser l'exécution ?
-Rédige ta synthèse d'arbitrage (environ 90 à 120 mots).";
+Rédige ta synthèse d'arbitrage (environ 90 à 120 mots)." . $companyPromptInjection;
 
 $res3 = callGroqApi([
     ['role' => 'system', 'content' => $agent3Prompt],
@@ -225,6 +230,7 @@ Tu clôtures la délibération entre l'Analyste, l'Auditeur des Risques et le St
 Intègre leurs consensus et arbitrages pour produire la synthèse exécutive finale selon le mode : $modeTitle.
 
 $modeInstructions
+$companyPromptInjection
 
 RÈGLE ABSOLUE DE VÉRACITÉ : Base-toi UNIQUEMENT et EXCLUSIVEMENT sur les informations réellement présentes dans le document fourni et validées lors de la délibération.
 Tu dois répondre UNIQUEMENT par un objet JSON valide respectant rigoureusement ce schéma :
@@ -256,6 +262,7 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide respectant rigoureusement 
     \"agent3_arbitration\": " . json_encode(mb_substr($agent3Arbitration, 0, 300)) . "
   }
 }";
+
 
 $userPrompt = "Document source :\n" . $doc_sample . "\n\nDélibération des experts :\n- Agent 1 (Analyste) : " . $agent1Draft . "\n- Agent 2 (Auditeur) : " . $agent2Critique . "\n- Agent 3 (Stratège) : " . $agent3Arbitration . "\n\nGénère le rapport JSON final certifié.";
 

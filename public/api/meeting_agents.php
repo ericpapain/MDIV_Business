@@ -22,6 +22,7 @@ while (ob_get_level() > 0) { ob_end_flush(); }
 ob_implicit_flush(1);
 
 require_once __DIR__ . '/groq_client.php';
+require_once __DIR__ . '/context_engine.php';
 
 function sendSSE($event, $data) {
     echo "event: $event\n";
@@ -31,6 +32,10 @@ function sendSSE($event, $data) {
 
 $context = $_GET['context'] ?? '';
 $company_id = isset($_GET['company_id']) ? intval($_GET['company_id']) : 1;
+
+// Chargement du profil de l'entreprise et de sa posture d'expert sectoriel
+$companyContext = get_company_context($company_id);
+$companyPromptInjection = $companyContext['prompt_injection'] ?? '';
 
 try {
     $meeting_text = $context;
@@ -72,7 +77,7 @@ Analyse les notes ou transcriptions orales de la réunion suivante :
 1. Identifie les participants réels ou implicites et l'objet principal
 2. Extrais les faits saillants, annonces et points abordés
 3. Liste les premières tâches et engagements évoqués
-Sois précis, direct et professionnel (environ 110 à 150 mots).";
+Sois précis, direct et professionnel (environ 110 à 150 mots)." . $companyPromptInjection;
 
     $res1 = callGroqApi([
         ['role' => 'system', 'content' => $agent1Prompt],
@@ -98,7 +103,7 @@ Examine la proposition du Secrétaire de séance par rapport aux notes sources :
 1. Quelles actions manquent de clarté quant au porteur (assignee) ou à la date limite (deadline) ?
 2. Quels risques critiques (techniques, financiers, d'approvisionnement, RH) n'ont pas été formulés ?
 3. Quelles zones de flou méritent un arbitrage ferme ?
-Reste concis, constructif et rigoureux (environ 90 à 130 mots).";
+Reste concis, constructif et rigoureux (environ 90 à 130 mots)." . $companyPromptInjection;
 
     $res2 = callGroqApi([
         ['role' => 'system', 'content' => $agent2Prompt],
@@ -124,7 +129,7 @@ Prends en compte l'analyse du Secrétaire et les alertes de l'Auditeur des Risqu
 Rends tes arbitrages opérationnels :
 - Précise les responsabilités claires (qui fait quoi et pour quand)
 - Fixe les priorités d'action pour sécuriser les livrables
-Rédige ta synthèse d'arbitrage exécutif (environ 90 à 120 mots).";
+Rédige ta synthèse d'arbitrage exécutif (environ 90 à 120 mots)." . $companyPromptInjection;
 
     $res3 = callGroqApi([
         ['role' => 'system', 'content' => $agent3Prompt],
@@ -148,6 +153,8 @@ Rédige ta synthèse d'arbitrage exécutif (environ 90 à 120 mots).";
     $systemPrompt = "Tu es le Directeur Général certifiant le compte-rendu officiel de réunion.
 Tu disposes des délibérations entre le Secrétaire, l'Auditeur des Risques et le Directeur des Opérations.
 Tu dois consolider l'ensemble pour produire un compte-rendu exécutif irréprochable.
+$companyPromptInjection
+
 Réponds UNIQUEMENT par un objet JSON valide suivant rigoureusement ce schéma :
 {
   \"id\": \"meet_" . bin2hex(random_bytes(6)) . "\",
@@ -171,6 +178,7 @@ Réponds UNIQUEMENT par un objet JSON valide suivant rigoureusement ce schéma :
     \"agent3_raci\": " . json_encode(mb_substr($agent3Arbitration, 0, 300)) . "
   }
 }";
+
 
     $userPrompt = "Notes de réunion source :\n" . $sample . "\n\nDélibération du comité :\n- Secrétaire : " . $agent1Draft . "\n- Auditeur des Risques : " . $agent2Critique . "\n- Directeur des Opérations : " . $agent3Arbitration . "\n\nGénère le compte-rendu JSON certifié.";
 
