@@ -53,6 +53,7 @@ const ServicesIAContent = lazy(() => import("./pages/ServicesIAContent"));
 const ServicesIALeads = lazy(() => import("./pages/ServicesIALeads"));
 const ServicesIAProspecting = lazy(() => import("./pages/ServicesIAProspecting"));
 const ServicesIAMeetingPrep = lazy(() => import("./pages/ServicesIAMeetingPrep"));
+const ServicesIAPricing = lazy(() => import("./pages/ServicesIAPricing"));
 
 // ─── Admin pages (lazy-loaded) ───────────────────────────────────────────────
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -131,6 +132,8 @@ const App = () => (
                     <Route path="/services-ia/generateur-leads" element={<ServicesIALeads />} />
                     <Route path="/services-ia/prospection-email" element={<ServicesIAProspecting />} />
                     <Route path="/services-ia/prepa-reunion" element={<ServicesIAMeetingPrep />} />
+                    <Route path="/services-ia/tarifs" element={<ServicesIAPricing />} />
+                    <Route path="/tarifs" element={<ServicesIAPricing />} />
                     <Route path="/services-ia/:category" element={<ServicesIACategory />} />
                     {/* BNE & Blog */}
                     <Route path="/sejours-bne" element={<SejoursBNE />} />

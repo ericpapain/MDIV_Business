@@ -102,7 +102,40 @@ export async function generateContentMultiChannelAI(
     throw new Error(errorMsg);
   }
 
-  return response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    throw new Error("Erreur de parsing de la réponse serveur.");
+  }
+  
+  if (!Array.isArray(data)) {
+    // Si l'IA a retourné un objet avec le tableau à l'intérieur (ex: { "data": [...] } )
+    if (data && typeof data === 'object') {
+      // S'il y a un message d'erreur explicite renvoyé par le backend
+      if (data.error) throw new Error(data.error);
+      
+      // Si l'IA a renvoyé un seul objet au lieu d'un tableau
+      if (data.channel && data.body) return [data];
+
+      if (Array.isArray(data.data)) return data.data;
+      if (Array.isArray(data.results)) return data.results;
+      if (Array.isArray(data.channels)) return data.channels;
+      
+      // Chercher n'importe quelle clé qui contient un tableau
+      for (const key of Object.keys(data)) {
+        if (Array.isArray(data[key])) {
+          return data[key];
+        }
+      }
+    }
+    
+    if (data && data.status === 'success') return [];
+    console.error("Format inattendu reçu de l'IA :", data);
+    throw new Error("Le serveur n'a pas retourné un tableau de résultats.");
+  }
+
+  return data;
 }
 
 /**

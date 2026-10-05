@@ -49,12 +49,12 @@ export default function Blog() {
     },
     {
       id: 4,
-      title: "L'Afrique construit plus vite que jamais : +7,1% de croissance BTP",
+      title: "L'Afrique construit plus vite que jamais : +7,1% de croissance des Infrastructures",
       category: "BNE BUSINESS",
       color: "gold",
       date: "14/06/2026",
-      desc: "Le secteur BTP africain croît de 7,1% par an pour atteindre 363 milliards USD en 2031. Opportunités massives.",
-      tags: ["#BTP", "#Afrique", "#croissance"],
+      desc: "Le secteur des infrastructures africain croît de 7,1% par an pour atteindre 363 milliards USD en 2031. Opportunités massives.",
+      tags: ["#Infrastructures", "#Afrique", "#croissance"],
       img: "https://fr.le360.ma/resizer/v2/34EWUQBKCVAXFATUWWZO7IUFR4.jpg?auth=869e94ca59a8dd7324fd07cbf74a99cf2062d8761c934d34fd050572523ab7ee&smart=true&width=1216&height=684"
     },
     {

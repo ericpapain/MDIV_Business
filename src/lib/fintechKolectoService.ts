@@ -88,6 +88,7 @@ export interface FecExportDiagnosis {
   totalCredit: number;
   isBalanced: boolean;
   preview: string[];
+  accountsSummary?: Array<{ code: string; name: string; debit: number; credit: number }>;
   downloadUrl: string;
   compatibleSoftware: string[];
 }

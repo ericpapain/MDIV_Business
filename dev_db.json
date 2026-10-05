@@ -15,322 +15,43 @@
       "password_hash": "$2y$10$e.w2O9VvV107Y0GqWkM4Kek73Pz9B3QhZkJwGq7uM3mF3y7kR0N7q",
       "status": "active",
       "created_at": "2026-09-28T11:00:00.000Z"
-    }
-  ],
-  "clients": [
-    {
-      "id": 1,
-      "company_id": 1,
-      "name": "Jean-Marc Dupont",
-      "email": "jm.dupont@groupe-industriel.fr",
-      "company": "Groupe Industriel de l'Est",
-      "address": "12 Avenue de l'Europe, 67000 Strasbourg",
-      "phone": "+33 3 88 00 11 22",
-      "createdAt": "2026-09-28T16:08:30.656Z"
-    },
-    {
-      "id": 2,
-      "company_id": 1,
-      "name": "Claire Lefebvre",
-      "email": "claire.l@novabiotech.com",
-      "company": "Nova Biotech SAS",
-      "address": "45 Rue de la Recherche, 69007 Lyon",
-      "phone": "+33 4 72 33 44 55",
-      "createdAt": "2026-09-28T16:08:30.667Z"
     },
     {
       "id": 3,
-      "company_id": 2,
-      "name": "Marc Lemaire",
-      "email": "m.lemaire@lemaire-btp.fr",
-      "company": "Lemaire BTP",
-      "address": "5 Rue des Chantiers, 75012 Paris",
-      "phone": "+33 1 45 67 89 00",
-      "createdAt": "2026-09-28T16:30:00.000Z"
-    },
-    {
-      "id": 4,
-      "company_id": 1,
-      "name": "Alexandre Mercier",
-      "company": "Mercier Tech Solutions",
-      "email": "a.mercier@mercier-tech.fr",
-      "phone": "06 11 22 33 44",
-      "address": "10 Rue de la Paix, 75002 Paris",
-      "notes": "",
-      "createdAt": "2026-09-28T20:42:58.792Z"
+      "company_name": "GOOGLE FRANCE",
+      "siren": "443061841",
+      "siret": "44306184100047",
+      "trade_name": null,
+      "legal_form": "SAS",
+      "naf_code": "62.02A",
+      "activity": "Conseil en systèmes informatiques",
+      "address": "8 RUE DE LONDRES",
+      "postal_code": "75009",
+      "city": "PARIS",
+      "country": "France",
+      "creation_date": null,
+      "employee_range": null,
+      "capital": null,
+      "email": "sundar.test@google.fr",
+      "phone": null,
+      "company_status": "ACTIVE",
+      "data_source": "INSEE",
+      "official_data": null,
+      "first_name": "Sundar",
+      "last_name": "Pichai",
+      "job_title": "Dirigeant / Fondateur",
+      "password_hash": "hash_dev_StrongPassword2026!",
+      "status": "active",
+      "created_at": "2026-10-03T02:04:56.895Z"
     }
   ],
-  "invoices": [
-    {
-      "id": "inv_1790611710680",
-      "company_id": 1,
-      "invoiceNumber": "FAC-2026-0001",
-      "clientName": "Groupe Industriel de l'Est",
-      "clientId": 1,
-      "amountHT": 5000,
-      "amountTTC": 6000,
-      "status": "overdue",
-      "date": "2026-09-28",
-      "createdAt": "2026-09-28T16:08:30.680Z"
-    }
-  ],
-  "quotes": [
-    {
-      "id": "dev_1790628178799",
-      "company_id": 1,
-      "clientId": 4,
-      "clientName": "Alexandre Mercier (Mercier Tech Solutions)",
-      "quoteNumber": "DEV-2026-TEST",
-      "date": "2026-09-28",
-      "totalHT": 4500,
-      "totalVAT": 900,
-      "totalTTC": 5400,
-      "status": "draft",
-      "executiveSummary": "Accompagnement IA et automatisation pour Mercier Tech Solutions",
-      "paymentTerms": "30 jours net",
-      "lines": [
-        {
-          "id": "1",
-          "description": "Audit et diagnostic IA",
-          "quantity": 1,
-          "unitPriceHT": 2000,
-          "vatRate": 20,
-          "discountPercentage": 0
-        },
-        {
-          "id": "2",
-          "description": "Deploiement Copilot",
-          "quantity": 1,
-          "unitPriceHT": 2500,
-          "vatRate": 20,
-          "discountPercentage": 0
-        }
-      ],
-      "createdAt": "2026-09-28T20:42:58.799Z"
-    },
-    {
-      "id": "dev_1790612000001",
-      "company_id": 1,
-      "clientId": 1,
-      "clientName": "Groupe Industriel de l'Est",
-      "quoteNumber": "DEV-2026-0001",
-      "date": "2026-09-28",
-      "totalHT": 8400,
-      "totalVAT": 1680,
-      "totalTTC": 10080,
-      "status": "sent",
-      "executiveSummary": "Proposition d'accompagnement transformation numérique et implémentation IA.",
-      "paymentTerms": "Acompte 30% à la commande, solde à 30 jours.",
-      "lines": [
-        {
-          "id": "line_1",
-          "description": "Audit des processus métiers et cadrage IA Copilot",
-          "quantity": 1,
-          "unitPriceHT": 3500,
-          "vatRate": 20,
-          "discountPercentage": 0
-        },
-        {
-          "id": "line_2",
-          "description": "Déploiement et paramétrage des agents d'automatisation",
-          "quantity": 1,
-          "unitPriceHT": 4900,
-          "vatRate": 20,
-          "discountPercentage": 0
-        }
-      ],
-      "createdAt": "2026-09-28T17:00:00.000Z"
-    }
-  ],
-  "projects": [
-    {
-      "id": "prj_1790628178820",
-      "company_id": 1,
-      "clientId": 4,
-      "clientName": "Alexandre Mercier (Mercier Tech Solutions)",
-      "quoteId": "DEV-2026-TEST",
-      "title": "Chantier Automatisation Mercier Tech",
-      "description": "Deploiement complet des agents metiers.",
-      "budget": 5400,
-      "status": "in_progress",
-      "startDate": "2026-10-01",
-      "endDate": "",
-      "createdAt": "2026-09-28T20:42:58.820Z"
-    },
-    {
-      "id": "prj_1790613000001",
-      "company_id": 1,
-      "clientId": 1,
-      "clientName": "Groupe Industriel de l'Est",
-      "quoteId": "dev_1790612000001",
-      "title": "Chantier Modernisation IA & ERP",
-      "description": "Automatisation des flux de commandes et intégration des agents de reporting.",
-      "budget": 10080,
-      "status": "in_progress",
-      "startDate": "2026-10-01",
-      "endDate": "2026-12-15",
-      "createdAt": "2026-09-28T17:15:00.000Z"
-    }
-  ],
+  "clients": [],
+  "invoices": [],
+  "quotes": [],
+  "projects": [],
   "followups": [],
-  "integrations": [
-    {
-      "id": 1,
-      "company_id": 1,
-      "provider": "google",
-      "account_email": "direction@mdiv-business.fr",
-      "status": "connected",
-      "scopes": [
-        "gmail.send",
-        "calendar.events",
-        "contacts"
-      ],
-      "token_expires_at": "2027-01-01T00:00:00.000Z",
-      "created_at": "2026-09-28T10:00:00.000Z"
-    },
-    {
-      "id": 2,
-      "company_id": 1,
-      "provider": "microsoft",
-      "account_email": "contact@mdiv-business.onmicrosoft.com",
-      "status": "connected",
-      "scopes": [
-        "Mail.Send",
-        "Calendars.ReadWrite",
-        "Contacts.ReadWrite"
-      ],
-      "token_expires_at": "2027-01-01T00:00:00.000Z",
-      "created_at": "2026-09-28T10:00:00.000Z"
-    }
-  ],
-  "expenses": [
-    {
-      "id": "exp_1790764876876",
-      "company_id": 1,
-      "project_id": "prj_1790628178820",
-      "client_id": 3,
-      "merchant": "Ensuite",
-      "category": "restauration",
-      "invoice_number": "TICKET",
-      "date": "2017-02-15",
-      "amount_ht": 9,
-      "amount_tva": 0.9,
-      "tva_rate": 10,
-      "amount_ttc": 9.9,
-      "payment_method": "cb",
-      "receipt_url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...",
-      "notes": "1 Bol. Tofu 8.90 EUR, 1 Pop Ball carotte 1.00 EUR, TVA (10.0%) 0.90 EUR, TOTAL TTC 9.90 EUR",
-      "created_at": "2026-09-30T10:41:16.876Z"
-    },
-    {
-      "id": "exp_1790764601142",
-      "company_id": 1,
-      "project_id": "prj_1790613000001",
-      "client_id": 2,
-      "merchant": "Tempo",
-      "category": "autre",
-      "invoice_number": "12345",
-      "date": "2025-02-12",
-      "amount_ht": 4650,
-      "amount_tva": 930,
-      "tva_rate": 20,
-      "amount_ttc": 5580,
-      "payment_method": "virement",
-      "receipt_url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...",
-      "notes": "Facture n°12345 pour divers services de création artistique.",
-      "created_at": "2026-09-30T10:36:41.142Z"
-    },
-    {
-      "id": "exp_1790684690961",
-      "company_id": 1,
-      "project_id": null,
-      "client_id": null,
-      "merchant": "Tempo",
-      "category": "sous_traitance",
-      "invoice_number": "12345",
-      "date": "2025-02-12",
-      "amount_ht": 4650,
-      "amount_tva": 930,
-      "tva_rate": 20,
-      "amount_ttc": 5580,
-      "payment_method": "cb",
-      "receipt_url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCI...",
-      "notes": "Facture n°12345 pour divers services de création artistique.",
-      "created_at": "2026-09-29T12:24:50.961Z"
-    },
-    {
-      "id": "exp_1790610001",
-      "company_id": 1,
-      "project_id": "prj_1790613000001",
-      "client_id": 1,
-      "merchant": "TotalEnergies Relais",
-      "category": "carburant",
-      "date": "2026-09-25",
-      "invoice_number": "TKT-884920",
-      "total_ht": 65,
-      "total_vat": 13,
-      "total_ttc": 78,
-      "vat_details": [
-        {
-          "rate": 20,
-          "amount": 13
-        }
-      ],
-      "payment_method": "CB",
-      "confidence_score": 0.99,
-      "status": "valide",
-      "notes": "Déplacement chantier Groupe Industriel",
-      "created_at": "2026-09-25T14:30:00.000Z"
-    },
-    {
-      "id": "exp_1790610002",
-      "company_id": 1,
-      "project_id": "prj_1790613000001",
-      "client_id": 1,
-      "merchant": "Point.P Matériaux",
-      "category": "materiaux",
-      "date": "2026-09-26",
-      "invoice_number": "FAC-PP-2026-993",
-      "total_ht": 420,
-      "total_vat": 84,
-      "total_ttc": 504,
-      "vat_details": [
-        {
-          "rate": 20,
-          "amount": 84
-        }
-      ],
-      "payment_method": "Virement",
-      "confidence_score": 0.98,
-      "status": "valide",
-      "notes": "Fournitures et outillage de raccordement",
-      "created_at": "2026-09-26T09:15:00.000Z"
-    },
-    {
-      "id": "exp_1790610003",
-      "company_id": 1,
-      "project_id": null,
-      "client_id": null,
-      "merchant": "Kiloutou Location",
-      "category": "location_materiel",
-      "date": "2026-09-27",
-      "invoice_number": "KIL-7721",
-      "total_ht": 160,
-      "total_vat": 32,
-      "total_ttc": 192,
-      "vat_details": [
-        {
-          "rate": 20,
-          "amount": 32
-        }
-      ],
-      "payment_method": "CB",
-      "confidence_score": 0.97,
-      "status": "valide",
-      "notes": "Location équipement nacelle",
-      "created_at": "2026-09-27T16:00:00.000Z"
-    }
-  ],
+  "integrations": [],
+  "expenses": [],
   "aiSettings": {
     "primaryProvider": "groq",
     "groqModel": "qwen/qwen3.8-27b",

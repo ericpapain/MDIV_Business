@@ -5,9 +5,9 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { EnterpriseAuthBar } from '@/components/site/EnterpriseAuthBar';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, Calendar, User, Sparkles, Loader2, ChevronDown,
+  ArrowLeft, ArrowRight, Calendar, User, Sparkles, Loader2, ChevronDown,
   Target, AlertTriangle, HelpCircle, TrendingUp, Zap, Clock,
-  Copy, Check, FileText, Building2, History, Shield
+  Copy, Check, FileText, Building2, History, Shield, Brain, CheckCircle2, RefreshCcw
 } from 'lucide-react';
 
 import {
@@ -17,6 +17,8 @@ import {
 import { fetchClients, Client } from '@/lib/quoteService'; // réutilisation service existant
 import { ClientSelectWithCreate } from '@/components/clients/ClientSelectWithCreate';
 import { CalendarScheduleModal } from '@/components/integrations/CalendarScheduleModal';
+import { useGuestQuota } from '@/hooks/useGuestQuota';
+import { AuthRequiredModal } from '@/components/auth/AuthRequiredModal';
 
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -56,6 +58,15 @@ export default function ServicesIAMeetingPrep() {
   const { company } = useAuth();
   const { language } = useLanguage();
 
+  const {
+    remainingTrials,
+    isLimitReached,
+    isAuthModalOpen,
+    setIsAuthModalOpen,
+    checkCanExecute,
+    recordExecution
+  } = useGuestQuota('meeting-prep');
+
   // Data
   const [clients, setClients] = useState<Client[]>([]);
   const [upcomingMeetings, setUpcomingMeetings] = useState<UpcomingMeeting[]>([]);
@@ -87,6 +98,12 @@ export default function ServicesIAMeetingPrep() {
   }, [selectedClientId]);
 
   const loadInitialData = async () => {
+    if (!company?.id) {
+      setClients([]);
+      setUpcomingMeetings([]);
+      setIsLoadingData(false);
+      return;
+    }
     setIsLoadingData(true);
     try {
       const [c, m] = await Promise.all([
@@ -100,6 +117,10 @@ export default function ServicesIAMeetingPrep() {
   };
 
   const loadClientHistory = async (clientId: number) => {
+    if (!company?.id) {
+      setClientHistory(null);
+      return;
+    }
     try {
       const h = await fetchClientHistory(clientId, company?.id);
       setClientHistory(h);
@@ -125,6 +146,8 @@ export default function ServicesIAMeetingPrep() {
       return;
     }
 
+    if (!checkCanExecute()) return;
+
     const selectedClient = clients.find(c => c.id === selectedClientId);
     const req: MeetingPrepRequest = {
       clientId: selectedClientId as number,
@@ -139,6 +162,7 @@ export default function ServicesIAMeetingPrep() {
     try {
       const result = await generateMeetingBriefing(req, company?.id);
       setBriefing(result);
+      recordExecution();
       toast.success('Briefing généré avec succès.');
     } catch (err: any) {
       toast.error(err.message || 'Erreur lors de la génération.');
@@ -171,29 +195,100 @@ export default function ServicesIAMeetingPrep() {
   return (
     <div className="ia-page min-h-screen pt-32 pb-20 bg-slate-50/50">
       <div className="container mx-auto px-4 max-w-7xl">
-        <EnterpriseAuthBar className="mb-8" />
+        {/* Header avec Vidéo et Étapes */}
+        <div className="mb-12 flex flex-col md:flex-row md:justify-between md:items-stretch gap-6">
+          <div className="pt-2 flex flex-col justify-between">
+            <div className="flex items-center gap-4 mb-4">
+              <Link to="/services-ia" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors">
+                <ArrowLeft size={16} /> "Retour aux Services IA"
+              </Link>
+              <button onClick={() => window.location.reload()} className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors" title="Actualiser et relancer l'IA">
+                <RefreshCcw size={16} /> "Actualiser et recommencer"
+              </button>
+            </div>
+            <div className="flex items-center gap-3 text-indigo-600 font-bold uppercase tracking-widest text-xs mb-2">
+              <Calendar size={16} /> Assistant Commercial
+            </div>
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Préparation de RDV IA
+            </h1>
+            <p className="text-slate-600 font-medium text-lg max-w-2xl mb-8">
+              L'IA analyse l'historique réel du client et génère un briefing complet :
+              synthèse, objections probables, questions recommandées et stratégie de découverte.
+            </p>
 
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            to="/services-ia"
-            className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors mb-4"
-          >
-            <ArrowLeft size={16} /> Retour aux Services IA
-          </Link>
-          <div className="flex items-center gap-3 text-indigo-600 font-bold uppercase tracking-widest text-xs mb-2">
-            <Calendar size={16} /> Assistant Commercial
+            {/* Séparateur créatif */}
+            <div className="flex items-center gap-4 mb-8 max-w-lg">
+              <div className="h-px bg-gradient-to-r from-indigo-300 via-blue-300 to-transparent flex-1"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+              <div className="w-1 h-1 rounded-full bg-indigo-400 opacity-50"></div>
+            </div>
+
+            {/* Comment ça marche : Visuel à étapes détaillées */}
+            <div className="max-w-2xl">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                
+                {/* Étape 1 */}
+                <div className="flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:border-indigo-200 hover:shadow-md transition-all group flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                      <Calendar size={16} />
+                    </div>
+                    <span className="text-sm font-bold text-slate-800">1. Paramètres</span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium pl-11">Sélectionnez le client & date.</p>
+                </div>
+
+                {/* Flèche de liaison */}
+                <div className="hidden sm:flex items-center justify-center flex-shrink-0 text-indigo-500 bg-indigo-50/80 h-8 w-8 rounded-full border border-indigo-100/50 shadow-[0_0_10px_rgba(99,102,241,0.2)] animate-[pulse_1.5s_ease-in-out_infinite]">
+                  <ArrowRight size={16} strokeWidth={3} className="ml-0.5" />
+                </div>
+                <div className="w-px h-6 bg-gradient-to-b from-indigo-200 to-blue-200 ml-8 sm:hidden"></div>
+
+                {/* Étape 2 */}
+                <div className="flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all group relative flex-1">
+                  <div className="absolute -top-1.5 -right-1.5">
+                    <span className="flex h-3.5 w-3.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-blue-500 shadow-sm"></span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:rotate-12 transition-transform flex-shrink-0">
+                      <Brain size={16} />
+                    </div>
+                    <span className="text-sm font-bold text-slate-800">2. Analyse IA</span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium pl-11">L'IA étudie l'historique CRM.</p>
+                </div>
+
+                {/* Flèche de liaison */}
+                <div className="hidden sm:flex items-center justify-center flex-shrink-0 text-blue-500 bg-blue-50/80 h-8 w-8 rounded-full border border-blue-100/50 shadow-[0_0_10px_rgba(59,130,246,0.2)] animate-[pulse_1.5s_ease-in-out_infinite]" style={{ animationDelay: '0.5s' }}>
+                  <ArrowRight size={16} strokeWidth={3} className="ml-0.5" />
+                </div>
+                <div className="w-px h-6 bg-gradient-to-b from-blue-200 to-slate-800 ml-8 sm:hidden"></div>
+
+                {/* Étape 3 */}
+                <div className="flex flex-col gap-2 bg-slate-900 p-4 rounded-xl shadow-md hover:bg-slate-800 hover:shadow-lg transition-all group flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                      <CheckCircle2 size={16} />
+                    </div>
+                    <span className="text-sm font-bold text-white">3. Briefing</span>
+                  </div>
+                  <p className="text-xs text-white font-medium pl-11">Obtenez la synthèse finale.</p>
+                </div>
+
+              </div>
+            </div>
           </div>
-          <h1
-            className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3"
-            style={{ fontFamily: "'Inter', sans-serif" }}
-          >
-            Préparation de RDV IA
-          </h1>
-          <p className="text-slate-600 font-medium text-lg max-w-2xl">
-            L'IA analyse l'historique réel du client et génère un briefing complet :
-            synthèse, objections probables, questions recommandées et stratégie de découverte.
-          </p>
+
+          {/* Bloc Vidéo */}
+          <div className="max-w-sm md:max-w-md lg:max-w-lg w-full rounded-2xl overflow-hidden shadow-xl shadow-blue-600/10 border border-slate-100 flex-shrink-0">
+            <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+              <source src="https://cdn.prod.website-files.com/6373b53b7e4adf70ce44cbd5%2F6a71f36dba060eceb7c770d6_anim%20-%20gestion%20des%20achats_webm.webm" type="video/webm" />
+            </video>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
@@ -228,7 +323,7 @@ export default function ServicesIAMeetingPrep() {
             )}
 
             {/* Formulaire */}
-            <div className="ia-card bg-white p-6 border border-slate-200 rounded-2xl space-y-5">
+            <div className="ia-card bg-white p-6 border border-slate-200 rounded-2xl space-y-5 relative z-30 overflow-visible">
               <h3 className="font-bold text-lg text-slate-800">Configuration du briefing</h3>
 
               {/* Client selector avec création intégrée */}
@@ -273,20 +368,20 @@ export default function ServicesIAMeetingPrep() {
 
               {/* Date du RDV */}
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
                   Date & Heure du RDV *
                 </label>
                 <input
                   type="datetime-local"
                   value={meetingDate}
                   onChange={e => setMeetingDate(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                 />
               </div>
 
               {/* Objectif */}
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
                   Objectif principal du RDV
                 </label>
                 <input
@@ -294,13 +389,13 @@ export default function ServicesIAMeetingPrep() {
                   value={meetingObjective}
                   onChange={e => setMeetingObjective(e.target.value)}
                   placeholder="Ex: Présenter notre offre Copilot M365…"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                 />
               </div>
 
               {/* Notes contextuelles */}
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
                   Contexte / Notes manuelles
                 </label>
                 <textarea
@@ -308,19 +403,26 @@ export default function ServicesIAMeetingPrep() {
                   onChange={e => setMeetingContext(e.target.value)}
                   placeholder="Informations supplémentaires connues sur ce RDV…"
                   rows={3}
-                  className="w-full px-4 py-3 bg-white border border-[#D9D9D9] dark:border-slate-700 rounded-[12px] text-sm font-normal text-slate-900 dark:text-slate-100 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 min-h-[90px] resize-y transition-all"
+                  className="w-full px-4 py-3 bg-white border border-[#D9D9D9] dark:border-slate-700 rounded-[12px] text-sm font-semibold text-slate-900 dark:text-slate-100 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 min-h-[90px] resize-y transition-all"
                 />
               </div>
 
               <button
                 onClick={handleGenerate}
                 disabled={isGenerating || !selectedClientId || !meetingDate}
-                className="w-full ia-btn-primary py-3.5 font-bold flex justify-center items-center gap-2 disabled:opacity-50"
+                className="w-full ia-btn-primary py-3.5 font-bold flex flex-col items-center justify-center gap-1 disabled:opacity-50"
               >
-                {isGenerating
-                  ? <><Loader2 size={18} className="animate-spin" /> Analyse IA en cours…</>
-                  : <><Sparkles size={18} /> Générer le Briefing</>
-                }
+                <span className="flex items-center gap-2">
+                  {isGenerating
+                    ? <><Loader2 size={18} className="animate-spin" /> Analyse IA en cours…</>
+                    : <><Sparkles size={18} /> Générer le Briefing</>
+                  }
+                </span>
+                {!company?.id && (
+                  <span className="text-[11px] font-normal text-indigo-200">
+                    ⚡ {remainingTrials} / 3 essais gratuits restants
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -469,6 +571,15 @@ export default function ServicesIAMeetingPrep() {
           clientName: selectedClient?.name
         }}
         companyId={company?.id}
+      />
+
+      {/* Modale d'authentification requise au 4ème essai */}
+      <AuthRequiredModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        title="Vous avez utilisé vos 3 essais gratuits sur cet outil"
+        subtitle="Créez votre compte entreprise en 30 secondes ou connectez-vous pour débloquer l'accès illimité, synchroniser votre calendrier et sauvegarder vos briefings."
+        quotaLimitReached={isLimitReached}
       />
     </div>
   );

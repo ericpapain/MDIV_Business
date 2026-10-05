@@ -135,10 +135,37 @@ export async function fetchMeetingHistory(companyId?: number): Promise<MeetingRe
   return Array.isArray(data) ? data : [];
 }
 
+import { downloadMeetingReportPDF } from './pdfExportService';
+
 /**
  * Demande la génération du fichier PDF/Word définitif.
+ * Si format === 'pdf' et le rapport est fourni, télécharge directement le PDF vectoriel haute fidélité.
  */
-export async function exportMeetingReport(reportId: string, format: 'pdf' | 'docx') {
+export async function exportMeetingReport(reportIdOrObj: string | MeetingReport, format: 'pdf' | 'docx', reportFallback?: MeetingReport) {
+  const report = typeof reportIdOrObj === 'object' ? reportIdOrObj : reportFallback;
+
+  if (format === 'pdf' && report) {
+    try {
+      await downloadMeetingReportPDF({
+        title: report.subject || 'Compte-rendu de réunion',
+        date: report.date || new Date().toISOString(),
+        participants: report.participants || [],
+        summary: report.executiveSummary || '',
+        decisions: report.decisions?.map(d => typeof d === 'string' ? d : d.decision) || [],
+        actionItems: report.actions?.map(a => ({
+          task: a.task,
+          assignee: a.assignee,
+          deadline: a.deadline,
+          priority: a.status
+        }))
+      });
+      return;
+    } catch (err) {
+      console.error("Erreur téléchargement PDF réunion:", err);
+    }
+  }
+
+  const reportId = typeof reportIdOrObj === 'string' ? reportIdOrObj : reportIdOrObj.id;
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = getApiUrl('meeting_export.php');
@@ -160,3 +187,4 @@ export async function exportMeetingReport(reportId: string, format: 'pdf' | 'doc
   form.submit();
   document.body.removeChild(form);
 }
+

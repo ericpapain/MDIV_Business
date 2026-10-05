@@ -160,6 +160,43 @@ if (isset($_GET['download'])) {
     exit;
 }
 
+// Calcul de la synthèse des comptes PCG
+$totalVentes = 0.0;
+$totalClients = 0.0;
+$totalTvaCollectee = 0.0;
+$totalAchats = 0.0;
+$totalFournisseurs = 0.0;
+$totalTvaDeductible = 0.0;
+
+foreach ($invoices as $inv) {
+    if (($inv['company_id'] ?? 1) !== $companyId) continue;
+    $ht = floatval($inv['amount_ht'] ?? $inv['totalHT'] ?? $inv['amountHT'] ?? 0);
+    $vat = floatval($inv['amount_tva'] ?? $inv['totalVAT'] ?? 0);
+    $ttc = floatval($inv['amount_ttc'] ?? $inv['totalTTC'] ?? $inv['amountTTC'] ?? ($ht + $vat));
+    $totalVentes += $ht;
+    $totalTvaCollectee += $vat;
+    $totalClients += $ttc;
+}
+
+foreach ($expenses as $exp) {
+    if (($exp['company_id'] ?? 1) !== $companyId) continue;
+    $ht = floatval($exp['amount_ht'] ?? $exp['total_ht'] ?? 0);
+    $vat = floatval($exp['amount_tva'] ?? $exp['total_vat'] ?? 0);
+    $ttc = floatval($exp['amount_ttc'] ?? $exp['total_ttc'] ?? ($ht + $vat));
+    $totalAchats += $ht;
+    $totalTvaDeductible += $vat;
+    $totalFournisseurs += $ttc;
+}
+
+$accountsSummary = [
+    ['code' => '411000', 'name' => 'Clients (Créances)', 'debit' => round($totalClients, 2), 'credit' => 0.0],
+    ['code' => '706000', 'name' => 'Prestations de services et ventes', 'debit' => 0.0, 'credit' => round($totalVentes, 2)],
+    ['code' => '445710', 'name' => 'TVA collectée (20%)', 'debit' => 0.0, 'credit' => round($totalTvaCollectee, 2)],
+    ['code' => '401000', 'name' => 'Fournisseurs (Dettes)', 'debit' => 0.0, 'credit' => round($totalFournisseurs, 2)],
+    ['code' => '606000', 'name' => 'Achats & Fournitures d\'exploitation', 'debit' => round($totalAchats, 2), 'credit' => 0.0],
+    ['code' => '445660', 'name' => 'TVA déductible sur autres biens et services', 'debit' => round($totalTvaDeductible, 2), 'credit' => 0.0]
+];
+
 // Réponse JSON de diagnostic et audit de pré-comptabilité
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode([
@@ -168,11 +205,13 @@ echo json_encode([
     'fiscalYear' => $fiscalYear,
     'siren' => $siren,
     'entriesCount' => $ecritureIndex - 1,
-    'linesCount' => count($lines) - 1,
+    'linesCount' => max(0, count($lines) - 1),
     'totalDebit' => round($totalDebit, 2),
     'totalCredit' => round($totalCredit, 2),
     'isBalanced' => abs($totalDebit - $totalCredit) < 0.05,
     'preview' => array_slice($lines, 0, 15),
+    'accountsSummary' => $accountsSummary,
     'downloadUrl' => 'api/fec_export.php?download=1&company_id=' . $companyId . '&year=' . $fiscalYear . '&siren=' . $siren,
     'compatibleSoftware' => ['Cegid Expert', 'Sage 100', 'Pennylane', 'ACD Conseil', 'Ibiza', 'MyUnisoft', 'Agiris']
 ], JSON_UNESCAPED_UNICODE);
+

@@ -58,12 +58,18 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
 
   // Fetch clients on mount and when company changes
   const loadClients = async () => {
+    if (!company?.id) {
+      setClients([]);
+      setIsLoadingClients(false);
+      return;
+    }
     setIsLoadingClients(true);
     try {
-      const data = await fetchClients(company?.id);
+      const data = await fetchClients(company.id);
       setClients(data);
     } catch (err) {
       console.error("Erreur lors de la récupération des clients:", err);
+      setClients([]);
     } finally {
       setIsLoadingClients(false);
     }
@@ -163,19 +169,19 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
   };
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${isDropdownOpen ? 'z-[9999]' : 'z-20'} ${className}`}>
       {/* Label and "+ Nouveau client" button */}
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-          <Building2 size={16} className="text-gold" />
-          {label} {required && <span className="text-gold">*</span>}
+        <label className="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <Building2 size={16} className="text-blue-500" />
+          {label} {required && <span className="text-blue-500">*</span>}
         </label>
         
         <button
           type="button"
           onClick={handleOpenCreate}
           id="btn-add-new-client"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 rounded-lg transition-all shadow-sm hover:scale-[1.02]"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 rounded-lg transition-all shadow-sm hover:scale-[1.02] cursor-pointer"
         >
           <UserPlus size={13} />
           + Nouveau client
@@ -184,19 +190,19 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
 
       {/* Selected Client Display or Select Trigger */}
       {selectedClient ? (
-        <div className="flex items-center justify-between p-3.5 bg-[#121624]/90 border border-gold/40 rounded-xl shadow-inner group hover:border-gold transition-all">
+        <div className="flex items-center justify-between p-3.5 bg-[#F8F7F4] border border-slate-200 rounded-xl shadow-sm group hover:border-blue-400 transition-all">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gold/10 border border-gold/30 flex items-center justify-center text-gold font-bold text-sm">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 font-bold text-sm">
               {selectedClient.company?.charAt(0) || selectedClient.name?.charAt(0) || 'C'}
             </div>
             <div>
-              <div className="text-sm font-semibold text-white flex items-center gap-2">
+              <div className="text-sm font-semibold text-[#222222] flex items-center gap-2">
                 {selectedClient.company || selectedClient.name}
-                <span className="text-[10px] bg-gold/20 text-gold border border-gold/30 px-1.5 py-0.5 rounded-full">
+                <span className="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-1.5 py-0.5 rounded-full">
                   Client sélectionné
                 </span>
               </div>
-              <div className="text-xs text-gray-400 flex items-center gap-3 mt-0.5">
+              <div className="text-xs text-slate-500 flex items-center gap-3 mt-0.5">
                 <span>Contact : {selectedClient.name}</span>
                 {selectedClient.email && <span>• {selectedClient.email}</span>}
                 {selectedClient.phone && <span>• {selectedClient.phone}</span>}
@@ -206,7 +212,7 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
           <button
             type="button"
             onClick={() => onSelectClient(null)}
-            className="p-1.5 text-gray-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
             title="Désélectionner"
           >
             <X size={16} />
@@ -216,58 +222,84 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
         <div className="relative">
           <button
             type="button"
+            role="combobox"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-full flex items-center justify-between px-3.5 py-3 bg-[#0d101a] border border-gray-700/60 rounded-xl text-left text-sm text-gray-300 hover:border-gold/50 focus:outline-none focus:border-gold transition-colors"
+            className="w-full flex items-center justify-between px-3.5 py-3 bg-[#F8F7F4] border border-slate-200 rounded-xl text-left text-sm text-[#222222] hover:border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm cursor-pointer"
           >
-            <span className={selectedClient ? "text-white" : "text-gray-400"}>
+            <span className={selectedClient ? "text-[#222222]" : "text-[#666666]"} data-placeholder="true">
               {placeholder}
             </span>
-            <ChevronDown size={16} className={`text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={16} className={`text-slate-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
           </button>
+
+          {/* Backdrop transparent pour fermer au clic extérieur */}
+          {isDropdownOpen && (
+            <div 
+              className="fixed inset-0 z-[9998] bg-transparent" 
+              onClick={() => setIsDropdownOpen(false)} 
+            />
+          )}
 
           {/* Dropdown Menu */}
           {isDropdownOpen && (
-            <div className="absolute z-40 w-full mt-2 bg-[#121624] border border-gold/30 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute z-[9999] left-0 right-0 w-full mt-2 bg-white border border-slate-200/90 rounded-2xl shadow-[0_25px_70px_rgba(0,0,0,0.22)] overflow-hidden animate-in fade-in zoom-in-95 duration-100 ring-1 ring-slate-900/5">
               {/* Search Bar */}
-              <div className="p-2 border-b border-gray-800 flex items-center gap-2 bg-[#0d101a]/80">
-                <Search size={14} className="text-gray-400 ml-1" />
+              <div className="p-2 border-b border-slate-100 flex items-center gap-2 bg-[#F8F7F4]">
+                <Search size={14} className="text-slate-400 ml-1" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Rechercher par nom, entreprise, email..."
-                  className="w-full bg-transparent text-xs text-white placeholder-gray-500 focus:outline-none py-1"
+                  className="w-full bg-transparent text-xs text-[#222222] placeholder-[#666666] focus:outline-none py-1"
                   autoFocus
                 />
                 {searchQuery && (
-                  <button type="button" onClick={() => setSearchQuery('')} className="text-gray-400 hover:text-white p-1">
+                  <button type="button" onClick={() => setSearchQuery('')} className="text-slate-400 hover:text-slate-600 p-1">
                     <X size={12} />
                   </button>
                 )}
               </div>
 
               {/* Client List */}
-              <div className="max-h-56 overflow-y-auto divide-y divide-gray-800/40">
+              <div className="max-h-56 overflow-y-auto divide-y divide-slate-100">
                 {isLoadingClients ? (
-                  <div className="p-4 text-center text-xs text-gray-400 flex items-center justify-center gap-2">
-                    <Loader2 size={14} className="animate-spin text-gold" />
+                  <div className="p-4 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                    <Loader2 size={14} className="animate-spin text-blue-500" />
                     Chargement des clients...
                   </div>
                 ) : filteredClients.length === 0 ? (
-                  <div className="p-4 text-center">
-                    <p className="text-xs text-gray-400 mb-2">Aucun client trouvé.</p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        handleOpenCreate();
-                      }}
-                      className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline font-medium"
-                    >
-                      <UserPlus size={13} />
-                      Créer ce client maintenant
-                    </button>
-                  </div>
+                  !isAuthenticated ? (
+                    <div className="p-4 text-center">
+                      <p className="text-xs text-slate-500 mb-2">Connectez-vous pour retrouver vos clients enregistrés.</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          setIsAuthModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline font-bold"
+                      >
+                        <Building2 size={13} />
+                        Se connecter à mon entreprise
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center">
+                      <p className="text-xs text-slate-500 mb-2">Aucun client trouvé.</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          handleOpenCreate();
+                        }}
+                        className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline font-medium"
+                      >
+                        <UserPlus size={13} />
+                        Créer ce client maintenant
+                      </button>
+                    </div>
+                  )
                 ) : (
                   filteredClients.map((client) => (
                     <button
@@ -278,18 +310,18 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
                         setIsDropdownOpen(false);
                         setSearchQuery('');
                       }}
-                      className="w-full text-left p-3 hover:bg-gold/10 transition-colors flex items-center justify-between group"
+                      className="w-full text-left p-3 hover:bg-[#F8F7F4] transition-colors flex items-center justify-between group"
                     >
                       <div>
-                        <div className="text-sm font-semibold text-white group-hover:text-gold transition-colors">
+                        <div className="text-sm font-semibold text-[#222222] group-hover:text-blue-600 transition-colors">
                           {client.company || client.name}
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-slate-500">
                           {client.name} {client.email ? `• ${client.email}` : ''}
                         </div>
                       </div>
                       {String(selectedClientId) === String(client.id) && (
-                        <Check size={16} className="text-gold" />
+                        <Check size={16} className="text-blue-600" />
                       )}
                     </button>
                   ))
@@ -297,8 +329,8 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
               </div>
 
               {/* Footer with "+ Nouveau client" */}
-              <div className="p-2 border-t border-gray-800 bg-[#0d101a]/90 flex justify-between items-center">
-                <span className="text-[11px] text-gray-400 px-2">
+              <div className="p-2 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
+                <span className="text-[11px] text-slate-500 px-2">
                   {clients.length} client{clients.length > 1 ? 's' : ''} enregistré{clients.length > 1 ? 's' : ''}
                 </span>
                 <button
@@ -307,7 +339,7 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
                     setIsDropdownOpen(false);
                     handleOpenCreate();
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-gold text-black rounded-lg hover:bg-gold/90 transition-all"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-sm"
                 >
                   <UserPlus size={12} />
                   + Nouveau client
@@ -321,34 +353,34 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
       {/* Modal: Création d'un nouveau client (via Portal au-dessus de tout) */}
       {isCreateModalOpen && typeof document !== 'undefined' && createPortal(
         <div 
-          className="fixed inset-0 z-[99999] overflow-y-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fade-in"
+          className="fixed inset-0 z-[99999] overflow-y-auto bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-fade-in"
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsCreateModalOpen(false);
           }}
           style={{ pointerEvents: 'auto' }}
         >
           <div 
-            className="relative w-full max-w-lg bg-[#121624] border border-gold/40 rounded-3xl p-6 md:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.95)] text-white my-auto max-h-[92vh] overflow-y-auto transform-none"
+            className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-2xl text-slate-900 my-auto max-h-[92vh] overflow-y-auto transform-none"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(false)}
-              className="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5"
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-lg hover:bg-slate-100"
               aria-label="Fermer"
             >
               <X size={20} />
             </button>
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-11 h-11 rounded-2xl bg-gold/15 border border-gold/30 flex items-center justify-center text-gold">
+              <div className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
                 <UserPlus size={22} />
               </div>
               <div>
-                <h3 className="text-xl font-bold font-serif text-white">
+                <h3 className="text-xl font-bold font-serif text-slate-900">
                   Ajouter un nouveau client
                 </h3>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-slate-500">
                   Créez la fiche client et associez-la immédiatement à ce document.
                 </p>
               </div>
@@ -357,8 +389,8 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
             <form onSubmit={handleClientSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">
-                    Nom du contact <span className="text-gold">*</span>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Nom du contact <span className="text-blue-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -366,11 +398,10 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="ex: Jean Dupont"
-                    className="w-full bg-[#0d101a] border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gold"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
                     Entreprise / Raison sociale
                   </label>
                   <input
@@ -378,62 +409,61 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
                     value={newCompany}
                     onChange={(e) => setNewCompany(e.target.value)}
                     placeholder="ex: SAS Dupont Immobilier"
-                    className="w-full bg-[#0d101a] border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gold"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
                     Email professionnel
                   </label>
                   <div className="relative">
-                    <Mail size={15} className="absolute left-3 top-3 text-gray-500" />
+                    <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <input
                       type="email"
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
                       placeholder="contact@dupont.fr"
-                      className="w-full bg-[#0d101a] border border-gray-700/80 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gold"
+                      className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
                     Téléphone
                   </label>
                   <div className="relative">
-                    <Phone size={15} className="absolute left-3 top-3 text-gray-500" />
+                    <Phone size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <input
                       type="tel"
                       value={newPhone}
                       onChange={(e) => setNewPhone(e.target.value)}
                       placeholder="+33 6 12 34 56 78"
-                      className="w-full bg-[#0d101a] border border-gray-700/80 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gold"
+                      className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">
+                <label className="block text-xs font-bold text-slate-800 mb-1">
                   Adresse postale
                 </label>
                 <div className="relative">
-                  <MapPin size={15} className="absolute left-3 top-3 text-gray-500" />
-                  <input
-                    type="text"
-                    value={newAddress}
-                    onChange={(e) => setNewAddress(e.target.value)}
-                    placeholder="12 Avenue Montaigne, 75008 Paris"
-                    className="w-full bg-[#0d101a] border border-gray-700/80 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gold"
-                  />
+                  <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={newAddress}
+                      onChange={(e) => setNewAddress(e.target.value)}
+                      placeholder="12 Avenue Montaigne, 75008 Paris"
+                      className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                    />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">
+                <label className="block text-xs font-bold text-slate-800 mb-1">
                   Notes internes (optionnel)
                 </label>
                 <textarea
@@ -441,31 +471,30 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
                   value={newNotes}
                   onChange={(e) => setNewNotes(e.target.value)}
                   placeholder="Notes sur les besoins ou particularités du client..."
-                  className="w-full bg-[#0d101a] border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gold resize-y min-h-[70px]"
                 />
               </div>
 
               {!isAuthenticated && (
-                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-200/90 flex items-center gap-2">
-                  <Sparkles size={16} className="text-amber-400 shrink-0" />
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-800 flex items-center gap-2">
+                  <Sparkles size={16} className="text-blue-500 shrink-0" />
                   <span>
                     Vous êtes en mode démo. La connexion vous sera demandée pour enregistrer ce client dans votre entreprise.
                   </span>
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 mt-4">
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-medium text-gray-400 hover:text-white transition-colors"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 bg-gradient-to-r from-gold to-amber-500 text-black font-semibold text-xs rounded-xl shadow-lg hover:shadow-gold/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="px-5 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl shadow-md hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>

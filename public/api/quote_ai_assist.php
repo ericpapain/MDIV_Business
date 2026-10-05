@@ -24,8 +24,26 @@ try {
         throw new Exception("La description du projet est requise pour générer les lignes de devis.");
     }
 
+    // FILTRE ANTI-GRIBOUILLAGE
+    $isGibberish = strlen($projectDescription) < 8
+        || preg_match('/^(.)\1{4,}/i', $projectDescription)
+        || (preg_match('/^[b-df-hj-np-tv-z0-9\s.,;:!?\'-]{10,}$/i', $projectDescription) && !preg_match('/[aeiouy]/i', $projectDescription));
+
+    if ($isGibberish) {
+        http_response_code(400);
+        echo json_encode([
+            'error' => "Votre saisie semble incomplète ou incompréhensible. Pour générer un devis précis, veuillez indiquer au minimum la nature des prestations souhaitées, le contexte du client et les quantités ou budgets indicatifs."
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     $systemPrompt = "Tu es un directeur commercial et tarificateur expert pour MDIV Business.
 À partir du contexte client et de la description du projet, génère une proposition commerciale et des lignes de devis détaillées et réalistes.
+
+GARDE-FOU ANTI-GRIBOUILLAGE :
+Si la saisie client est incohérente, fantaisiste ou dénuée de sens métier, tu NE DOIS PAS inventer de fausses prestations. Renvoie :
+{\"error\": \"Votre saisie semble incomplète ou incompréhensible. Pour générer un devis précis, veuillez indiquer au minimum la nature des prestations souhaitées, le contexte du client et les quantités ou budgets indicatifs.\"}
+
 Tu dois répondre UNIQUEMENT par un objet JSON valide suivant rigoureusement cette structure :
 {
   \"suggestedLines\": [

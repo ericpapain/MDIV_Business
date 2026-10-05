@@ -27,13 +27,13 @@ export interface ExtractedReceipt {
 }
 
 export const CATEGORY_LABELS: Record<ExpenseCategory, { label: string; color: string; badge: string }> = {
-  carburant: { label: 'Carburant & Essence', color: 'text-amber-500', badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  peage: { label: 'Péages & Transports', color: 'text-sky-400', badge: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
-  materiaux: { label: 'Matériaux & Fournitures (Point.P, etc.)', color: 'text-emerald-400', badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  outillage: { label: 'Outillage & Équipements', color: 'text-orange-400', badge: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
-  location: { label: 'Location Engins & Véhicules (Kiloutou...)', color: 'text-purple-400', badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-  restauration: { label: 'Repas & Frais Déplacement', color: 'text-pink-400', badge: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
-  sous_traitance: { label: 'Sous-traitance & Prestataires', color: 'text-indigo-400', badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+  carburant: { label: 'Carburant & Énergie', color: 'text-amber-500', badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+  peage: { label: 'Déplacements & Transports', color: 'text-sky-400', badge: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
+  materiaux: { label: 'Achats & Fournitures professionnelles', color: 'text-emerald-400', badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+  outillage: { label: 'Matériel, Équipements & Logiciels', color: 'text-orange-400', badge: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
+  location: { label: 'Location & Abonnements', color: 'text-purple-400', badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+  restauration: { label: 'Repas & Frais de Mission', color: 'text-pink-400', badge: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
+  sous_traitance: { label: 'Sous-traitance & Prestataires externes', color: 'text-indigo-400', badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
   autre: { label: 'Autres Frais Généraux', color: 'text-slate-400', badge: 'bg-slate-500/10 text-slate-400 border-slate-500/20' }
 };
 

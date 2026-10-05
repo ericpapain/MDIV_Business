@@ -25,6 +25,15 @@ try {
 
     $systemPrompt = "Tu es un moteur de prospection et d'intelligence commerciale B2B spécialisé pour MDIV Business.
 À partir des filtres de ciblage demandés, génère une liste de 4 à 6 entreprises cibles crédibles et hautement qualifiées avec leur profil d'enrichissement IA.
+
+RÈGLE ABSOLUE POUR LES SITES WEB (ZÉRO LIEN MORT 404) :
+Interdiction formelle d'inventer des URLs profondes fictives ou des noms de domaine fantaisistes (comme 'https://exemple.fr' ou 'https://entreprise-inventee.fr').
+Pour chaque entreprise :
+- Si l'entreprise est très connue, renseigne son domaine officiel vérifié (ex: 'https://www.bouygues.com', 'https://www.sncf.com', 'https://www.veolia.fr').
+- Dans tous les autres cas, génère OBLIGATOIREMENT une URL Google Search directe au format exact :
+  \"https://www.google.com/search?q=\" suivi du nom de l'entreprise et de sa ville encodés (ex: \"https://www.google.com/search?q=Eiffage+Lyon+site+officiel\").
+Ce lien doit impérativement fonctionner à 100% lors du clic.
+
 Tu dois répondre UNIQUEMENT par un tableau JSON valide respectant rigoureusement ce schéma :
 [
   {
@@ -32,7 +41,7 @@ Tu dois répondre UNIQUEMENT par un tableau JSON valide respectant rigoureusemen
     \"sector\": \"$sector\",
     \"size\": \"$companySize\",
     \"location\": \"Ville, $country\",
-    \"website\": \"https://www.nom-entreprise.fr\",
+    \"website\": \"URL officielle ou https://www.google.com/search?q=NomEntreprise+Ville\",
     \"digitalMaturityScore\": \"Moyen\", // Faible | Moyen | Élevé | Très élevé
     \"aiPotentialScore\": \"Élevé\", // Faible | Moyen | Élevé | Très élevé
     \"purchaseProbability\": \"Élevé\", // Faible | Moyen | Élevé | Très élevé
@@ -62,6 +71,17 @@ Tu dois répondre UNIQUEMENT par un tableau JSON valide respectant rigoureusemen
         if (!is_array($data)) {
             throw new Exception("Format de réponse invalide pour les leads.");
         }
+
+        // Post-traitement de sécurité absolue sur les liens
+        foreach ($data as &$lead) {
+            $site = trim($lead['website'] ?? '');
+            if (empty($site) || strpos($site, 'exemple') !== false || strpos($site, 'example') !== false || strpos($site, 'http') !== 0) {
+                $comp = $lead['companyName'] ?? 'Entreprise';
+                $loc = $lead['location'] ?? $country;
+                $lead['website'] = "https://www.google.com/search?q=" . urlencode("{$comp} {$loc} site officiel");
+            }
+        }
+        unset($lead);
 
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
     } else {

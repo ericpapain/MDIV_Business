@@ -239,7 +239,7 @@ export const Dashboard = () => {
 
   // Suppression d'un projet
   const handleDeleteProject = async (id: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer ce travail/chantier ?")) return;
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) return;
     try {
       await deleteProject(id, company?.id, token || undefined);
       toast.success("Projet supprimé avec succès.");
@@ -249,11 +249,11 @@ export const Dashboard = () => {
     }
   };
 
-  // Création d'un nouveau travail/chantier depuis le Dashboard
+  // Création d'un nouveau projet depuis le Dashboard
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProjectTitle.trim()) {
-      toast.error("Le titre du travail/chantier est requis.");
+      toast.error("Le titre du projet est requis.");
       return;
     }
     setIsSubmittingProject(true);
@@ -269,7 +269,7 @@ export const Dashboard = () => {
         startDate: new Date().toISOString().split('T')[0]
       }, company?.id, token || undefined);
 
-      toast.success(`Chantier "${res.title}" créé avec succès !`);
+      toast.success(`Projet "${res.title}" créé avec succès !`);
       setProjects(prev => [res, ...prev]);
       setNewProjectTitle('');
       setNewProjectDesc('');
@@ -431,7 +431,7 @@ export const Dashboard = () => {
               }`}
             >
               <FolderKanban size={15} />
-              Travaux & Chantiers ({projects.length})
+              Projets & Missions ({projects.length})
             </button>
 
             <button
@@ -512,13 +512,13 @@ export const Dashboard = () => {
             {/* Barre de Recherche & Filtres */}
             <div className="bg-[#121624] border border-gray-800 rounded-2xl p-4 flex flex-col md:flex-row items-center gap-3">
               <div className="relative flex-1 w-full">
-                <Search size={15} className="absolute left-3 top-3 text-gray-400" />
+                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 <input
                   type="text"
                   value={quoteSearch}
                   onChange={(e) => setQuoteSearch(e.target.value)}
                   placeholder="Rechercher par N° devis, nom de client, description..."
-                  className="w-full bg-[#0d101a] border border-gray-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gold"
+                  className="w-full bg-[#0d101a] border border-gray-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gold"
                 />
               </div>
 
@@ -643,7 +643,7 @@ export const Dashboard = () => {
         )}
 
         {/* ================================================================= */}
-        {/* ONGLET 2 : TRAVAUX & CHANTIERS / PROJETS */}
+        {/* ONGLET 2 : PROJETS & MISSIONS */}
         {/* ================================================================= */}
         {activeTab === 'projects' && (
           <div className="space-y-6">
@@ -651,10 +651,10 @@ export const Dashboard = () => {
               <div>
                 <h2 className="text-xl font-bold font-serif text-white flex items-center gap-2">
                   <FolderKanban className="text-gold" size={22} />
-                  Suivi des Travaux & Chantiers
+                  Suivi des Projets & Missions
                 </h2>
                 <p className="text-xs text-gray-400">
-                  Pilotez les travaux en cours, le budget engagé et le statut de réalisation.
+                  Pilotez les projets en cours, le budget engagé et le statut de réalisation.
                 </p>
               </div>
 
@@ -663,7 +663,7 @@ export const Dashboard = () => {
                   onClick={() => setIsAddProjectModalOpen(true)}
                   className="bg-gold text-black font-semibold text-xs rounded-xl hover:bg-gold/90 flex items-center gap-1.5 shadow-md"
                 >
-                  <Plus size={14} /> + Nouveau Chantier / Travail
+                  <Plus size={14} /> + Nouveau Projet / Mission
                 </Button>
               </div>
             </div>
@@ -675,7 +675,7 @@ export const Dashboard = () => {
                 type="text"
                 value={projectSearch}
                 onChange={(e) => setProjectSearch(e.target.value)}
-                placeholder="Rechercher par titre de chantier, client, description..."
+                placeholder="Rechercher par titre de projet, client, description..."
                 className="w-full bg-transparent text-xs text-white placeholder-gray-500 focus:outline-none"
               />
             </div>
@@ -684,20 +684,20 @@ export const Dashboard = () => {
             {isLoadingProjects ? (
               <div className="py-16 text-center text-gray-400 flex flex-col items-center justify-center gap-2">
                 <Loader2 size={28} className="animate-spin text-gold" />
-                <p className="text-xs">Chargement de vos chantiers...</p>
+                <p className="text-xs">Chargement de vos projets...</p>
               </div>
             ) : filteredProjects.length === 0 ? (
               <div className="bg-[#121624] border border-dashed border-gray-800 rounded-3xl p-12 text-center">
                 <FolderKanban className="mx-auto h-12 w-12 text-gray-600 mb-3" />
-                <h3 className="text-base font-bold text-white mb-1">Aucun travail enregistré</h3>
+                <h3 className="text-base font-bold text-white mb-1">Aucun projet enregistré</h3>
                 <p className="text-xs text-gray-400 mb-6 max-w-md mx-auto">
-                  Enregistrez vos travaux depuis le module Devis IA ou créez-en un manuellement ici.
+                  Enregistrez vos projets depuis le module Devis IA ou créez-en un manuellement ici.
                 </p>
                 <Button 
                   onClick={() => setIsAddProjectModalOpen(true)}
                   className="bg-gold text-black font-semibold text-xs rounded-xl hover:bg-gold/90"
                 >
-                  <Plus size={14} className="mr-1" /> Ajouter un chantier
+                  <Plus size={14} className="mr-1" /> Ajouter un projet
                 </Button>
               </div>
             ) : (
@@ -806,7 +806,7 @@ export const Dashboard = () => {
                 <Users className="mx-auto h-12 w-12 text-gray-600 mb-3" />
                 <h3 className="text-base font-bold text-white mb-1">Aucun client trouvé</h3>
                 <p className="text-xs text-gray-400 mb-6 max-w-md mx-auto">
-                  Ajoutez vos clients pour pouvoir leur associer des devis, factures et chantiers.
+                  Ajoutez vos clients pour pouvoir leur associer des devis, factures et projets.
                 </p>
                 <Button 
                   onClick={() => setIsAddClientModalOpen(true)}
@@ -1027,7 +1027,7 @@ export const Dashboard = () => {
         )}
 
         {/* ================================================================= */}
-        {/* ONGLET 6 : MES DÉPENSES & FRAIS (ARTISANS & PME) */}
+        {/* ONGLET 6 : MES DÉPENSES & FRAIS (ENTREPRISES & PME) */}
         {/* ================================================================= */}
         {activeTab === 'expenses' && (
           <div className="space-y-6">
@@ -1038,7 +1038,7 @@ export const Dashboard = () => {
                   Mes Dépenses, Fournisseurs & Notes de Frais
                 </h2>
                 <p className="text-xs text-gray-400">
-                  Suivez vos coûts de chantier, votre TVA déductible et la rentabilité nette de votre entreprise.
+                  Suivez vos coûts de projets, votre TVA déductible et la rentabilité nette de votre entreprise.
                 </p>
               </div>
 
@@ -1117,13 +1117,13 @@ export const Dashboard = () => {
             {/* Barre de Recherche & Filtres */}
             <div className="bg-[#121624] border border-gray-800 rounded-2xl p-4 flex flex-col md:flex-row items-center gap-3">
               <div className="relative flex-1 w-full">
-                <Search size={15} className="absolute left-3 top-3 text-gray-400" />
+                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 <input
                   type="text"
                   value={expenseSearch}
                   onChange={(e) => setExpenseSearch(e.target.value)}
-                  placeholder="Rechercher un fournisseur, N° de ticket, chantier..."
-                  className="w-full bg-[#0d101a] border border-gray-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gold"
+                  placeholder="Rechercher un fournisseur, N° de ticket, projet..."
+                  className="w-full bg-[#0d101a] border border-gray-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gold"
                 />
               </div>
 
@@ -1135,14 +1135,14 @@ export const Dashboard = () => {
                   className="bg-[#0d101a] border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold w-full md:w-auto"
                 >
                   <option value="all">Toutes les catégories</option>
-                  <option value="carburant">Carburant</option>
-                  <option value="peage">Péages</option>
-                  <option value="materiaux">Matériaux (Point.P...)</option>
-                  <option value="outillage">Outillage</option>
-                  <option value="location">Location (Kiloutou...)</option>
-                  <option value="restauration">Repas</option>
-                  <option value="sous_traitance">Sous-traitance</option>
-                  <option value="autre">Autre</option>
+                  <option value="carburant">Carburant & Énergie</option>
+                  <option value="peage">Déplacements & Transports</option>
+                  <option value="materiaux">Achats & Fournitures</option>
+                  <option value="outillage">Matériel & Équipements</option>
+                  <option value="location">Location & Abonnements</option>
+                  <option value="restauration">Repas & Frais de Mission</option>
+                  <option value="sous_traitance">Sous-traitance & Prestataires</option>
+                  <option value="autre">Autres Frais Généraux</option>
                 </select>
               </div>
             </div>
@@ -1180,7 +1180,7 @@ export const Dashboard = () => {
                         <th className="py-3.5 px-6">Montant HT</th>
                         <th className="py-3.5 px-6">TVA</th>
                         <th className="py-3.5 px-6">Total TTC</th>
-                        <th className="py-3.5 px-6">Chantier</th>
+                        <th className="py-3.5 px-6">Projet</th>
                         <th className="py-3.5 px-6 text-right">Action</th>
                       </tr>
                     </thead>
@@ -1309,7 +1309,7 @@ export const Dashboard = () => {
         document.body
       )}
 
-      {/* MODAL : AJOUT D'UN TRAVAIL / CHANTIER (PORTAL AU DESSUS DU CONTENU) */}
+      {/* MODAL : AJOUT D'UN TRAVAIL / PROJET (PORTAL AU DESSUS DU CONTENU) */}
       {isAddProjectModalOpen && typeof document !== 'undefined' && createPortal(
         <div 
           className="fixed inset-0 z-[99999] overflow-y-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fade-in"
@@ -1335,7 +1335,7 @@ export const Dashboard = () => {
                 <FolderKanban size={20} />
               </div>
               <div>
-                <h3 className="text-lg font-bold font-serif text-white">Nouveau Chantier / Travail</h3>
+                <h3 className="text-lg font-bold font-serif text-white">Nouveau Projet / Mission</h3>
                 <p className="text-xs text-gray-400">Enregistrez un nouveau projet dans votre suivi.</p>
               </div>
             </div>
@@ -1343,7 +1343,7 @@ export const Dashboard = () => {
             <form onSubmit={handleCreateProject} className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-gray-300 mb-1">
-                  Titre du chantier <span className="text-gold">*</span>
+                  Titre du projet <span className="text-gold">*</span>
                 </label>
                 <input
                   type="text"
@@ -1387,7 +1387,7 @@ export const Dashboard = () => {
                   rows={3}
                   value={newProjectDesc}
                   onChange={(e) => setNewProjectDesc(e.target.value)}
-                  placeholder="Périmètre du chantier, livrables attendus..."
+                  placeholder="Périmètre du projet, livrables attendus..."
                   className="w-full bg-[#0d101a] border border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gold resize-y min-h-[75px]"
                 />
               </div>
@@ -1405,7 +1405,7 @@ export const Dashboard = () => {
                   disabled={isSubmittingProject}
                   className="bg-gold text-black font-semibold text-xs rounded-xl hover:bg-gold/90"
                 >
-                  {isSubmittingProject ? <Loader2 size={14} className="animate-spin" /> : "Créer le chantier"}
+                  {isSubmittingProject ? <Loader2 size={14} className="animate-spin" /> : "Créer le projet"}
                 </Button>
               </div>
             </form>

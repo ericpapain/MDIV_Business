@@ -43,3 +43,5 @@ revivre/*
 *.webm
 litterature.md
 offre pelico.md
+vite.config.ts.timestamp-*
+scratch/

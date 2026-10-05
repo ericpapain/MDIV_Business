@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { EnterpriseAuthBar } from "@/components/site/EnterpriseAuthBar";
-import { ArrowLeft, ArrowRight, Brain, Loader2, CheckCircle2, ChevronRight, BarChart3, Lock, ShieldAlert, Sparkles, Zap, Map, FileText, Download } from "lucide-react";
+import { ArrowLeft, ArrowRight, Brain, Loader2, CheckCircle2, ChevronRight, BarChart3, Lock, ShieldAlert, Sparkles, Zap, Map, FileText, Download, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 import {
   BENCHMARK_PILLARS,
@@ -14,6 +14,8 @@ import {
   generateRoadmapFromScores
 } from "@/lib/benchmarkConfig";
 import { fetchSectorBenchmark, submitBenchmarkResults, SectorBenchmarkData, LeadGenData } from "@/lib/benchmarkService";
+import { useGuestQuota } from "@/hooks/useGuestQuota";
+import { AuthRequiredModal } from "@/components/auth/AuthRequiredModal";
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid
@@ -22,6 +24,15 @@ import {
 export default function ServicesIABenchmark() {
   const { language } = useLanguage();
   const isEn = language === "en";
+
+  const {
+    remainingTrials,
+    isLimitReached,
+    isAuthModalOpen,
+    setIsAuthModalOpen,
+    checkCanExecute,
+    recordExecution
+  } = useGuestQuota('benchmark');
 
   // Phases: 'welcome' | 'profile' | 'questionnaire' | 'leadgen' | 'results'
   const [phase, setPhase] = useState<'welcome' | 'profile' | 'questionnaire' | 'leadgen' | 'results'>('welcome');
@@ -77,6 +88,9 @@ export default function ServicesIABenchmark() {
 
   const handleLeadGenSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!checkCanExecute()) return;
+
     setIsSubmitting(true);
 
     try {
@@ -102,11 +116,11 @@ export default function ServicesIABenchmark() {
       setBenchmarkData(bData);
 
       // 3. Soumission API pour sauvegarde du lead et des résultats
-      // Si l'API échoue, on continue quand même pour afficher les résultats à l'utilisateur
       await submitBenchmarkResults(leadData, calculatedScores, gScore, aiScore).catch(err => {
          console.warn("Could not save to backend, but continuing to display results:", err);
       });
 
+      recordExecution();
       setPhase('results');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error: any) {
@@ -118,43 +132,107 @@ export default function ServicesIABenchmark() {
 
   // Renderers
   const renderWelcome = () => (
-    <div className="ia-card p-10 md:p-16 text-center max-w-4xl mx-auto ia-animate-in">
-      <div className="w-24 h-24 rounded-full bg-slate-900 mx-auto mb-6 flex items-center justify-center text-white shadow-xl shadow-slate-900/20">
-        <BarChart3 size={40} />
-      </div>
-      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 mb-6 text-sm font-semibold border border-emerald-200">
-        <Sparkles size={16} /> Édition Premium - {new Date().getFullYear()}
-      </div>
-      <h1 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight text-slate-900">
-        {isEn ? "Digital & AI Maturity Benchmark" : "Benchmark de Maturité Digitale & IA"}
-      </h1>
-      <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-        {isEn 
-          ? "Evaluate your organization across 6 strategic pillars. Compare your performance against real market data and get a customized transformation roadmap." 
-          : "Évaluez votre organisation sur 6 piliers stratégiques. Comparez-vous aux données réelles de votre secteur et obtenez une feuille de route de transformation sur-mesure."}
-      </p>
-      
-      <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-3xl mx-auto text-left">
-        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-4 text-blue-600"><CheckCircle2 size={20}/></div>
-          <h3 className="font-bold mb-2">Diagnostic 360°</h3>
-          <p className="text-sm text-slate-500 font-medium">60 questions couvrant la Data, l'IA, l'Infra et les Talents.</p>
-        </div>
-        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mb-4 text-emerald-600"><BarChart3 size={20}/></div>
-          <h3 className="font-bold mb-2">Benchmark Réel</h3>
-          <p className="text-sm text-slate-500 font-medium">Comparaison basée exclusivement sur les données du marché.</p>
-        </div>
-        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mb-4 text-amber-600"><Map size={20}/></div>
-          <h3 className="font-bold mb-2">Roadmap Sur-mesure</h3>
-          <p className="text-sm text-slate-500 font-medium">Génération d'un plan d'action de 0 à 24 mois.</p>
-        </div>
-      </div>
+    <div className="ia-animate-in">
+      {/* Header avec Vidéo et Étapes */}
+      <div className="mb-12 flex flex-col md:flex-row md:justify-between md:items-stretch gap-6">
+        <div className="pt-2 flex flex-col justify-between">
+          <div className="flex items-center gap-4 mb-4">
+            <Link to="/services-ia" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-emerald-600 font-semibold transition-colors">
+              <ArrowLeft size={16} /> {isEn ? "Back to AI Services" : "Retour aux Services IA"}
+            </Link>
+            <button onClick={() => window.location.reload()} className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-emerald-600 font-semibold transition-colors" title="Actualiser et relancer l'IA">
+              <RefreshCcw size={16} /> {isEn ? "Refresh & Restart" : "Actualiser et recommencer"}
+            </button>
+          </div>
+          <div className="flex items-center gap-3 text-emerald-600 font-bold uppercase tracking-widest text-xs mb-2">
+            <BarChart3 size={16} /> Édition Premium - {new Date().getFullYear()}
+          </div>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+            {isEn ? "Digital & AI Maturity Benchmark" : "Benchmark de Maturité Digitale & IA"}
+          </h1>
+          <p className="text-slate-600 font-medium text-lg max-w-2xl mb-8">
+            {isEn 
+              ? "Evaluate your organization across 6 strategic pillars. Compare your performance against real market data and get a customized transformation roadmap." 
+              : "Évaluez votre organisation sur 6 piliers stratégiques. Comparez-vous aux données réelles de votre secteur et obtenez une feuille de route sur-mesure."}
+          </p>
 
-      <button onClick={() => setPhase('profile')} className="ia-btn-primary px-10 py-4 text-lg font-bold shadow-lg shadow-blue-500/30">
-        {isEn ? "Start the Assessment" : "Démarrer l'Évaluation"} <ChevronRight className="ml-2 inline" />
-      </button>
+          {/* Séparateur créatif */}
+          <div className="flex items-center gap-4 mb-8 max-w-lg">
+            <div className="h-px bg-gradient-to-r from-emerald-300 via-teal-300 to-transparent flex-1"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]"></div>
+            <div className="w-1 h-1 rounded-full bg-emerald-400 opacity-50"></div>
+          </div>
+
+          {/* Comment ça marche : Visuel à étapes détaillées */}
+          <div className="max-w-2xl">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-8">
+              
+              {/* Étape 1 */}
+              <div className="flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:border-emerald-200 hover:shadow-md transition-all group flex-1">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <CheckCircle2 size={16} />
+                  </div>
+                  <span className="text-sm font-bold text-slate-800">1. Diagnostic</span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium pl-11">Questionnaire à 360°.</p>
+              </div>
+
+              {/* Flèche de liaison */}
+              <div className="hidden sm:flex items-center justify-center flex-shrink-0 text-emerald-500 bg-emerald-50/80 h-8 w-8 rounded-full border border-emerald-100/50 shadow-[0_0_10px_rgba(16,185,129,0.2)] animate-[pulse_1.5s_ease-in-out_infinite]">
+                <ArrowRight size={16} strokeWidth={3} className="ml-0.5" />
+              </div>
+              <div className="w-px h-6 bg-gradient-to-b from-emerald-200 to-teal-200 ml-8 sm:hidden"></div>
+
+              {/* Étape 2 */}
+              <div className="flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:border-teal-200 hover:shadow-md transition-all group relative flex-1">
+                <div className="absolute -top-1.5 -right-1.5">
+                  <span className="flex h-3.5 w-3.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-teal-500 shadow-sm"></span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center group-hover:rotate-12 transition-transform flex-shrink-0">
+                    <BarChart3 size={16} />
+                  </div>
+                  <span className="text-sm font-bold text-slate-800">2. Analyse IA</span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium pl-11">Comparatif secteur.</p>
+              </div>
+
+              {/* Flèche de liaison */}
+              <div className="hidden sm:flex items-center justify-center flex-shrink-0 text-teal-500 bg-teal-50/80 h-8 w-8 rounded-full border border-teal-100/50 shadow-[0_0_10px_rgba(20,184,166,0.2)] animate-[pulse_1.5s_ease-in-out_infinite]" style={{ animationDelay: '0.5s' }}>
+                <ArrowRight size={16} strokeWidth={3} className="ml-0.5" />
+              </div>
+              <div className="w-px h-6 bg-gradient-to-b from-teal-200 to-slate-800 ml-8 sm:hidden"></div>
+
+              {/* Étape 3 */}
+              <div className="flex flex-col gap-2 bg-slate-900 p-4 rounded-xl shadow-md hover:bg-slate-800 hover:shadow-lg transition-all group flex-1">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <Map size={16} />
+                  </div>
+                  <span className="text-sm font-bold text-white">3. Roadmap</span>
+                </div>
+                <p className="text-xs text-white font-medium pl-11">Plan d'action complet.</p>
+              </div>
+
+            </div>
+
+            <button onClick={() => setPhase('profile')} className="ia-btn-primary px-8 py-3 text-base font-bold shadow-lg shadow-emerald-500/30">
+              {isEn ? "Start the Assessment" : "Démarrer l'Évaluation"} <ArrowRight className="ml-2 inline" size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Bloc Vidéo */}
+        <div className="max-w-sm md:max-w-md lg:max-w-lg w-full rounded-2xl overflow-hidden shadow-xl shadow-blue-600/10 border border-slate-100 flex-shrink-0">
+          <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+            <source src="https://cdn.prod.website-files.com/6373b53b7e4adf70ce44cbd5%2F6a71f36dba060eceb7c770d6_anim%20-%20gestion%20des%20achats_webm.webm" type="video/webm" />
+          </video>
+        </div>
+      </div>
     </div>
   );
 
@@ -167,11 +245,11 @@ export default function ServicesIABenchmark() {
       <form onSubmit={handleProfileSubmit} className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">Secteur d'activité</label>
+            <label className="block text-sm font-bold text-slate-900 mb-2">Secteur d'activité</label>
             <select 
               value={leadData.sector} 
               onChange={e => setLeadData({...leadData, sector: e.target.value})}
-              className="w-full p-3 border border-slate-200 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50"
+              className="w-full p-3 border border-slate-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 bg-slate-50 font-bold text-slate-900"
               required
             >
               <option value="Technologie / IT">Technologie / IT</option>
@@ -184,11 +262,11 @@ export default function ServicesIABenchmark() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">Pays principal</label>
+            <label className="block text-sm font-bold text-slate-900 mb-2">Pays principal</label>
             <select 
               value={leadData.country} 
               onChange={e => setLeadData({...leadData, country: e.target.value})}
-              className="w-full p-3 border border-slate-200 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50"
+              className="w-full p-3 border border-slate-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 bg-slate-50 font-bold text-slate-900"
               required
             >
               <option value="France">France</option>
@@ -200,11 +278,11 @@ export default function ServicesIABenchmark() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">Taille de l'entreprise</label>
+            <label className="block text-sm font-bold text-slate-900 mb-2">Taille de l'entreprise</label>
             <select 
               value={leadData.employees} 
               onChange={e => setLeadData({...leadData, employees: e.target.value})}
-              className="w-full p-3 border border-slate-200 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50"
+              className="w-full p-3 border border-slate-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 bg-slate-50 font-bold text-slate-900"
               required
             >
               <option value="1-10">1 à 10 collaborateurs</option>
@@ -215,11 +293,11 @@ export default function ServicesIABenchmark() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">Chiffre d'affaires</label>
+            <label className="block text-sm font-bold text-slate-900 mb-2">Chiffre d'affaires</label>
             <select 
               value={leadData.revenue} 
               onChange={e => setLeadData({...leadData, revenue: e.target.value})}
-              className="w-full p-3 border border-slate-200 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50"
+              className="w-full p-3 border border-slate-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 bg-slate-50 font-bold text-slate-900"
               required
             >
               <option value="Non communiqué">Non communiqué</option>
@@ -396,34 +474,34 @@ export default function ServicesIABenchmark() {
     };
 
     return (
-      <div className="max-w-6xl mx-auto ia-animate-in space-y-8">
+      <div className="max-w-7xl mx-auto ia-animate-in space-y-8">
         
         {/* HEADER EXECUTIVE */}
-        <div className="ia-card p-10 bg-slate-900 text-white relative overflow-hidden border-0">
-           <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 100% 0%, #2563eb 0%, transparent 50%)' }}></div>
+        <div className="ia-card p-8 md:p-10 bg-white text-slate-900 border border-slate-200 relative overflow-hidden rounded-3xl shadow-sm">
+           <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 100% 0%, rgba(37,99,235,0.08) 0%, transparent 60%)' }}></div>
            
            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
               <div>
-                 <div className="text-blue-400 font-bold uppercase tracking-widest text-xs mb-2 flex items-center gap-2">
+                 <div className="text-blue-600 font-bold uppercase tracking-widest text-xs mb-2 flex items-center gap-2">
                     <Sparkles size={14} /> Executive Summary
                  </div>
-                 <h1 className="text-3xl md:text-4xl font-bold mb-4">{leadData.companyName}</h1>
+                 <h1 className="text-3xl md:text-4xl font-black text-slate-950 mb-4">{leadData.companyName}</h1>
                  <div className="flex flex-wrap gap-3">
-                    <span className="px-3 py-1 rounded-full bg-slate-800 text-sm border border-slate-700">Secteur: {leadData.sector}</span>
-                    <span className="px-3 py-1 rounded-full bg-slate-800 text-sm border border-slate-700">{leadData.employees} collab.</span>
+                    <span className="px-3.5 py-1 rounded-full bg-slate-100 text-slate-900 font-semibold text-sm border border-slate-200">Secteur: {leadData.sector}</span>
+                    <span className="px-3.5 py-1 rounded-full bg-slate-100 text-slate-900 font-semibold text-sm border border-slate-200">{leadData.employees} collab.</span>
                  </div>
               </div>
 
               <div className="flex gap-6 text-center">
-                 <div className="bg-slate-800/80 backdrop-blur-md p-6 rounded-2xl border border-slate-700 min-w-[160px]">
-                    <div className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Score Digital</div>
-                    <div className="text-5xl font-black text-white">{globalScore}</div>
-                    <div className="text-sm mt-2 font-medium text-emerald-400">{getLevelText(globalScore)}</div>
+                 <div className="bg-[#F8F7F4] p-6 rounded-2xl border border-slate-200 min-w-[160px] shadow-sm">
+                    <div className="text-slate-950 text-xs font-black uppercase tracking-wider mb-2">Score Digital</div>
+                    <div className="text-5xl font-black text-slate-950">{globalScore}</div>
+                    <div className="text-sm mt-2 font-bold text-emerald-700">{getLevelText(globalScore)}</div>
                  </div>
-                 <div className="bg-blue-600/20 backdrop-blur-md p-6 rounded-2xl border border-blue-500/30 min-w-[160px]">
-                    <div className="text-blue-300 text-xs font-bold uppercase tracking-wider mb-2">AI Readiness</div>
-                    <div className="text-5xl font-black text-blue-400">{aiReadiness}</div>
-                    <div className="text-sm mt-2 font-medium text-blue-200">Prêt pour l'IA</div>
+                 <div className="bg-blue-50/70 p-6 rounded-2xl border border-blue-200 min-w-[160px] shadow-sm">
+                    <div className="text-slate-950 text-xs font-black uppercase tracking-wider mb-2">AI Readiness</div>
+                    <div className="text-5xl font-black text-blue-700">{aiReadiness}</div>
+                    <div className="text-sm mt-2 font-black text-slate-950">Prêt pour l'IA</div>
                  </div>
               </div>
            </div>
@@ -535,14 +613,17 @@ export default function ServicesIABenchmark() {
                 { phase: 'Phase 3 (6-12 mois)', items: roadmap.phase3 },
               ].map((group, idx) => (
                 <div key={idx} className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-                   <div className="font-black text-slate-300 text-sm uppercase tracking-widest mb-4">{group.phase}</div>
+                   <div className="font-black text-[#543b0c] text-sm uppercase tracking-widest mb-4 flex items-center gap-2">
+                     <span className="w-2.5 h-2.5 rounded-full bg-[#926014]"></span>
+                     {group.phase}
+                   </div>
                    <div className="space-y-4">
                      {group.items.map((item, i) => (
                        <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-slate-50/50 border border-slate-100">
-                          <div className="font-semibold text-slate-800">{item.title}</div>
+                          <div className="font-semibold text-slate-900">{item.title}</div>
                           <div className="flex gap-2 shrink-0">
-                            <span className="px-2.5 py-1 rounded bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold uppercase">Impact {item.impact}</span>
-                            <span className="px-2.5 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold uppercase">ROI: {item.roi}</span>
+                            <span className="px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold uppercase">Impact {item.impact}</span>
+                            <span className="px-2.5 py-1 rounded bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold uppercase">ROI: {item.roi}</span>
                           </div>
                        </div>
                      ))}
@@ -553,15 +634,15 @@ export default function ServicesIABenchmark() {
         </div>
 
         {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8 border-t border-slate-200 pb-10">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center pt-8 border-t border-slate-200 pb-10">
            <button className="ia-btn-primary px-8 py-4 font-bold text-base shadow-xl shadow-blue-500/20">
              Réserver un Audit IA Gratuit
            </button>
            <button className="ia-btn-secondary px-8 py-4 font-bold text-base bg-white">
              <Download size={18} className="mr-2 inline" /> Télécharger mon PDF
            </button>
-           <button className="px-8 py-4 font-bold text-slate-600 hover:text-slate-900 transition-colors">
-             Parler à un Expert
+           <button onClick={() => window.location.reload()} className="px-8 py-4 font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 rounded-xl transition-colors flex items-center">
+             <RefreshCcw size={18} className="mr-2 inline" /> Refaire une analyse
            </button>
         </div>
 
@@ -571,14 +652,7 @@ export default function ServicesIABenchmark() {
 
   return (
     <div className="ia-page min-h-screen pt-32 pb-20 bg-slate-50/50">
-      <div className="container mx-auto px-4">
-        {phase === 'welcome' && (
-           <div className="mb-6 max-w-4xl mx-auto">
-             <Link to="/services-ia" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors">
-               <ArrowLeft size={16} /> {isEn ? "Back to AI Services" : "Retour aux Services IA"}
-             </Link>
-           </div>
-        )}
+      <div className="container mx-auto px-4 max-w-7xl">
         
         {phase === 'welcome' && renderWelcome()}
         {phase === 'profile' && renderProfile()}
@@ -586,6 +660,15 @@ export default function ServicesIABenchmark() {
         {phase === 'leadgen' && renderLeadGen()}
         {phase === 'results' && renderResults()}
       </div>
+
+      {/* Modale d'authentification requise au 4ème essai */}
+      <AuthRequiredModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        title="Vous avez utilisé vos 3 essais gratuits sur cet outil"
+        subtitle="Créez votre compte entreprise en 30 secondes ou connectez-vous pour débloquer des audits sectoriels illimités, exporter vos rapports et sauvegarder vos scores."
+        quotaLimitReached={isLimitReached}
+      />
     </div>
   );
 }

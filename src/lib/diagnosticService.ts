@@ -8,8 +8,11 @@ export interface DiagnosticMessage {
 }
 
 export interface DiagnosticNextStepResponse {
+  expert_domain?: string;
+  expert_insight?: string;
   question: string;
   options: string[];
+  precision_score?: number;
   total_questions?: number;
 }
 

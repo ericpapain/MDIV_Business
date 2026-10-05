@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserProfileModal } from "@/components/auth/UserProfileModal";
@@ -8,6 +8,7 @@ import { iaCategories, iaJourney } from "@/data/servicesIAData";
 import { ArrowRight, Sparkles, Zap, ChevronRight, Star, LayoutGrid, CreditCard, Route, ArrowDown, Search, Target, Users, Rocket, Quote, Cpu, ChevronDown, Settings, FileText, Building2, LogOut, LogIn } from "lucide-react";
 import { motion } from "framer-motion";
 import Countdown from "@/components/ui/Countdown";
+import { FintechPricingTab } from "@/components/fintech/FintechPricingTab";
 
 const AnimatedJourneyWidget = () => {
   const { language } = useLanguage();
@@ -129,8 +130,18 @@ const AnimatedJourneyWidget = () => {
 export default function ServicesIA() {
   const { t, language } = useLanguage();
   const { company, isAuthenticated, logout } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const isEn = language === "en";
-  const [activeTab, setActiveTab] = useState('solutions');
+
+  const getInitialTab = () => {
+    const tabParam = searchParams.get('tab') || searchParams.get('section');
+    if (tabParam === 'tarification' || tabParam === 'tarifs' || tabParam === 'pricing' || location.hash === '#tarification' || location.hash === '#tarifs') return 'tarification';
+    if (tabParam === 'parcours' || location.hash === '#parcours') return 'parcours';
+    return 'solutions';
+  };
+
+  const [activeTab, setActiveTab] = useState<string>(getInitialTab);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [modalState, setModalState] = useState<{ isOpen: boolean; tab: 'profile' | 'reports' }>({
     isOpen: false,
@@ -139,6 +150,18 @@ export default function ServicesIA() {
 
   const tabsRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') || searchParams.get('section');
+    if (tabParam === 'tarification' || tabParam === 'tarifs' || tabParam === 'pricing' || location.hash === '#tarification' || location.hash === '#tarifs') {
+      setActiveTab('tarification');
+      setTimeout(() => {
+        tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    } else if (tabParam === 'parcours' || location.hash === '#parcours') {
+      setActiveTab('parcours');
+    }
+  }, [searchParams, location.hash]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -151,7 +174,14 @@ export default function ServicesIA() {
   }, []);
 
   const scrollToTabs = (tab?: string) => {
-    if (tab) setActiveTab(tab);
+    if (tab) {
+      setActiveTab(tab);
+      if (tab === 'tarification') {
+        setSearchParams({ tab: 'tarification' });
+      } else {
+        setSearchParams({});
+      }
+    }
     setTimeout(() => {
       tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 80);
@@ -205,10 +235,10 @@ export default function ServicesIA() {
                 )}
               </h1>
 
-              <p className="text-base md:text-lg max-w-lg mb-7 leading-relaxed" style={{ color: "hsl(215 16% 47%)" }}>
+              <p className="text-base md:text-lg max-w-lg mb-7 leading-relaxed" style={{ color: "#334155" }}>
                 {isEn
-                  ? "Save time, automate your tasks and grow your business with AI solutions accessible to SMBs and freelancers."
-                  : "Gagnez du temps, automatisez vos tâches et développez votre activité grâce à des solutions IA accessibles aux PME, TPE et artisans."}
+                  ? "Save time, automate your tasks and grow your business with AI solutions accessible to SMBs, startups and entrepreneurs."
+                  : "Gagnez du temps, automatisez vos tâches et développez votre activité grâce à des solutions IA accessibles aux PME, TPE, startups et entreprises."}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -241,9 +271,6 @@ export default function ServicesIA() {
         <section className="container max-w-5xl mx-auto pt-6 pb-4">
           {/* Decorative gold hairline */}
           <div className="h-px mb-8" style={{ background: "linear-gradient(90deg, transparent, hsl(42 55% 56% / 0.35), transparent)" }} />
-
-          {/* Zone Auth & Profil Entreprise réutilisable */}
-          <EnterpriseAuthBar className="mb-8" />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {tabs.map((tab) => {
@@ -386,40 +413,10 @@ export default function ServicesIA() {
       </section>
       )}
 
-      {/* ── TARIFICATION ── */}
+      {/* ── TARIFICATION (IT4ALL 2026) ── */}
       {activeTab === 'tarification' && (
-      <section className="container max-w-4xl mx-auto py-10 ia-animate-in">
-        <div className="flex items-center gap-4 mb-10">
-          <div className="w-1 h-10 rounded-full ia-gradient-hero" />
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-              {isEn ? "Simple, transparent pricing" : "Tarification simple et transparente"}
-            </h2>
-            <p className="text-sm mt-1" style={{ color: "hsl(215 16% 47%)" }}>
-              {isEn
-                ? "Start for free, upgrade when you need to."
-                : "Commencez gratuitement, évoluez selon vos besoins."}
-            </p>
-          </div>
-        </div>
-
-        <div className="ia-card p-12 md:p-16 text-center opacity-75">
-          <div className="w-16 h-16 rounded-2xl ia-gradient-hero flex items-center justify-center text-foreground mx-auto mb-6 opacity-60">
-            <CreditCard size={28} />
-          </div>
-          <h3 className="text-xl font-bold mb-3" style={{ fontFamily: "'Inter', sans-serif", color: "hsl(215 16% 35%)" }}>
-            {isEn ? "Pricing coming soon" : "Tarification à venir"}
-          </h3>
-          <p className="text-sm max-w-md mx-auto mb-6" style={{ color: "hsl(215 16% 55%)" }}>
-            {isEn
-              ? "We are finalizing our pricing plans. Contact us for early access and special launch rates."
-              : "Nous finalisons nos offres tarifaires. Contactez-nous pour un accès anticipé et des tarifs de lancement."}
-          </p>
-          <Link to="/contact" className="ia-btn-primary text-sm px-8 py-3 mx-auto">
-            {isEn ? "Contact us" : "Nous contacter"}
-            <ArrowRight size={14} />
-          </Link>
-        </div>
+      <section className="container max-w-7xl mx-auto py-6 ia-animate-in">
+        <FintechPricingTab />
       </section>
       )}
 

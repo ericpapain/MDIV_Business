@@ -21,8 +21,16 @@ try {
     $objective = $input['objective'] ?? 'Nouvel email';
     $company_id = intval($input['company_id'] ?? 1);
 
-    if (empty($text)) {
-        throw new Exception("Le texte d'entrée ne peut pas être vide.");
+    $isRepeated = preg_match('/(.)\1{4,}/', $text);
+    $noSpaces = strlen($text) > 10 && strpos($text, ' ') === false && strpos($text, '@') === false;
+    $isSmash = preg_match('/^[bcdfghjklmnpqrstvwxyz]{6,}$/i', str_replace(' ', '', $text));
+
+    if ($isRepeated || $noSpaces || $isSmash) {
+        echo json_encode([
+            'success' => true,
+            'generatedText' => "⚠️ Votre saisie semble incomplète ou incompréhensible.\n\nPour que l'Assistant Email puisse rédiger un message professionnel percutant, veuillez préciser au minimum :\n• Le destinataire (client, prospect, partenaire, collaborateur)\n• L'objet de votre démarche (relance facture, proposition commerciale, demande de réunion, compte-rendu)\n• Les points clés ou chiffres à aborder."
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     $systemPrompt = "Tu es un expert en communication exécutive et en rédaction professionnelle B2B pour MDIV Business.
@@ -30,6 +38,12 @@ Rédige un email exceptionnel en français selon les consignes :
 - Tâche demandée : $task
 - Ton : $tone
 - Objectif : $objective
+
+GARDE-FOU ANTI-GRIBOUILLAGE :
+Si le texte fourni est du charabia, une suite aléatoire de caractères sans signification, ou un texte totalement hors contexte sans aucun sens métier :
+Ne génère PAS de faux email absurde.
+Réponds STRICTEMENT par ce message d'erreur explicite et bienveillant :
+\"⚠️ Votre saisie semble incomplète ou incompréhensible. Pour rédiger un email professionnel, veuillez indiquer au minimum l'objet, le destinataire et le message clé à transmettre (ex: relance facture d'acompte, proposition commerciale, confirmation de rendez-vous).\"
 
 Règles de style :
 1. Objet d'email clair, percutant et professionnel (ex: « Objet : ... » en première ligne).

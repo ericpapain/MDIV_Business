@@ -3,15 +3,74 @@
 -- À importer dans le PHPMyAdmin d'OVH ou exécuté automatiquement par le backend
 -- ==============================================================================
 
--- 1. Table des Entreprises (Comptes Utilisateurs & Multi-tenant)
+-- 1. Table des Entreprises (Comptes Entreprises & Multi-tenant hermétique)
 CREATE TABLE IF NOT EXISTS `companies` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `siren` VARCHAR(9) UNIQUE DEFAULT NULL,
+  `siret` VARCHAR(14) DEFAULT NULL,
   `company_name` VARCHAR(255) NOT NULL,
+  `trade_name` VARCHAR(255) DEFAULT NULL,
+  `legal_form` VARCHAR(150) DEFAULT NULL,
+  `naf_code` VARCHAR(20) DEFAULT NULL,
+  `activity` TEXT DEFAULT NULL,
+  `address` TEXT DEFAULT NULL,
+  `postal_code` VARCHAR(20) DEFAULT NULL,
+  `city` VARCHAR(150) DEFAULT NULL,
+  `country` VARCHAR(100) DEFAULT 'France',
+  `creation_date` VARCHAR(50) DEFAULT NULL,
+  `administrative_status` VARCHAR(50) DEFAULT 'ACTIVE',
+  `employee_range` VARCHAR(100) DEFAULT NULL,
+  `capital` VARCHAR(100) DEFAULT NULL,
   `email` VARCHAR(255) NOT NULL UNIQUE,
-  `password_hash` VARCHAR(255) NOT NULL,
+  `phone` VARCHAR(30) DEFAULT NULL,
+  `website` VARCHAR(255) DEFAULT NULL,
+  `iban` VARCHAR(40) DEFAULT NULL,
+  `bic` VARCHAR(15) DEFAULT NULL,
+  `plan_tier` ENUM('free', 'starter', 'pro', 'enterprise') DEFAULT 'free',
+  `company_status` ENUM('ACTIVE', 'SIREN_PENDING', 'MANUAL', 'INACTIVE') DEFAULT 'ACTIVE',
+  `data_source` ENUM('INSEE', 'INPI', 'BODACC', 'PAPPERS', 'MANUAL') DEFAULT 'INSEE',
+  `official_data` JSON DEFAULT NULL COMMENT 'Snapshot brut certifié des sources officielles',
+  `password_hash` VARCHAR(255) NOT NULL COMMENT 'Mot de passe principal ou rétro-compatible',
   `status` ENUM('active', 'inactive', 'banned') DEFAULT 'active',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_siren` (`siren`),
+  INDEX `idx_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 1b. Table des Utilisateurs / Collaborateurs (1 Entreprise -> N Utilisateurs)
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `company_id` INT NOT NULL,
+  `first_name` VARCHAR(100) NOT NULL,
+  `last_name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(255) NOT NULL UNIQUE,
+  `phone` VARCHAR(50) DEFAULT NULL,
+  `job_title` VARCHAR(150) DEFAULT 'Dirigeant',
+  `password_hash` VARCHAR(255) NOT NULL,
+  `role` ENUM('ADMIN', 'MANAGER', 'USER') DEFAULT 'ADMIN',
+  `email_verified` TINYINT(1) DEFAULT 1,
+  `verification_token` VARCHAR(255) DEFAULT NULL,
+  `status` ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_user_email` (`email`),
+  CONSTRAINT `fk_users_company` 
+    FOREIGN KEY (`company_id`) 
+    REFERENCES `companies`(`id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 1c. Table Cache des Requêtes API SIREN (Évite les quotas et requêtes inutiles)
+CREATE TABLE IF NOT EXISTS `company_api_cache` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `siren` VARCHAR(9) NOT NULL UNIQUE,
+  `provider` VARCHAR(50) NOT NULL DEFAULT 'INSEE_RECHERCHE_GOUV',
+  `response_json` LONGTEXT NOT NULL,
+  `fetched_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` TIMESTAMP NOT NULL,
+  INDEX `idx_cache_siren` (`siren`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2. Table des Diagnostics IA réalisés
@@ -106,6 +165,9 @@ CREATE TABLE IF NOT EXISTS `invoices` (
   `amount_vat` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `amount_ttc` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `status` ENUM('pending', 'paid', 'overdue', 'cancelled') DEFAULT 'pending',
+  `pdp_status` VARCHAR(50) DEFAULT 'DEPOSITED',
+  `pdp_operator` VARCHAR(100) DEFAULT 'PDP n° 0039',
+  `xml_content` LONGTEXT NULL,
   `legal_check_result` JSON DEFAULT NULL COMMENT 'Rapport de conformité IA',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

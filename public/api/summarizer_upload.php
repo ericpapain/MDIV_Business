@@ -1,6 +1,7 @@
 <?php
 // public/api/summarizer_upload.php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/document_parser.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -21,24 +22,10 @@ try {
         $file = $_FILES['document'];
         $document_name = basename($file['name']);
         $file_path = $file['tmp_name'];
-        $ext = strtolower(pathinfo($document_name, PATHINFO_EXTENSION));
-
-        if (empty($extracted_text)) {
-            if (in_array($ext, ['txt', 'md', 'csv', 'json', 'log'])) {
-                $extracted_text = file_get_contents($file_path);
-            } elseif ($ext === 'pdf') {
-                // Essai d'extraction basique PDF
-                $content = @file_get_contents($file_path);
-                // Extraction rudimentaire des chaînes de texte PDF si outils non disponibles
-                if (preg_match_all('/\((.*?)\)[\r\n]*Tj/s', $content, $matches)) {
-                    $extracted_text = implode(' ', $matches[1]);
-                }
-                if (empty($extracted_text)) {
-                    $extracted_text = "Document PDF importé : " . $document_name . " (analyse structurelle et stratégique demandée).";
-                }
-            } else {
-                $extracted_text = "Fichier documentaire reçu : " . $document_name . " (mode " . $mode . ").";
-            }
+        
+        $parsed = parseUploadedFileContent($file_path, $document_name, $extracted_text);
+        if (!empty($parsed)) {
+            $extracted_text = $parsed;
         }
     }
 

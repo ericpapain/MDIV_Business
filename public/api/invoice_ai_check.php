@@ -58,6 +58,21 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide avec ce schéma :
             ];
         }
 
+        // Contrôle anti-gribouillage sur les lignes
+        $hasGibberish = false;
+        foreach ($lines as $l) {
+            $desc = trim($l['description'] ?? '');
+            if (!empty($desc) && (preg_match('/^(.)\1{4,}/i', $desc) || (preg_match('/^[b-df-hj-np-tv-z0-9\s.,;:!?\'-]{10,}$/i', $desc) && !preg_match('/[aeiouy]/i', $desc)))) {
+                $hasGibberish = true;
+                break;
+            }
+        }
+
+        if ($hasGibberish) {
+            $data['isValid'] = false;
+            $data['errors'][] = "Votre saisie semble incomplète ou incompréhensible. Pour auditer une facture, veuillez indiquer des désignations de prestations réelles et intelligibles.";
+        }
+
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
     } else {
         throw new Exception("Aucune réponse du modèle IA.");

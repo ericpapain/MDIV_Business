@@ -4,8 +4,8 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { EnterpriseAuthBar } from '@/components/site/EnterpriseAuthBar';
 import { 
-  ArrowLeft, Send, BarChart2, Bell, CheckCircle2, AlertTriangle, 
-  Clock, ShieldAlert, Sparkles, Loader2, Mail, Copy, Check, FileText
+  ArrowLeft, ArrowRight, Search, Send, BarChart2, Bell, CheckCircle2, AlertTriangle, 
+  Clock, ShieldAlert, Sparkles, Loader2, Mail, Copy, Check, FileText, RefreshCcw
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -158,21 +158,99 @@ export default function ServicesIAFollowup() {
   return (
     <div className="ia-page min-h-screen pt-32 pb-20 bg-slate-50/50">
       <div className="container mx-auto px-4 max-w-7xl">
-        <EnterpriseAuthBar className="mb-8" />
-        
-        <div className="mb-8">
-          <Link to="/services-ia" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors mb-4">
-            <ArrowLeft size={16} /> Retour aux Services IA
-          </Link>
-          <div className="flex items-center gap-3 text-blue-600 font-bold uppercase tracking-widest text-xs mb-2">
-            <Send size={16} /> Suite Commerciale
+        {/* Header avec Vidéo et Étapes */}
+        <div className="mb-12 flex flex-col md:flex-row md:justify-between md:items-stretch gap-6">
+          <div className="pt-2 flex flex-col justify-between">
+            <div className="flex items-center gap-4 mb-4">
+              <Link to="/services-ia" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors">
+                <ArrowLeft size={16} /> {isEn ? "Back to AI Services" : "Retour aux Services IA"}
+              </Link>
+              <button onClick={() => window.location.reload()} className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors" title="Actualiser et relancer l'IA">
+                <RefreshCcw size={16} /> {isEn ? "Refresh & Restart" : "Actualiser et recommencer"}
+              </button>
+            </div>
+            <div className="flex items-center gap-3 text-blue-600 font-bold uppercase tracking-widest text-xs mb-2">
+              <Send size={16} /> Suite Commerciale
+            </div>
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Relances Intelligentes
+            </h1>
+            <p className="text-slate-600 font-medium text-lg max-w-2xl mb-8">
+              L'IA identifie les relances à effectuer (factures, devis) et rédige l'email parfait avec le ton adéquat.
+            </p>
+
+            {/* Séparateur créatif */}
+            <div className="flex items-center gap-4 mb-8 max-w-lg">
+              <div className="h-px bg-gradient-to-r from-blue-300 via-cyan-300 to-transparent flex-1"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.5)]"></div>
+              <div className="w-1 h-1 rounded-full bg-blue-400 opacity-50"></div>
+            </div>
+
+            {/* Comment ça marche : Visuel à étapes détaillées */}
+            <div className="max-w-2xl">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                
+                {/* Étape 1 */}
+                <div className="flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all group flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                      <Search size={16} />
+                    </div>
+                    <span className="text-sm font-bold text-slate-800">1. Détection</span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium pl-11">Détecte les impayés/devis.</p>
+                </div>
+
+                {/* Flèche de liaison */}
+                <div className="hidden sm:flex items-center justify-center flex-shrink-0 text-blue-500 bg-blue-50/80 h-8 w-8 rounded-full border border-blue-100/50 shadow-[0_0_10px_rgba(59,130,246,0.2)] animate-[pulse_1.5s_ease-in-out_infinite]">
+                  <ArrowRight size={16} strokeWidth={3} className="ml-0.5" />
+                </div>
+                <div className="w-px h-6 bg-gradient-to-b from-blue-200 to-cyan-200 ml-8 sm:hidden"></div>
+
+                {/* Étape 2 */}
+                <div className="flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:border-cyan-200 hover:shadow-md transition-all group relative flex-1">
+                  <div className="absolute -top-1.5 -right-1.5">
+                    <span className="flex h-3.5 w-3.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-cyan-500 shadow-sm"></span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-cyan-50 text-cyan-600 flex items-center justify-center group-hover:rotate-12 transition-transform flex-shrink-0">
+                      <Sparkles size={16} />
+                    </div>
+                    <span className="text-sm font-bold text-slate-800">2. Création IA</span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium pl-11">Rédige la relance parfaite.</p>
+                </div>
+
+                {/* Flèche de liaison */}
+                <div className="hidden sm:flex items-center justify-center flex-shrink-0 text-cyan-500 bg-cyan-50/80 h-8 w-8 rounded-full border border-cyan-100/50 shadow-[0_0_10px_rgba(6,182,212,0.2)] animate-[pulse_1.5s_ease-in-out_infinite]" style={{ animationDelay: '0.5s' }}>
+                  <ArrowRight size={16} strokeWidth={3} className="ml-0.5" />
+                </div>
+                <div className="w-px h-6 bg-gradient-to-b from-cyan-200 to-slate-800 ml-8 sm:hidden"></div>
+
+                {/* Étape 3 */}
+                <div className="flex flex-col gap-2 bg-slate-900 p-4 rounded-xl shadow-md hover:bg-slate-800 hover:shadow-lg transition-all group flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                      <Send size={16} />
+                    </div>
+                    <span className="text-sm font-bold text-white">3. Envoi direct</span>
+                  </div>
+                  <p className="text-xs text-white font-medium pl-11">Envoyez en un clic.</p>
+                </div>
+
+              </div>
+            </div>
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Relances Intelligentes
-          </h1>
-          <p className="text-slate-600 font-medium text-lg max-w-2xl">
-            L'IA identifie les relances à effectuer (factures, devis) et rédige l'email parfait avec le ton adéquat.
-          </p>
+
+          {/* Bloc Vidéo */}
+          <div className="max-w-sm md:max-w-md lg:max-w-lg w-full rounded-2xl overflow-hidden shadow-xl shadow-blue-600/10 border border-slate-100 flex-shrink-0">
+            <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+              <source src="https://cdn.prod.website-files.com/6373b53b7e4adf70ce44cbd5%2F6a71f36dba060eceb7c770d6_anim%20-%20gestion%20des%20achats_webm.webm" type="video/webm" />
+            </video>
+          </div>
         </div>
 
         {/* Tabs */}

@@ -1,6 +1,7 @@
 <?php
 // public/api/meeting_upload.php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/document_parser.php';
 require_once __DIR__ . '/groq_client.php';
 
 header("Access-Control-Allow-Origin: *");
@@ -19,23 +20,39 @@ try {
     if (isset($_FILES['media_file']) && $_FILES['media_file']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['media_file'];
         $filename = $file['name'];
-        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $file_path = $file['tmp_name'];
 
-        if (empty($raw_text)) {
-            if (in_array($ext, ['txt', 'md', 'log'])) {
-                $raw_text = file_get_contents($file['tmp_name']);
-            } else {
-                $raw_text = "Fichier audio / vidéo / note de réunion reçu : $filename. Analyse des échanges et synthèses des décisions et tâches.";
-            }
+        $parsed = parseUploadedFileContent($file_path, $filename, $raw_text);
+        if (!empty($parsed)) {
+            $raw_text = $parsed;
         }
     }
 
+    $raw_text = trim($raw_text);
     if (empty($raw_text)) {
-        $raw_text = "Réunion de coordination stratégique d'entreprise : cadrage des priorités, validation des budgets, répartition des tâches opérationnelles.";
+        throw new Exception("Aucun texte ou fichier de réunion fourni.");
+    }
+
+    // FILTRE ANTI-GRIBOUILLAGE
+    $isGibberish = strlen($raw_text) < 10
+        || preg_match('/^(.)\1{4,}/i', $raw_text)
+        || (preg_match('/^[b-df-hj-np-tv-z0-9\s.,;:!?\'-]{12,}$/i', $raw_text) && !preg_match('/[aeiouy]/i', $raw_text));
+
+    if ($isGibberish) {
+        http_response_code(400);
+        echo json_encode([
+            'error' => "Votre saisie semble incomplète ou incompréhensible. Pour synthétiser une réunion et générer un compte-rendu décisionnel, veuillez fournir des notes de réunion contenant au minimum les sujets abordés, les participants ou les décisions prises."
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     $systemPrompt = "Tu es un secrétaire général et chef de cabinet de direction pour MDIV Business.
 À partir des notes, de la transcription ou du résumé de réunion, génère un compte-rendu exécutif de réunion complet.
+
+GARDE-FOU ANTI-GRIBOUILLAGE :
+Si les notes fournies sont du charabia ou dénuées de sens, tu NE DOIS PAS inventer de réunion fictive. Renvoie :
+{\"error\": \"Votre saisie semble incomplète ou incompréhensible. Pour synthétiser une réunion et générer un compte-rendu décisionnel, veuillez fournir des notes de réunion contenant au minimum les sujets abordés, les participants ou les décisions prises.\"}
+
 Tu dois répondre UNIQUEMENT par un objet JSON valide suivant exactement cette structure :
 {
   \"id\": \"meet_" . bin2hex(random_bytes(6)) . "\",

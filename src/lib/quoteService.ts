@@ -68,6 +68,7 @@ export interface QuoteAIAssistRequest {
   clientContext: string;
   projectDescription: string;
   budget?: string;
+  exampleQuotesText?: string;
 }
 
 export interface QuoteAIAssistResponse {
@@ -80,8 +81,11 @@ export interface QuoteAIAssistResponse {
  * Récupère la liste des clients réels depuis la base de données SQL / locale.
  */
 export async function fetchClients(companyId?: number): Promise<Client[]> {
+  if (!companyId) {
+    return [];
+  }
   const url = createApiUrl('clients.php');
-  if (companyId) url.searchParams.append('company_id', companyId.toString());
+  url.searchParams.append('company_id', companyId.toString());
 
   const response = await fetch(url.toString());
   if (!response.ok) {
@@ -197,8 +201,9 @@ export async function saveQuote(
  * Récupère l'historique des devis pour l'entreprise connectée.
  */
 export async function fetchQuotes(companyId?: number, token?: string): Promise<Quote[]> {
+  if (!companyId) return [];
   const url = createApiUrl('quotes.php');
-  if (companyId) url.searchParams.append('company_id', companyId.toString());
+  url.searchParams.append('company_id', companyId.toString());
 
   const headers: Record<string, string> = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -230,7 +235,7 @@ export async function deleteQuote(quoteId: string, companyId?: number, token?: s
 }
 
 /**
- * Sauvegarde un travail / chantier / projet.
+ * Sauvegarde un travail / prestation / projet.
  */
 export async function saveProject(
   projectData: Partial<ProjectWork>, 
@@ -263,8 +268,9 @@ export async function saveProject(
  * Récupère les travaux / projets de l'entreprise.
  */
 export async function fetchProjects(companyId?: number, token?: string): Promise<ProjectWork[]> {
+  if (!companyId) return [];
   const url = createApiUrl('projects.php');
-  if (companyId) url.searchParams.append('company_id', companyId.toString());
+  url.searchParams.append('company_id', companyId.toString());
 
   const headers: Record<string, string> = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -295,28 +301,31 @@ export async function deleteProject(projectId: string, companyId?: number, token
   return response.ok;
 }
 
+import { downloadQuotePDF, QuoteExportData } from './pdfExportService';
+
 /**
- * Demande la génération du fichier PDF du devis au backend.
+ * Exporte le devis en vrai fichier binaire PDF haute fidélité.
+ * Déclenche le téléchargement immédiat du document vectoriel sans rendu HTML intermédiaire.
  */
 export async function exportQuotePDF(quoteData: any, companyId?: number) {
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = getApiUrl('quote_export.php');
-  form.target = '_blank';
-  
-  const dataInput = document.createElement('input');
-  dataInput.type = 'hidden';
-  dataInput.name = 'quote_data';
-  dataInput.value = JSON.stringify(quoteData);
+  try {
+    const payload: QuoteExportData = {
+      quoteNumber: quoteData.quoteNumber || ('DEV-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000)),
+      date: quoteData.date || new Date().toISOString().split('T')[0],
+      validityDays: quoteData.validityDays || 30,
+      client: quoteData.client,
+      clientName: quoteData.clientName || (quoteData.client ? (quoteData.client.company || quoteData.client.name) : undefined),
+      lines: quoteData.lines || [],
+      executiveSummary: quoteData.executiveSummary,
+      paymentTerms: quoteData.paymentTerms || "Paiement à 30 jours date d'émission.",
+      totals: quoteData.totals,
+      company: quoteData.company
+    };
 
-  const compInput = document.createElement('input');
-  compInput.type = 'hidden';
-  compInput.name = 'company_id';
-  compInput.value = companyId?.toString() || '';
-
-  form.appendChild(dataInput);
-  form.appendChild(compInput);
-  document.body.appendChild(form);
-  form.submit();
-  document.body.removeChild(form);
+    await downloadQuotePDF(payload);
+  } catch (error) {
+    console.error("Erreur lors de la génération PDF du devis:", error);
+    throw error;
+  }
 }
+

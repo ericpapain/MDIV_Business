@@ -198,7 +198,10 @@
     border-radius: 12px;
     border: 1px solid #D9D9D9;
     background-color: #ffffff;
-    padding: 0.75rem 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
     font-size: 0.9375rem;
     color: #0f172a;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -293,7 +296,10 @@
     border-radius: 12px;
     border: 1px solid #D9D9D9;
     background-color: #ffffff;
-    padding: 0.75rem 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
     font-size: 0.9375rem;
     color: #0f172a;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -745,22 +751,24 @@
 }
 
 /* ==============================================================================
-   CHAMPS DE SAISIE UNIFIÉS (FOND NOIR / TEXTE BLANC / LISIBILITÉ OPTIMALE)
+   CHAMPS DE SAISIE UNIFIÉS (FOND BLANC CASSÉ / TEXTE GRIS FONCÉ / DESIGN PREMIUM)
    ============================================================================== */
 input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]),
 textarea,
 select,
+button[role="combobox"],
 [contenteditable="true"] {
-  background-color: #0b0d14 !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  caret-color: #d4af37 !important;
+  background-color: #F8F7F4 !important;
+  color: #222222 !important;
+  border: 1px solid #e2e8f0 !important;
+  caret-color: #3b82f6 !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"])::placeholder,
-textarea::placeholder {
-  color: #9ca3af !important;
+textarea::placeholder,
+button[role="combobox"] span[data-placeholder] {
+  color: #666666 !important;
   opacity: 1 !important;
 }
 
@@ -770,18 +778,21 @@ textarea:focus,
 textarea:focus-visible,
 select:focus,
 select:focus-visible,
+button[role="combobox"]:focus,
+button[role="combobox"][data-state="open"],
 [contenteditable="true"]:focus {
-  background-color: #05060a !important;
-  color: #ffffff !important;
-  border-color: #d4af37 !important;
+  background-color: #F8F7F4 !important;
+  color: #222222 !important;
+  border-color: #3b82f6 !important;
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.35) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
 }
 
 input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]):hover,
 textarea:hover,
-select:hover {
-  border-color: rgba(255, 255, 255, 0.32) !important;
+select:hover,
+button[role="combobox"]:hover {
+  border-color: #cbd5e1 !important;
 }
 
 /* Autofill navigateur (Chrome, Edge, Safari) */
@@ -792,26 +803,176 @@ textarea:-webkit-autofill,
 textarea:-webkit-autofill:hover,
 textarea:-webkit-autofill:focus,
 select:-webkit-autofill {
-  -webkit-text-fill-color: #ffffff !important;
-  -webkit-box-shadow: 0 0 0px 1000px #0b0d14 inset !important;
+  -webkit-text-fill-color: #222222 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #F8F7F4 inset !important;
   transition: background-color 5000s ease-in-out 0s !important;
-  caret-color: #d4af37 !important;
+  caret-color: #3b82f6 !important;
 }
 
 /* État désactivé */
 input:disabled,
 textarea:disabled,
-select:disabled {
-  opacity: 0.45 !important;
+select:disabled,
+button[role="combobox"]:disabled {
+  opacity: 0.5 !important;
   cursor: not-allowed !important;
-  background-color: #12141c !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
 }
 
 /* Sélection de texte dans les champs */
 input::selection,
 textarea::selection {
-  background-color: #2563eb !important;
+  background-color: #3b82f6 !important;
   color: #ffffff !important;
 }
+
+
+/* ==============================================================================
+   FORCAGE PADDING INPUTS AVEC ICONES (EMPECHE TOUTE COLLISION DE TEXTE)
+   ============================================================================== */
+input.pl-6, .pl-6 { padding-left: 1.5rem !important; }
+input.pl-7, .pl-7 { padding-left: 1.75rem !important; }
+input.pl-8, .pl-8 { padding-left: 2rem !important; }
+input.pl-9, .pl-9 { padding-left: 2.25rem !important; }
+input.pl-10, .pl-10 { padding-left: 2.5rem !important; }
+input.pl-11, .pl-11 { padding-left: 2.75rem !important; }
+input.pl-12, .pl-12 { padding-left: 3rem !important; }
+input.pl-14, .pl-14 { padding-left: 3.5rem !important; }
+input.pl-16, .pl-16 { padding-left: 4rem !important; }
+input.pr-8, .pr-8 { padding-right: 2rem !important; }
+input.pr-9, .pr-9 { padding-right: 2.25rem !important; }
+input.pr-10, .pr-10 { padding-right: 2.5rem !important; }
+input.pr-11, .pr-11 { padding-right: 2.75rem !important; }
+input.pr-12, .pr-12 { padding-right: 3rem !important; }
+
+/* Permettre aux inputs compacts (lignes devis/factures) d'avoir une hauteur adaptée */
+input.py-1, input.py-2, input.h-auto, input.h-8, input.h-9, input.h-10 {
+  min-height: unset !important;
+  height: auto !important;
+}
+
+/* ==============================================================================
+   SECTION HAUTE LISIBILITÉ & HYPER-CONTRASTE (TOUTES APPLICATIONS & FORMULAIRES)
+   ============================================================================== */
+
+/* 1. Labels de formulaires universels - Contraste maximal #0f172a et typographie ultra-nette */
+label,
+label.text-slate-400,
+label.text-slate-500,
+label.text-slate-600,
+label.text-slate-700,
+label.text-slate-800,
+label.text-slate-900,
+label.text-gray-400,
+label.text-gray-500,
+label.text-gray-600,
+label.text-gray-700,
+label.text-gray-800,
+label.text-gray-900,
+label[class*="text-slate-"],
+label[class*="text-gray-"],
+label[class*="text-"],
+.ia-page label,
+.ia-page label[class*="text-"],
+form label,
+.ia-card label,
+.bg-white label {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+/* Uniquement pour les conteneurs explicitement sombres */
+.bg-slate-900 label,
+.bg-slate-950 label,
+.bg-black label,
+.dark-panel label,
+.bg-slate-900 .ia-card label {
+  color: #f8fafc !important;
+}
+
+.text-white,
+.bg-slate-900 .text-white,
+.bg-slate-800 .text-white,
+.bg-slate-950 .text-white,
+.bg-slate-900 p.text-white,
+.bg-slate-900 span.text-white {
+  color: #ffffff !important;
+}
+
+.bg-slate-900 .text-slate-400,
+.bg-slate-900 .text-slate-300,
+.bg-slate-900 .text-slate-200,
+.bg-slate-800 .text-slate-400,
+.bg-slate-800 .text-slate-300,
+.bg-slate-800 .text-slate-200 {
+  color: #e2e8f0 !important;
+}
+
+/* 2. Textes secondaires, captions et descriptions relevés en contraste sur fonds clairs */
+.ia-page :not(.bg-slate-900):not(.bg-slate-800):not(.bg-slate-950):not(.bg-black) > .text-slate-400,
+.ia-card :not(.bg-slate-900):not(.bg-slate-800):not(.bg-slate-950):not(.bg-black) > .text-slate-400 {
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+.ia-page .text-slate-500,
+.ia-page .text-gray-500,
+.ia-card .text-slate-500,
+.ia-card .text-gray-500 {
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+.ia-page .text-slate-600,
+.ia-page .text-gray-600,
+.ia-card .text-slate-600,
+.ia-card .text-gray-600 {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+.ia-page p[class*="text-slate-"]:not(.text-white),
+.ia-page p[class*="text-gray-"]:not(.text-white) {
+  color: #1e293b !important;
+  font-weight: 500 !important;
+}
+
+/* 3. Placeholders clairs et lisibles */
+input::placeholder,
+textarea::placeholder,
+.ia-page input::placeholder,
+.ia-page textarea::placeholder,
+button[role="combobox"] span[data-placeholder] {
+  color: #475569 !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+}
+
+/* 4. En-têtes de tableaux et grilles financières */
+.ia-page th,
+.ia-page thead tr th,
+.ia-card th,
+table th {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.03em !important;
+}
+
+/* 5. Badges et étiquettes d'état */
+.ia-badge,
+.ia-page .badge {
+  font-weight: 700 !important;
+}
+
+/* 6. Textes des boutons d'options et sélecteurs de type de facture */
+.ia-page button .text-slate-500,
+.ia-page button .text-gray-500 {
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+
 

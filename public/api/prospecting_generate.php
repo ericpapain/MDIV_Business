@@ -15,14 +15,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 try {
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     
-    $targetCompany = $input['targetCompany'] ?? 'Entreprise cible';
-    $sector = $input['sector'] ?? 'Secteur d\'activité';
-    $contactRole = $input['contactRole'] ?? 'Directeur Général';
-    $objective = $input['objective'] ?? 'Premier contact';
-    $offer = $input['offer'] ?? 'Accompagnement IA et automatisation';
-    $tone = $input['tone'] ?? 'Professionnel';
-    $language = $input['language'] ?? 'Français';
+    $targetCompany = trim($input['targetCompany'] ?? '');
+    $sector = trim($input['sector'] ?? 'Secteur d\'activité');
+    $contactRole = trim($input['contactRole'] ?? 'Directeur Général');
+    $objective = trim($input['objective'] ?? 'Premier contact');
+    $offer = trim($input['offer'] ?? '');
+    $tone = trim($input['tone'] ?? 'Professionnel');
+    $language = trim($input['language'] ?? 'Français');
     $company_id = intval($input['company_id'] ?? 1);
+
+    // FILTRE ANTI-GRIBOUILLAGE
+    $isGibberish = strlen($targetCompany) < 3
+        || preg_match('/^(.)\1{3,}/i', $targetCompany)
+        || strlen($offer) < 6
+        || preg_match('/^(.)\1{4,}/i', $offer)
+        || (preg_match('/^[b-df-hj-np-tv-z0-9\s.,;:!?\'-]{10,}$/i', $offer) && !preg_match('/[aeiouy]/i', $offer));
+
+    if ($isGibberish) {
+        http_response_code(400);
+        echo json_encode([
+            'error' => "Votre saisie semble incomplète ou incompréhensible. Pour générer un email de prospection B2B percutant, veuillez indiquer au minimum l'entreprise ou secteur cible, le rôle du destinataire et la proposition de valeur de votre offre."
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 
     $systemPrompt = "Tu es le meilleur expert en prospection commerciale B2B grand compte pour MDIV Business.
 Rédige un email de cold outreach ultra-personnalisé, à fort taux de réponse, dans la langue demandée ($language).
@@ -31,6 +46,10 @@ Destinataire : $contactRole
 Objectif : $objective
 Offre à valoriser : $offer
 Ton : $tone
+
+GARDE-FOU ANTI-GRIBOUILLAGE :
+Si les informations fournies sont farfelues ou dénuées de sens commercial, NE GÉNÈRE PAS de faux message absurde. Renvoie :
+{\"error\": \"Votre saisie semble incomplète ou incompréhensible. Pour générer un email de prospection B2B percutant, veuillez indiquer au minimum l'entreprise ou secteur cible, le rôle du destinataire et la proposition de valeur de votre offre.\"}
 
 Règles :
 1. Objet irrésistible et court.

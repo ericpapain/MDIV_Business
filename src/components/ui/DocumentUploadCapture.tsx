@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { extractTextFromImage, openDocumentCamera } from "@/lib/ocrService";
+import { openDocumentCamera } from "@/lib/ocrService";
+import { parseUploadedDocument } from "@/lib/documentParserService";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Camera, Upload, FileText, Image as ImageIcon, CheckCircle2, AlertCircle, Loader2, RefreshCw } from "lucide-react";
@@ -13,8 +14,8 @@ interface DocumentUploadCaptureProps {
 
 export function DocumentUploadCapture({
   onDocumentProcessed,
-  acceptedFormats = ".pdf,.jpg,.jpeg,.png,.webp",
-  label = "Déposez votre document (PDF, Facture, Contrat, Photo...)",
+  acceptedFormats = ".pdf,.docx,.doc,.txt,.md,.csv,.json,.log,.jpg,.jpeg,.png,.webp",
+  label = "Déposez votre document (PDF, Word DOCX, Contrat, Facture, Photo...)",
   disabled = false,
 }: DocumentUploadCaptureProps) {
   const [loading, setLoading] = useState(false);
@@ -29,39 +30,35 @@ export function DocumentUploadCapture({
     setPreviewName(file.name);
     setLoading(true);
     setProgress(10);
-    setStatusMsg("Lecture du document...");
-
-    const isImage = file.type.startsWith("image/");
-    const isText = file.type === "text/plain" || file.name.endsWith(".txt") || file.name.endsWith(".md") || file.name.endsWith(".csv");
+    setStatusMsg("Analyse du format documentaire...");
 
     try {
-      let extractedText = "";
+      const res = await parseUploadedDocument(file, (p, s) => {
+        setProgress(p);
+        setStatusMsg(s);
+      });
 
-      if (isImage) {
-        setStatusMsg("Traitement OCR (Vision) de la photo...");
-        const res = await extractTextFromImage(file, {
-          onProgress: (p, s) => {
-            setProgress(p);
-            setStatusMsg(s);
-          },
-        });
-        extractedText = res.text;
-        setExtractedPreview(extractedText ? extractedText.slice(0, 200) + (extractedText.length > 200 ? "..." : "") : "Aucun texte détecté sur l'image.");
-        setStatusMsg(extractedText ? "Texte extrait par OCR avec succès !" : "Analyse terminée (image sans texte lisible).");
-      } else if (isText) {
-        setStatusMsg("Lecture du fichier texte...");
-        extractedText = await file.text();
-        setExtractedPreview(extractedText.slice(0, 200) + (extractedText.length > 200 ? "..." : ""));
-        setProgress(100);
-        setStatusMsg("Document texte lu avec succès !");
+      const extractedText = res.text;
+
+      if (extractedText && extractedText.trim().length > 0) {
+        setExtractedPreview(
+          extractedText.slice(0, 250) + (extractedText.length > 250 ? "..." : "")
+        );
+        const formatLabel = 
+          res.format === 'docx' 
+            ? `Document Word (.docx) extrait (${res.wordCount} mots)` 
+            : res.format === 'pdf'
+            ? `PDF extrait avec succès (${res.numPages || 1} page(s), ${res.wordCount} mots)${res.isScanned ? ' [OCR Vision]' : ''}`
+            : res.format === 'image'
+            ? `Texte extrait par OCR Vision (${res.wordCount} mots)`
+            : `Fichier texte lu avec succès (${res.wordCount} mots)`;
+        setStatusMsg(`${formatLabel} !`);
       } else {
-        // Pour les PDFs ou binaires
-        setProgress(100);
         setExtractedPreview(`Document joint : ${file.name} (${(file.size / 1024).toFixed(1)} Ko)`);
         setStatusMsg("Document joint pour l'analyse.");
       }
 
-      onDocumentProcessed({ file, text: extractedText, isImage });
+      onDocumentProcessed({ file, text: extractedText, isImage: res.format === 'image' });
     } catch (err: any) {
       console.error("Erreur traitement document:", err);
       setStatusMsg(err.message || "Erreur lors du traitement");
@@ -78,7 +75,7 @@ export function DocumentUploadCapture({
 
   return (
     <div className="space-y-3">
-      <div className="border-2 border-dashed border-border/80 hover:border-gold/60 rounded-xl p-6 bg-card/40 backdrop-blur-sm text-center transition-all">
+      <div className="border-2 border-dashed border-blue-300 hover:border-blue-400 rounded-xl p-6 bg-gradient-to-br from-blue-100 to-blue-200 text-center transition-all shadow-sm">
         <input
           ref={fileInputRef}
           type="file"
@@ -101,8 +98,8 @@ export function DocumentUploadCapture({
           </div>
         </div>
 
-        <h4 className="text-sm font-semibold text-foreground mb-1">{label}</h4>
-        <p className="text-xs text-muted-foreground max-w-md mx-auto mb-4">
+        <h4 className="text-sm font-bold text-blue-950 mb-1">{label}</h4>
+        <p className="text-xs text-blue-800 max-w-md mx-auto mb-4">
           Formats acceptés : PDF, JPG, PNG, WEBP, reçus ou photos prises sur le vif avec votre appareil.
         </p>
 

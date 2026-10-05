@@ -12,7 +12,7 @@ const stepAnim = {
 };
 
 const INPUT_CLASS =
-  "w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-slate-200";
+  "w-full bg-white/70 border border-blue-300 rounded-xl px-4 py-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-blue-950 placeholder:text-blue-400";
 
 interface StepProps {
   data: ROIFormData;
@@ -26,12 +26,12 @@ export function StepCompany({ data, onUpdate, onNext }: Omit<StepProps, "onBack"
   const isValid = data.companyName && data.sector && data.employees && data.country;
   return (
     <motion.div key="step1" {...stepAnim}>
-      <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+      <h2 className="text-blue-950 mb-6 flex items-center gap-2">
         <Building2 className="text-blue-500" /> Informations de l'entreprise
       </h2>
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-300">Nom de l'entreprise *</label>
+          <label className="text-sm font-bold text-slate-900">Nom de l'entreprise *</label>
           <input
             type="text"
             value={data.companyName}
@@ -41,7 +41,7 @@ export function StepCompany({ data, onUpdate, onNext }: Omit<StepProps, "onBack"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-300">Pays *</label>
+          <label className="text-sm font-bold text-slate-900">Pays *</label>
           <select
             value={data.country}
             onChange={(e) => onUpdate("country", e.target.value)}
@@ -56,7 +56,7 @@ export function StepCompany({ data, onUpdate, onNext }: Omit<StepProps, "onBack"
           </select>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-300">Secteur d'activité *</label>
+          <label className="text-sm font-bold text-slate-900">Secteur d'activité *</label>
           <select
             value={data.sector}
             onChange={(e) => onUpdate("sector", e.target.value)}
@@ -73,7 +73,7 @@ export function StepCompany({ data, onUpdate, onNext }: Omit<StepProps, "onBack"
           </select>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-300">Nombre d'employés *</label>
+          <label className="text-sm font-bold text-slate-900">Nombre d'employés *</label>
           <select
             value={data.employees}
             onChange={(e) => onUpdate("employees", e.target.value)}
@@ -110,10 +110,10 @@ export function StepProcess({ data, onUpdate, onNext, onBack }: StepProps) {
   const isValid = !!data.process;
   return (
     <motion.div key="step2" {...stepAnim}>
-      <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+      <h2 className="text-blue-950 mb-2 flex items-center gap-2">
         <TrendingUp className="text-blue-500" /> Processus concerné
       </h2>
-      <p className="text-slate-400 mb-6">
+      <p className="text-blue-800 mb-6">
         Quel département ou processus souhaitez-vous analyser pour l'automatisation IA ?
       </p>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -124,7 +124,7 @@ export function StepProcess({ data, onUpdate, onNext, onBack }: StepProps) {
             className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-2 h-24 ${
               data.process === proc
                 ? "border-blue-500 bg-blue-500/10 text-blue-400 font-bold"
-                : "border-slate-800 bg-slate-900/40 hover:border-blue-500/50 hover:bg-blue-500/5 text-slate-300"
+                : "border-blue-400 bg-slate-900/40 hover:border-blue-500/50 hover:bg-blue-500/5 text-blue-900"
             }`}
           >
             {proc}
@@ -134,7 +134,7 @@ export function StepProcess({ data, onUpdate, onNext, onBack }: StepProps) {
       <div className="mt-10 flex justify-between">
         <button
           onClick={onBack}
-          className="px-6 py-3 border border-slate-700 rounded-xl hover:bg-slate-800 text-slate-300 transition-all"
+          className="px-6 py-3 border border-blue-300 rounded-xl hover:bg-blue-300 text-blue-900 transition-all"
         >
           Retour
         </button>
@@ -160,72 +160,72 @@ export function StepMetrics({ data, onUpdate, onNext, onBack }: StepProps) {
 
   return (
     <motion.div key="step3" {...stepAnim}>
-      <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+      <h2 className="text-blue-950 mb-6 flex items-center gap-2">
         <Calculator className="text-blue-500" /> Calcul des gains ({data.process})
       </h2>
       <div className="space-y-8">
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <label className="text-sm font-semibold flex justify-between">
-              <span className="text-slate-300">Employés assignés à cette tâche</span>
-              <span className="text-blue-400 font-bold text-lg">{data.employeesTask}</span>
+            <label className="text-sm font-bold flex justify-between">
+              <span className="text-slate-900">Employés assignés à cette tâche</span>
+              <span className="text-blue-700 font-bold text-lg">{data.employeesTask}</span>
             </label>
             <input
               type="range" min="1" max="100"
               value={data.employeesTask}
               onChange={(e) => onUpdate("employeesTask", parseInt(e.target.value))}
-              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              className="w-full h-2 bg-blue-300 rounded-lg appearance-none cursor-pointer accent-blue-600"
             />
           </div>
           <div className="space-y-4">
-            <label className="text-sm font-semibold flex justify-between">
-              <span className="text-slate-300">Heures / semaine (par employé)</span>
-              <span className="text-blue-400 font-bold text-lg">{data.hoursPerWeek}h</span>
+            <label className="text-sm font-bold flex justify-between">
+              <span className="text-slate-900">Heures / semaine (par employé)</span>
+              <span className="text-blue-700 font-bold text-lg">{data.hoursPerWeek}h</span>
             </label>
             <input
               type="range" min="1" max="40"
               value={data.hoursPerWeek}
               onChange={(e) => onUpdate("hoursPerWeek", parseInt(e.target.value))}
-              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              className="w-full h-2 bg-blue-300 rounded-lg appearance-none cursor-pointer accent-blue-600"
             />
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 pt-6 border-t border-white/5">
+        <div className="grid md:grid-cols-2 gap-8 pt-6 border-t border-blue-300">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-300">
+            <label className="text-sm font-bold text-slate-900">
               Coût horaire moyen d'un employé (€)
             </label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-3.5 text-slate-500" size={18} />
+              <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" size={18} />
               <input
                 type="number" min="10"
                 value={data.avgHourlyRate}
                 onChange={(e) => onUpdate("avgHourlyRate", parseInt(e.target.value) || 0)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                className="w-full pl-11 pr-4 py-3 bg-white border border-blue-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 outline-none"
               />
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-300">
+            <label className="text-sm font-bold text-slate-900">
               Coût mensuel estimé de l'outil IA (€)
             </label>
             <div className="relative">
-              <Zap className="absolute left-3 top-3.5 text-slate-500" size={18} />
+              <Zap className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" size={18} />
               <input
                 type="number" min="0"
                 value={data.aiMonthlyCost}
                 onChange={(e) => onUpdate("aiMonthlyCost", parseInt(e.target.value) || 0)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                className="w-full pl-11 pr-4 py-3 bg-white border border-blue-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 outline-none"
               />
             </div>
           </div>
         </div>
 
-        <div className="pt-6 border-t border-white/5 space-y-4">
-          <label className="text-sm font-semibold flex justify-between items-center">
-            <span className="text-slate-300">Estimation du % d'automatisation possible</span>
-            <span className="text-emerald-400 font-bold text-2xl bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20">
+        <div className="pt-6 border-t border-blue-300 space-y-4">
+          <label className="text-sm font-bold flex justify-between items-center">
+            <span className="text-slate-900">Estimation du % d'automatisation possible</span>
+            <span className="text-emerald-700 font-bold text-2xl bg-emerald-100 px-3 py-1 rounded-lg border border-emerald-300">
               {data.automationPercent}%
             </span>
           </label>
@@ -236,7 +236,7 @@ export function StepMetrics({ data, onUpdate, onNext, onBack }: StepProps) {
             type="range" min="5" max="100" step="5"
             value={data.automationPercent}
             onChange={(e) => onUpdate("automationPercent", parseInt(e.target.value))}
-            className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+            className="w-full h-2 bg-blue-300 rounded-lg appearance-none cursor-pointer accent-emerald-500"
           />
         </div>
       </div>
@@ -244,7 +244,7 @@ export function StepMetrics({ data, onUpdate, onNext, onBack }: StepProps) {
       <div className="mt-10 flex justify-between">
         <button
           onClick={onBack}
-          className="px-6 py-3 border border-slate-700 rounded-xl hover:bg-slate-800 text-slate-300 transition-all"
+          className="px-6 py-3 border border-blue-300 rounded-xl hover:bg-blue-300 text-blue-900 transition-all"
         >
           Retour
         </button>
@@ -269,37 +269,37 @@ export function StepLead({ data, onUpdate, onNext, onBack }: StepProps) {
         <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-6">
           <CheckCircle2 size={40} />
         </div>
-        <h2 className="text-2xl font-bold mb-3">Votre analyse est prête !</h2>
-        <p className="text-slate-400">
+        <h2 className="text-blue-950 mb-3">Votre analyse est prête !</h2>
+        <p className="text-blue-800">
           Pour découvrir vos résultats complets et générer votre rapport détaillé, veuillez renseigner vos coordonnées ci-dessous.
         </p>
       </div>
-      <div className="max-w-md mx-auto space-y-4 bg-slate-900/50 p-6 md:p-8 rounded-2xl border border-white/5">
+      <div className="max-w-md mx-auto space-y-4 bg-white/70 p-6 md:p-8 rounded-2xl border border-blue-300">
         <div className="relative">
-          <User className="absolute left-4 top-3.5 text-slate-500" size={18} />
+          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
           <input
             type="text" placeholder="Nom et Prénom"
             value={data.leadName}
             onChange={(e) => onUpdate("leadName", e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-black/40 border border-slate-700 rounded-xl focus:border-blue-500 focus:ring-1 outline-none transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-white/70 border border-blue-300 rounded-xl focus:border-blue-500 focus:ring-1 outline-none transition-all"
           />
         </div>
         <div className="relative">
-          <Mail className="absolute left-4 top-3.5 text-slate-500" size={18} />
+          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
           <input
             type="email" placeholder="Adresse Email Professionnelle"
             value={data.leadEmail}
             onChange={(e) => onUpdate("leadEmail", e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-black/40 border border-slate-700 rounded-xl focus:border-blue-500 focus:ring-1 outline-none transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-white/70 border border-blue-300 rounded-xl focus:border-blue-500 focus:ring-1 outline-none transition-all"
           />
         </div>
         <div className="relative">
-          <Phone className="absolute left-4 top-3.5 text-slate-500" size={18} />
+          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
           <input
             type="tel" placeholder="Numéro de téléphone"
             value={data.leadPhone}
             onChange={(e) => onUpdate("leadPhone", e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-black/40 border border-slate-700 rounded-xl focus:border-blue-500 focus:ring-1 outline-none transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-white/70 border border-blue-300 rounded-xl focus:border-blue-500 focus:ring-1 outline-none transition-all"
           />
         </div>
         <button
@@ -316,7 +316,7 @@ export function StepLead({ data, onUpdate, onNext, onBack }: StepProps) {
       <div className="mt-8 flex justify-center">
         <button
           onClick={onBack}
-          className="text-sm text-slate-400 hover:text-slate-200 underline"
+          className="text-sm text-blue-800 hover:text-blue-950 underline"
         >
           Retourner aux paramètres
         </button>

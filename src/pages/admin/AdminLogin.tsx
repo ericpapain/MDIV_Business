@@ -103,9 +103,9 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full pl-10 pr-4 py-2 bg-muted/30 border border-border rounded-sm outline-none focus:border-gold/50 transition-colors font-mono text-sm"
+                className="w-full pl-11 pr-4 py-2 bg-muted/30 border border-border rounded-sm outline-none focus:border-gold/50 transition-colors font-mono text-sm"
               />
-              <Key size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Key size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             </div>
           </div>
 

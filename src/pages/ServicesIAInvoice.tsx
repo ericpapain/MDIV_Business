@@ -1,26 +1,31 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { EnterpriseAuthBar } from '@/components/site/EnterpriseAuthBar';
 import { 
   ArrowLeft, FileText, Download, Plus, Trash2, 
   Sparkles, Loader2, Calculator, Users, Box, Save, AlertTriangle, CheckCircle2,
-  TrendingUp, CreditCard, Clock, FileWarning, Camera, ChevronDown, ChevronUp
+  TrendingUp, CreditCard, Clock, FileWarning, Camera, ChevronDown, ChevronUp, Eye
 } from 'lucide-react';
+import { getInvoicePDFBlob } from '@/lib/pdfExportService';
+import { PdfPreviewModal } from '@/components/ui/PdfPreviewModal';
 import { toast } from 'sonner';
 import { fetchClients, fetchProducts, generateQuoteAIAssist, Client, Product, QuoteLine } from '@/lib/quoteService';
 import { 
   fetchInvoiceKPIs, fetchInvoicesList, checkInvoiceWithAI, exportInvoicePDF,
+  deleteInvoice, saveInvoice,
   InvoiceKPIs, Invoice, InvoiceAICheckResult 
 } from '@/lib/invoiceService';
 import { DocumentUploadCapture } from '@/components/ui/DocumentUploadCapture';
 import { ClientSelectWithCreate } from '@/components/clients/ClientSelectWithCreate';
 import { AuthRequiredModal } from '@/components/auth/AuthRequiredModal';
+import { UserProfileModal } from '@/components/auth/UserProfileModal';
 import { getApiUrl } from '@/lib/apiConfig';
 import { 
   Receipt, Filter, FolderGit2, Tag as TagIcon, Trash, FileSpreadsheet,
-  ShieldCheck, ShieldAlert, Landmark, BookOpen, Send, Check, RefreshCw, FileCode, CheckSquare, Square
+  ShieldCheck, ShieldAlert, Landmark, BookOpen, Send, Check, RefreshCw, FileCode, CheckSquare, Square,
+  ArrowUpRight, ArrowDownRight, LayoutDashboard, Edit3Icon, Settings, X, Edit, ExternalLink
 } from 'lucide-react';
 import { 
   fetchExpenses, deleteExpense, getExpensesExportUrl, Expense, ExpenseStats 
@@ -32,13 +37,47 @@ import {
   fetchBankReconciliationQueue, validateReconciliation, generateFecAudit,
   IbanSecurityCheckResult, FacturXGenerationResult, ReconciliationItem, FecExportDiagnosis
 } from '@/lib/fintechKolectoService';
+import { FintechPricingTab } from '@/components/fintech/FintechPricingTab';
+import { useGuestQuota } from '@/hooks/useGuestQuota';
 
 export default function ServicesIAInvoice() {
   const { language } = useLanguage();
   const { company, token, isAuthenticated } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isEn = language === "en";
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'editor' | 'expenses' | 'payments' | 'banking' | 'accounting'>('dashboard');
+  // Quota Freemium 3 essais invité
+  const { 
+    remainingTrials, 
+    isLimitReached: isQuotaLimitReached, 
+    isAuthModalOpen: isQuotaModalOpen, 
+    setIsAuthModalOpen: setIsQuotaModalOpen, 
+    checkCanExecute, 
+    recordExecution 
+  } = useGuestQuota('invoice');
+
+  const getInitialTab = (): 'dashboard' | 'editor' | 'expenses' | 'payments' | 'banking' | 'accounting' | 'pricing' => {
+    const tab = searchParams.get('tab');
+    if (tab === 'pricing' || tab === 'tarifs' || tab === 'tarification') return 'pricing';
+    if (tab === 'editor' || tab === 'ventes') return 'editor';
+    if (tab === 'expenses' || tab === 'achats') return 'expenses';
+    if (tab === 'payments' || tab === 'transactions') return 'payments';
+    if (tab === 'banking' || tab === 'tresorerie') return 'banking';
+    if (tab === 'accounting' || tab === 'comptabilite') return 'accounting';
+    return 'dashboard';
+  };
+
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'editor' | 'expenses' | 'payments' | 'banking' | 'accounting' | 'pricing'>(getInitialTab);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'pricing' || tab === 'tarifs' || tab === 'tarification') setActiveTab('pricing');
+    else if (tab === 'editor' || tab === 'ventes') setActiveTab('editor');
+    else if (tab === 'expenses' || tab === 'achats') setActiveTab('expenses');
+    else if (tab === 'payments' || tab === 'transactions') setActiveTab('payments');
+    else if (tab === 'banking' || tab === 'tresorerie') setActiveTab('banking');
+    else if (tab === 'accounting' || tab === 'comptabilite') setActiveTab('accounting');
+  }, [searchParams]);
 
   // Factur-X State
   const [facturXResult, setFacturXResult] = useState<FacturXGenerationResult | null>(null);
@@ -49,7 +88,7 @@ export default function ServicesIAInvoice() {
 
   // Anti-Fraud IBAN State
   const [testIban, setTestIban] = useState<string>('FR7630006000011234567890189');
-  const [ibanSupplierName, setIbanSupplierName] = useState<string>('Point.P Matériaux SAS');
+  const [ibanSupplierName, setIbanSupplierName] = useState<string>('Fournisseur Partenaire SAS');
   const [ibanSiret, setIbanSiret] = useState<string>('55204487000120');
   const [ibanAmount, setIbanAmount] = useState<number>(1420.00);
   const [ibanCheckResult, setIbanCheckResult] = useState<IbanSecurityCheckResult | null>(null);
@@ -69,19 +108,20 @@ export default function ServicesIAInvoice() {
   const [fecAudit, setFecAudit] = useState<FecExportDiagnosis | null>(null);
   const [isLoadingFec, setIsLoadingFec] = useState(false);
 
-  // Expenses State (Achats, Reçus & Notes de frais Artisans)
+  // Expenses State (Achats, Reçus & Notes de frais Entreprises)
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [expenseStats, setExpenseStats] = useState<ExpenseStats | null>(null);
   const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
   const [isCaptureModalOpen, setIsCaptureModalOpen] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('');
   const [filterProject, setFilterProject] = useState<string>('');
+  const [selectedProofExpense, setSelectedProofExpense] = useState<Expense | null>(null);
 
   const loadBankingData = async () => {
     setIsLoadingReconciliation(true);
     try {
       const res = await fetchBankReconciliationQueue(company?.id);
-      setReconcileQueue(res.queue);
+      setReconcileQueue(res.queue || []);
     } catch (e) {}
     setIsLoadingReconciliation(false);
   };
@@ -110,7 +150,7 @@ export default function ServicesIAInvoice() {
         category: filterCategory || undefined,
         projectId: filterProject || undefined
       });
-      setExpenses(res.expenses);
+      setExpenses(res.expenses || []);
       setExpenseStats(res.stats);
     } catch(e) {}
     setIsLoadingExpenses(false);
@@ -121,6 +161,7 @@ export default function ServicesIAInvoice() {
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
 
   // Editor State
+  const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string>('');
@@ -136,6 +177,7 @@ export default function ServicesIAInvoice() {
   const [isSavingInvoice, setIsSavingInvoice] = useState(false);
   const [savedInvoiceSuccess, setSavedInvoiceSuccess] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Document OCR Scanning State
   const [showScanner, setShowScanner] = useState(false);
@@ -145,6 +187,10 @@ export default function ServicesIAInvoice() {
   // AI Verification State
   const [isCheckingAI, setIsCheckingAI] = useState(false);
   const [aiCheckResult, setAiCheckResult] = useState<InvoiceAICheckResult | null>(null);
+
+  // État de la prévisualisation PDF
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewPdfBlob, setPreviewPdfBlob] = useState<Blob | null>(null);
 
   const handleDeleteExpense = async (id: string) => {
     if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette dépense ?")) return;
@@ -234,6 +280,100 @@ export default function ServicesIAInvoice() {
   
   const finalToPay = totals.totalTTC - downpayment;
 
+  const getInvoiceExportPayload = () => {
+    const selectedClient = clients.find(c => String(c.id) === String(selectedClientId));
+    return {
+      invoiceNumber,
+      issueDate,
+      dueDate: dueDate || new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString().split('T')[0],
+      client: selectedClient,
+      clientName: selectedClient ? (selectedClient.company || selectedClient.name) : 'Client Partenaire',
+      lines,
+      downpayment,
+      totals,
+      company: company ? {
+        name: company.name,
+        email: company.email
+      } : undefined
+    };
+  };
+
+  const handleExportInvoicePDF = async () => {
+    try {
+      const payload = getInvoiceExportPayload();
+      await exportInvoicePDF(payload, company?.id);
+      toast.success(`Facture ${invoiceNumber} téléchargée en PDF haute qualité !`);
+    } catch (err: any) {
+      toast.error("Erreur lors de la génération du PDF.");
+    }
+  };
+
+  const handlePreviewInvoicePDF = () => {
+    try {
+      const payload = getInvoiceExportPayload();
+      const { blob } = getInvoicePDFBlob(payload);
+      setPreviewPdfBlob(blob);
+      setIsPreviewOpen(true);
+    } catch (err: any) {
+      toast.error("Erreur lors de la génération de l'aperçu PDF.");
+    }
+  };
+
+  const handleEditInvoice = (inv: Invoice) => {
+    setEditingInvoiceId(inv.id);
+    setInvoiceNumber(inv.invoiceNumber);
+    if (inv.clientId) setSelectedClientId(String(inv.clientId));
+    if (inv.date) {
+      setIssueDate(inv.date.includes('/') ? inv.date.split('/').reverse().join('-') : inv.date);
+    }
+    if (inv.dueDate) {
+      setDueDate(inv.dueDate.includes('/') ? inv.dueDate.split('/').reverse().join('-') : inv.dueDate);
+    }
+    if (inv.downpayment) setDownpayment(inv.downpayment);
+    if (Array.isArray(inv.lines) && inv.lines.length > 0) {
+      setLines(inv.lines);
+    }
+    setActiveTab('editor');
+    toast.info(`Mode modification activé pour la facture ${inv.invoiceNumber}`);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingInvoiceId(null);
+    setInvoiceNumber('FA-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000));
+    setLines([{ id: '1', description: '', quantity: 1, unitPriceHT: 0, vatRate: 20, discountPercentage: 0 }]);
+    setDownpayment(0);
+    toast.info("Mode création d'une nouvelle facture réactivé.");
+  };
+
+  const handleDeleteInvoice = async (inv: Invoice) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement la facture ${inv.invoiceNumber} (${inv.clientName}) ?`)) {
+      return;
+    }
+    try {
+      const ok = await deleteInvoice(inv.id, company?.id);
+      if (ok) {
+        toast.success(`Facture ${inv.invoiceNumber} supprimée avec succès.`);
+        loadDashboard();
+        if (activeTab === 'accounting') loadFecData();
+      } else {
+        toast.error("Impossible de supprimer la facture.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Erreur lors de la suppression de la facture.");
+    }
+  };
+
+  const handleDownloadProof = (exp: Expense) => {
+    if (!exp.receipt_url) return;
+    const a = document.createElement('a');
+    a.href = exp.receipt_url;
+    a.download = `Justificatif_${exp.merchant.replace(/[^a-zA-Z0-9]/g, '_')}_${exp.invoice_number || exp.id}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast.success("Téléchargement du justificatif démarré.");
+  };
+
   const handleSaveInvoice = async () => {
     const hasValidLines = lines.some(l => l.description.trim() !== '');
     if (!hasValidLines) {
@@ -251,32 +391,31 @@ export default function ServicesIAInvoice() {
 
     try {
       const selectedClient = clients.find(c => String(c.id) === String(selectedClientId));
-      const res = await fetch(getApiUrl('invoices.php'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({
-          company_id: company?.id,
-          invoiceNumber,
-          clientId: selectedClientId || null,
-          clientName: selectedClient ? (selectedClient.company || selectedClient.name) : 'Client Partenaire',
-          date: issueDate,
-          dueDate: dueDate || issueDate,
-          amountHT: totals.totalHT,
-          amountTTC: finalToPay,
-          status: 'pending'
-        })
-      });
+      await saveInvoice({
+        id: editingInvoiceId || undefined,
+        company_id: company?.id,
+        invoiceNumber,
+        clientId: selectedClientId || null,
+        clientName: selectedClient ? (selectedClient.company || selectedClient.name) : 'Client Partenaire',
+        date: issueDate,
+        dueDate: dueDate || issueDate,
+        amountHT: totals.totalHT,
+        amountTTC: finalToPay,
+        downpayment,
+        lines,
+        status: 'pending'
+      }, company?.id);
 
-      if (!res.ok) throw new Error("Erreur lors de la sauvegarde de la facture.");
-
-      const data = await res.json();
       setSavedInvoiceSuccess(true);
-      toast.success(`✓ Facture ${invoiceNumber} enregistrée avec succès dans votre espace entreprise !`);
-      // Recharger le tableau de bord
+      if (editingInvoiceId) {
+        toast.success(`✓ Facture ${invoiceNumber} mise à jour avec succès !`);
+        setEditingInvoiceId(null);
+      } else {
+        toast.success(`✓ Facture ${invoiceNumber} enregistrée avec succès dans votre espace entreprise !`);
+      }
+      // Recharger le tableau de bord et la comptabilité
       loadDashboard();
+      if (activeTab === 'accounting') loadFecData();
     } catch (err: any) {
       toast.error(err.message || "Erreur de sauvegarde.");
     } finally {
@@ -290,6 +429,8 @@ export default function ServicesIAInvoice() {
       return;
     }
 
+    if (!checkCanExecute()) return;
+
     setIsParsingOcr(true);
     try {
       const res = await generateQuoteAIAssist({
@@ -299,6 +440,7 @@ export default function ServicesIAInvoice() {
 
       if (res && res.suggestedLines && res.suggestedLines.length > 0) {
         setLines(res.suggestedLines);
+        recordExecution();
         toast.success(`${res.suggestedLines.length} ligne(s) générée(s) depuis l'OCR !`);
       } else {
         toast.info("L'IA n'a pas pu identifier de lignes spécifiques. Vous pouvez éditer manuellement.");
@@ -311,6 +453,8 @@ export default function ServicesIAInvoice() {
   };
 
   const handleGenerateFacturX = async () => {
+    if (!checkCanExecute()) return;
+
     setIsGeneratingFacturX(true);
     try {
       const selectedClient = clients.find(c => String(c.id) === String(selectedClientId));
@@ -333,6 +477,7 @@ export default function ServicesIAInvoice() {
         pdp_status: 'DEPOSITED'
       });
       setFacturXResult(res);
+      recordExecution();
       toast.success("Factur-X 2026 généré avec succès (Conforme DGFIP / PDP n° 0039).");
     } catch(err: any) {
       toast.error(err.message || "Erreur de génération Factur-X");
@@ -412,82 +557,104 @@ export default function ServicesIAInvoice() {
   };
 
   return (
-    <div className="ia-page min-h-screen pt-32 pb-20 bg-slate-50/50">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <EnterpriseAuthBar className="mb-8" />
+    <>
+      <div className="ia-page min-h-screen pt-32 pb-8 bg-slate-100/80">
+      <div className="max-w-[1500px] mx-auto px-4 h-[calc(100vh-10.5rem)]">
         
-        <div className="mb-8">
-          <Link to="/services-ia" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors mb-4">
-            <ArrowLeft size={16} /> Retour aux Services IA
-          </Link>
-          <div className="flex items-center gap-3 text-blue-600 font-bold uppercase tracking-widest text-xs mb-2">
-            <FileText size={16} /> Suite Comptable
-          </div>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Facturation Intelligente
-          </h1>
-          <p className="text-slate-600 font-medium text-lg max-w-2xl">
-            Gérez votre trésorerie et émettez des factures sans erreurs grâce à la vérification IA intégrée.
-          </p>
-        </div>
+        <div className="flex w-full h-full bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-200">
+          
+          {/* Sidebar */}
+          <div className="w-64 bg-slate-50/50 border-r border-slate-200 flex flex-col shrink-0">
+            <div className="p-5">
+              <div onClick={() => setIsProfileModalOpen(true)} className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50 transition-colors">
+                 <div className="flex items-center gap-2">
+                   <div className="w-8 h-8 rounded-lg bg-amber-400 text-amber-900 flex items-center justify-center font-bold text-sm">
+                     {company?.name ? company.name.charAt(0).toUpperCase() : 'M'}
+                   </div>
+                   <div className="flex flex-col overflow-hidden">
+                     <span className="text-sm font-bold text-slate-900 truncate max-w-[110px]">{company?.name || 'Mon Entreprise'}</span>
+                     <span className="text-[10px] text-slate-500 truncate max-w-[110px]">{company?.email || 'contact@entreprise.com'}</span>
+                   </div>
+                 </div>
+                 <ChevronDown size={14} className="text-slate-400" />
+              </div>
+            </div>
+            
+            <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
+               <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'dashboard' ? 'bg-white shadow-sm border border-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100'}`}>
+                  <div className="flex items-center gap-3"><LayoutDashboard size={18} className={activeTab === 'dashboard' ? 'text-slate-900' : 'text-slate-400'} /> Accueil</div>
+               </button>
+               
+               <div className="pt-2 pb-1">
+                  <button onClick={() => setActiveTab('editor')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'editor' ? 'text-blue-700' : 'text-slate-600 hover:bg-slate-100'}`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`p-1 rounded-md ${activeTab === 'editor' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}><ArrowUpRight size={14} strokeWidth={3} /></div>
+                      Ventes
+                    </div>
+                    <ChevronDown size={14} className={activeTab === 'editor' ? 'text-blue-600' : 'text-slate-400'} />
+                  </button>
+                  {activeTab === 'editor' && (
+                    <div className="ml-5 mt-1 border-l-2 border-slate-200 pl-3 py-1 space-y-1">
+                       <div className="px-3 py-2 bg-slate-200/60 rounded-lg text-sm font-bold text-slate-900">Factures</div>
+                    </div>
+                  )}
+               </div>
 
-        {/* Tabs */}
-        <div className="flex flex-wrap border-b border-slate-200 mb-8 gap-1">
-          <button 
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex items-center gap-2 px-5 py-3.5 font-bold text-sm border-b-2 transition-all ${
-              activeTab === 'dashboard' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <TrendingUp size={17} /> Tableau de bord
-          </button>
-          <button 
-            onClick={() => setActiveTab('editor')}
-            className={`flex items-center gap-2 px-5 py-3.5 font-bold text-sm border-b-2 transition-all ${
-              activeTab === 'editor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <Edit3Icon /> Créer une Facture & Factur-X
-          </button>
-          <button 
-            onClick={() => setActiveTab('expenses')}
-            className={`flex items-center gap-2 px-5 py-3.5 font-bold text-sm border-b-2 transition-all ${
-              activeTab === 'expenses' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <Receipt size={17} /> Achats & Reçus
-            {expenses.length > 0 && (
-              <span className="ml-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 font-bold">
-                {expenses.length}
-              </span>
-            )}
-          </button>
-          <button 
-            onClick={() => setActiveTab('payments')}
-            className={`flex items-center gap-2 px-5 py-3.5 font-bold text-sm border-b-2 transition-all ${
-              activeTab === 'payments' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <Send size={17} /> Virement SEPA ISO 20022
-            <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 font-extrabold uppercase">3 clics</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('banking')}
-            className={`flex items-center gap-2 px-5 py-3.5 font-bold text-sm border-b-2 transition-all ${
-              activeTab === 'banking' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <Landmark size={17} /> Rapprochement Bancaire IA
-          </button>
-          <button 
-            onClick={() => setActiveTab('accounting')}
-            className={`flex items-center gap-2 px-5 py-3.5 font-bold text-sm border-b-2 transition-all ${
-              activeTab === 'accounting' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <BookOpen size={17} /> Pré-Compta & FEC 2026
-          </button>
-        </div>
+               <div className="pt-1 pb-1">
+                  <button onClick={() => setActiveTab('expenses')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'expenses' ? 'text-blue-700' : 'text-slate-600 hover:bg-slate-100'}`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`p-1 rounded-md ${activeTab === 'expenses' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}><ArrowDownRight size={14} strokeWidth={3} /></div>
+                      Achats
+                    </div>
+                    <ChevronDown size={14} className={activeTab === 'expenses' ? 'text-blue-600' : 'text-slate-400'} />
+                  </button>
+                  {activeTab === 'expenses' && (
+                    <div className="ml-5 mt-1 border-l-2 border-slate-200 pl-3 py-1 space-y-1">
+                       <div className="px-3 py-2 bg-slate-200/60 rounded-lg text-sm font-bold text-slate-900">Dépenses fournisseurs</div>
+                    </div>
+                  )}
+               </div>
+
+               <button onClick={() => setActiveTab('banking')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'banking' ? 'bg-white shadow-sm border border-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100'}`}>
+                  <div className="flex items-center gap-3"><Landmark size={18} className={activeTab === 'banking' ? 'text-slate-900' : 'text-slate-400'} /> Suivi de trésorerie</div>
+                  <ChevronDown size={14} className="text-slate-400 opacity-50" />
+               </button>
+               
+               <button onClick={() => setActiveTab('payments')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'payments' ? 'bg-white shadow-sm border border-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100'}`}>
+                  <div className="flex items-center gap-3"><RefreshCw size={18} className={activeTab === 'payments' ? 'text-slate-900' : 'text-slate-400'} /> Transactions</div>
+               </button>
+
+               <button onClick={() => setActiveTab('accounting')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'accounting' ? 'bg-white shadow-sm border border-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100'}`}>
+                  <div className="flex items-center gap-3"><BookOpen size={18} className={activeTab === 'accounting' ? 'text-slate-900' : 'text-slate-400'} /> Comptabilité</div>
+                  <ChevronDown size={14} className="text-slate-400 opacity-50" />
+               </button>
+
+                <button onClick={() => setActiveTab('pricing')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'pricing' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-slate-600 hover:bg-slate-100'}`}>
+                   <div className="flex items-center gap-3"><TagIcon size={18} className={activeTab === 'pricing' ? 'text-white' : 'text-slate-400'} /> Grille Tarifaire & Modules</div>
+                   <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold ${activeTab === 'pricing' ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-600'}`}>2026</span>
+                </button>
+
+               
+               <button onClick={() => {}} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors text-slate-600 hover:bg-slate-100`}>
+                  <div className="flex items-center gap-3"><FolderGit2 size={18} className="text-slate-400" /> Documents</div>
+               </button>
+            </nav>
+            
+            <div className="p-4 mt-auto border-t border-slate-200">
+              <Link to="/services-ia" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors">
+                <ArrowLeft size={18} /> Quitter
+              </Link>
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col h-full bg-white relative overflow-hidden">
+            <div className="absolute inset-0 overflow-y-auto p-8 lg:p-12">
+
+        {/* TAB 0 : GRILLE TARIFAIRE KOLECTO / IT4ALL */}
+        {activeTab === 'pricing' && (
+          <FintechPricingTab />
+        )}
 
         {/* TAB 1 : DASHBOARD */}
         {activeTab === 'dashboard' && (
@@ -516,11 +683,35 @@ export default function ServicesIAInvoice() {
                 </div>
 
                 <div className="ia-card bg-white border border-slate-200 overflow-hidden">
-                   <div className="p-6 border-b border-slate-100 bg-slate-50">
-                     <h3 className="font-bold text-lg">Dernières Factures</h3>
+                   <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                     <h3 className="font-bold text-lg text-slate-900">Dernières Factures</h3>
+                     <button
+                       type="button"
+                       onClick={() => {
+                         handleCancelEdit();
+                         setActiveTab('editor');
+                       }}
+                       className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                     >
+                       <Plus size={14} /> Nouvelle Facture
+                     </button>
                    </div>
                    {invoices.length === 0 ? (
-                     <div className="p-10 text-center text-slate-500 font-medium">Aucune facture enregistrée sur le serveur.</div>
+                     <div className="p-12 text-center text-slate-500 font-medium space-y-3">
+                       <FileText className="mx-auto text-slate-300" size={36} />
+                       <div className="text-slate-700 font-bold">Aucune facture enregistrée pour le moment.</div>
+                       <p className="text-xs text-slate-400 max-w-sm mx-auto">Créez votre première facture de vente avec calcul automatique de la TVA et export PDF officiel.</p>
+                       <button
+                         type="button"
+                         onClick={() => {
+                           handleCancelEdit();
+                           setActiveTab('editor');
+                         }}
+                         className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center gap-2 shadow-md shadow-blue-500/20"
+                       >
+                         <Plus size={14} /> Créer une facture maintenant
+                       </button>
+                     </div>
                    ) : (
                      <div className="overflow-x-auto">
                        <table className="w-full text-left">
@@ -531,6 +722,7 @@ export default function ServicesIAInvoice() {
                              <th className="px-6 py-4">Émission</th>
                              <th className="px-6 py-4">Montant TTC</th>
                              <th className="px-6 py-4">Statut</th>
+                             <th className="px-6 py-4 text-right">Actions</th>
                            </tr>
                          </thead>
                          <tbody className="divide-y divide-slate-100 font-medium text-sm text-slate-700">
@@ -544,6 +736,34 @@ export default function ServicesIAInvoice() {
                                  {inv.status === 'paid' && <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase">Payée</span>}
                                  {inv.status === 'pending' && <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold uppercase">En attente</span>}
                                  {inv.status === 'overdue' && <span className="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold uppercase">En retard</span>}
+                               </td>
+                               <td className="px-6 py-4 text-right whitespace-nowrap">
+                                 <div className="flex items-center justify-end gap-1.5">
+                                   <button
+                                     type="button"
+                                     onClick={() => handleEditInvoice(inv)}
+                                     className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                     title="Modifier la facture"
+                                   >
+                                     <Edit size={16} />
+                                   </button>
+                                   <button
+                                     type="button"
+                                     onClick={() => exportInvoicePDF(inv, company?.id)}
+                                     className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                     title="Télécharger le PDF"
+                                   >
+                                     <Download size={16} />
+                                   </button>
+                                   <button
+                                     type="button"
+                                     onClick={() => handleDeleteInvoice(inv)}
+                                     className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                     title="Supprimer la facture"
+                                   >
+                                     <Trash size={16} />
+                                   </button>
+                                 </div>
                                </td>
                              </tr>
                            ))}
@@ -562,6 +782,28 @@ export default function ServicesIAInvoice() {
           <div className="grid lg:grid-cols-12 gap-8 ia-animate-in">
             {/* Colonne Principale: Éditeur du Devis */}
             <div className="lg:col-span-8 space-y-6">
+              
+              {/* Bannière Mode Modification */}
+              {editingInvoiceId && (
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 flex items-center justify-between gap-4 shadow-sm ia-animate-in">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold">
+                      <Edit size={18} />
+                    </div>
+                    <div>
+                      <div className="font-extrabold text-sm">Mode Modification : Facture {invoiceNumber}</div>
+                      <div className="text-xs text-amber-700">Vous pouvez modifier les lignes, les montants ou le client et sauvegarder vos modifications.</div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="px-3.5 py-1.5 rounded-xl bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-colors whitespace-nowrap"
+                  >
+                    Annuler / Nouvelle facture
+                  </button>
+                </div>
+              )}
               
               {/* Module OCR & Scanner de Facture / Devis papier */}
               <div className="ia-card bg-white p-5 border border-slate-200">
@@ -586,12 +828,12 @@ export default function ServicesIAInvoice() {
                 {showScanner && (
                   <div className="mt-4 pt-4 border-t border-slate-100 space-y-4">
                     <DocumentUploadCapture 
-                      label="Photographiez ou déposez votre facture / bon de commande"
-                      acceptedFormats=".pdf,.jpg,.jpeg,.png,.webp"
+                      label="Photographiez ou déposez votre facture / bon de commande (PDF, Word, Scan)"
+                      acceptedFormats=".pdf,.docx,.doc,.jpg,.jpeg,.png,.webp"
                       onDocumentProcessed={({ text, file }) => {
                         setOcrText(text);
                         if (text) {
-                          toast.success("Texte du document extrait par OCR !");
+                          toast.success("Texte du document extrait avec succès !");
                         } else {
                           toast.info(`Fichier ${file.name} joint.`);
                         }
@@ -617,7 +859,7 @@ export default function ServicesIAInvoice() {
                 )}
               </div>
 
-              <div className="ia-card bg-white p-6 border border-slate-200">
+              <div className="ia-card bg-white p-6 border border-slate-200 relative z-30 overflow-visible">
                 {/* Type de Facture Kolecto */}
                 <div className="mb-5 pb-5 border-b border-slate-100">
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">
@@ -627,7 +869,7 @@ export default function ServicesIAInvoice() {
                     {[
                       { id: 'standard', label: 'Standard', desc: 'Facture finale de vente' },
                       { id: 'downpayment', label: "Facture d'Acompte", desc: 'Versement préalable' },
-                      { id: 'situation', label: 'Situation BTP/PME', desc: 'Facturation à l’avancement' },
+                      { id: 'situation', label: 'Facture de Situation', desc: 'Facturation à l’avancement' },
                       { id: 'recurring', label: 'Récurrente', desc: 'Abonnement / Forfait' },
                     ].map((type) => (
                       <button
@@ -679,7 +921,7 @@ export default function ServicesIAInvoice() {
                   {invoiceType === 'situation' && (
                     <div className="mt-4 p-3.5 bg-indigo-50/70 border border-indigo-200 rounded-xl flex items-center justify-between gap-4">
                       <div className="text-xs text-indigo-900 font-medium">
-                        Taux d'avancement du chantier / projet : <strong>{situationProgress}%</strong>
+                        Taux d'avancement du projet / mission : <strong>{situationProgress}%</strong>
                       </div>
                       <input 
                         type="range" 
@@ -696,16 +938,16 @@ export default function ServicesIAInvoice() {
 
                 <div className="grid md:grid-cols-3 gap-4 mb-4">
                    <div>
-                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">N° Facture</label>
-                     <input type="text" value={invoiceNumber} onChange={e=>setInvoiceNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none" />
+                     <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">N° Facture</label>
+                     <input type="text" value={invoiceNumber} onChange={e=>setInvoiceNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
                    </div>
                    <div>
-                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Date Émission</label>
-                     <input type="date" value={issueDate} onChange={e=>setIssueDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none" />
+                     <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">Date Émission</label>
+                     <input type="date" value={issueDate} onChange={e=>setIssueDate(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
                    </div>
                    <div>
-                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Échéance</label>
-                     <input type="date" value={dueDate} onChange={e=>setDueDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none" />
+                     <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">Échéance</label>
+                     <input type="date" value={dueDate} onChange={e=>setDueDate(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
                    </div>
                 </div>
 
@@ -723,10 +965,10 @@ export default function ServicesIAInvoice() {
               {/* Lignes */}
               <div className="ia-card bg-white border border-slate-200 overflow-hidden">
                 <div className="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                  <h3 className="font-bold text-lg flex items-center gap-2">
+                  <h3 className="font-bold text-lg flex items-center gap-2 text-slate-900">
                     <Box size={20} className="text-emerald-600" /> Détail des Prestations
                   </h3>
-                  <button onClick={addLine} className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-500 transition-colors">
+                  <button onClick={addLine} className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-500 transition-colors shadow-sm">
                     <Plus size={16} /> Ajouter Ligne
                   </button>
                 </div>
@@ -740,18 +982,18 @@ export default function ServicesIAInvoice() {
                       
                       <div className="grid md:grid-cols-12 gap-4 mb-3">
                         <div className="md:col-span-8">
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Désignation</label>
+                          <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">Désignation</label>
                           <textarea 
                             value={line.description} 
                             onChange={(e) => updateLine(line.id, 'description', e.target.value)}
-                            className="w-full bg-white border border-[#D9D9D9] dark:border-slate-700 rounded-[12px] px-3.5 py-2.5 text-sm font-normal text-slate-900 dark:text-slate-100 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 min-h-[70px] resize-y transition-all"
+                            className="w-full bg-white border border-[#D9D9D9] dark:border-slate-700 rounded-[12px] px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-slate-100 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 min-h-[70px] resize-y transition-all"
                           />
                         </div>
                         <div className="md:col-span-4">
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Catalogue</label>
+                          <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">Catalogue</label>
                           <select 
                             onChange={(e) => handleProductSelect(line.id, e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-medium outline-none text-slate-500"
+                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none text-slate-900"
                           >
                             <option value="">Sélection...</option>
                             {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -761,20 +1003,20 @@ export default function ServicesIAInvoice() {
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">QTE</label>
-                           <input type="number" min="0" step="1" value={line.quantity} onChange={(e) => updateLine(line.id, 'quantity', parseFloat(e.target.value)||0)} className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none" />
+                           <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">QTE</label>
+                           <input type="number" min="0" step="1" value={line.quantity} onChange={(e) => updateLine(line.id, 'quantity', parseFloat(e.target.value)||0)} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 outline-none" />
                         </div>
                         <div>
-                           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Prix U. HT</label>
-                           <input type="number" min="0" step="0.01" value={line.unitPriceHT} onChange={(e) => updateLine(line.id, 'unitPriceHT', parseFloat(e.target.value)||0)} className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none" />
+                           <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">Prix U. HT</label>
+                           <input type="number" min="0" step="0.01" value={line.unitPriceHT} onChange={(e) => updateLine(line.id, 'unitPriceHT', parseFloat(e.target.value)||0)} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 outline-none" />
                         </div>
                         <div>
-                           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Remise %</label>
-                           <input type="number" min="0" max="100" step="1" value={line.discountPercentage} onChange={(e) => updateLine(line.id, 'discountPercentage', parseFloat(e.target.value)||0)} className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-amber-600 outline-none" />
+                           <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">Remise %</label>
+                           <input type="number" min="0" max="100" step="1" value={line.discountPercentage} onChange={(e) => updateLine(line.id, 'discountPercentage', parseFloat(e.target.value)||0)} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-amber-700 outline-none" />
                         </div>
                         <div>
-                           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">TVA %</label>
-                           <select value={line.vatRate} onChange={(e) => updateLine(line.id, 'vatRate', parseFloat(e.target.value))} className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none">
+                           <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">TVA %</label>
+                           <select value={line.vatRate} onChange={(e) => updateLine(line.id, 'vatRate', parseFloat(e.target.value))} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 outline-none">
                              <option value={20}>20%</option>
                              <option value={10}>10%</option>
                              <option value={5.5}>5.5%</option>
@@ -802,7 +1044,7 @@ export default function ServicesIAInvoice() {
                   </div>
                 </div>
                 
-                <p className="text-sm text-slate-300 font-medium mb-4 relative z-10">
+                <p className="text-sm text-white font-medium mb-4 relative z-10">
                   Vérifiez la conformité de cette facture avant émission (calculs, mentions légales obligatoires).
                 </p>
 
@@ -887,24 +1129,34 @@ export default function ServicesIAInvoice() {
                   >
                     {isSavingInvoice ? (
                       <>
-                        <Loader2 size={16} className="animate-spin" /> Enregistrement...
+                        <Loader2 size={16} className="animate-spin" /> {editingInvoiceId ? "Mise à jour en cours..." : "Enregistrement..."}
                       </>
                     ) : savedInvoiceSuccess ? (
                       <>
-                        <CheckCircle2 size={16} /> ✓ Facture enregistrée
+                        <CheckCircle2 size={16} /> {editingInvoiceId ? "✓ Facture mise à jour" : "✓ Facture enregistrée"}
                       </>
                     ) : (
                       <>
-                        <Save size={16} /> Enregistrer la facture
+                        <Save size={16} /> {editingInvoiceId ? "Mettre à jour la facture" : "Enregistrer la facture"}
                       </>
                     )}
                   </button>
-                  <button 
-                    onClick={() => exportInvoicePDF({ clientId: selectedClientId, lines, downpayment, totals }, company?.id)}
-                    className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-500 transition-colors flex justify-center items-center gap-2"
-                  >
-                    <Download size={16} /> Exporter PDF
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button 
+                      type="button"
+                      onClick={handlePreviewInvoicePDF}
+                      className="py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm border border-slate-700 transition-colors flex justify-center items-center gap-2"
+                    >
+                      <Eye size={16} /> Aperçu
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={handleExportInvoicePDF}
+                      className="py-3 bg-blue-600 text-white font-bold rounded-xl text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-500 transition-colors flex justify-center items-center gap-2"
+                    >
+                      <Download size={16} /> Exporter PDF
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -983,7 +1235,7 @@ export default function ServicesIAInvoice() {
           </div>
         )}
 
-        {/* TAB 3 : ACHATS & FRAIS REÇUS (ARTISANS & PME) */}
+        {/* TAB 3 : ACHATS & FRAIS REÇUS (ENTREPRISES & PME) */}
         {activeTab === 'expenses' && (
           <div className="ia-animate-in space-y-8">
             {/* Header Actions */}
@@ -991,10 +1243,10 @@ export default function ServicesIAInvoice() {
               <div>
                 <h3 className="text-xl font-bold text-slate-900 mb-1 flex items-center gap-2">
                   <Receipt className="text-blue-600" size={22} />
-                  Achats Fournisseurs, Matériaux & Notes de Frais
+                  Achats Fournisseurs, Dépenses & Notes de Frais
                 </h3>
                 <p className="text-sm text-slate-600 max-w-xl">
-                  Scannez vos tickets (carburant, péage, matériaux Point.P, location Kiloutou) par IA Vision multimodale pour calculer automatiquement votre rentabilité par chantier.
+                  Scannez vos justificatifs, factures d'achats et frais professionnels par IA Vision multimodale pour calculer automatiquement votre rentabilité par projet ou mission.
                 </p>
               </div>
 
@@ -1243,7 +1495,7 @@ export default function ServicesIAInvoice() {
                 </div>
                 <h4 className="text-xl font-bold text-slate-800 mb-2">Aucune facture d'achat ou reçu enregistré</h4>
                 <p className="text-sm text-slate-500 max-w-md mx-auto mb-6">
-                  Photographiez vos tickets de carburant, vos factures Point.P ou Kiloutou. L'IA Vision extrait automatiquement montants et TVA et les rattache à vos chantiers.
+                  Photographiez vos factures d'achats, notes de frais ou justificatifs. L'IA Vision extrait automatiquement montants et TVA et les rattache à vos projets.
                 </p>
                 <button
                   type="button"
@@ -1315,7 +1567,8 @@ export default function ServicesIAInvoice() {
                         <th className="py-4 px-6">Montant HT</th>
                         <th className="py-4 px-6">TVA</th>
                         <th className="py-4 px-6">Total TTC</th>
-                        <th className="py-4 px-6">Chantier / Projet</th>
+                        <th className="py-4 px-6">Projet / Mission</th>
+                        <th className="py-4 px-6 text-center">Preuve / Justificatif</th>
                         <th className="py-4 px-6 text-right">Actions</th>
                       </tr>
                     </thead>
@@ -1366,21 +1619,48 @@ export default function ServicesIAInvoice() {
                               {e.project_id ? (
                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 font-bold">
                                   <FolderGit2 size={12} />
-                                  Chantier: {e.project_id}
+                                  Projet: {e.project_id}
                                 </span>
                               ) : (
                                 <span className="text-xs text-slate-400">Frais général</span>
                               )}
                             </td>
+                            <td className="py-4 px-6 text-center whitespace-nowrap">
+                              {e.receipt_url ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedProofExpense(e)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold transition-all hover:scale-105 shadow-sm"
+                                  title="Visualiser et télécharger le reçu"
+                                >
+                                  <Eye size={13} />
+                                  <span>Voir la preuve</span>
+                                </button>
+                              ) : (
+                                <span className="text-slate-300 text-xs font-mono">-</span>
+                              )}
+                            </td>
                             <td className="py-4 px-6 text-right whitespace-nowrap">
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteExpense(e.id)}
-                                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                                title="Supprimer la dépense"
-                              >
-                                <Trash size={16} />
-                              </button>
+                              <div className="flex items-center justify-end gap-1">
+                                {e.receipt_url && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDownloadProof(e)}
+                                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                    title="Télécharger la pièce justificative"
+                                  >
+                                    <Download size={16} />
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteExpense(e.id)}
+                                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                  title="Supprimer la dépense"
+                                >
+                                  <Trash size={16} />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -1728,6 +2008,37 @@ export default function ServicesIAInvoice() {
               <div className="flex justify-center py-16">
                 <Loader2 className="animate-spin text-slate-400" size={32} />
               </div>
+            ) : fecAudit && fecAudit.entriesCount === 0 ? (
+              <div className="text-center py-16 bg-white border border-slate-200 border-dashed rounded-3xl max-w-2xl mx-auto p-8 ia-animate-in space-y-4">
+                <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-2 border border-indigo-100">
+                  <BookOpen size={32} />
+                </div>
+                <h4 className="text-xl font-bold text-slate-800">Aucune écriture comptable pour le moment</h4>
+                <p className="text-sm text-slate-500 max-w-md mx-auto">
+                  Votre journal FEC et votre balance générale des comptes se mettent à jour en temps réel à chaque facture client émise ou dépense fournisseur ajoutée.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleCancelEdit();
+                      setActiveTab('editor');
+                    }}
+                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all inline-flex items-center gap-2"
+                  >
+                    <Plus size={16} />
+                    Créer une première facture
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsCaptureModalOpen(true)}
+                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all inline-flex items-center gap-2"
+                  >
+                    <Receipt size={16} />
+                    Ajouter une dépense d'achat
+                  </button>
+                </div>
+              </div>
             ) : fecAudit && (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -1758,45 +2069,115 @@ export default function ServicesIAInvoice() {
                 </div>
 
                 {/* Synthèse des comptes PCG */}
-                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-                  <h4 className="font-bold text-slate-900 text-base">
-                    Balance Générale des Comptes (Plan Comptable Général Français)
-                  </h4>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
-                        <tr>
-                          <th className="py-3 px-4">N° Compte PCG</th>
-                          <th className="py-3 px-4">Intitulé du Compte</th>
-                          <th className="py-3 px-4 text-right">Total Débit</th>
-                          <th className="py-3 px-4 text-right">Total Crédit</th>
-                          <th className="py-3 px-4 text-right">Solde</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 font-medium">
-                        {fecAudit.accountsSummary.map((acc) => {
-                          const solde = acc.debit - acc.credit;
-                          return (
-                            <tr key={acc.code} className="hover:bg-slate-50/70 transition-colors">
-                              <td className="py-3 px-4 font-mono font-bold text-slate-900">{acc.code}</td>
-                              <td className="py-3 px-4 font-semibold text-slate-700">{acc.name}</td>
-                              <td className="py-3 px-4 text-right text-slate-900">{acc.debit > 0 ? acc.debit.toFixed(2) + ' €' : '-'}</td>
-                              <td className="py-3 px-4 text-right text-slate-900">{acc.credit > 0 ? acc.credit.toFixed(2) + ' €' : '-'}</td>
-                              <td className={`py-3 px-4 text-right font-bold ${solde >= 0 ? 'text-blue-600' : 'text-slate-700'}`}>
-                                {solde.toFixed(2)} €
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                {fecAudit.accountsSummary && (
+                  <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
+                    <h4 className="font-bold text-slate-900 text-base">
+                      Balance Générale des Comptes (Plan Comptable Général Français)
+                    </h4>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                          <tr>
+                            <th className="py-3 px-4">N° Compte PCG</th>
+                            <th className="py-3 px-4">Intitulé du Compte</th>
+                            <th className="py-3 px-4 text-right">Total Débit</th>
+                            <th className="py-3 px-4 text-right">Total Crédit</th>
+                            <th className="py-3 px-4 text-right">Solde</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 font-medium">
+                          {fecAudit.accountsSummary.map((acc) => {
+                            const solde = acc.debit - acc.credit;
+                            return (
+                              <tr key={acc.code} className="hover:bg-slate-50/70 transition-colors">
+                                <td className="py-3 px-4 font-mono font-bold text-slate-900">{acc.code}</td>
+                                <td className="py-3 px-4 font-semibold text-slate-700">{acc.name}</td>
+                                <td className="py-3 px-4 text-right text-slate-900">{acc.debit > 0 ? acc.debit.toFixed(2) + ' €' : '-'}</td>
+                                <td className="py-3 px-4 text-right text-slate-900">{acc.credit > 0 ? acc.credit.toFixed(2) + ' €' : '-'}</td>
+                                <td className={`py-3 px-4 text-right font-bold ${solde >= 0 ? 'text-blue-600' : 'text-slate-700'}`}>
+                                  {solde.toFixed(2)} €
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             )}
           </div>
         )}
       </div>
+    </div>
+  </div>
+</div>
+</div>
+
+      {/* Modal Lightbox de Visualisation et Téléchargement de la Preuve */}
+      {selectedProofExpense && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md ia-animate-in">
+          <div className="fixed inset-0" onClick={() => setSelectedProofExpense(null)} />
+          <div className="relative w-full max-w-2xl bg-[#121624] border border-gold/30 rounded-3xl p-6 md:p-7 shadow-2xl text-white z-10 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div>
+                <h3 className="font-serif font-bold text-lg text-white">
+                  Pièce Justificative — {selectedProofExpense.merchant}
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {selectedProofExpense.date} • {Number(selectedProofExpense.amount_ttc).toFixed(2)} € TTC • N° Pièce : {selectedProofExpense.invoice_number || 'TICKET'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedProofExpense(null)}
+                className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="max-h-[60vh] overflow-auto rounded-2xl bg-black/60 border border-white/10 flex items-center justify-center p-3">
+              {selectedProofExpense.receipt_url?.startsWith('data:application/pdf') ? (
+                <iframe
+                  src={selectedProofExpense.receipt_url}
+                  className="w-full h-[55vh] rounded-xl"
+                  title="Aperçu PDF"
+                />
+              ) : (
+                <img
+                  src={selectedProofExpense.receipt_url || ''}
+                  alt="Pièce justificative"
+                  className="max-h-[55vh] max-w-full object-contain rounded-xl shadow-lg"
+                />
+              )}
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-white/10">
+              <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5">
+                <CheckCircle2 size={14} /> Pièce authentifiée et archivée
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDownloadProof(selectedProofExpense)}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold hover:bg-gold-light text-[#0b0d14] text-xs font-extrabold shadow-lg shadow-gold/20 transition-all hover:scale-105"
+                >
+                  <Download size={14} /> Télécharger la preuve
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedProofExpense(null)}
+                  className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Capture OCR Vision des Dépenses */}
       <ExpenseCaptureModal
@@ -1805,8 +2186,22 @@ export default function ServicesIAInvoice() {
         onExpenseSaved={(newExp) => {
           setExpenses(prev => [newExp, ...prev]);
           loadExpenses();
+          if (activeTab === 'accounting') loadFecData();
         }}
         companyId={company?.id}
+      />
+
+      {/* Modal Quota 3 Essais Atteints */}
+      <AuthRequiredModal
+        isOpen={isQuotaModalOpen}
+        onClose={() => setIsQuotaModalOpen(false)}
+        onSuccess={() => {
+          setIsQuotaModalOpen(false);
+          handleGenerateFacturX();
+        }}
+        quotaLimitReached={isQuotaLimitReached}
+        title="Vous avez utilisé vos 3 essais gratuits"
+        description="Créez votre compte entreprise en 30 secondes ou connectez-vous pour débloquer la génération Factur-X illimitée et sauvegarder vos factures."
       />
 
       {/* Modal d'authentification sans perte de données */}
@@ -1820,7 +2215,23 @@ export default function ServicesIAInvoice() {
         title="Connectez-vous pour enregistrer cette facture"
         description="Votre facture et tous ses détails seront immédiatement enregistrés dans votre espace entreprise."
       />
-    </div>
+
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        defaultTab="profile"
+      />
+
+      {/* Modal de prévisualisation PDF haute qualité */}
+      <PdfPreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        pdfBlob={previewPdfBlob}
+        title={`Facture ${invoiceNumber}`}
+        fileName={`Facture-${invoiceNumber}.pdf`}
+        onDownload={handleExportInvoicePDF}
+      />
+    </>
   );
 }
 

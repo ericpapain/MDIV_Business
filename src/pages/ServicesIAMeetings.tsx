@@ -4,9 +4,10 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { EnterpriseAuthBar } from '@/components/site/EnterpriseAuthBar';
 import { 
-  ArrowLeft, FileAudio, FileText, Upload, Plus, History, 
+  ArrowLeft, ArrowRight, FileAudio, FileText, Upload, Plus, History, 
   Loader2, Mic, PlayCircle, Search, Calendar, FileDown, 
-  AlertCircle, Camera, CheckCircle2, Lock as LockIcon
+  AlertCircle, Camera, CheckCircle2, Sparkles, RefreshCcw,
+  Pause, Play, Square, Trash2, Radio, Volume2, Save, FolderKanban
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
@@ -19,25 +20,91 @@ import {
 } from '@/lib/meetingReportService';
 import { MeetingReportView } from '@/components/meetings/MeetingReportView';
 import { DocumentUploadCapture } from '@/components/ui/DocumentUploadCapture';
+import { AuthRequiredModal } from '@/components/auth/AuthRequiredModal';
+import { useGuestQuota } from '@/hooks/useGuestQuota';
+import { SaveWorkModal } from '@/components/saved-work/SaveWorkModal';
+import { SavedWorkDrawer } from '@/components/saved-work/SavedWorkDrawer';
+import { VersionSelectorBar, VersionItem } from '@/components/common/VersionSelectorBar';
+import { SavedWorkItem } from '@/lib/savedWorkService';
 
 export default function ServicesIAMeetings() {
   const { language } = useLanguage();
-  const { company } = useAuth();
+  const { company, token, isAuthenticated } = useAuth();
   const isEn = language === "en";
+
+  // Quota Freemium 3 essais invité
+  const { 
+    remainingTrials, 
+    isLimitReached: isQuotaLimitReached, 
+    isAuthModalOpen: isQuotaModalOpen, 
+    setIsAuthModalOpen: setIsQuotaModalOpen, 
+    checkCanExecute, 
+    recordExecution 
+  } = useGuestQuota('meetings');
 
   const [activeTab, setActiveTab] = useState<'create' | 'history'>('create');
   
   // Create State
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState('');
+  const [phase, setPhase] = useState<'upload' | 'agents' | 'result'>('upload');
+  const [agentMessages, setAgentMessages] = useState<AgentMessage[]>([]);
+  const [agentError, setAgentError] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentReport, setCurrentReport] = useState<MeetingReport | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Agents Phase
-  const [phase, setPhase] = useState<'upload' | 'agents' | 'result'>('upload');
-  const [agentMessages, setAgentMessages] = useState<AgentMessage[]>([]);
-  const [agentError, setAgentError] = useState<string | null>(null);
+  // Versions State
+  const [versions, setVersions] = useState<VersionItem<MeetingReport>[]>([]);
+  const [activeVersionIndex, setActiveVersionIndex] = useState<number>(0);
+
+  // Universal Save & History Drawer State
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
+
+  // Live Dictation State
+  const [dictationStatus, setDictationStatus] = useState<'ready' | 'listening' | 'transcribing' | 'paused' | 'completed'>('ready');
+  const [dictationTime, setDictationTime] = useState(0);
+  const recognitionRef = useRef<any>(null);
+  const dictationTimerRef = useRef<any>(null);
+
+  // Restore saved draft on mount
+  useEffect(() => {
+    try {
+      const savedNotes = localStorage.getItem('mdiv_meeting_notes_draft');
+      if (savedNotes && !text) {
+        setText(savedNotes);
+        setDictationStatus('completed');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  // Auto-save draft on every change
+  useEffect(() => {
+    try {
+      if (text) {
+        localStorage.setItem('mdiv_meeting_notes_draft', text);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [text]);
+
+  // Dictation timer effect
+  useEffect(() => {
+    if (dictationStatus === 'listening' || dictationStatus === 'transcribing') {
+      dictationTimerRef.current = setInterval(() => {
+        setDictationTime(t => t + 1);
+      }, 1000);
+    } else {
+      if (dictationTimerRef.current) clearInterval(dictationTimerRef.current);
+    }
+    return () => {
+      if (dictationTimerRef.current) clearInterval(dictationTimerRef.current);
+    };
+  }, [dictationStatus]);
 
   // History State
   const [history, setHistory] = useState<MeetingReport[]>([]);
@@ -70,39 +137,138 @@ export default function ServicesIAMeetings() {
     const selected = e.target.files?.[0];
     if (selected) {
       setFile(selected);
-      setText(''); // On vide le texte si on sélectionne un fichier
+      setText('');
     }
   };
 
   const clearUpload = () => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
+    }
+    setDictationStatus('ready');
     setFile(null);
     setText('');
+    try { localStorage.removeItem('mdiv_meeting_notes_draft'); } catch (e) {}
     setCurrentReport(null);
     setPhase('upload');
     setAgentMessages([]);
-    setAgentError(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleAnalyze = async () => {
+  // Live Dictation Controls
+  const startLiveDictation = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("La dictée vocale n'est pas supportée par votre navigateur. Utilisez Google Chrome ou Microsoft Edge.");
+      return;
+    }
+
+    try {
+      if (!recognitionRef.current) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'fr-FR';
+
+        recognition.onstart = () => {
+          setDictationStatus('listening');
+          toast.success("Dictée vocale activée. Parlez naturellement...");
+        };
+
+        recognition.onresult = (event: any) => {
+          let currentSessionText = '';
+          for (let i = 0; i < event.results.length; i++) {
+            currentSessionText += event.results[i][0].transcript + ' ';
+          }
+          if (currentSessionText.trim()) {
+            setText(currentSessionText.trim());
+          }
+        };
+
+        recognition.onerror = (event: any) => {
+          console.warn("Dictation error:", event.error);
+          if (event.error !== 'no-speech') {
+            toast.error(`Erreur micro : ${event.error}`);
+            setDictationStatus('ready');
+          }
+        };
+
+        recognition.onend = () => {
+          setDictationStatus(prev => (prev === 'listening' || prev === 'transcribing') ? 'paused' : prev);
+        };
+
+        recognitionRef.current = recognition;
+      }
+
+      recognitionRef.current.start();
+      setDictationStatus('listening');
+    } catch (e: any) {
+      toast.error("Impossible de démarrer le microphone.");
+    }
+  };
+
+  const pauseLiveDictation = () => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
+    }
+    setDictationStatus('paused');
+    toast.info("Dictée mise en pause.");
+  };
+
+  const resumeLiveDictation = () => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.start(); } catch (e) {}
+    }
+    setDictationStatus('listening');
+  };
+
+  const stopLiveDictation = () => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
+    }
+    setDictationStatus('completed');
+    toast.success("Transcription terminée et enregistrée.");
+  };
+
+  const formatTimer = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+
+  const handleAnalyze = async (isNewVersion = false) => {
     if (!file && !text.trim()) {
       toast.error("Veuillez importer un fichier ou coller une transcription.");
       return;
     }
 
+    if (!file) {
+      const clean = text.trim();
+      const isGibberish = 
+        clean.length < 10 ||
+        /^(.)\1{4,}/i.test(clean) ||
+        (/^[b-df-hj-np-tv-z0-9\s.,;:!?'-]{12,}$/i.test(clean) && !/[aeiouy]/i.test(clean));
+
+      if (isGibberish) {
+        toast.error("Votre saisie semble incomplète ou incompréhensible. Pour synthétiser une réunion, veuillez fournir des notes contenant au minimum les sujets abordés, les participants ou les décisions clés prises.");
+        return;
+      }
+    }
+
+    if (!checkCanExecute()) return;
+
     setIsAnalyzing(true);
     setAgentError(null);
     try {
-      // 1. On upload d'abord le fichier ou le texte (qui retourne un ID ou un mock pour initier le flux)
-      const uploadRes = await analyzeMeetingMedia(file, text, company?.id);
+      const contentToAnalyze = isNewVersion ? `${text}\n\n[CONSIGNE VARIATION] : Reformule et synthétise sous un angle d'arbitrage exécutif alternatif.` : text;
+      const uploadRes = await analyzeMeetingMedia(file, contentToAnalyze, company?.id);
       
-      // 2. On passe en mode agents visuel
       setPhase('agents');
       setAgentMessages([]);
       
-      // 3. On lance la discussion
       startMeetingAgentsAnalysis(
-        uploadRes.id || "meeting_temp_id", // ou le texte si on voulait tout faire en GET
+        uploadRes.id || "meeting_temp_id",
         company?.id,
         (msg) => {
           setAgentMessages(prev => [...prev, msg]);
@@ -110,7 +276,21 @@ export default function ServicesIAMeetings() {
         (report) => {
           setCurrentReport(report);
           setPhase('result');
-          toast.success("Compte-rendu généré avec succès !");
+          
+          const newVerNum = versions.length + 1;
+          const newVer: VersionItem<MeetingReport> = {
+            id: 'ver_' + Date.now(),
+            versionNumber: newVerNum,
+            label: `Compte-rendu V${newVerNum}`,
+            timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+            data: report,
+          };
+          const updatedVers = [...versions, newVer];
+          setVersions(updatedVers);
+          setActiveVersionIndex(updatedVers.length - 1);
+
+          recordExecution();
+          toast.success(isNewVersion ? `Nouvelle variante V${newVerNum} générée !` : "Compte-rendu généré avec succès !");
           setIsAnalyzing(false);
         },
         (err) => {
@@ -123,6 +303,28 @@ export default function ServicesIAMeetings() {
       toast.error(err.message || "Erreur lors de l'analyse.");
       setIsAnalyzing(false);
       setPhase('upload');
+    }
+  };
+
+  const handleSwitchVersion = (index: number) => {
+    if (versions[index]) {
+      setActiveVersionIndex(index);
+      setCurrentReport(versions[index].data);
+      toast.info(`Affichage de la ${versions[index].label || `Version ${index + 1}`}`);
+    }
+  };
+
+  const handleLoadSavedWork = (item: SavedWorkItem) => {
+    try {
+      const p = item.content_payload;
+      if (p.subject && p.executiveSummary) {
+        setCurrentReport(p);
+        setPhase('result');
+        setActiveTab('create');
+        toast.success(`Compte-rendu « ${item.title} » restauré avec succès !`);
+      }
+    } catch {
+      toast.error("Format de travail invalide.");
     }
   };
 
@@ -140,29 +342,126 @@ export default function ServicesIAMeetings() {
 
   return (
     <div className="ia-page min-h-screen pt-32 pb-20 bg-slate-50/50">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <EnterpriseAuthBar className="mb-8" />
+      <div className="container mx-auto px-4 max-w-7xl">
         
-        <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <Link to="/services-ia" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors mb-4">
-              <ArrowLeft size={16} /> Retour aux Services IA
+        {/* Barre d'Authentification / Entreprise */}
+        <EnterpriseAuthBar 
+          appName="Comptes-Rendus de Réunions IA"
+          onOpenAuthModal={() => setIsQuotaModalOpen(true)}
+        />
+
+        {/* Top Header & Actions Nav */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <Link to="/services-ia" className="inline-flex items-center gap-2 text-sm text-slate-700 hover:text-slate-900 font-bold transition-colors">
+              <ArrowLeft size={16} /> {isEn ? "Back to AI Services" : "Retour aux Services IA"}
             </Link>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
+            <button onClick={() => window.location.reload()} className="inline-flex items-center gap-2 text-sm text-slate-700 hover:text-blue-600 font-bold transition-colors" title="Actualiser et relancer l'IA">
+              <RefreshCcw size={16} /> {isEn ? "Refresh & Restart" : "Actualiser"}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsHistoryDrawerOpen(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold text-xs shadow-xs transition-colors"
+            >
+              <History className="w-4 h-4 text-blue-600" />
+              <span>Historique Sauvegardes</span>
+            </button>
+
+            {currentReport && (
+              <button
+                type="button"
+                onClick={() => setIsSaveModalOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Save className="w-4 h-4" />
+                <span>Sauvegarder dans l'historique</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Header avec Vidéo et Étapes */}
+        <div className="mb-10 flex flex-col md:flex-row md:justify-between md:items-stretch gap-6">
+          <div className="pt-2 flex flex-col justify-between">
+            <div className="flex items-center gap-3 text-indigo-600 font-bold uppercase tracking-widest text-xs mb-2">
+              <Mic size={16} /> Réunions, Dictées & Synthèses
+            </div>
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
               Générateur de Comptes-Rendus IA
             </h1>
-            <p className="text-slate-600 mt-2 font-medium">
-              Transformez vos réunions (Teams, Zoom, Meet) ou transcriptions en rapports exécutifs structurés.
+            <p className="text-slate-600 font-medium text-lg max-w-2xl mb-8">
+              Transformez vos réunions (Teams, Zoom, Meet, Audio) ou dictées vocales en direct en rapports exécutifs structurés avec décisions et plans d'actions.
             </p>
+            
+            {/* Séparateur créatif */}
+            <div className="flex items-center gap-4 mb-8 max-w-lg">
+              <div className="h-px bg-gradient-to-r from-indigo-300 via-blue-300 to-transparent flex-1"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+              <div className="w-1 h-1 rounded-full bg-indigo-400 opacity-50"></div>
+            </div>
+
+            {/* Comment ça marche */}
+            <div className="max-w-2xl">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                <div className="flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:border-indigo-200 hover:shadow-md transition-all group flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                      <Mic size={16} />
+                    </div>
+                    <span className="text-sm font-bold text-slate-800">1. Audio ou Dictée</span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium pl-11">Importez l'audio ou parlez au micro.</p>
+                </div>
+
+                <div className="hidden sm:flex items-center justify-center flex-shrink-0 text-indigo-500 bg-indigo-50/80 h-8 w-8 rounded-full border border-indigo-100/50 shadow-[0_0_10px_rgba(99,102,241,0.2)] animate-[pulse_1.5s_ease-in-out_infinite]">
+                  <ArrowRight size={16} strokeWidth={3} className="ml-0.5" />
+                </div>
+
+                <div className="flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all group relative flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:rotate-12 transition-transform flex-shrink-0">
+                      <Sparkles size={16} />
+                    </div>
+                    <span className="text-sm font-bold text-slate-800">2. Analyse Multi-Agents</span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium pl-11">Extraction décisions & actions.</p>
+                </div>
+
+                <div className="hidden sm:flex items-center justify-center flex-shrink-0 text-blue-500 bg-blue-50/80 h-8 w-8 rounded-full border border-blue-100/50 shadow-[0_0_10px_rgba(59,130,246,0.2)] animate-[pulse_1.5s_ease-in-out_infinite]" style={{ animationDelay: '0.5s' }}>
+                  <ArrowRight size={16} strokeWidth={3} className="ml-0.5" />
+                </div>
+
+                <div className="flex flex-col gap-2 bg-slate-900 p-4 rounded-xl shadow-md hover:bg-slate-800 hover:shadow-lg transition-all group flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                      <FileText size={16} />
+                    </div>
+                    <span className="text-sm font-bold text-white">3. Rapport & Export</span>
+                  </div>
+                  <p className="text-xs text-white font-medium pl-11">Export PDF, Word ou sauvegarde.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bloc Vidéo */}
+          <div className="max-w-sm md:max-w-md lg:max-w-lg w-full rounded-2xl overflow-hidden shadow-xl shadow-blue-600/10 border border-slate-100 flex-shrink-0">
+            <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+              <source src="https://cdn.prod.website-files.com/6373b53b7e4adf70ce44cbd5%2F6a71f36dba060eceb7c770d6_anim%20-%20gestion%20des%20achats_webm.webm" type="video/webm" />
+            </video>
           </div>
         </div>
 
         {/* Tabs */}
         <div className="flex border-b border-slate-200 mb-8">
           <button 
-            onClick={() => { setActiveTab('create'); if(currentReport) clearUpload(); }}
+            onClick={() => setActiveTab('create')}
             className={`flex items-center gap-2 px-6 py-4 font-bold border-b-2 transition-colors ${
-              activeTab === 'create' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
+              activeTab === 'create' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-700 hover:text-slate-900'
             }`}
           >
             <Plus size={18} /> Nouveau Compte-Rendu
@@ -170,96 +469,258 @@ export default function ServicesIAMeetings() {
           <button 
             onClick={() => setActiveTab('history')}
             className={`flex items-center gap-2 px-6 py-4 font-bold border-b-2 transition-colors ${
-              activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
+              activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-700 hover:text-slate-900'
             }`}
           >
-            <History size={18} /> Historique & Tableau de Bord
+            <History size={18} /> Historique & Archives
           </button>
         </div>
 
         {/* TAB: CREATE */}
         {activeTab === 'create' && (
-          <div className="ia-animate-in">
+          <div className="space-y-6">
+            {/* Version Selector Bar */}
+            {versions.length > 0 && phase === 'result' && (
+              <VersionSelectorBar
+                versions={versions}
+                activeVersionIndex={activeVersionIndex}
+                onSelectVersion={handleSwitchVersion}
+                onGenerateNewVersion={() => handleAnalyze(true)}
+                isGeneratingNewVersion={isAnalyzing}
+              />
+            )}
+
             {phase === 'upload' && (
-              <div className="grid md:grid-cols-2 gap-8">
-                {/* File Upload Zone */}
-                <div className="ia-card p-8 bg-white border border-slate-200 flex flex-col">
-                  <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
-                    <FileAudio size={20} className="text-blue-600" /> Importer un enregistrement
-                  </h2>
-                  <p className="text-sm text-slate-500 mb-6">Formats supportés : MP3, WAV, MP4, PDF, DOCX</p>
+              <div className="space-y-8 ia-animate-in">
+                
+                {/* 1. Studio Dictée Vocale en Direct */}
+                <div className="p-6 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-3xl text-white shadow-xl relative overflow-hidden border border-blue-500/30">
+                  <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-blue-500/20 blur-3xl rounded-full pointer-events-none"></div>
                   
-                  <div 
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`flex-1 min-h-[250px] border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-colors ${
-                      file ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'
-                    }`}
-                  >
-                    <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
-                    {file ? (
-                      <>
-                        <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
-                          <CheckCircle2 size={32} />
+                  <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div className="space-y-2">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-wider">
+                        <Radio className="w-3.5 h-3.5 text-red-400 animate-pulse" />
+                        Micro & Dictée Vocale IA Directe
+                      </div>
+                      <h3 className="text-xl md:text-2xl font-bold text-white">
+                        Dictez vos réunions ou vos débriefings en direct
+                      </h3>
+                      <p className="text-sm text-white max-w-xl">
+                        Activez le micro, parlez librement et laissez notre IA retranscrire fidèlement vos échanges sans coupure.
+                      </p>
+                    </div>
+
+                    {/* Microphone Controls */}
+                    <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+                      {dictationStatus === 'ready' && (
+                        <button
+                          type="button"
+                          onClick={startLiveDictation}
+                          className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold text-sm shadow-lg shadow-red-500/30 transition-all hover:scale-105 active:scale-95"
+                        >
+                          <Mic className="w-5 h-5 animate-pulse" />
+                          Démarrer la Dictée Vocale
+                        </button>
+                      )}
+
+                      {dictationStatus === 'listening' && (
+                        <div className="flex items-center gap-2">
+                          <div className="px-4 py-2.5 rounded-xl bg-red-500/20 border border-red-400/40 text-red-300 text-xs font-bold flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                            Enregistrement : {formatTimer(dictationTime)}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={pauseLiveDictation}
+                            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors"
+                            title="Mettre en pause"
+                          >
+                            <Pause className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={stopLiveDictation}
+                            className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors flex items-center gap-1.5"
+                            title="Terminer et valider"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            Valider
+                          </button>
                         </div>
-                        <h3 className="font-bold text-slate-800 text-lg">{file.name}</h3>
-                        <p className="text-sm text-emerald-600 font-medium mt-1">Fichier prêt pour l'analyse</p>
-                        <button onClick={(e) => { e.stopPropagation(); setFile(null); }} className="mt-4 text-xs font-bold text-slate-400 hover:text-slate-600 underline">Retirer le fichier</button>
-                      </>
-                    ) : (
-                      <>
-                        <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-4">
-                          <Upload size={32} />
+                      )}
+
+                      {dictationStatus === 'paused' && (
+                        <div className="flex items-center gap-2">
+                          <span className="px-3 py-2 rounded-xl bg-amber-500/20 text-amber-300 text-xs font-bold">
+                            En pause ({formatTimer(dictationTime)})
+                          </span>
+                          <button
+                            type="button"
+                            onClick={resumeLiveDictation}
+                            className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+                            title="Reprendre"
+                          >
+                            <Play className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={stopLiveDictation}
+                            className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+                            title="Terminer"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </button>
                         </div>
-                        <h3 className="font-bold text-slate-800 text-lg mb-1">Cliquez ou glissez un fichier</h3>
-                        <p className="text-sm text-slate-400 font-medium max-w-[200px]">Pour extraire automatiquement les actions et décisions.</p>
-                      </>
+                      )}
+
+                      {dictationStatus === 'completed' && (
+                        <div className="flex items-center gap-2">
+                          <span className="px-3 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-bold flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4" /> {wordCount} mots retranscrits
+                          </span>
+                          <button
+                            type="button"
+                            onClick={startLiveDictation}
+                            className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors"
+                          >
+                            Reprendre la dictée
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Upload Audio / Transcription existante */}
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* File Upload Box */}
+                  <div className="ia-card p-6 md:p-8 bg-white border border-slate-200 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+                        <FileAudio className="text-blue-600" size={20} />
+                        Importer un Fichier Audio / Vidéo
+                      </h3>
+                      <p className="text-xs font-semibold text-slate-700 mb-6">
+                        Formats supportés : MP3, WAV, M4A, MP4, WebM (Jusqu'à 100 Mo).
+                      </p>
+
+                      <div 
+                        onClick={() => fileInputRef.current?.click()}
+                        className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
+                          file ? 'border-blue-500 bg-blue-50/30' : 'border-slate-300 hover:border-blue-400 bg-slate-50'
+                        }`}
+                      >
+                        <input 
+                          type="file" 
+                          ref={fileInputRef} 
+                          onChange={handleFileChange} 
+                          accept="audio/*,video/*" 
+                          className="hidden" 
+                        />
+                        
+                        {file ? (
+                          <div className="flex flex-col items-center">
+                            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-3">
+                              <FileAudio size={24} />
+                            </div>
+                            <span className="font-bold text-slate-800 text-sm mb-1">{file.name}</span>
+                            <span className="text-xs text-slate-500">{(file.size / (1024 * 1024)).toFixed(2)} Mo</span>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                              className="mt-3 text-xs text-red-600 font-bold hover:underline"
+                            >
+                              Supprimer le fichier
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center">
+                            <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-3">
+                              <Upload size={24} />
+                            </div>
+                            <span className="font-bold text-slate-700 text-sm mb-1">Cliquez ou glissez un enregistrement</span>
+                            <span className="text-xs text-slate-400">MP3, WAV, M4A, Teams, Zoom, Meet</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Text Notes Box */}
+                  <div className="ia-card p-6 md:p-8 bg-white border border-slate-200 flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                          <FileText className="text-blue-600" size={20} />
+                          Notes, Transcription ou Verbatim
+                        </h3>
+                        {wordCount > 0 && (
+                          <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+                            {wordCount} mots
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs font-semibold text-slate-700 mb-3">
+                        Collez vos notes brutes ou le texte dicté en direct :
+                      </p>
+
+                      <div className="mb-3">
+                        <DocumentUploadCapture 
+                          label="Importer un document de réunion (PDF, Word, Scan)"
+                          acceptedFormats=".pdf,.docx,.doc,.txt,.jpg,.jpeg,.png,.webp"
+                          onDocumentProcessed={({ text: extractedText }) => {
+                            if (extractedText) {
+                              setText(prev => (prev ? prev + "\n\n" : "") + extractedText);
+                              toast.success("Notes de réunion extraites du document avec succès !");
+                            }
+                          }}
+                        />
+                      </div>
+
+                      <textarea 
+                        value={text} 
+                        onChange={(e) => { setText(e.target.value); setFile(null); }}
+                        placeholder="Ex : Réunion de cadrage du 04/10. Présents : Alice, Thomas. Ordre du jour : validation du budget Q4. Décision : validation du budget à 45k€..."
+                        className="w-full bg-slate-50 border border-[#D9D9D9] dark:border-slate-700 rounded-[12px] p-4 text-sm font-semibold text-slate-900 dark:text-slate-100 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 min-h-[140px] resize-y transition-all"
+                      />
+                    </div>
+
+                    {text && (
+                      <div className="flex justify-between items-center mt-2 text-xs text-slate-500 font-medium">
+                        <span>Brouillon synchronisé localement</span>
+                        <button 
+                          type="button" 
+                          onClick={() => { setText(''); localStorage.removeItem('mdiv_meeting_notes_draft'); }} 
+                          className="text-red-600 hover:underline font-bold"
+                        >
+                          Effacer le texte
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Text / Photo Notes Paste Zone */}
-                <div className="ia-card p-6 bg-white border border-slate-200 flex flex-col relative">
-                  {file && <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-3xl"><LockIcon className="text-slate-400 mb-2" size={32} /><span className="font-bold text-slate-500 text-sm">Fichier audio/vidéo déjà sélectionné</span></div>}
-                  
-                  <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
-                      <FileText size={20} className="text-amber-500" /> Notes ou Photo de réunion
-                    </h2>
-                  </div>
-                  <p className="text-xs text-slate-500 mb-4">Collez vos notes, ou photographiez le tableau blanc / notes manuscrites via OCR.</p>
-                  
-                  <div className="mb-3">
-                    <DocumentUploadCapture 
-                      label="Photographier tableau blanc ou notes papier (OCR)"
-                      acceptedFormats=".pdf,.jpg,.jpeg,.png,.webp,.txt"
-                      onDocumentProcessed={({ text: ocrResult }) => {
-                        if (ocrResult) {
-                          setText(prev => (prev ? prev + "\n\n" : "") + ocrResult);
-                          toast.success("Notes extraites par OCR et ajoutées à la transcription !");
-                        }
-                      }}
-                    />
-                  </div>
-
-                  <textarea 
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Collez ici les notes de votre réunion ou vérifiez le texte extrait par photo OCR..."
-                    className="flex-1 min-h-[160px] w-full p-4 border border-[#D9D9D9] dark:border-slate-700 bg-white dark:bg-slate-900 rounded-[12px] resize-y outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all text-sm font-normal text-slate-900 dark:text-slate-100"
-                  />
-                </div>
-
-                {/* Action Bar */}
-                <div className="md:col-span-2 flex items-center justify-center pt-4">
+                {/* Launch Button */}
+                <div className="flex justify-center pt-4">
                   <button 
-                    onClick={handleAnalyze} 
+                    onClick={() => handleAnalyze(false)}
                     disabled={isAnalyzing || (!file && !text.trim())}
-                    className="ia-btn-primary px-12 py-5 text-lg font-bold shadow-xl shadow-blue-500/20 disabled:opacity-50 flex items-center gap-3"
+                    className="ia-btn-primary px-8 py-4 text-base font-bold shadow-xl shadow-blue-500/20 flex items-center gap-3 disabled:opacity-50"
                   >
                     {isAnalyzing ? (
-                      <><Loader2 className="animate-spin" size={24} /> Connexion aux experts IA...</>
+                      <>
+                        <Loader2 className="animate-spin" size={20} /> Analyse en cours...
+                      </>
                     ) : (
-                      <><Mic size={24} /> Générer le Compte-Rendu</>
+                      <>
+                        <Sparkles size={20} />
+                        Générer le Compte-Rendu Exécutif
+                        {!isAuthenticated && (
+                          <span className="ml-1 text-xs px-2.5 py-1 rounded-full bg-white/20 font-normal">
+                            {remainingTrials > 0 ? `⚡ ${remainingTrials}/3 essai${remainingTrials > 1 ? 's' : ''}` : '⚡ 0/3 (Verrouillé)'}
+                          </span>
+                        )}
+                      </>
                     )}
                   </button>
                 </div>
@@ -313,9 +774,26 @@ export default function ServicesIAMeetings() {
               <div className="space-y-6 ia-animate-in">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                   <span className="font-semibold text-slate-600 flex items-center gap-2">
-                    <CheckCircle2 className="text-emerald-500" size={20} /> Rapport généré et sauvegardé dans l'historique
+                    <CheckCircle2 className="text-emerald-500" size={20} /> Rapport généré avec succès
                   </span>
-                  <button onClick={clearUpload} className="text-sm font-bold text-blue-600 hover:text-blue-700 px-4 py-2 bg-blue-50 rounded-lg">Analyser un autre fichier</button>
+                  
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleAnalyze(true)}
+                      disabled={isAnalyzing}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-colors"
+                    >
+                      <RefreshCcw className="w-3.5 h-3.5 text-blue-600" />
+                      Proposer une autre version
+                    </button>
+                    <button 
+                      onClick={clearUpload} 
+                      className="text-xs font-bold text-blue-600 hover:text-blue-700 px-3.5 py-2 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
+                    >
+                      Analyser un autre fichier
+                    </button>
+                  </div>
                 </div>
                 
                 <MeetingReportView report={currentReport} />
@@ -333,7 +811,7 @@ export default function ServicesIAMeetings() {
                   <p className="text-sm text-slate-500 font-medium">Retrouvez et exportez tous vos historiques de réunions.</p>
                </div>
                <div className="relative w-full md:w-72">
-                  <Search className="absolute left-3.5 top-3.5 text-slate-400" size={18} />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
                   <input 
                     type="text" 
                     placeholder="Rechercher une réunion..." 
@@ -398,13 +876,40 @@ export default function ServicesIAMeetings() {
           </div>
         )}
       </div>
-    </div>
-  );
-}
 
-// Helper icon
-function LockIcon(props: any) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      {/* Universal Save Modal */}
+      {currentReport && (
+        <SaveWorkModal
+          isOpen={isSaveModalOpen}
+          onClose={() => setIsSaveModalOpen(false)}
+          toolType="meeting"
+          defaultTitle={`Compte-rendu : ${currentReport.subject}`}
+          contentPayload={currentReport}
+          summary={`Compte-rendu avec ${currentReport.actions?.length || 0} actions assignées et ${currentReport.decisions?.length || 0} décisions actées.`}
+          currentVersion={activeVersionIndex + 1}
+        />
+      )}
+
+      {/* Universal Saved Work Drawer */}
+      <SavedWorkDrawer
+        isOpen={isHistoryDrawerOpen}
+        onClose={() => setIsHistoryDrawerOpen(false)}
+        toolType="meeting"
+        onSelectWork={handleLoadSavedWork}
+      />
+
+      {/* Modal Quota 3 Essais Atteints */}
+      <AuthRequiredModal
+        isOpen={isQuotaModalOpen}
+        onClose={() => setIsQuotaModalOpen(false)}
+        onSuccess={() => {
+          setIsQuotaModalOpen(false);
+          handleAnalyze();
+        }}
+        quotaLimitReached={isQuotaLimitReached}
+        title="Vous avez utilisé vos 3 essais gratuits"
+        description="Créez votre compte entreprise en 30 secondes ou connectez-vous pour générer des comptes-rendus de réunions illimités et sauvegarder vos actions."
+      />
+    </div>
   );
 }
