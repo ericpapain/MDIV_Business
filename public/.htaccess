@@ -23,6 +23,23 @@ DirectoryIndex index.html
   
   # Pass Authorization header to PHP (OVH strips it by default)
   RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+  # ========================================================
+  # 🛡️ PROTECTION ANTI-SCRAPING, ANTI-BOTS & MOISSONNEURS IA
+  # ========================================================
+  # 1. Bloquer les requêtes sans User-Agent (signatures de scripts automatisés)
+  RewriteCond %{HTTP_USER_AGENT} ^$
+  RewriteRule .* - [F,L]
+
+  # 2. Bloquer les outils, bibliothèques et navigateurs sans tête de scraping
+  RewriteCond %{HTTP_USER_AGENT} (python|requests|scrapy|aiohttp|httpx|beautifulsoup|curl|wget|libwww-perl|postman|insomnia|go-http-client) [NC,OR]
+  RewriteCond %{HTTP_USER_AGENT} (puppeteer|playwright|selenium|phantomjs|headlesschrome|webdriver|casperjs) [NC,OR]
+  # 3. Bloquer les robots d'aspiration et crawlers d'IA non autorisés
+  RewriteCond %{HTTP_USER_AGENT} (bytespider|diffbot|ccbot|gptbot|chatgpt-user|anthropic-ai|claude-web|perplexitybot|amazonbot|cohere-ai|omgili) [NC]
+  RewriteRule .* - [F,L]
+
+  # 4. Interdire le téléchargement direct de fichiers sensibles
+  RewriteRule ^.*\.(sql|env|log|md|git|yml|yaml|ini|sh)$ - [F,L]
   
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
