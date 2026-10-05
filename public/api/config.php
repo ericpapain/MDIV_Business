@@ -149,12 +149,107 @@ function get_db_connection() {
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS `companies` (
               `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `siren` VARCHAR(9) NULL,
+              `siret` VARCHAR(14) NULL,
               `company_name` VARCHAR(255) NOT NULL,
+              `trade_name` VARCHAR(255) DEFAULT NULL,
+              `legal_form` VARCHAR(150) DEFAULT NULL,
+              `naf_code` VARCHAR(20) DEFAULT NULL,
+              `activity` TEXT DEFAULT NULL,
+              `address` TEXT DEFAULT NULL,
+              `postal_code` VARCHAR(20) DEFAULT NULL,
+              `city` VARCHAR(150) DEFAULT NULL,
+              `country` VARCHAR(100) DEFAULT 'France',
+              `creation_date` VARCHAR(50) DEFAULT NULL,
+              `administrative_status` VARCHAR(50) DEFAULT 'ACTIVE',
+              `employee_range` VARCHAR(100) DEFAULT NULL,
+              `capital` VARCHAR(100) DEFAULT NULL,
               `email` VARCHAR(255) NOT NULL UNIQUE,
+              `phone` VARCHAR(30) DEFAULT NULL,
+              `website` VARCHAR(255) DEFAULT NULL,
+              `iban` VARCHAR(40) DEFAULT NULL,
+              `bic` VARCHAR(15) DEFAULT NULL,
+              `plan_tier` ENUM('free', 'starter', 'pro', 'enterprise') DEFAULT 'free',
+              `company_status` ENUM('ACTIVE', 'SIREN_PENDING', 'MANUAL', 'INACTIVE') DEFAULT 'ACTIVE',
+              `data_source` ENUM('INSEE', 'INPI', 'BODACC', 'PAPPERS', 'MANUAL') DEFAULT 'INSEE',
+              `official_data` JSON DEFAULT NULL,
               `password_hash` VARCHAR(255) NOT NULL,
               `status` ENUM('active', 'inactive', 'banned') DEFAULT 'active',
               `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-              `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+              `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              INDEX `idx_siren` (`siren`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        // Migration douce et automatique des colonnes manquantes sur une table companies existante
+        try {
+            $cols_stmt = $pdo->query("SHOW COLUMNS FROM `companies`");
+            $existing_cols = [];
+            while ($row = $cols_stmt->fetch(PDO::FETCH_ASSOC)) {
+                $existing_cols[$row['Field']] = true;
+            }
+            $extended_cols = [
+                'siren' => "VARCHAR(9) NULL",
+                'siret' => "VARCHAR(14) NULL",
+                'trade_name' => "VARCHAR(255) NULL",
+                'legal_form' => "VARCHAR(150) NULL",
+                'naf_code' => "VARCHAR(20) NULL",
+                'activity' => "TEXT NULL",
+                'address' => "TEXT NULL",
+                'postal_code' => "VARCHAR(20) NULL",
+                'city' => "VARCHAR(150) NULL",
+                'country' => "VARCHAR(100) DEFAULT 'France'",
+                'creation_date' => "VARCHAR(50) NULL",
+                'administrative_status' => "VARCHAR(50) DEFAULT 'ACTIVE'",
+                'employee_range' => "VARCHAR(100) NULL",
+                'capital' => "VARCHAR(100) NULL",
+                'phone' => "VARCHAR(30) NULL",
+                'website' => "VARCHAR(255) NULL",
+                'iban' => "VARCHAR(40) NULL",
+                'bic' => "VARCHAR(15) NULL",
+                'plan_tier' => "ENUM('free', 'starter', 'pro', 'enterprise') DEFAULT 'free'",
+                'company_status' => "ENUM('ACTIVE', 'SIREN_PENDING', 'MANUAL', 'INACTIVE') DEFAULT 'ACTIVE'",
+                'data_source' => "ENUM('INSEE', 'INPI', 'BODACC', 'PAPPERS', 'MANUAL') DEFAULT 'INSEE'",
+                'official_data' => "JSON NULL"
+            ];
+            foreach ($extended_cols as $cName => $cDef) {
+                if (!isset($existing_cols[$cName])) {
+                    $pdo->exec("ALTER TABLE `companies` ADD COLUMN `$cName` $cDef");
+                }
+            }
+        } catch (Throwable $eCols) {
+            // Ignorer si les colonnes existent déjà
+        }
+
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `users` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `first_name` VARCHAR(100) NOT NULL,
+              `last_name` VARCHAR(100) NOT NULL,
+              `email` VARCHAR(255) NOT NULL UNIQUE,
+              `phone` VARCHAR(50) DEFAULT NULL,
+              `job_title` VARCHAR(150) DEFAULT 'Dirigeant',
+              `password_hash` VARCHAR(255) NOT NULL,
+              `role` ENUM('ADMIN', 'MANAGER', 'USER') DEFAULT 'ADMIN',
+              `email_verified` TINYINT(1) DEFAULT 1,
+              `verification_token` VARCHAR(255) DEFAULT NULL,
+              `status` ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              INDEX `idx_user_email` (`email`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `company_api_cache` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `siren` VARCHAR(9) NOT NULL UNIQUE,
+              `provider` VARCHAR(50) NOT NULL DEFAULT 'INSEE_RECHERCHE_GOUV',
+              `response_json` LONGTEXT NOT NULL,
+              `fetched_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              `expires_at` TIMESTAMP NOT NULL,
+              INDEX `idx_cache_siren` (`siren`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
         

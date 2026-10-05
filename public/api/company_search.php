@@ -27,25 +27,34 @@ if (strlen($siren) !== 9) {
 try {
     $pdo = get_db_connection();
 
-    // 2. Vérification si l'entreprise est déjà inscrite sur la plateforme
-    $stmtCheck = $pdo->prepare("SELECT id, company_name, email, siren FROM companies WHERE siren = ? LIMIT 1");
-    $stmtCheck->execute([$siren]);
-    $existingCompany = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+    // 2. Vérification si l'entreprise est déjà inscrite sur la plateforme (non-bloquant)
+    $isAlreadyRegistered = false;
+    $existingCompany = null;
+    try {
+        $stmtCheck = $pdo->prepare("SELECT id, company_name, email, siren FROM companies WHERE siren = ? LIMIT 1");
+        $stmtCheck->execute([$siren]);
+        $existingCompany = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+        $isAlreadyRegistered = !empty($existingCompany);
+    } catch (Throwable $eDbCheck) {
+        // En cas de mise à jour de schéma en cours, on ne bloque pas la recherche INSEE
+    }
 
-    $isAlreadyRegistered = !empty($existingCompany);
+    // 3. Vérification du Cache API Local (pour éviter les quotas et latences inutiles, non-bloquant)
+    try {
+        $stmtCache = $pdo->prepare("SELECT response_json, expires_at FROM company_api_cache WHERE siren = ? AND expires_at > NOW() LIMIT 1");
+        $stmtCache->execute([$siren]);
+        $cached = $stmtCache->fetch(PDO::FETCH_ASSOC);
 
-    // 3. Vérification du Cache API Local (pour éviter les quotas et latences inutiles)
-    $stmtCache = $pdo->prepare("SELECT response_json, expires_at FROM company_api_cache WHERE siren = ? AND expires_at > NOW() LIMIT 1");
-    $stmtCache->execute([$siren]);
-    $cached = $stmtCache->fetch(PDO::FETCH_ASSOC);
-
-    if ($cached && !empty($cached['response_json'])) {
-        $data = json_decode($cached['response_json'], true);
-        $data['already_registered'] = $isAlreadyRegistered;
-        $data['existing_company_id'] = $isAlreadyRegistered ? $existingCompany['id'] : null;
-        $data['from_cache'] = true;
-        echo json_encode($data);
-        exit;
+        if ($cached && !empty($cached['response_json'])) {
+            $data = json_decode($cached['response_json'], true);
+            $data['already_registered'] = $isAlreadyRegistered;
+            $data['existing_company_id'] = $isAlreadyRegistered ? ($existingCompany['id'] ?? null) : null;
+            $data['from_cache'] = true;
+            echo json_encode($data);
+            exit;
+        }
+    } catch (Throwable $eCache) {
+        // En cas d'absence de table cache, continuer vers l'API officielle
     }
 
     // 4. MULTI-SOURCES ENRICHMENT ENGINE

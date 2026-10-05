@@ -70,15 +70,19 @@ try {
 
     // 4. Vérification unicité du SIREN (si renseigné)
     if (!empty($cleanSiren)) {
-        $stmtSiren = $pdo->prepare("SELECT id, company_name FROM companies WHERE siren = ? LIMIT 1");
-        $stmtSiren->execute([$cleanSiren]);
-        $existingSiren = $stmtSiren->fetch(PDO::FETCH_ASSOC);
-        if ($existingSiren) {
-            http_response_code(409);
-            echo json_encode([
-                "error" => "Cette entreprise (SIREN " . $cleanSiren . ") possède déjà un compte (" . $existingSiren['company_name'] . "). Connectez-vous ou contactez votre administrateur."
-            ]);
-            exit;
+        try {
+            $stmtSiren = $pdo->prepare("SELECT id, company_name FROM companies WHERE siren = ? LIMIT 1");
+            $stmtSiren->execute([$cleanSiren]);
+            $existingSiren = $stmtSiren->fetch(PDO::FETCH_ASSOC);
+            if ($existingSiren) {
+                http_response_code(409);
+                echo json_encode([
+                    "error" => "Cette entreprise (SIREN " . $cleanSiren . ") possède déjà un compte (" . $existingSiren['company_name'] . "). Connectez-vous ou contactez votre administrateur."
+                ]);
+                exit;
+            }
+        } catch (Throwable $eSiren) {
+            // Ignorer si la colonne siren est en cours d'initialisation
         }
     }
 
