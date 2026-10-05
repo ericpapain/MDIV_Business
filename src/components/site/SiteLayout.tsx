@@ -21,9 +21,9 @@ export function SiteLayout() {
     }
   }, [pathname, hash]);
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col w-full max-w-full overflow-x-hidden">
       <SiteHeader />
-      <main className="flex-1">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden">
         <Outlet />
       </main>
       <SiteFooter />

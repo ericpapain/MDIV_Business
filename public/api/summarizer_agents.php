@@ -35,6 +35,11 @@ $company_id = isset($_GET['company_id']) ? intval($_GET['company_id']) : 1;
 
 try {
     $temp_file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'mdiv_sum_' . $doc_id . '.json';
+    $local_temp_file = __DIR__ . '/temp/mdiv_sum_' . $doc_id . '.json';
+    if (!file_exists($temp_file) && file_exists($local_temp_file)) {
+        $temp_file = $local_temp_file;
+    }
+
     $doc_text = "Document d'analyse d'activité et stratégie d'entreprise.";
     $doc_name = "Document_Analyse.pdf";
 

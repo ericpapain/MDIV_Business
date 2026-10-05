@@ -233,7 +233,7 @@ export default function ServicesIALeads() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 border-b border-slate-200 mb-8">
+        <div className="flex overflow-x-auto no-scrollbar whitespace-nowrap gap-2 sm:gap-4 border-b border-slate-200 mb-8 pb-1">
           <button 
             onClick={() => setActiveTab('search')}
             className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm border-b-2 transition-all ${
@@ -260,7 +260,7 @@ export default function ServicesIALeads() {
           <div className="grid xl:grid-cols-12 gap-6">
             {/* Colonne 1 : Filtres (3/12) */}
             <div className="xl:col-span-4 lg:col-span-5">
-              <form onSubmit={handleSearch} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl sticky top-28">
+              <form onSubmit={handleSearch} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl xl:sticky xl:top-28">
                 <div className="flex items-center gap-2 font-bold text-[#020617] text-base mb-6 border-b border-slate-200 pb-4">
                   <Filter size={18} className="text-gold"/> Critères de Qualification IA
                 </div>
@@ -356,7 +356,7 @@ export default function ServicesIALeads() {
 
             {/* Colonne 2 : Pipeline Résultats (4/12) */}
             <div className="xl:col-span-4 lg:col-span-7">
-              <div className="bg-white border border-slate-200 rounded-2xl h-full min-h-[600px] flex flex-col shadow-xl overflow-hidden">
+              <div className="bg-white border border-slate-200 rounded-2xl h-full min-h-[350px] lg:min-h-[600px] flex flex-col shadow-xl overflow-hidden">
                 <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                    <h3 className="font-bold text-[#020617] text-base flex items-center gap-2">
                      <Target size={16} className="text-gold"/> Prospects Identifiés
@@ -457,7 +457,7 @@ export default function ServicesIALeads() {
             {/* Colonne 3 : Panneau d'Enrichissement Détaillé (4/12) */}
             <div className="xl:col-span-4 lg:col-span-12">
               {activeLead ? (
-                <div className="bg-white border border-gold/30 rounded-2xl overflow-hidden sticky top-28 shadow-2xl">
+                <div className="bg-white border border-gold/30 rounded-2xl overflow-hidden xl:sticky xl:top-28 shadow-2xl">
                   {/* Header profil */}
                   <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 border-b border-slate-200 relative overflow-hidden">
                     <div className="flex items-center justify-between mb-4">

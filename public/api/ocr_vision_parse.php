@@ -21,8 +21,9 @@ if (empty($imageBase64)) {
     exit;
 }
 
-$groqKey = getenv('GROQ_API_KEY') ?: '';
-$openaiKey = getenv('OPENAI_API_KEY') ?: '';
+require_once __DIR__ . '/config.php';
+$groqKey = defined('GROQ_API_KEY') ? GROQ_API_KEY : (getenv('GROQ_API_KEY') ?: '');
+$openaiKey = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : (getenv('OPENAI_API_KEY') ?: '');
 
 $extractedData = null;
 

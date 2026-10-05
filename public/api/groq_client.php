@@ -105,7 +105,16 @@ function callGroqApi($messages, $model = null, $stream = false, $useJsonMode = t
                 }
                 return callLlmProvider('https://api.groq.com/openai/v1/chat/completions', GROQ_API_KEY, $data, 'Groq (' . $groqModel . ')', $stream);
             } catch (Exception $e) {
-                $errors[] = 'Groq: ' . $e->getMessage();
+                $errors[] = 'Groq (' . $groqModel . '): ' . $e->getMessage();
+                // Si le modèle Qwen est indisponible ou rate limited, basculer immédiatement sur llama-3.3-70b-versatile
+                if ($groqModel !== 'llama-3.3-70b-versatile') {
+                    try {
+                        $data['model'] = 'llama-3.3-70b-versatile';
+                        return callLlmProvider('https://api.groq.com/openai/v1/chat/completions', GROQ_API_KEY, $data, 'Groq (llama-3.3-70b-versatile)', $stream);
+                    } catch (Exception $e2) {
+                        $errors[] = 'Groq (llama-3.3-70b-versatile): ' . $e2->getMessage();
+                    }
+                }
             }
         }
 
@@ -159,6 +168,10 @@ function callGroqApi($messages, $model = null, $stream = false, $useJsonMode = t
         } catch (Exception $e) {
             $errors[] = 'HuggingFace: ' . $e->getMessage();
         }
+    }
+
+    if (empty($errors)) {
+        throw new Exception("Aucune clé API IA (GROQ_API_KEY ou OPENAI_API_KEY) n'est activement configurée sur le serveur.");
     }
 
     throw new Exception("Toutes les APIs IA ont échoué. Détails : " . implode(" | ", $errors));

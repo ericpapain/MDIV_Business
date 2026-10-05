@@ -369,7 +369,7 @@ export default function ServicesIAProspecting() {
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap border-b border-slate-200 mb-8">
+        <div className="flex overflow-x-auto no-scrollbar whitespace-nowrap gap-1 border-b border-slate-200 mb-8 pb-1">
           <button 
             onClick={() => setActiveTab('generator')}
             className={`flex items-center gap-2 px-6 py-4 font-bold border-b-2 transition-colors ${
