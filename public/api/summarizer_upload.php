@@ -34,6 +34,12 @@ try {
     }
 
     $temp_file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'mdiv_sum_' . $id . '.json';
+    $local_temp_dir = __DIR__ . '/temp';
+    if (!is_dir($local_temp_dir)) {
+        @mkdir($local_temp_dir, 0777, true);
+    }
+    $local_temp_file = $local_temp_dir . '/mdiv_sum_' . $id . '.json';
+
     $data_to_store = [
         'id' => $id,
         'documentName' => $document_name,
@@ -41,7 +47,8 @@ try {
         'text' => $extracted_text,
         'created_at' => date('Y-m-d H:i:s')
     ];
-    file_put_contents($temp_file, json_encode($data_to_store, JSON_UNESCAPED_UNICODE));
+    @file_put_contents($temp_file, json_encode($data_to_store, JSON_UNESCAPED_UNICODE));
+    @file_put_contents($local_temp_file, json_encode($data_to_store, JSON_UNESCAPED_UNICODE));
 
     echo json_encode([
         'id' => $id,

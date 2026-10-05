@@ -47,6 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'fallbackEnabled' => isset($input['fallbackEnabled']) ? filter_var($input['fallbackEnabled'], FILTER_VALIDATE_BOOLEAN) : true
     ];
 
+    if (!empty($input['groqApiKey'])) $new_settings['groqApiKey'] = trim($input['groqApiKey']);
+    if (!empty($input['openaiApiKey'])) $new_settings['openaiApiKey'] = trim($input['openaiApiKey']);
+    if (!empty($input['mistralApiKey'])) $new_settings['mistralApiKey'] = trim($input['mistralApiKey']);
+
     $existing_data = [];
     if (file_exists($settings_file)) {
         $existing_data = json_decode(file_get_contents($settings_file), true) ?: [];

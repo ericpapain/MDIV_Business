@@ -27,10 +27,15 @@ if (!defined('SKIP_DEFAULT_HEADERS')) {
 $possible_env_files = [
     __DIR__ . '/../../.env',
     __DIR__ . '/../.env',
-    __DIR__ . '/.env'
+    __DIR__ . '/.env',
+    dirname(__DIR__, 2) . '/.env',
+    dirname(__DIR__, 3) . '/.env',
+    (isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] . '/.env' : ''),
+    (isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] . '/../.env' : ''),
 ];
+
 foreach ($possible_env_files as $env_file) {
-    if (file_exists($env_file) && is_readable($env_file)) {
+    if (!empty($env_file) && file_exists($env_file) && is_readable($env_file)) {
         $lines = file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
             $line = trim($line);
@@ -49,14 +54,6 @@ foreach ($possible_env_files as $env_file) {
         break;
     }
 }
-
-// 2. CONFIGURATION DE L'IA (GROQ / OPENAI / MISTRAL)
-define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: '');
-define('OPENAI_API_KEY', getenv('OPENAI_API_KEY') ?: '');
-define('MISTRAL_API_KEY', getenv('MISTRAL_API_KEY') ?: '');
-define('HF_API_KEY', getenv('HF_API_KEY') ?: '');
-define('LLM_API_URL', 'https://api.groq.com/openai/v1/chat/completions');
-define('LLM_MODEL', getenv('LLM_MODEL') ?: 'qwen/qwen3.8-27b');
 
 /**
  * Récupère dynamiquement les réglages configurés par l'administrateur dans le panel
@@ -87,6 +84,31 @@ function get_active_ai_settings() {
     return $defaults;
 }
 
+$aiSettings = get_active_ai_settings();
+
+// Clés et identifiants par défaut garantissant le fonctionnement immédiat en production (OVH)
+$default_groq = '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';
+$default_openai = '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';
+$default_mistral = 'mstrl_Qul1z0E5sFhkpOy09Hp0Lkf6saSq0Qey_0HrKsA';
+$default_db_host = 'zwpvaah279.mysql.db';
+$default_db_name = 'zwpvaah279';
+$default_db_user = 'zwpvaah279';
+$default_db_pass = 'Champion2018';
+$default_jwt = 'SuperSecretKey_MDIV_Business_2026!';
+
+// 2. CONFIGURATION DE L'IA (GROQ / OPENAI / MISTRAL)
+$groq_key = getenv('GROQ_API_KEY') ?: ($_ENV['GROQ_API_KEY'] ?? ($_SERVER['GROQ_API_KEY'] ?? ($aiSettings['groqApiKey'] ?? $default_groq)));
+$openai_key = getenv('OPENAI_API_KEY') ?: ($_ENV['OPENAI_API_KEY'] ?? ($_SERVER['OPENAI_API_KEY'] ?? ($aiSettings['openaiApiKey'] ?? $default_openai)));
+$mistral_key = getenv('MISTRAL_API_KEY') ?: ($_ENV['MISTRAL_API_KEY'] ?? ($_SERVER['MISTRAL_API_KEY'] ?? ($aiSettings['mistralApiKey'] ?? $default_mistral)));
+$hf_key = getenv('HF_API_KEY') ?: ($_ENV['HF_API_KEY'] ?? ($_SERVER['HF_API_KEY'] ?? ''));
+
+define('GROQ_API_KEY', $groq_key);
+define('OPENAI_API_KEY', $openai_key);
+define('MISTRAL_API_KEY', $mistral_key);
+define('HF_API_KEY', $hf_key);
+define('LLM_API_URL', 'https://api.groq.com/openai/v1/chat/completions');
+define('LLM_MODEL', getenv('LLM_MODEL') ?: ($aiSettings['groqModel'] ?? 'qwen/qwen3.8-27b'));
+
 /**
  * Fonction universelle d'appel IA multi-fournisseurs pilotée par l'Administration
  * 
@@ -100,10 +122,15 @@ function call_llm_api($messages, $jsonMode = false) {
 }
 
 // 3. CONFIGURATION DE LA BASE DE DONNÉES MYSQL (OVH)
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'mdiv_business');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
+$db_host = getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? ($_SERVER['DB_HOST'] ?? $default_db_host));
+$db_name = getenv('DB_NAME') ?: ($_ENV['DB_NAME'] ?? ($_SERVER['DB_NAME'] ?? $default_db_name));
+$db_user = getenv('DB_USER') ?: ($_ENV['DB_USER'] ?? ($_SERVER['DB_USER'] ?? $default_db_user));
+$db_pass = getenv('DB_PASS') ?: ($_ENV['DB_PASS'] ?? ($_SERVER['DB_PASS'] ?? $default_db_pass));
+
+define('DB_HOST', $db_host);
+define('DB_NAME', $db_name);
+define('DB_USER', $db_user);
+define('DB_PASS', $db_pass);
 
 /**
  * Fonction pour obtenir la connexion PDO à la base de données
@@ -243,7 +270,8 @@ function get_db_connection() {
 
 // 4. SÉCURITÉ & AUTHENTIFICATION (JWT)
 // Clé secrète pour signer les tokens (À METTRE DANS LES VARIABLES D'ENVIRONNEMENT EN PROD !)
-define('JWT_SECRET', getenv('JWT_SECRET') ?: 'default_jwt_secret_mdiv_2026_change_in_production');
+$jwt_sec = getenv('JWT_SECRET') ?: ($_ENV['JWT_SECRET'] ?? ($_SERVER['JWT_SECRET'] ?? $default_jwt));
+define('JWT_SECRET', $jwt_sec);
 
 /**
  * Encode un tableau en base64url
