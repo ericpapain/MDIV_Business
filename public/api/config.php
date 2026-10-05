@@ -84,22 +84,17 @@ function get_active_ai_settings() {
     return $defaults;
 }
 
+// Chargement optionnel de server_secrets.php (non suivi par Git)
+if (file_exists(__DIR__ . '/server_secrets.php')) {
+    require_once __DIR__ . '/server_secrets.php';
+}
+
 $aiSettings = get_active_ai_settings();
 
-// Clés et identifiants par défaut garantissant le fonctionnement immédiat en production (OVH)
-$default_groq = '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';
-$default_openai = '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';
-$default_mistral = 'mstrl_Qul1z0E5sFhkpOy09Hp0Lkf6saSq0Qey_0HrKsA';
-$default_db_host = 'zwpvaah279.mysql.db';
-$default_db_name = 'zwpvaah279';
-$default_db_user = 'zwpvaah279';
-$default_db_pass = 'Champion2018';
-$default_jwt = 'SuperSecretKey_MDIV_Business_2026!';
-
 // 2. CONFIGURATION DE L'IA (GROQ / OPENAI / MISTRAL)
-$groq_key = getenv('GROQ_API_KEY') ?: ($_ENV['GROQ_API_KEY'] ?? ($_SERVER['GROQ_API_KEY'] ?? ($aiSettings['groqApiKey'] ?? $default_groq)));
-$openai_key = getenv('OPENAI_API_KEY') ?: ($_ENV['OPENAI_API_KEY'] ?? ($_SERVER['OPENAI_API_KEY'] ?? ($aiSettings['openaiApiKey'] ?? $default_openai)));
-$mistral_key = getenv('MISTRAL_API_KEY') ?: ($_ENV['MISTRAL_API_KEY'] ?? ($_SERVER['MISTRAL_API_KEY'] ?? ($aiSettings['mistralApiKey'] ?? $default_mistral)));
+$groq_key = getenv('GROQ_API_KEY') ?: ($_ENV['GROQ_API_KEY'] ?? ($_SERVER['GROQ_API_KEY'] ?? ($aiSettings['groqApiKey'] ?? (defined('GROQ_API_KEY_FALLBACK') ? GROQ_API_KEY_FALLBACK : ''))));
+$openai_key = getenv('OPENAI_API_KEY') ?: ($_ENV['OPENAI_API_KEY'] ?? ($_SERVER['OPENAI_API_KEY'] ?? ($aiSettings['openaiApiKey'] ?? (defined('OPENAI_API_KEY_FALLBACK') ? OPENAI_API_KEY_FALLBACK : ''))));
+$mistral_key = getenv('MISTRAL_API_KEY') ?: ($_ENV['MISTRAL_API_KEY'] ?? ($_SERVER['MISTRAL_API_KEY'] ?? ($aiSettings['mistralApiKey'] ?? (defined('MISTRAL_API_KEY_FALLBACK') ? MISTRAL_API_KEY_FALLBACK : ''))));
 $hf_key = getenv('HF_API_KEY') ?: ($_ENV['HF_API_KEY'] ?? ($_SERVER['HF_API_KEY'] ?? ''));
 
 define('GROQ_API_KEY', $groq_key);
@@ -122,10 +117,10 @@ function call_llm_api($messages, $jsonMode = false) {
 }
 
 // 3. CONFIGURATION DE LA BASE DE DONNÉES MYSQL (OVH)
-$db_host = getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? ($_SERVER['DB_HOST'] ?? $default_db_host));
-$db_name = getenv('DB_NAME') ?: ($_ENV['DB_NAME'] ?? ($_SERVER['DB_NAME'] ?? $default_db_name));
-$db_user = getenv('DB_USER') ?: ($_ENV['DB_USER'] ?? ($_SERVER['DB_USER'] ?? $default_db_user));
-$db_pass = getenv('DB_PASS') ?: ($_ENV['DB_PASS'] ?? ($_SERVER['DB_PASS'] ?? $default_db_pass));
+$db_host = getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? ($_SERVER['DB_HOST'] ?? (defined('DB_HOST_FALLBACK') ? DB_HOST_FALLBACK : 'localhost')));
+$db_name = getenv('DB_NAME') ?: ($_ENV['DB_NAME'] ?? ($_SERVER['DB_NAME'] ?? (defined('DB_NAME_FALLBACK') ? DB_NAME_FALLBACK : 'mdiv_business')));
+$db_user = getenv('DB_USER') ?: ($_ENV['DB_USER'] ?? ($_SERVER['DB_USER'] ?? (defined('DB_USER_FALLBACK') ? DB_USER_FALLBACK : 'root')));
+$db_pass = getenv('DB_PASS') ?: ($_ENV['DB_PASS'] ?? ($_SERVER['DB_PASS'] ?? (defined('DB_PASS_FALLBACK') ? DB_PASS_FALLBACK : '')));
 
 define('DB_HOST', $db_host);
 define('DB_NAME', $db_name);
@@ -270,7 +265,7 @@ function get_db_connection() {
 
 // 4. SÉCURITÉ & AUTHENTIFICATION (JWT)
 // Clé secrète pour signer les tokens (À METTRE DANS LES VARIABLES D'ENVIRONNEMENT EN PROD !)
-$jwt_sec = getenv('JWT_SECRET') ?: ($_ENV['JWT_SECRET'] ?? ($_SERVER['JWT_SECRET'] ?? $default_jwt));
+$jwt_sec = getenv('JWT_SECRET') ?: ($_ENV['JWT_SECRET'] ?? ($_SERVER['JWT_SECRET'] ?? (defined('JWT_SECRET_FALLBACK') ? JWT_SECRET_FALLBACK : 'default_jwt_secret_mdiv_2026_change_in_production')));
 define('JWT_SECRET', $jwt_sec);
 
 /**

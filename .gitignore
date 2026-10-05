@@ -16,6 +16,8 @@ dist-ssr
 .env.local
 .env.production
 .env.development
+server_secrets.php
+public/api/server_secrets.php
 
 *.local
 
