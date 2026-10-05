@@ -31,10 +31,10 @@ export function VersionSelectorBar<T = any>({
   if (!versions || versions.length === 0) return null;
 
   return (
-    <div className={`flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-900 text-white rounded-2xl border border-slate-800 shadow-md ${className}`}>
+    <div className={`w-full max-w-full overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-900 text-white rounded-2xl border border-slate-800 shadow-md ${className}`}>
       {/* Versions Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto py-0.5">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300 mr-2 uppercase tracking-wider">
+      <div className="w-full sm:w-auto flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 whitespace-nowrap">
+        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300 mr-2 uppercase tracking-wider shrink-0">
           <History className="w-3.5 h-3.5 text-blue-400" />
           Versions :
         </div>
@@ -46,7 +46,7 @@ export function VersionSelectorBar<T = any>({
               key={ver.id || idx}
               type="button"
               onClick={() => onSelectVersion(idx)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
                 isActive
                   ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-400/40'
                   : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
@@ -67,7 +67,7 @@ export function VersionSelectorBar<T = any>({
         type="button"
         onClick={onGenerateNewVersion}
         disabled={isGeneratingNewVersion}
-        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-2 sm:py-1.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none shrink-0"
       >
         {isGeneratingNewVersion ? (
           <>

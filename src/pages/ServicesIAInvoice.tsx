@@ -559,12 +559,72 @@ export default function ServicesIAInvoice() {
   return (
     <>
       <div className="ia-page min-h-screen pt-32 pb-8 bg-slate-100/80">
-      <div className="max-w-[1500px] mx-auto px-4 h-[calc(100vh-10.5rem)]">
+      <div className="max-w-[1500px] mx-auto px-2 sm:px-4 min-h-[calc(100vh-10.5rem)] lg:h-[calc(100vh-10.5rem)]">
         
-        <div className="flex w-full h-full bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-200">
+        <div className="flex flex-col lg:flex-row w-full h-full bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-200">
           
-          {/* Sidebar */}
-          <div className="w-64 bg-slate-50/50 border-r border-slate-200 flex flex-col shrink-0">
+          {/* Barre de Navigation Mobile Horizontale */}
+          <div className="flex lg:hidden overflow-x-auto no-scrollbar gap-1.5 p-2.5 bg-slate-50 border-b border-slate-200 whitespace-nowrap">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
+                activeTab === 'dashboard' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              }`}
+            >
+              <LayoutDashboard size={14} /> Accueil
+            </button>
+            <button
+              onClick={() => setActiveTab('editor')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
+                activeTab === 'editor' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              }`}
+            >
+              <ArrowUpRight size={14} /> Ventes
+            </button>
+            <button
+              onClick={() => setActiveTab('expenses')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
+                activeTab === 'expenses' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              }`}
+            >
+              <ArrowDownRight size={14} /> Achats
+            </button>
+            <button
+              onClick={() => setActiveTab('banking')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
+                activeTab === 'banking' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              }`}
+            >
+              <Landmark size={14} /> Trésorerie
+            </button>
+            <button
+              onClick={() => setActiveTab('payments')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
+                activeTab === 'payments' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              }`}
+            >
+              <RefreshCw size={14} /> Transactions
+            </button>
+            <button
+              onClick={() => setActiveTab('accounting')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
+                activeTab === 'accounting' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              }`}
+            >
+              <BookOpen size={14} /> Comptabilité
+            </button>
+            <button
+              onClick={() => setActiveTab('pricing')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
+                activeTab === 'pricing' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-blue-700 border border-blue-200'
+              }`}
+            >
+              <TagIcon size={14} /> Tarifs 2026
+            </button>
+          </div>
+
+          {/* Sidebar Desktop */}
+          <div className="hidden lg:flex w-64 bg-slate-50/50 border-r border-slate-200 flex-col shrink-0">
             <div className="p-5">
               <div onClick={() => setIsProfileModalOpen(true)} className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50 transition-colors">
                  <div className="flex items-center gap-2">
@@ -648,8 +708,8 @@ export default function ServicesIAInvoice() {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 flex flex-col h-full bg-white relative overflow-hidden">
-            <div className="absolute inset-0 overflow-y-auto p-8 lg:p-12">
+          <div className="flex-1 flex flex-col min-h-0 bg-white relative overflow-hidden">
+            <div className="relative lg:absolute lg:inset-0 lg:overflow-y-auto p-4 sm:p-6 lg:p-10">
 
         {/* TAB 0 : GRILLE TARIFAIRE KOLECTO / IT4ALL */}
         {activeTab === 'pricing' && (

@@ -492,16 +492,16 @@ export default function ServicesIABenchmark() {
                  </div>
               </div>
 
-              <div className="flex gap-6 text-center">
-                 <div className="bg-[#F8F7F4] p-6 rounded-2xl border border-slate-200 min-w-[160px] shadow-sm">
+              <div className="grid grid-cols-2 sm:flex gap-3 sm:gap-6 text-center w-full sm:w-auto">
+                 <div className="bg-[#F8F7F4] p-4 sm:p-6 rounded-2xl border border-slate-200 min-w-0 sm:min-w-[160px] shadow-sm flex-1">
                     <div className="text-slate-950 text-xs font-black uppercase tracking-wider mb-2">Score Digital</div>
-                    <div className="text-5xl font-black text-slate-950">{globalScore}</div>
-                    <div className="text-sm mt-2 font-bold text-emerald-700">{getLevelText(globalScore)}</div>
+                    <div className="text-4xl sm:text-5xl font-black text-slate-950">{globalScore}</div>
+                    <div className="text-xs sm:text-sm mt-2 font-bold text-emerald-700">{getLevelText(globalScore)}</div>
                  </div>
-                 <div className="bg-blue-50/70 p-6 rounded-2xl border border-blue-200 min-w-[160px] shadow-sm">
+                 <div className="bg-blue-50/70 p-4 sm:p-6 rounded-2xl border border-blue-200 min-w-0 sm:min-w-[160px] shadow-sm flex-1">
                     <div className="text-slate-950 text-xs font-black uppercase tracking-wider mb-2">AI Readiness</div>
-                    <div className="text-5xl font-black text-blue-700">{aiReadiness}</div>
-                    <div className="text-sm mt-2 font-black text-slate-950">Prêt pour l'IA</div>
+                    <div className="text-4xl sm:text-5xl font-black text-blue-700">{aiReadiness}</div>
+                    <div className="text-xs sm:text-sm mt-2 font-black text-slate-950">Prêt pour l'IA</div>
                  </div>
               </div>
            </div>

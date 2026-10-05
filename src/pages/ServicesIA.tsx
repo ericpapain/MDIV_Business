@@ -40,87 +40,139 @@ const AnimatedJourneyWidget = () => {
   const currentColor = stepColors[currentStepIndex];
 
   return (
-    <div className="relative w-full h-[450px] lg:h-[500px] group bg-transparent">
-      {/* Remove the white background and border to blend with the main div */}
-      <div className="relative z-10 p-2 md:p-4 flex flex-col h-full w-full">
-        <h3 className="text-xl md:text-2xl font-bold text-center mb-6" style={{ color: "hsl(42 55% 56%)", fontFamily: "'Inter', sans-serif" }}>
+    <div className="w-full">
+      {/* Mobile Journey View: Fluid vertical step cards */}
+      <div className="lg:hidden w-full space-y-3 py-2">
+        <h3 className="text-xl font-bold text-center mb-4 gold-text" style={{ fontFamily: "'Inter', sans-serif" }}>
           {isEn ? "Your Modular Journey" : "Votre Parcours Modulaire"}
         </h3>
-        
-        <div className="absolute inset-0 top-16 pointer-events-none">
-          {/* SVG S-Curve (Snaking 3 times) */}
-          <svg className="w-full h-full text-slate-500/30" viewBox="0 0 500 500" preserveAspectRatio="none">
-             {/* Base path */}
-             <path d="M 125 75 L 375 75 A 50 50 0 0 1 375 175 L 125 175 A 50 50 0 0 0 125 275 L 375 275 A 50 50 0 0 1 375 375 L 125 375" fill="none" stroke="currentColor" strokeWidth="4" strokeDasharray="8,8" />
-             {/* Animated active path */}
-             <path 
-               d="M 125 75 L 375 75 A 50 50 0 0 1 375 175 L 125 175 A 50 50 0 0 0 125 275 L 375 275 A 50 50 0 0 1 375 375 L 125 375" 
-               fill="none" 
-               stroke={currentColor}
-               strokeWidth="4"
-               strokeLinecap="round"
-               className="transition-all duration-1000 ease-out"
-               strokeDasharray="1471"
-               strokeDashoffset={1471 - [0, 250, 657, 1064, 1471][currentStepIndex]}
-             />
-          </svg>
-
-          {/* Nodes placed over the path */}
+        <div className="space-y-2.5">
           {iaJourney.map((step, idx) => {
             const Icon = iconMap[step.icon];
-            const nodesPos = [
-              { left: "25%", top: "15%", align: "left" },
-              { left: "75%", top: "15%", align: "right" },
-              { left: "25%", top: "35%", align: "left" },
-              { left: "75%", top: "55%", align: "right" },
-              { left: "25%", top: "75%", align: "left" },
-            ];
-            const pos = nodesPos[idx];
             const isActive = idx <= currentStepIndex;
             const isCurrent = idx === currentStepIndex;
-            const nodeColor = isActive ? stepColors[idx] : "transparent";
-            const interiorColor = isActive ? interiorColors[idx] : "transparent";
-            
             return (
               <div 
-                key={step.id} 
-                className="absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 transition-all duration-500"
-                style={{ left: pos.left, top: pos.top }}
+                key={step.id}
+                onClick={() => setCurrentStepIndex(idx)}
+                className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer ${
+                  isCurrent 
+                    ? 'bg-slate-900 border-gold/60 text-white shadow-md' 
+                    : isActive 
+                    ? 'bg-slate-900/60 border-slate-700 text-slate-200' 
+                    : 'bg-slate-900/30 border-slate-800 text-slate-400'
+                }`}
               >
-                {/* Node Icon - Creative dark/glow design */}
-                <div 
-                  className={`relative w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center border-[3px] transition-all duration-500 ${
-                    isActive ? 'text-white scale-110' : 'bg-slate-900/80 border-white/10 text-white/30 scale-100 backdrop-blur-md'
-                  }`}
-                  style={{
-                    backgroundColor: isActive ? interiorColor : undefined,
-                    borderColor: isActive ? nodeColor : undefined,
-                    boxShadow: isActive ? `0 0 25px ${interiorColor}80, inset 0 0 10px ${interiorColor}40` : 'none'
-                  }}
-                >
-                  {Icon && <Icon size={24} className={isCurrent ? "animate-pulse" : ""} style={{ color: isActive ? "white" : undefined }} />}
-                  {isCurrent && (
-                    <div 
-                      className="absolute inset-0 rounded-full animate-ping opacity-30"
-                      style={{ backgroundColor: interiorColor }}
-                    />
-                  )}
-                </div>
-                
-                {/* Tooltip / Text for the step - Placed strictly OUTSIDE the snake loops to never overlap */}
-                <div className={`absolute w-36 md:w-48 transition-all duration-500 ${pos.align === 'left' ? 'right-full mr-4 md:mr-6 text-right' : 'left-full ml-4 md:ml-6 text-left'} ${isActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-2'}`}>
-                  <div className="font-bold text-sm md:text-base leading-tight ia-gradient-text drop-shadow-sm">
-                    {isEn ? step.stepEn : step.step}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    isActive ? 'bg-gold/20 text-gold border border-gold/40' : 'bg-slate-800 text-slate-500'
+                  }`}>
+                    {Icon && <Icon size={18} />}
                   </div>
-                  {isCurrent && (
-                    <div className={`mt-2 text-[10px] md:text-xs font-semibold px-3 py-1.5 rounded-md border animate-fade-up shadow-xl inline-block text-white ${pos.align === 'left' ? 'ml-auto' : 'mr-auto'}`} style={{ backgroundColor: interiorColor, borderColor: nodeColor, boxShadow: `0 0 15px ${interiorColor}60` }}>
-                      ROI: {isEn ? step.roiEn : step.roi}
+                  <div className="min-w-0">
+                    <div className="font-bold text-xs sm:text-sm truncate">
+                      {isEn ? step.stepEn : step.step}
                     </div>
-                  )}
+                    <div className="text-[10px] text-slate-400 truncate">
+                      {isEn ? step.descEn : step.desc}
+                    </div>
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                    isCurrent ? 'bg-gold/20 text-gold border border-gold/40' : 'text-slate-400'
+                  }`}>
+                    {isEn ? step.roiEn : step.roi}
+                  </span>
                 </div>
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Desktop S-Curve Snake Journey */}
+      <div className="hidden lg:block relative w-full h-[450px] lg:h-[500px] group bg-transparent">
+        <div className="relative z-10 p-2 md:p-4 flex flex-col h-full w-full">
+          <h3 className="text-xl md:text-2xl font-bold text-center mb-6" style={{ color: "hsl(42 55% 56%)", fontFamily: "'Inter', sans-serif" }}>
+            {isEn ? "Your Modular Journey" : "Votre Parcours Modulaire"}
+          </h3>
+          
+          <div className="absolute inset-0 top-16 pointer-events-none">
+            {/* SVG S-Curve (Snaking 3 times) */}
+            <svg className="w-full h-full text-slate-500/30" viewBox="0 0 500 500" preserveAspectRatio="none">
+               {/* Base path */}
+               <path d="M 125 75 L 375 75 A 50 50 0 0 1 375 175 L 125 175 A 50 50 0 0 0 125 275 L 375 275 A 50 50 0 0 1 375 375 L 125 375" fill="none" stroke="currentColor" strokeWidth="4" strokeDasharray="8,8" />
+               {/* Animated active path */}
+               <path 
+                 d="M 125 75 L 375 75 A 50 50 0 0 1 375 175 L 125 175 A 50 50 0 0 0 125 275 L 375 275 A 50 50 0 0 1 375 375 L 125 375" 
+                 fill="none" 
+                 stroke={currentColor}
+                 strokeWidth="4"
+                 strokeLinecap="round"
+                 className="transition-all duration-1000 ease-out"
+                 strokeDasharray="1471"
+                 strokeDashoffset={1471 - [0, 250, 657, 1064, 1471][currentStepIndex]}
+               />
+            </svg>
+
+            {/* Nodes placed over the path */}
+            {iaJourney.map((step, idx) => {
+              const Icon = iconMap[step.icon];
+              const nodesPos = [
+                { left: "25%", top: "15%", align: "left" },
+                { left: "75%", top: "15%", align: "right" },
+                { left: "25%", top: "35%", align: "left" },
+                { left: "75%", top: "55%", align: "right" },
+                { left: "25%", top: "75%", align: "left" },
+              ];
+              const pos = nodesPos[idx];
+              const isActive = idx <= currentStepIndex;
+              const isCurrent = idx === currentStepIndex;
+              const nodeColor = isActive ? stepColors[idx] : "transparent";
+              const interiorColor = isActive ? interiorColors[idx] : "transparent";
+              
+              return (
+                <div 
+                  key={step.id} 
+                  className="absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 transition-all duration-500"
+                  style={{ left: pos.left, top: pos.top }}
+                >
+                  {/* Node Icon - Creative dark/glow design */}
+                  <div 
+                    className={`relative w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center border-[3px] transition-all duration-500 ${
+                      isActive ? 'text-white scale-110' : 'bg-slate-900/80 border-white/10 text-white/30 scale-100 backdrop-blur-md'
+                    }`}
+                    style={{
+                      backgroundColor: isActive ? interiorColor : undefined,
+                      borderColor: isActive ? nodeColor : undefined,
+                      boxShadow: isActive ? `0 0 25px ${interiorColor}80, inset 0 0 10px ${interiorColor}40` : 'none'
+                    }}
+                  >
+                    {Icon && <Icon size={24} className={isCurrent ? "animate-pulse" : ""} style={{ color: isActive ? "white" : undefined }} />}
+                    {isCurrent && (
+                      <div 
+                        className="absolute inset-0 rounded-full animate-ping opacity-30"
+                        style={{ backgroundColor: interiorColor }}
+                      />
+                    )}
+                  </div>
+                  
+                  {/* Tooltip / Text for the step - Placed strictly OUTSIDE the snake loops to never overlap */}
+                  <div className={`absolute w-36 md:w-48 transition-all duration-500 ${pos.align === 'left' ? 'right-full mr-4 md:mr-6 text-right' : 'left-full ml-4 md:ml-6 text-left'} ${isActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-2'}`}>
+                    <div className="font-bold text-sm md:text-base leading-tight ia-gradient-text drop-shadow-sm">
+                      {isEn ? step.stepEn : step.step}
+                    </div>
+                    {isCurrent && (
+                      <div className={`mt-2 text-[10px] md:text-xs font-semibold px-3 py-1.5 rounded-md border animate-fade-up shadow-xl inline-block text-white ${pos.align === 'left' ? 'ml-auto' : 'mr-auto'}`} style={{ backgroundColor: interiorColor, borderColor: nodeColor, boxShadow: `0 0 15px ${interiorColor}60` }}>
+                        ROI: {isEn ? step.roiEn : step.roi}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

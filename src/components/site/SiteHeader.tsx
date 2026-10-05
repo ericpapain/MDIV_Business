@@ -255,10 +255,10 @@ export function SiteHeader() {
                 <img 
                   src="/IT4ALL.jpeg" 
                   alt="IT4ALL Innovation" 
-                  className="h-10 sm:h-12 md:h-14 w-auto rounded-md object-contain mix-blend-multiply" 
+                  className="h-8 sm:h-12 md:h-14 w-auto rounded-md object-contain mix-blend-multiply" 
                   onError={(e)=>{ (e.target as HTMLElement).style.display = 'none'; }}
                 />
-                <div className="text-[6.5px] sm:text-[7.5px] md:text-[8.5px] font-extrabold tracking-wide uppercase flex items-center justify-center gap-1 sm:gap-1.5 mt-0.5 px-1 leading-tight flex-wrap xl:whitespace-nowrap select-none">
+                <div className="hidden xs:flex text-[6.5px] sm:text-[7.5px] md:text-[8.5px] font-extrabold tracking-wide uppercase items-center justify-center gap-1 sm:gap-1.5 mt-0.5 px-1 leading-tight flex-wrap xl:whitespace-nowrap select-none">
                   <span className="text-[#0a2540] font-black">AI</span>
                   <span className="text-[#00b4d8] font-black text-[7.5px] sm:text-[9px] leading-none">•</span>
                   <span className="text-[#0a2540] font-black">DATA</span>

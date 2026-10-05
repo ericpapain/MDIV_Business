@@ -577,7 +577,7 @@ export default function ServicesIAQuote() {
                 <div className="space-y-4">
                   {lines.map((line) => (
                     <div key={line.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
-                      <button onClick={() => removeLine(line.id)} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white">
+                      <button onClick={() => removeLine(line.id)} className="absolute -top-3 -right-3 w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center shadow-sm opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white">
                         <Trash2 size={14} />
                       </button>
                       
@@ -603,7 +603,7 @@ export default function ServicesIAQuote() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                         <div>
                            <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">QTE</label>
                            <input type="number" min="0" step="1" value={line.quantity} onChange={(e) => updateLine(line.id, 'quantity', parseFloat(e.target.value)||0)} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 outline-none focus:border-blue-500" />

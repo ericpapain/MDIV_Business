@@ -457,7 +457,7 @@ export default function ServicesIAMeetings() {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-200 mb-8">
+        <div className="flex overflow-x-auto no-scrollbar whitespace-nowrap gap-1 border-b border-slate-200 mb-8 pb-1">
           <button 
             onClick={() => setActiveTab('create')}
             className={`flex items-center gap-2 px-6 py-4 font-bold border-b-2 transition-colors ${
@@ -512,12 +512,12 @@ export default function ServicesIAMeetings() {
                     </div>
 
                     {/* Microphone Controls */}
-                    <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 w-full sm:w-auto">
                       {dictationStatus === 'ready' && (
                         <button
                           type="button"
                           onClick={startLiveDictation}
-                          className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold text-sm shadow-lg shadow-red-500/30 transition-all hover:scale-105 active:scale-95"
+                          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold text-sm shadow-lg shadow-red-500/30 transition-all hover:scale-105 active:scale-95"
                         >
                           <Mic className="w-5 h-5 animate-pulse" />
                           Démarrer la Dictée Vocale
@@ -525,7 +525,7 @@ export default function ServicesIAMeetings() {
                       )}
 
                       {dictationStatus === 'listening' && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <div className="px-4 py-2.5 rounded-xl bg-red-500/20 border border-red-400/40 text-red-300 text-xs font-bold flex items-center gap-2">
                             <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
                             Enregistrement : {formatTimer(dictationTime)}
