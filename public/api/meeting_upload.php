@@ -46,52 +46,72 @@ try {
         exit;
     }
 
-    $systemPrompt = "Tu es un secrétaire général et chef de cabinet de direction pour MDIV Business.
-À partir des notes, de la transcription ou du résumé de réunion, génère un compte-rendu exécutif de réunion complet.
+    $systemPrompt = "Tu es un secrétaire général et chef de cabinet de direction d'élite pour MDIV Business.
+À partir des notes de réunion brutes, de transcriptions orales (pouvant comporter des imprécisions phonétiques, de la dictée vocale sans ponctuation ou du langage parlé) ou d'un résumé de réunion, génère un compte-rendu exécutif de réunion complet, professionnel et soigné.
+Ton rôle est de :
+1. Comprendre le contexte réel, identifier les personnes mentionnées (même phonétiquement ou informellement), les délais, les missions et les enjeux.
+2. Nettoyer, reformuler et structurer ces informations en un compte-rendu exécutif de réunion professionnel de haut niveau.
+3. Seul le charabia total et purement aléatoire (ex: suites de touches 'asdfghjk' sans aucun mot compréhensible) doit renvoyer :
+{\"error\": \"Votre saisie semble totalement illisible. Veuillez fournir des notes contenant au minimum quelques informations compréhensibles.\"}
 
-GARDE-FOU ANTI-GRIBOUILLAGE :
-Si les notes fournies sont du charabia ou dénuées de sens, tu NE DOIS PAS inventer de réunion fictive. Renvoie :
-{\"error\": \"Votre saisie semble incomplète ou incompréhensible. Pour synthétiser une réunion et générer un compte-rendu décisionnel, veuillez fournir des notes de réunion contenant au minimum les sujets abordés, les participants ou les décisions prises.\"}
-
-Tu dois répondre UNIQUEMENT par un objet JSON valide suivant exactement cette structure :
+Tu dois répondre UNIQUEMENT par un objet JSON valide conforme à cette structure :
 {
   \"id\": \"meet_" . bin2hex(random_bytes(6)) . "\",
   \"date\": \"" . date('Y-m-d') . "\",
-  \"subject\": \"Objet de la réunion\",
+  \"subject\": \"Objet clair et professionnel de la réunion\",
   \"participants\": [\"Participant 1\", \"Participant 2\"],
   \"agenda\": [\"Point 1 abordé\", \"Point 2 abordé\"],
-  \"executiveSummary\": \"Synthèse globale des échanges...\",
+  \"executiveSummary\": \"Synthèse globale claire et valorisante des échanges...\",
   \"decisions\": [
-    {\"decision\": \"Décision 1 actée\", \"context\": \"Contexte de la décision\"}
+    {\"decision\": \"Décision actée\", \"context\": \"Contexte de la décision\"}
   ],
   \"actions\": [
-    {\"task\": \"Tâche à accomplir\", \"assignee\": \"Responsable\", \"deadline\": \"Échéance\", \"status\": \"pending\"}
+    {\"task\": \"Tâche concrète à accomplir\", \"assignee\": \"Responsable identifié\", \"deadline\": \"Échéance estimée\", \"status\": \"pending\"}
   ],
   \"risks\": [
-    {\"risk\": \"Risque ou point de blocage\", \"impact\": \"High\"} // Low | Medium | High
+    {\"risk\": \"Risque ou point d'attention identifié\", \"impact\": \"High\"}
   ]
 }";
 
     $messages = [
         ['role' => 'system', 'content' => $systemPrompt],
-        ['role' => 'user', 'content' => "Voici les notes de réunion :\n\n" . mb_substr($raw_text, 0, 5000)]
+        ['role' => 'user', 'content' => "Voici les notes ou la transcription de réunion :\n\n" . mb_substr($raw_text, 0, 5000)]
     ];
 
-    $response = callGroqApi($messages, 'qwen/qwen3.8-27b', false, true);
+    $response = callGroqApi($messages, null, false, true);
 
     if (isset($response['choices'][0]['message']['content'])) {
-        $content = $response['choices'][0]['message']['content'];
+        $content = trim($response['choices'][0]['message']['content']);
         $data = json_decode($content, true);
 
-        if (!$data && preg_match('/\{.*\}/s', $content, $m)) {
+        if (!$data && preg_match('/\{[\s\S]*\}/', $content, $m)) {
             $data = json_decode($m[0], true);
         }
 
-        if (!$data || !isset($data['subject'])) {
-            throw new Exception("Format de compte-rendu invalide.");
+        if (is_array($data) && isset($data['error'])) {
+            http_response_code(400);
+            echo json_encode(['error' => $data['error']], JSON_UNESCAPED_UNICODE);
+            exit;
         }
 
-        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+        if (!$data || !is_array($data)) {
+            throw new Exception("Impossible de structurer le compte-rendu de réunion.");
+        }
+
+        // Normalisation et sécurisation absolue des champs attendus par le frontend
+        $report = [
+            'id' => $data['id'] ?? ('meet_' . bin2hex(random_bytes(6))),
+            'date' => $data['date'] ?? date('Y-m-d'),
+            'subject' => !empty($data['subject']) ? $data['subject'] : 'Revue de projet & plan d\'action',
+            'participants' => (isset($data['participants']) && is_array($data['participants']) && count($data['participants']) > 0) ? $data['participants'] : ['Équipe Projet'],
+            'agenda' => (isset($data['agenda']) && is_array($data['agenda']) && count($data['agenda']) > 0) ? $data['agenda'] : ['Avancement et répartition des responsabilités'],
+            'executiveSummary' => $data['executiveSummary'] ?? ($data['summary'] ?? 'Synthèse des décisions opérationnelles et des objectifs fixés.'),
+            'decisions' => (isset($data['decisions']) && is_array($data['decisions'])) ? $data['decisions'] : [],
+            'actions' => (isset($data['actions']) && is_array($data['actions'])) ? $data['actions'] : [],
+            'risks' => (isset($data['risks']) && is_array($data['risks'])) ? $data['risks'] : []
+        ];
+
+        echo json_encode($report, JSON_UNESCAPED_UNICODE);
     } else {
         throw new Exception("Aucune réponse du modèle IA.");
     }

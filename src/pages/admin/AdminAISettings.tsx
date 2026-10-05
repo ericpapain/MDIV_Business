@@ -25,7 +25,7 @@ export default function AdminAISettings() {
   const [isSaving, setIsSaving] = useState(false);
 
   const [settings, setSettings] = useState<AISettings>({
-    primaryProvider: "groq",
+    primaryProvider: "openai",
     groqModel: "qwen/qwen3.8-27b",
     openaiModel: "gpt-4o-mini",
     mistralModel: "mistral-small-latest",

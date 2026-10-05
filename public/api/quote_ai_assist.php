@@ -67,17 +67,23 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide suivant rigoureusement cet
         ['role' => 'user', 'content' => $userPrompt]
     ];
 
-    $response = callGroqApi($messages, 'qwen/qwen3.8-27b', false, true);
+    $response = callGroqApi($messages, null, false, true);
 
     if (isset($response['choices'][0]['message']['content'])) {
-        $content = $response['choices'][0]['message']['content'];
+        $content = trim($response['choices'][0]['message']['content']);
         $data = json_decode($content, true);
 
-        if (!$data && preg_match('/\{.*\}/s', $content, $m)) {
+        if (!$data && preg_match('/\{[\s\S]*\}/', $content, $m)) {
             $data = json_decode($m[0], true);
         }
 
-        if (!$data || !isset($data['suggestedLines'])) {
+        if (is_array($data) && isset($data['error'])) {
+            http_response_code(400);
+            echo json_encode(['error' => $data['error']], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if (!$data || !is_array($data) || !isset($data['suggestedLines'])) {
             throw new Exception("Réponse IA non conforme.");
         }
 

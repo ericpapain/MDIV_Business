@@ -10,7 +10,7 @@ if (!file_exists($settings_file)) {
 }
 
 $default_settings = [
-    'primaryProvider' => 'groq',
+    'primaryProvider' => 'openai',
     'groqModel' => 'qwen/qwen3.8-27b',
     'openaiModel' => 'gpt-4o-mini',
     'mistralModel' => 'mistral-small-latest',

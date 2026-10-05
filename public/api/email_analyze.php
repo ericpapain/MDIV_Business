@@ -48,7 +48,7 @@ Réponds UNIQUEMENT par un objet JSON valide avec ce format :
         ['role' => 'user', 'content' => "Email à analyser :\n\n" . $text]
     ];
 
-    $response = callGroqApi($messages, 'qwen/qwen3.8-27b', false, true);
+    $response = callGroqApi($messages, null, false, true);
 
     $clarity = 75;
     $professionalism = 80;

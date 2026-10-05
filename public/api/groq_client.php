@@ -6,7 +6,8 @@ require_once __DIR__ . '/config.php';
 function callLlmProvider($url, $apiKey, $data, $providerName, $stream = false) {
     $headers = [
         'Authorization: Bearer ' . $apiKey,
-        'Content-Type: application/json'
+        'Content-Type: application/json',
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     ];
 
     $ch = curl_init($url);
@@ -14,6 +15,7 @@ function callLlmProvider($url, $apiKey, $data, $providerName, $stream = false) {
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     curl_setopt($ch, CURLOPT_TIMEOUT, 60);
 
     if ($stream) {
@@ -58,7 +60,7 @@ function callLlmProvider($url, $apiKey, $data, $providerName, $stream = false) {
  */
 function callGroqApi($messages, $model = null, $stream = false, $useJsonMode = true) {
     $settings = function_exists('get_active_ai_settings') ? get_active_ai_settings() : [
-        'primaryProvider' => 'groq',
+        'primaryProvider' => 'openai',
         'groqModel' => 'qwen/qwen3.8-27b',
         'openaiModel' => 'gpt-4o-mini',
         'mistralModel' => 'mistral-small-latest',
@@ -66,7 +68,7 @@ function callGroqApi($messages, $model = null, $stream = false, $useJsonMode = t
         'fallbackEnabled' => true
     ];
 
-    $primary = $settings['primaryProvider'] ?? 'groq';
+    $primary = $settings['primaryProvider'] ?? 'openai';
     $fallback = ($settings['fallbackEnabled'] ?? true) !== false;
     $temperature = floatval($settings['temperature'] ?? 0.7);
 
@@ -77,14 +79,14 @@ function callGroqApi($messages, $model = null, $stream = false, $useJsonMode = t
         if ($fallback) { $sequence[] = 'groq'; $sequence[] = 'mistral'; }
     } elseif ($primary === 'mistral') {
         $sequence[] = 'mistral';
-        if ($fallback) { $sequence[] = 'groq'; $sequence[] = 'openai'; }
+        if ($fallback) { $sequence[] = 'openai'; $sequence[] = 'groq'; }
     } elseif ($primary === 'groq') {
         $sequence[] = 'groq';
         if ($fallback) { $sequence[] = 'openai'; $sequence[] = 'mistral'; }
     } else {
-        // Mode auto cascade
-        $sequence[] = 'groq';
+        // Mode auto cascade (priorité OpenAI puis Groq puis Mistral)
         $sequence[] = 'openai';
+        $sequence[] = 'groq';
         $sequence[] = 'mistral';
     }
 

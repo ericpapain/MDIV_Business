@@ -78,21 +78,33 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide suivant rigoureusement ce 
         ['role' => 'user', 'content' => $userPrompt]
     ];
 
-    $response = callGroqApi($messages, 'qwen/qwen3.8-27b', false, true);
+    $response = callGroqApi($messages, null, false, true);
 
     if (isset($response['choices'][0]['message']['content'])) {
-        $content = $response['choices'][0]['message']['content'];
+        $content = trim($response['choices'][0]['message']['content']);
         $data = json_decode($content, true);
 
-        if (!$data && preg_match('/\{.*\}/s', $content, $m)) {
+        if (!$data && preg_match('/\{[\s\S]*\}/', $content, $m)) {
             $data = json_decode($m[0], true);
         }
 
-        if (!$data) {
+        if (!$data || !is_array($data)) {
             throw new Exception("Erreur de parsing du compte-rendu.");
         }
 
-        sendSSE('complete', $data);
+        $report = [
+            'id' => $data['id'] ?? ('meet_' . bin2hex(random_bytes(6))),
+            'date' => $data['date'] ?? date('Y-m-d'),
+            'subject' => !empty($data['subject']) ? $data['subject'] : 'Revue Stratégique & Avancement Opérationnel',
+            'participants' => (isset($data['participants']) && is_array($data['participants']) && count($data['participants']) > 0) ? $data['participants'] : ['Direction Générale', 'Équipe Opérationnelle'],
+            'agenda' => (isset($data['agenda']) && is_array($data['agenda']) && count($data['agenda']) > 0) ? $data['agenda'] : ['Points clés et jalons'],
+            'executiveSummary' => $data['executiveSummary'] ?? ($data['summary'] ?? 'Synthèse des décisions et responsabilités partagées.'),
+            'decisions' => (isset($data['decisions']) && is_array($data['decisions'])) ? $data['decisions'] : [],
+            'actions' => (isset($data['actions']) && is_array($data['actions'])) ? $data['actions'] : [],
+            'risks' => (isset($data['risks']) && is_array($data['risks'])) ? $data['risks'] : []
+        ];
+
+        sendSSE('complete', $report);
     } else {
         throw new Exception("Aucune réponse du modèle IA.");
     }

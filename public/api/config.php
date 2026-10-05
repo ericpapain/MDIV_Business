@@ -64,7 +64,7 @@ function get_active_ai_settings() {
         __DIR__ . '/../../dev_db.json'
     ];
     $defaults = [
-        'primaryProvider' => 'groq',
+        'primaryProvider' => 'openai',
         'groqModel' => 'qwen/qwen3.8-27b',
         'openaiModel' => 'gpt-4o-mini',
         'mistralModel' => 'mistral-small-latest',

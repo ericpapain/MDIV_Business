@@ -43,9 +43,72 @@
       "password_hash": "hash_dev_StrongPassword2026!",
       "status": "active",
       "created_at": "2026-10-03T02:04:56.895Z"
+    },
+    {
+      "id": 4,
+      "company_name": "M.DIV CONSULTING",
+      "siren": "911982726",
+      "siret": "91198272600018",
+      "trade_name": null,
+      "legal_form": "5710",
+      "naf_code": "70.22Z",
+      "activity": "Activités des entreprises",
+      "address": "8 RUE JACQUES BINGEN 10600 LA CHAPELLE-SAINT-LUC",
+      "postal_code": "10600",
+      "city": "LA CHAPELLE-SAINT-LUC",
+      "country": "France",
+      "creation_date": "2022-03-28",
+      "employee_range": "NN",
+      "capital": null,
+      "email": "epmezatio@gmail.com",
+      "phone": "111111",
+      "company_status": "ACTIVE",
+      "data_source": "INSEE",
+      "official_data": {
+        "siren": "911982726",
+        "siret": "91198272600018",
+        "company_name": "M.DIV CONSULTING",
+        "trade_name": null,
+        "legal_form": "5710",
+        "naf_code": "70.22Z",
+        "activity": "Activités des entreprises",
+        "address": "8 RUE JACQUES BINGEN 10600 LA CHAPELLE-SAINT-LUC",
+        "postal_code": "10600",
+        "city": "LA CHAPELLE-SAINT-LUC",
+        "country": "France",
+        "creation_date": "2022-03-28",
+        "administrative_status": "ACTIVE",
+        "employee_range": "NN",
+        "capital": null,
+        "dirigeants": [
+          {
+            "name": "PONHO DIMVULA",
+            "role": "Président de SAS"
+          }
+        ],
+        "bodacc_events": []
+      },
+      "first_name": "PONHO",
+      "last_name": "DIMVULA",
+      "job_title": "Président de SAS",
+      "password_hash": "hash_dev_12341234",
+      "status": "active",
+      "created_at": "2026-10-05T10:31:56.950Z"
     }
   ],
-  "clients": [],
+  "clients": [
+    {
+      "id": 1,
+      "company_id": 4,
+      "name": "M. George",
+      "company": "CMA",
+      "email": "epmezatio@gmail.com",
+      "phone": "",
+      "address": "sdfsdf",
+      "notes": "fsdfs",
+      "createdAt": "2026-10-05T10:41:41.499Z"
+    }
+  ],
   "invoices": [],
   "quotes": [],
   "projects": [],

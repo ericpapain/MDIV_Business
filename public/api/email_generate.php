@@ -59,7 +59,7 @@ Règles de style :
         ['role' => 'user', 'content' => $userPrompt]
     ];
 
-    $response = callGroqApi($messages, 'qwen/qwen3.8-27b', false, false);
+    $response = callGroqApi($messages, null, false, false);
 
     $generatedText = '';
     if (isset($response['choices'][0]['message']['content'])) {

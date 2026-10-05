@@ -81,7 +81,7 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide avec cette structure :
         ['role' => 'user', 'content' => $userPrompt]
     ];
 
-    $response = callGroqApi($messages, 'qwen/qwen3.8-27b', false, true);
+    $response = callGroqApi($messages, null, false, true);
 
     if (isset($response['choices'][0]['message']['content'])) {
         $content = $response['choices'][0]['message']['content'];
