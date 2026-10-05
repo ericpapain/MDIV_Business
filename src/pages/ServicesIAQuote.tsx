@@ -31,6 +31,8 @@ import { SavedWorkDrawer } from '@/components/saved-work/SavedWorkDrawer';
 import { VersionSelectorBar, VersionItem } from '@/components/common/VersionSelectorBar';
 import { SectionDeepDive } from '@/components/common/SectionDeepDive';
 import { SavedWorkItem } from '@/lib/savedWorkService';
+import { classifyDocumentContent, ClassificationResult } from '@/lib/documentClassifierService';
+import { DocumentMismatchModal } from '@/components/common/DocumentMismatchModal';
 
 const PRESET_FEW_SHOT_QUOTES: Record<string, { label: string; text: string }> = {
   plomberie: {
@@ -117,6 +119,11 @@ export default function ServicesIAQuote() {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
 
+  // Document Mismatch Guardrail State
+  const [mismatchResult, setMismatchResult] = useState<ClassificationResult | null>(null);
+  const [isMismatchModalOpen, setIsMismatchModalOpen] = useState(false);
+  const [isClassifying, setIsClassifying] = useState(false);
+
   // Sauvegarde Standard & Authentification
   const [isSavingQuote, setIsSavingQuote] = useState(false);
   const [isSavingProject, setIsSavingProject] = useState(false);
@@ -165,7 +172,7 @@ export default function ServicesIAQuote() {
     }
   };
 
-  const handleAIAssist = async (isNewVersion = false) => {
+  const handleAIAssist = async (isNewVersion = false, bypassMismatch = false) => {
     if (!aiContext.trim()) {
       toast.error("Veuillez décrire le besoin du client pour que l'IA puisse générer le devis.");
       return;
@@ -180,6 +187,24 @@ export default function ServicesIAQuote() {
     if (isGibberish) {
       toast.error("Votre saisie semble incomplète ou incompréhensible. Pour générer un devis précis, veuillez indiquer au minimum la nature des prestations, le contexte client et les quantités ou budgets indicatifs.");
       return;
+    }
+
+    // Garde-fou d'inadéquation de document
+    if (!bypassMismatch && cleanInput.length >= 25) {
+      setIsClassifying(true);
+      try {
+        const classif = await classifyDocumentContent(cleanInput, 'quote');
+        if (classif && classif.is_mismatch) {
+          setMismatchResult(classif);
+          setIsMismatchModalOpen(true);
+          setIsClassifying(false);
+          return;
+        }
+      } catch (e) {
+        console.warn("[Classification] Non-blocking classification error:", e);
+      } finally {
+        setIsClassifying(false);
+      }
     }
 
     if (!checkCanExecute()) return;
@@ -805,10 +830,12 @@ export default function ServicesIAQuote() {
                 <div className="space-y-2">
                   <button 
                     onClick={() => handleAIAssist(false)}
-                    disabled={isGeneratingAIAssist}
+                    disabled={isGeneratingAIAssist || isClassifying}
                     className="w-full ia-btn-primary py-3 text-sm font-bold flex justify-center items-center gap-2"
                   >
-                    {isGeneratingAIAssist ? (
+                    {isClassifying ? (
+                      <><Loader2 className="animate-spin" size={16}/> Vérification du document...</>
+                    ) : isGeneratingAIAssist ? (
                       <><Loader2 className="animate-spin" size={16}/> Génération en cours...</>
                     ) : (
                       <>
@@ -979,6 +1006,18 @@ export default function ServicesIAQuote() {
         title={`Devis ${quoteNumber}`}
         fileName={`Devis-${quoteNumber}.pdf`}
         onDownload={handleExportPDF}
+      />
+
+      {/* Document Mismatch Guardrail Modal */}
+      <DocumentMismatchModal
+        isOpen={isMismatchModalOpen}
+        onClose={() => setIsMismatchModalOpen(false)}
+        onProceedAnyway={() => {
+          setIsMismatchModalOpen(false);
+          handleAIAssist(false, true);
+        }}
+        result={mismatchResult}
+        currentModule="quote"
       />
     </div>
   );

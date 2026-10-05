@@ -2,6 +2,7 @@
 // public/api/invoice_ai_check.php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/groq_client.php';
+require_once __DIR__ . '/context_engine.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -21,18 +22,59 @@ try {
     $totalHT = floatval($input['totalHT'] ?? 0);
     $totalTTC = floatval($input['totalTTC'] ?? 0);
     $vatAmount = floatval($input['vatAmount'] ?? 0);
+    $company_id = intval($input['company_id'] ?? 1);
 
-    $systemPrompt = "Tu es un expert-comptable et juriste fiscaliste spécialisé en conformité de facturation B2B en France.
-Vérifie la conformité de la facture suivante.
+    // Chargement du profil entreprise & règles métier
+    $companyContext = get_company_context($company_id);
+    $companyPromptInjection = $companyContext['prompt_injection'] ?? '';
+
+    // ===================================================================
+    // DÉLIBÉRATION MULTI-AGENTS : AUDIT FISCAL & RISQUES DE FACTURATION
+    // ===================================================================
+
+    // Tour 1 : Auditeur Fiscal & Juriste B2B
+    $fiscalPrompt = "Tu es l'Auditeur Fiscal & Juriste B2B.
+Analyse les éléments de cette facture :
+- Vérifie la conformité légale (mentions obligatoires selon le Code de commerce et Code général des impôts).
+- Détecte les risques d'amende pour omission de mentions ou non-conformité Factur-X / PDP 2026.
+Sois direct et rigoureux (environ 80 à 100 mots)." . $companyPromptInjection;
+
+    $res1 = callGroqApi([
+        ['role' => 'system', 'content' => $fiscalPrompt],
+        ['role' => 'user', 'content' => "Facture $invoiceNumber pour $clientName - Total HT: $totalHT €, TVA: $vatAmount €, Total TTC: $totalTTC €"]
+    ], null, false, false);
+    $fiscalAudit = trim($res1['choices'][0]['message']['content'] ?? "Audit fiscal terminé.");
+
+    // Tour 2 : Contrôleur de Gestion & Risques d'Impayés
+    $financialPrompt = "Tu es le Contrôleur de Gestion & Responsable Recouvrement.
+Évalue la cohérence des montants, les risques d'impayés et les clauses protectrices (pénalités de retard, indemnité forfaitaire de 40€, délai de paiement L. 441-10 C. com.).
+Reste concis (environ 80 à 100 mots)." . $companyPromptInjection;
+
+    $res2 = callGroqApi([
+        ['role' => 'system', 'content' => $financialPrompt],
+        ['role' => 'user', 'content' => "Audit fiscal précédent : $fiscalAudit\nDonnées facture : $totalHT € HT, $totalTTC € TTC"]
+    ], null, false, false);
+    $financialAudit = trim($res2['choices'][0]['message']['content'] ?? "Audit financier terminé.");
+
+    // Tour 3 : Expert-Comptable & Consensus Final
+    $systemPrompt = "Tu es l'Expert-Comptable en chef.
+Clôture la délibération entre l'Auditeur Fiscal et le Contrôleur de Gestion.
+Émets la certification de conformité finale sous forme JSON strict.
+$companyPromptInjection
+
 Tu dois répondre UNIQUEMENT par un objet JSON valide avec ce schéma :
 {
   \"isValid\": true,
   \"errors\": [],
   \"warnings\": [\"Avertissement éventuel ou point de vigilance...\"],
-  \"suggestedMentions\": [\"Mention légale recommandée (ex: Indemnité forfaitaire de 40€ pour frais de recouvrement en cas de retard)\"]
+  \"suggestedMentions\": [\"Mention légale recommandée (ex: Indemnité forfaitaire de 40€ pour frais de recouvrement en cas de retard)\"],
+  \"deliberation_trail\": {
+    \"fiscal_audit\": " . json_encode(mb_substr($fiscalAudit, 0, 200)) . ",
+    \"financial_audit\": " . json_encode(mb_substr($financialAudit, 0, 200)) . "
+  }
 }";
 
-    $userPrompt = "Facture N° : $invoiceNumber\nClient : $clientName\nTotal HT : $totalHT €\nTVA : $vatAmount €\nTotal TTC : $totalTTC €\nNombre de lignes : " . count($lines);
+    $userPrompt = "Facture N° : $invoiceNumber\nClient : $clientName\nTotal HT : $totalHT €\nTVA : $vatAmount €\nTotal TTC : $totalTTC €\nNombre de lignes : " . count($lines) . "\n\nDélibération des experts :\n- Audit fiscal : $fiscalAudit\n- Audit financier : $financialAudit";
 
     $messages = [
         ['role' => 'system', 'content' => $systemPrompt],
@@ -40,6 +82,7 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide avec ce schéma :
     ];
 
     $response = callGroqApi($messages, null, false, true);
+
 
     if (isset($response['choices'][0]['message']['content'])) {
         $content = $response['choices'][0]['message']['content'];

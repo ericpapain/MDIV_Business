@@ -39,6 +39,8 @@ import {
 } from '@/lib/fintechKolectoService';
 import { FintechPricingTab } from '@/components/fintech/FintechPricingTab';
 import { useGuestQuota } from '@/hooks/useGuestQuota';
+import { classifyDocumentContent, ClassificationResult } from '@/lib/documentClassifierService';
+import { DocumentMismatchModal } from '@/components/common/DocumentMismatchModal';
 
 export default function ServicesIAInvoice() {
   const { language } = useLanguage();
@@ -159,6 +161,11 @@ export default function ServicesIAInvoice() {
   const [kpis, setKpis] = useState<InvoiceKPIs | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
+
+  // Document Mismatch Guardrail State
+  const [mismatchResult, setMismatchResult] = useState<ClassificationResult | null>(null);
+  const [isMismatchModalOpen, setIsMismatchModalOpen] = useState(false);
+  const [isClassifying, setIsClassifying] = useState(false);
 
   // Editor State
   const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
@@ -423,10 +430,27 @@ export default function ServicesIAInvoice() {
     }
   };
 
-  const handleFillFromOCR = async () => {
+  const handleFillFromOCR = async (bypassMismatch = false) => {
     if (!ocrText) {
       toast.error("Veuillez d'abord scanner ou photographier un document.");
       return;
+    }
+
+    if (!bypassMismatch && ocrText.trim().length >= 25) {
+      setIsClassifying(true);
+      try {
+        const classif = await classifyDocumentContent(ocrText.trim(), 'invoice');
+        if (classif && classif.is_mismatch) {
+          setMismatchResult(classif);
+          setIsMismatchModalOpen(true);
+          setIsClassifying(false);
+          return;
+        }
+      } catch (e) {
+        console.warn("[Classification] Non-blocking classification error:", e);
+      } finally {
+        setIsClassifying(false);
+      }
     }
 
     if (!checkCanExecute()) return;
@@ -906,12 +930,26 @@ export default function ServicesIAInvoice() {
                           <strong>OCR Réussi :</strong> {ocrText.slice(0, 100)}...
                         </div>
                         <button
-                          onClick={handleFillFromOCR}
-                          disabled={isParsingOcr}
+                          onClick={() => handleFillFromOCR(false)}
+                          disabled={isParsingOcr || isClassifying}
                           className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold flex items-center gap-2 disabled:opacity-50"
                         >
-                          {isParsingOcr ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                          Pré-remplir les lignes par IA
+                          {isClassifying ? (
+                            <>
+                              <Loader2 size={14} className="animate-spin" />
+                              Vérification du document...
+                            </>
+                          ) : isParsingOcr ? (
+                            <>
+                              <Loader2 size={14} className="animate-spin" />
+                              Extraction en cours...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles size={14} />
+                              Pré-remplir les lignes par IA
+                            </>
+                          )}
                         </button>
                       </div>
                     )}
@@ -2290,6 +2328,18 @@ export default function ServicesIAInvoice() {
         title={`Facture ${invoiceNumber}`}
         fileName={`Facture-${invoiceNumber}.pdf`}
         onDownload={handleExportInvoicePDF}
+      />
+
+      {/* Document Mismatch Guardrail Modal */}
+      <DocumentMismatchModal
+        isOpen={isMismatchModalOpen}
+        onClose={() => setIsMismatchModalOpen(false)}
+        onProceedAnyway={() => {
+          setIsMismatchModalOpen(false);
+          handleFillFromOCR(true);
+        }}
+        result={mismatchResult}
+        currentModule="invoice"
       />
     </>
   );
