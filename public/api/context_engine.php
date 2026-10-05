@@ -16,10 +16,11 @@
 
 require_once __DIR__ . '/config.php';
 
-function get_company_context($company_id = null) {
+function get_company_context($company_id = null, $query_text = '') {
     $context = [
         'company' => null,
         'recent_works' => [],
+        'vector_knowledge' => [],
         'domain_expertise' => 'Généraliste Direction d\'Entreprise',
         'domain_rules' => '',
         'prompt_injection' => ''
@@ -80,7 +81,7 @@ function get_company_context($company_id = null) {
 - Évalue systématiquement la faisabilité opérationnelle et la conformité administrative.";
             }
 
-            // 3. Récupération des livrables et interactions récentes (mémoire d'entreprise)
+            // 3. Récupération des livrables récents (historique opérationnel)
             try {
                 $stmtWork = $pdo->prepare("SELECT tool_type, title, summary, created_at FROM saved_work WHERE company_id = ? ORDER BY id DESC LIMIT 4");
                 $stmtWork->execute([intval($company_id)]);
@@ -89,7 +90,17 @@ function get_company_context($company_id = null) {
                 // table non encore migrée ou vide
             }
 
-            // 4. Construction de la directive d'injection
+            // 4. Recherche sémantique dans la mémoire vectorielle (RAG Hermétique)
+            if (!empty(trim($query_text))) {
+                try {
+                    require_once __DIR__ . '/vector_store.php';
+                    $context['vector_knowledge'] = search_company_semantic_memory(intval($company_id), $query_text, 3, 0.65);
+                } catch (Exception $e) {
+                    // vector search non-bloquant
+                }
+            }
+
+            // 5. Construction de la directive d'injection
             $promptInjection = "\n\n==================================================\n";
             $promptInjection .= "CONTEXTE DU COMPTE ENTREPRISE ACTIVE :\n";
             $promptInjection .= "- Raison Sociale : " . ($company['company_name'] ?? 'Entreprise Partenaire') . "\n";
@@ -100,7 +111,14 @@ function get_company_context($company_id = null) {
             $promptInjection .= "- POSTURE EXPERTE ASSIGNÉE : " . $context['domain_expertise'] . "\n";
             $promptInjection .= "\n" . $context['domain_rules'] . "\n";
 
-            if (!empty($context['recent_works'])) {
+            if (!empty($context['vector_knowledge'])) {
+                $promptInjection .= "\nEXTRAITS FACTUELS DE LA BASE DE CONNAISSANCES VECTORIELLE (RAG) :\n";
+                foreach ($context['vector_knowledge'] as $vk) {
+                    $docName = $vk['document_name'] ?? 'Document interne';
+                    $simScore = round(($vk['similarity_score'] ?? 0) * 100);
+                    $promptInjection .= "  * [SOURCE : {$docName} (Pertinence: {$simScore}%)] :\n    \"" . trim($vk['chunk_text']) . "\"\n";
+                }
+            } elseif (!empty($context['recent_works'])) {
                 $promptInjection .= "\nHISTORIQUE RÉCENT DES LIVRABLES DE L'ENTREPRISE (pour cohérence continue) :\n";
                 foreach ($context['recent_works'] as $w) {
                     $promptInjection .= "  * [" . strtoupper($w['tool_type'] ?? 'DOC') . "] " . ($w['title'] ?? 'Livrable') . " : " . mb_substr($w['summary'] ?? '', 0, 90) . "...\n";

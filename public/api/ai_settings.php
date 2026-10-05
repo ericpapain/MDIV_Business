@@ -15,7 +15,12 @@ $default_settings = [
     'openaiModel' => 'gpt-4o-mini',
     'mistralModel' => 'mistral-small-latest',
     'temperature' => 0.7,
-    'fallbackEnabled' => true
+    'fallbackEnabled' => true,
+    'vectorDbDriver' => getenv('VECTOR_DB_DRIVER') ?: 'sql',
+    'vectorEmbeddingModel' => 'text-embedding-3-large',
+    'vectorDimensions' => 1536,
+    'qdrantUrl' => getenv('QDRANT_URL') ?: 'http://localhost:6333',
+    'qdrantCollection' => getenv('QDRANT_COLLECTION') ?: 'mdiv_enterprise_vectors'
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -44,8 +49,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'openaiModel' => $input['openaiModel'] ?? 'gpt-4o-mini',
         'mistralModel' => $input['mistralModel'] ?? 'mistral-small-latest',
         'temperature' => isset($input['temperature']) ? floatval($input['temperature']) : 0.7,
-        'fallbackEnabled' => isset($input['fallbackEnabled']) ? filter_var($input['fallbackEnabled'], FILTER_VALIDATE_BOOLEAN) : true
+        'fallbackEnabled' => isset($input['fallbackEnabled']) ? filter_var($input['fallbackEnabled'], FILTER_VALIDATE_BOOLEAN) : true,
+        'vectorDbDriver' => in_array($input['vectorDbDriver'] ?? '', ['qdrant', 'pinecone', 'pgvector', 'sql']) ? $input['vectorDbDriver'] : 'sql',
+        'vectorEmbeddingModel' => $input['vectorEmbeddingModel'] ?? 'text-embedding-3-large',
+        'vectorDimensions' => intval($input['vectorDimensions'] ?? 1536),
+        'qdrantUrl' => trim($input['qdrantUrl'] ?? 'http://localhost:6333'),
+        'qdrantCollection' => trim($input['qdrantCollection'] ?? 'mdiv_enterprise_vectors')
     ];
+
+    if (!empty($input['qdrantApiKey'])) $new_settings['qdrantApiKey'] = trim($input['qdrantApiKey']);
+    if (!empty($input['pineconeApiKey'])) $new_settings['pineconeApiKey'] = trim($input['pineconeApiKey']);
+    if (!empty($input['pineconeIndexHost'])) $new_settings['pineconeIndexHost'] = trim($input['pineconeIndexHost']);
 
     if (!empty($input['groqApiKey'])) $new_settings['groqApiKey'] = trim($input['groqApiKey']);
     if (!empty($input['openaiApiKey'])) $new_settings['openaiApiKey'] = trim($input['openaiApiKey']);

@@ -3790,7 +3790,144 @@ Réponds EXCLUSIVEMENT avec un JSON valide suivant cette structure exacte, sans 
             }));
           }
 
-          // Fallback par défaut pour les endpoints non capturés
+          // ===================================================================
+          // 44. BRIQUE 5 : RAG VECTORIEL MULTI-TENANT & RECHERCHE SÉMANTIQUE
+          // ===================================================================
+          if (pathname.endsWith('/rag_document_indexer.php')) {
+            const { fields } = await parseBody(req);
+            const company_id = Number(fields.company_id || 0);
+            const document_id = String(fields.document_id || `doc_${Date.now()}`);
+            const document_type = String(fields.document_type || 'general');
+            const document_name = String(fields.document_name || 'Document sans titre');
+            const text = String(fields.text || '');
+            const metadata = typeof fields.metadata === 'object' ? fields.metadata : {};
+
+            if (company_id <= 0) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "company_id obligatoire pour garantir l'étanchéité multi-tenant." }));
+            }
+
+            if (!text || text.trim().length < 15) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "Texte de document insuffisant pour vectorisation." }));
+            }
+
+            const db = loadDevDb();
+            if (!(db as any).companyEmbeddings) {
+              (db as any).companyEmbeddings = [];
+            }
+
+            // Découpage sémantique
+            const chunkSize = 650;
+            const overlap = 100;
+            const chunks: string[] = [];
+            let start = 0;
+            while (start < text.length) {
+              const end = Math.min(start + chunkSize, text.length);
+              const chunk = text.slice(start, end).trim();
+              if (chunk.length > 20) chunks.push(chunk);
+              start = end - overlap;
+              if (start >= text.length - overlap) break;
+            }
+
+            // Supprimer ancienne version idempotente
+            (db as any).companyEmbeddings = (db as any).companyEmbeddings.filter(
+              (item: any) => !(item.company_id === company_id && item.document_id === document_id)
+            );
+
+            chunks.forEach((chunk, idx) => {
+              (db as any).companyEmbeddings.push({
+                id: Date.now() + idx,
+                company_id,
+                document_id,
+                document_type,
+                document_name,
+                chunk_index: idx,
+                chunk_text: chunk,
+                token_count: Math.round(chunk.length / 4),
+                metadata,
+                created_at: new Date().toISOString()
+              });
+            });
+
+            saveDevDb(db);
+
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify({
+              status: 'success',
+              document_id,
+              chunks_indexed: chunks.length,
+              model: 'text-embedding-3-large',
+              dimensions: 1536,
+              message: `Document « ${document_name} » indexé avec succès dans la mémoire vectorielle (ID ${company_id}).`
+            }));
+          }
+
+          if (pathname.endsWith('/rag_query.php')) {
+            const { fields } = await parseBody(req);
+            const company_id = Number(fields.company_id || urlObj.searchParams.get('company_id') || 0);
+            const query = String(fields.query || urlObj.searchParams.get('query') || urlObj.searchParams.get('q') || '');
+            const top_k = Number(fields.top_k || urlObj.searchParams.get('top_k') || 4);
+            const min_score = Number(fields.min_score || urlObj.searchParams.get('min_score') || 0.65);
+            const document_type = fields.document_type || urlObj.searchParams.get('document_type');
+
+            if (company_id <= 0) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "company_id obligatoire." }));
+            }
+
+            if (!query.trim()) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "Requête sémantique vide." }));
+            }
+
+            const db = loadDevDb();
+            const embeddings: any[] = (db as any).companyEmbeddings || [];
+
+            // Filtrage STRICT par company_id (ISOLATION HERMÉTIQUE)
+            const tenantChunks = embeddings.filter((item: any) => {
+              if (item.company_id !== company_id) return false;
+              if (document_type && item.document_type !== document_type) return false;
+              return true;
+            });
+
+            const queryWords = query.toLowerCase().split(/\W+/).filter(w => w.length > 2);
+            const scored = tenantChunks.map((item: any) => {
+              const textLower = item.chunk_text.toLowerCase();
+              let matchCount = 0;
+              for (const qw of queryWords) {
+                if (textLower.includes(qw)) matchCount++;
+              }
+              const score = queryWords.length > 0 
+                ? Math.min(0.98, 0.65 + (matchCount / queryWords.length) * 0.33)
+                : 0.70;
+              return {
+                document_id: item.document_id,
+                document_type: item.document_type,
+                document_name: item.document_name,
+                chunk_index: item.chunk_index,
+                chunk_text: item.chunk_text,
+                similarity_score: Math.round(score * 1000) / 1000,
+                metadata: item.metadata || {}
+              };
+            }).filter(item => item.similarity_score >= min_score);
+
+            scored.sort((a, b) => b.similarity_score - a.similarity_score);
+            const results = scored.slice(0, top_k);
+
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify({
+              status: 'success',
+              company_id,
+              query,
+              results_count: results.length,
+              results
+            }));
+          }
           next();
         } catch (e: any) {
           res.statusCode = 500;
