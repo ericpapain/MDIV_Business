@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { EnterpriseAuthBar } from '@/components/site/EnterpriseAuthBar';
@@ -33,6 +33,11 @@ import { SavedWorkDrawer } from '@/components/saved-work/SavedWorkDrawer';
 import { VersionSelectorBar, VersionItem } from '@/components/common/VersionSelectorBar';
 import { SectionDeepDive } from '@/components/common/SectionDeepDive';
 import { SavedWorkItem } from '@/lib/savedWorkService';
+import { ClientSelectWithCreate } from '@/components/clients/ClientSelectWithCreate';
+import { ClientContextPanel } from '@/components/clients/ClientContextPanel';
+import { IncomingEmailHandler } from '@/components/email/IncomingEmailHandler';
+import { generateContextualEmailReply, saveClientInteraction } from '@/lib/clientContextHubService';
+import { Client } from '@/lib/quoteService';
 
 const toneOptions: EmailTone[] = ['Professionnel', 'Commercial', 'Court & Percutant', 'Empathique', 'Formel', 'Chaleureux'];
 const objectiveOptions: EmailObjective[] = ['Nouvel email', 'Réponse stratégique', 'Négociation', 'Prise de contact', 'Suivi de projet'];
@@ -62,6 +67,11 @@ export default function ServicesIAEmail() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [kpis, setKpis] = useState<EmailAnalysisKPIs | null>(null);
 
+  // Client & Cross-module Hub State
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [emailWorkMode, setEmailWorkMode] = useState<'write' | 'reply_inbound'>('write');
+  const [isGeneratingContextualReply, setIsGeneratingContextualReply] = useState(false);
+
   // Versions State
   const [versions, setVersions] = useState<VersionItem<string>[]>([]);
   const [activeVersionIndex, setActiveVersionIndex] = useState<number>(0);
@@ -69,6 +79,33 @@ export default function ServicesIAEmail() {
   // Universal Save & History Drawer State
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
+
+  const [searchParams] = useSearchParams();
+
+  // Auto-chargement d'un brouillon transverse ou d'un client_id via l'URL
+  useEffect(() => {
+    try {
+      const draft = sessionStorage.getItem('prefill_email_draft');
+      if (draft) {
+        const parsed = JSON.parse(draft);
+        if (parsed.body) {
+          setText(parsed.body);
+          toast.success("Contenu importé depuis le module d'origine !");
+        }
+        sessionStorage.removeItem('prefill_email_draft');
+      }
+    } catch {}
+
+    const clientIdParam = searchParams.get('client_id');
+    if (clientIdParam) {
+      setSelectedClient({
+        id: Number(clientIdParam),
+        name: `Client #${clientIdParam}`,
+        email: '',
+        created_at: new Date().toISOString()
+      });
+    }
+  }, [searchParams]);
 
   // Debounce analysis
   useEffect(() => {
@@ -126,6 +163,53 @@ export default function ServicesIAEmail() {
       toast.error(err.message || "Erreur lors de la génération IA.");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleSelectMessageToReply = async (messageText: string, subject: string) => {
+    setEmailWorkMode('reply_inbound');
+    setObjective('Réponse stratégique');
+    toast.info(`Message sélectionné : « ${subject} ». Préparation de la réponse...`);
+    await handleGenerateContextualReply(messageText, `Répondre précisément au sujet : ${subject}`);
+  };
+
+  const handleGenerateContextualReply = async (incomingText: string, customInstructions?: string) => {
+    if (!checkCanExecute()) return;
+    setIsGeneratingContextualReply(true);
+    try {
+      const res = await generateContextualEmailReply({
+        client_id: selectedClient?.id ? Number(selectedClient.id) : 0,
+        company_id: company?.id,
+        incoming_email_text: incomingText,
+        tone: tone,
+        objective: objective,
+        custom_instructions: customInstructions
+      });
+
+      if (res.success && res.reply_text) {
+        setText(res.reply_text);
+        setEmailWorkMode('write');
+
+        const newVerNum = versions.length + 1;
+        const newVer: VersionItem<string> = {
+          id: 'ver_' + Date.now(),
+          versionNumber: newVerNum,
+          label: `V${newVerNum} (Réponse Contextuelle IA)`,
+          timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+          data: res.reply_text,
+        };
+
+        const updated = [...versions, newVer];
+        setVersions(updated);
+        setActiveVersionIndex(updated.length - 1);
+
+        recordExecution();
+        toast.success("Réponse IA contextualisée générée et chargée dans l'éditeur !");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Erreur lors de la génération de la réponse contextualisée.");
+    } finally {
+      setIsGeneratingContextualReply(false);
     }
   };
 
@@ -383,6 +467,64 @@ export default function ServicesIAEmail() {
               />
             )}
 
+            {/* Barre de Contexte Client Omnicanal */}
+            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="w-full md:w-96">
+                <ClientSelectWithCreate
+                  selectedClientId={selectedClient?.id}
+                  onSelectClient={(c) => setSelectedClient(c)}
+                  label="Client destinataire / interlocuteur lié"
+                  placeholder="Rechercher ou lier un client pour contexte 360°..."
+                />
+              </div>
+
+              {/* Sélecteur de mode de travail Email */}
+              <div className="flex items-center gap-2 p-1 bg-slate-950/80 border border-slate-800 rounded-xl w-full md:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setEmailWorkMode('write')}
+                  className={`flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                    emailWorkMode === 'write'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Edit3 className="w-3.5 h-3.5 inline mr-1.5" />
+                  Rédiger un email
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEmailWorkMode('reply_inbound')}
+                  className={`flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                    emailWorkMode === 'reply_inbound'
+                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 inline mr-1.5" />
+                  Traiter un mail reçu (Réponse IA)
+                </button>
+              </div>
+            </div>
+
+            {/* Dossier 360 Client (si sélectionné) */}
+            {selectedClient && (
+              <ClientContextPanel
+                clientId={selectedClient.id}
+                companyId={company?.id}
+                onSelectMessageToReply={handleSelectMessageToReply}
+              />
+            )}
+
+            {/* Mode Traitement d'un email reçu */}
+            {emailWorkMode === 'reply_inbound' && (
+              <IncomingEmailHandler
+                onGenerateReply={handleGenerateContextualReply}
+                isGenerating={isGeneratingContextualReply}
+                selectedClientName={selectedClient?.company || selectedClient?.name}
+              />
+            )}
+
             <div className="grid lg:grid-cols-3 gap-8 ia-animate-in">
               {/* Colonne Principale: Éditeur */}
               <div className="lg:col-span-2 space-y-6">
@@ -481,6 +623,33 @@ export default function ServicesIAEmail() {
                     </div>
                   </div>
                 </div>
+
+                {/* Barre d'Actions Cross-Modules MDIV Business */}
+                {selectedClient && text.trim() && (
+                  <div className="p-4 bg-slate-900/90 border border-slate-800 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-lg">
+                    <div className="flex items-center gap-2 text-slate-300">
+                      <Sparkles className="w-4 h-4 text-indigo-400" />
+                      <span>
+                        Écosystème unifié : actions transversales pour{' '}
+                        <strong className="text-white">{selectedClient.company || selectedClient.name}</strong> :
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        to={`/services-ia/devis?client_id=${selectedClient.id}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-200 font-medium transition-colors"
+                      >
+                        📄 Créer un devis lié
+                      </Link>
+                      <Link
+                        to={`/services-ia/relances?client_id=${selectedClient.id}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium transition-colors"
+                      >
+                        ⏱️ Programmer une relance
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Colonne Secondaire: Analyse & KPIs */}

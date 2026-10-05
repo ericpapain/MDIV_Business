@@ -122,5 +122,32 @@
     "mistralModel": "mistral-small-latest",
     "temperature": 0.7,
     "fallbackEnabled": true
-  }
+  },
+  "client_interactions": [
+    {
+      "id": 1791239693772,
+      "company_id": 1,
+      "client_id": 888,
+      "direction": "inbound",
+      "channel": "email",
+      "subject": "Urgence délai de livraison radiologie",
+      "body_text": "Bonjour, suite au devis DEV-089, le délai de 8 semaines est impossible car la clinique rouvre dans 1 mois. Avez-vous une solution accélérée ?",
+      "summary": "Bonjour, suite au devis DEV-089, le délai de 8 semaines est impossible car la clinique rouvre dans 1...",
+      "sentiment": "critical",
+      "created_at": "2026-10-05T22:34:53.772Z"
+    }
+  ],
+  "cross_module_bindings": [
+    {
+      "id": 1791239693783,
+      "company_id": 1,
+      "client_id": 888,
+      "source_module": "quote",
+      "source_id": "DEV-2026-VET1",
+      "target_module": "email",
+      "target_id": "msg_Dr Moreau",
+      "link_type": "replied_to",
+      "created_at": "2026-10-05T22:34:53.784Z"
+    }
+  ]
 }

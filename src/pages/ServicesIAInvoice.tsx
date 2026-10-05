@@ -19,6 +19,7 @@ import {
 } from '@/lib/invoiceService';
 import { DocumentUploadCapture } from '@/components/ui/DocumentUploadCapture';
 import { ClientSelectWithCreate } from '@/components/clients/ClientSelectWithCreate';
+import { ClientContextPanel } from '@/components/clients/ClientContextPanel';
 import { AuthRequiredModal } from '@/components/auth/AuthRequiredModal';
 import { UserProfileModal } from '@/components/auth/UserProfileModal';
 import { getApiUrl } from '@/lib/apiConfig';
@@ -1058,6 +1059,16 @@ export default function ServicesIAInvoice() {
                     placeholder="Sélectionner ou ajouter un client..."
                   />
                 </div>
+
+                {/* Dossier Client 360° Omnicanal */}
+                {selectedClientId && Number(selectedClientId) > 0 && (
+                  <div className="pt-3">
+                    <ClientContextPanel
+                      clientId={Number(selectedClientId)}
+                      companyId={company?.id}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Lignes */}

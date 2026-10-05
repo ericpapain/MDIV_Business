@@ -415,6 +415,20 @@ export default function ServicesIAFollowup() {
                             {m365Connected ? 'Envoyer direct' : 'M365 non connecté'}
                           </button>
                         </div>
+
+                        {/* Pont Écosystème vers Assistant Email */}
+                        <Link
+                          to="/services-ia/email"
+                          onClick={() => {
+                            sessionStorage.setItem('prefill_email_draft', JSON.stringify({
+                              subject: generatedSubject,
+                              body: generatedBody
+                            }));
+                          }}
+                          className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-indigo-300 hover:text-white font-semibold rounded-xl text-xs border border-slate-800 transition-colors flex justify-center items-center gap-2 shadow-sm"
+                        >
+                          <Sparkles size={14} className="text-indigo-400" /> Ouvrir & Affiner dans l'Assistant Email
+                        </Link>
                         {!m365Connected && (
                           <p className="text-xs text-amber-600 text-center font-medium">
                             <AlertTriangle size={12} className="inline mr-1"/>

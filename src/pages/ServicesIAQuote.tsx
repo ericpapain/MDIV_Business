@@ -24,6 +24,7 @@ import {
 } from '@/lib/quoteService';
 import { DocumentUploadCapture } from '@/components/ui/DocumentUploadCapture';
 import { ClientSelectWithCreate } from '@/components/clients/ClientSelectWithCreate';
+import { ClientContextPanel } from '@/components/clients/ClientContextPanel';
 import { AuthRequiredModal } from '@/components/auth/AuthRequiredModal';
 import { useGuestQuota } from '@/hooks/useGuestQuota';
 import { SaveWorkModal } from '@/components/saved-work/SaveWorkModal';
@@ -587,6 +588,14 @@ export default function ServicesIAQuote() {
               />
             </div>
 
+            {/* Dossier Client 360° Omnicanal */}
+            {selectedClientId && Number(selectedClientId) > 0 && (
+              <ClientContextPanel
+                clientId={Number(selectedClientId)}
+                companyId={company?.id}
+              />
+            )}
+
             {/* Lignes du devis */}
             <div className="ia-card bg-white border border-slate-200 overflow-hidden">
               <div className="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
@@ -942,6 +951,16 @@ export default function ServicesIAQuote() {
                     <Download size={16} /> Exporter PDF
                   </button>
                 </div>
+
+                {/* Pont Écosystème vers Assistant Email */}
+                {selectedClientId && (
+                  <Link
+                    to={`/services-ia/email?client_id=${selectedClientId}`}
+                    className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-indigo-300 hover:text-white font-semibold rounded-xl text-xs border border-slate-800 transition-colors flex justify-center items-center gap-2 shadow-sm"
+                  >
+                    <Sparkles size={14} className="text-indigo-400" /> Préparer l'email d'envoi du devis
+                  </Link>
+                )}
               </div>
             </div>
             

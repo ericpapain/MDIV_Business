@@ -4103,6 +4103,191 @@ Réponds EXCLUSIVEMENT avec un JSON valide suivant cette structure exacte, sans 
               recent_logs: logs.slice(0, limit)
             }));
           }
+
+          // ===================================================================
+          // 47. HUB D'INTERCONNEXION CLIENT 360 & RÉPONSE CONTEXTUELLE
+          // ===================================================================
+          if (pathname.endsWith('/client_context_hub.php')) {
+            const { fields } = await parseRequestBody(req);
+            const db = loadDevDb();
+            const action = urlObj.searchParams.get('action') || fields.action || '';
+            const company_id = Number(urlObj.searchParams.get('company_id') || fields.company_id || 1);
+            const client_id = Number(urlObj.searchParams.get('client_id') || fields.client_id || 0);
+
+            if (action === 'get_client_360') {
+              let client = db.clients.find((c: any) => Number(c.id) === client_id);
+              if (!client) {
+                client = {
+                  id: client_id || 1,
+                  company_id,
+                  name: "Cabinet & Partenaires Associés",
+                  company: "Cabinet & Partenaires",
+                  email: "direction@cabinet-associes.fr",
+                  phone: "01 42 68 00 00",
+                  address: "48 Rue de la Paix, 75002 Paris",
+                  notes: "Client grand compte, facturation à 30 jours net"
+                };
+              }
+
+              const allInteractions: any[] = (db as any).client_interactions || [];
+              const interactions = allInteractions.filter((i: any) => Number(i.client_id) === Number(client.id));
+              const quotes = (db.quotes || []).filter((q: any) => Number(q.client_id) === Number(client.id));
+              const invoices = (db.invoices || []).filter((inv: any) => Number(inv.client_id) === Number(client.id));
+
+              let pendingQuotesCount = quotes.filter((q: any) => ['draft', 'sent', 'pending'].includes(q.status)).length;
+              let overdueInvoicesCount = 0;
+              let totalOverdueAmount = 0;
+              const todayStr = new Date().toISOString().split('T')[0];
+
+              invoices.forEach((inv: any) => {
+                if (inv.status === 'overdue' || (inv.status === 'pending' && inv.due_date && inv.due_date < todayStr)) {
+                  overdueInvoicesCount++;
+                  totalOverdueAmount += Number(inv.amount_ttc || inv.total_ttc || 0);
+                }
+              });
+
+              let executive_context = `Client ${client.company || client.name}. `;
+              if (pendingQuotesCount > 0) executive_context += `${pendingQuotesCount} devis en cours d'arbitrage. `;
+              if (overdueInvoicesCount > 0) {
+                executive_context += `ATTENTION : ${overdueInvoicesCount} facture(s) en retard (${totalOverdueAmount.toFixed(2)} € TTC). `;
+              } else {
+                executive_context += `Situation financière saine, aucun arriéré. `;
+              }
+
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({
+                success: true,
+                client,
+                interactions,
+                quotes,
+                invoices,
+                financial_summary: {
+                  pending_quotes_count: pendingQuotesCount,
+                  overdue_invoices_count: overdueInvoicesCount,
+                  total_overdue_amount: totalOverdueAmount
+                },
+                executive_context
+              }));
+            }
+
+            if (action === 'save_interaction') {
+              if (!(db as any).client_interactions) (db as any).client_interactions = [];
+              const interactionId = Date.now();
+              const newInter = {
+                id: interactionId,
+                company_id,
+                client_id,
+                direction: fields.direction || 'inbound',
+                channel: fields.channel || 'email',
+                subject: fields.subject || 'Échange sans objet',
+                body_text: fields.body_text || '',
+                summary: fields.summary || (fields.body_text ? fields.body_text.slice(0, 140) + '...' : ''),
+                sentiment: fields.sentiment || 'neutral',
+                reference_id: fields.reference_id || null,
+                created_at: new Date().toISOString()
+              };
+              (db as any).client_interactions.unshift(newInter);
+              saveDevDb(db);
+
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({
+                success: true,
+                interaction_id: interactionId,
+                message: "Interaction client consignée avec succès."
+              }));
+            }
+
+            if (action === 'contextual_email_reply') {
+              const incomingText = fields.incoming_email_text || '';
+              const tone = fields.tone || 'Professionnel';
+              const objective = fields.objective || 'Réponse stratégique';
+              const customInstructions = fields.custom_instructions || '';
+
+              let client = db.clients.find((c: any) => Number(c.id) === client_id);
+              const clientName = client ? client.name : 'Client';
+              const clientCompany = client ? client.company : '';
+
+              const overdueInvoices = (db.invoices || []).filter((inv: any) => Number(inv.client_id) === client_id && (inv.status === 'overdue' || inv.status === 'pending'));
+              let financialWarning = overdueInvoices.length > 0 ? `Rappel : ${overdueInvoices.length} facture(s) en attente.` : '';
+
+              let generatedText = `Bonjour ${clientName},\n\nJ'ai bien pris connaissance de votre message et je vous remercie pour ces précisions.\n\n`;
+              generatedText += `Concernant votre demande, nous validons les éléments indiqués et mettons tout en œuvre pour assurer l'exécution dans les meilleures conditions avec nos équipes.\n\n`;
+              if (financialWarning) {
+                generatedText += `Par ailleurs, nous profitons de cet échange pour vous rappeler qu'un règlement est actuellement en cours de traitement sur votre compte. Nous vous remercions par avance pour son suivi comptable.\n\n`;
+              }
+              generatedText += `Je reste à votre entière disposition pour tout complément.\n\nBien cordialement,\nLa Direction`;
+
+              if (OPENAI_API_KEY && incomingText.length > 10) {
+                try {
+                  const prompt = `Rédige une réponse d'email professionnelle et soignée.
+Interlocuteur : ${clientName} (${clientCompany})
+Ton : ${tone}
+Objectif : ${objective}
+${financialWarning ? `Avertissement financier : ${financialWarning}` : ''}
+${customInstructions ? `Consignes particulières : ${customInstructions}` : ''}
+
+EMAIL REÇU :
+"""
+${incomingText}
+"""
+
+Génère UNIQUEMENT le corps du mail prêt à l'envoi.`;
+                  const r = await fetch(OPENAI_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_API_KEY}` },
+                    body: JSON.stringify({
+                      model: 'gpt-4o-mini',
+                      temperature: 0.4,
+                      messages: [{ role: 'user', content: prompt }]
+                    })
+                  });
+                  if (r.ok) {
+                    const d = await r.json();
+                    if (d.choices?.[0]?.message?.content) {
+                      generatedText = d.choices[0].message.content;
+                    }
+                  }
+                } catch {}
+              }
+
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({
+                success: true,
+                reply_text: generatedText,
+                context_summary: {
+                  client_name: clientName,
+                  client_company: clientCompany,
+                  tone_applied: tone,
+                  has_financial_warning: !!financialWarning
+                }
+              }));
+            }
+
+            if (action === 'bind_modules') {
+              if (!(db as any).cross_module_bindings) (db as any).cross_module_bindings = [];
+              const linkId = Date.now();
+              const newLink = {
+                id: linkId,
+                company_id,
+                client_id,
+                source_module: fields.source_module,
+                source_id: fields.source_id,
+                target_module: fields.target_module,
+                target_id: fields.target_id,
+                link_type: fields.link_type || 'referenced_by',
+                created_at: new Date().toISOString()
+              };
+              (db as any).cross_module_bindings.unshift(newLink);
+              saveDevDb(db);
+
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({
+                success: true,
+                link_id: linkId,
+                message: `Liaison créée entre ${fields.source_module} et ${fields.target_module}`
+              }));
+            }
+          }
           next();
         } catch (e: any) {
           res.statusCode = 500;

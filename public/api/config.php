@@ -401,6 +401,59 @@ function get_db_connection() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
 
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `client_interactions` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `client_id` INT NOT NULL,
+              `direction` ENUM('inbound', 'outbound', 'internal') NOT NULL DEFAULT 'inbound',
+              `channel` ENUM('email', 'meeting', 'quote', 'invoice', 'phone', 'note') NOT NULL,
+              `subject` VARCHAR(255) NOT NULL,
+              `body_text` LONGTEXT NOT NULL,
+              `summary` TEXT DEFAULT NULL,
+              `sentiment` ENUM('positive', 'neutral', 'negative', 'critical') DEFAULT 'neutral',
+              `metadata_json` JSON DEFAULT NULL,
+              `reference_id` VARCHAR(100) DEFAULT NULL,
+              `created_by_user_id` INT DEFAULT NULL,
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              INDEX `idx_company_client` (`company_id`, `client_id`),
+              INDEX `idx_channel_date` (`channel`, `created_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `cross_module_bindings` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `client_id` INT NOT NULL,
+              `source_module` ENUM('email', 'meeting', 'quote', 'invoice', 'followup', 'summarizer', 'prospecting') NOT NULL,
+              `source_id` VARCHAR(100) NOT NULL,
+              `target_module` ENUM('email', 'meeting', 'quote', 'invoice', 'followup', 'summarizer', 'prospecting') NOT NULL,
+              `target_id` VARCHAR(100) NOT NULL,
+              `link_type` ENUM('converted_to', 'referenced_by', 'replied_to', 'settled_by', 'audit_context') NOT NULL,
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              INDEX `idx_source` (`source_module`, `source_id`),
+              INDEX `idx_target` (`target_module`, `target_id`),
+              INDEX `idx_client` (`client_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `client_context_snapshots` (
+              `client_id` INT PRIMARY KEY,
+              `company_id` INT NOT NULL,
+              `total_quotes_count` INT DEFAULT 0,
+              `pending_quotes_amount` DECIMAL(12,2) DEFAULT 0.00,
+              `unpaid_invoices_amount` DECIMAL(12,2) DEFAULT 0.00,
+              `last_interaction_date` DATETIME DEFAULT NULL,
+              `last_interaction_channel` VARCHAR(50) DEFAULT NULL,
+              `preferred_tone` VARCHAR(50) DEFAULT 'Professionnel',
+              `executive_summary_context` TEXT DEFAULT NULL,
+              `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              INDEX `idx_snap_company` (`company_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
         return $pdo;
     } catch (PDOException $e) {
         // En prod, ne pas afficher le vrai message d'erreur pour des raisons de sécurité
