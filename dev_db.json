@@ -1,0 +1,63 @@
+{
+  "companies": [
+    {
+      "id": 1,
+      "company_name": "MDIV Entreprise Démo",
+      "email": "direction@mdiv-business.fr",
+      "password_hash": "$2y$10$e.w2O9VvV107Y0GqWkM4Kek73Pz9B3QhZkJwGq7uM3mF3y7kR0N7q",
+      "status": "active",
+      "created_at": "2026-09-28T10:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "company_name": "Cabinet Dupont & Associés",
+      "email": "contact@dupont-associes.com",
+      "password_hash": "$2y$10$e.w2O9VvV107Y0GqWkM4Kek73Pz9B3QhZkJwGq7uM3mF3y7kR0N7q",
+      "status": "active",
+      "created_at": "2026-09-28T11:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "company_name": "GOOGLE FRANCE",
+      "siren": "443061841",
+      "siret": "44306184100047",
+      "trade_name": null,
+      "legal_form": "SAS",
+      "naf_code": "62.02A",
+      "activity": "Conseil en systèmes informatiques",
+      "address": "8 RUE DE LONDRES",
+      "postal_code": "75009",
+      "city": "PARIS",
+      "country": "France",
+      "creation_date": null,
+      "employee_range": null,
+      "capital": null,
+      "email": "sundar.test@google.fr",
+      "phone": null,
+      "company_status": "ACTIVE",
+      "data_source": "INSEE",
+      "official_data": null,
+      "first_name": "Sundar",
+      "last_name": "Pichai",
+      "job_title": "Dirigeant / Fondateur",
+      "password_hash": "hash_dev_StrongPassword2026!",
+      "status": "active",
+      "created_at": "2026-10-03T02:04:56.895Z"
+    }
+  ],
+  "clients": [],
+  "invoices": [],
+  "quotes": [],
+  "projects": [],
+  "followups": [],
+  "integrations": [],
+  "expenses": [],
+  "aiSettings": {
+    "primaryProvider": "groq",
+    "groqModel": "qwen/qwen3.8-27b",
+    "openaiModel": "gpt-4o-mini",
+    "mistralModel": "mistral-small-latest",
+    "temperature": 0.7,
+    "fallbackEnabled": true
+  }
+}

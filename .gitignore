@@ -10,6 +10,13 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+# Environment files
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+
 *.local
 
 # Editor directories and files
@@ -36,3 +43,5 @@ revivre/*
 *.webm
 litterature.md
 offre pelico.md
+vite.config.ts.timestamp-*
+scratch/

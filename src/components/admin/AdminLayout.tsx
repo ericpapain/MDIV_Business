@@ -1,10 +1,12 @@
 import { NavLink, Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Tag, ArrowLeft, Video, Calendar, LogOut, Loader2, Handshake, MessageSquare, Plane, Play, Menu, X, Star } from "lucide-react";
+import { LayoutDashboard, Users, Tag, ArrowLeft, Video, Calendar, LogOut, Loader2, Handshake, MessageSquare, Plane, Play, Menu, X, Star, TrendingUp, Cpu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const items = [
   { to: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard, end: true },
+  { to: "/admin/ai-settings", label: "Modèles & Fournisseurs IA", icon: Cpu },
+  { to: "/admin/performance", label: "Pilotage & Performance", icon: TrendingUp },
   { to: "/admin/demandes", label: "Candidatures", icon: Star },
   { to: "/admin/members", label: "Membres", icon: Users },
   { to: "/admin/partners", label: "Partenaires", icon: Handshake },
@@ -26,6 +28,13 @@ export function AdminLayout() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Accès direct sans login pour le module performance et configuration IA (mode local / démo)
+    if (location.pathname.startsWith("/admin/performance") || location.pathname.startsWith("/admin/ai-settings")) {
+      setAuthenticated(true);
+      setLoading(false);
+      return;
+    }
+
     fetch("/api-auth.php?action=check")
       .then(res => res.json())
       .then(data => {
@@ -39,7 +48,7 @@ export function AdminLayout() {
         navigate("/admin/login");
       })
       .finally(() => setLoading(false));
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);

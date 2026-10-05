@@ -291,20 +291,20 @@ export default function Avis() {
           </div>
 
           <div>
-            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">{isEn ? "Your review" : "Votre avis"}</div>
+            <label className="text-sm font-semibold text-slate-800 dark:text-slate-200 block mb-2">{isEn ? "Your review" : "Votre avis"}</label>
             <textarea 
               rows={4} 
-              className="w-full bg-muted/40 border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors"
+              className="w-full bg-white dark:bg-slate-900/80 border border-[#D9D9D9] dark:border-slate-700 rounded-[12px] px-4 py-3 text-sm font-normal text-slate-900 dark:text-slate-100 outline-none hover:border-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/15 transition-all shadow-sm resize-y min-h-[120px]"
               value={formData.comment}
               onChange={e => setFormData({...formData, comment: e.target.value})}
               required
             />
           </div>
 
-          <button type="submit" disabled={sent} className="btn-gold w-full py-4 mt-2 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3">
+          <button type="submit" disabled={sent} className="btn-gold w-full min-h-[48px] h-12 mt-2 text-sm font-semibold tracking-wide rounded-[12px] flex items-center justify-center gap-3 transition-all duration-200 hover:-translate-y-0.5 shadow-md">
             {sent 
               ? (isEn ? "Review published" : "Avis publié") 
-              : <><Send size={14} /> {isEn ? "Publish my review" : "Publier mon avis"}</>}
+              : <><Send size={16} /> {isEn ? "Publish my review" : "Publier mon avis"}</>}
           </button>
         </form>
 

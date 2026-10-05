@@ -37,8 +37,6 @@ export default function ServicesIACategory() {
       <section className="relative pt-32 pb-16 overflow-hidden">
         <div className="absolute inset-0 ia-gradient-hero-subtle" />
         <div className="container relative z-10 max-w-5xl mx-auto">
-          <EnterpriseAuthBar className="mb-8" />
-
           <Link to="/services-ia" className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground/80 backdrop-blur-md text-[hsl(221,83%,53%)] font-semibold rounded-full shadow-sm hover:shadow-md border border-slate-200 hover:bg-white hover:-translate-x-1 transition-all mb-8 text-sm group">
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> {isEn ? "All AI Solutions" : "Toutes les Solutions IA"}
           </Link>

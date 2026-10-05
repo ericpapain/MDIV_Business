@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&family=Ubuntu:ital,wght@0,400;0,500;0,700;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -41,7 +41,8 @@
     --input: 218 20% 85%;
     --ring: 42 55% 45%;
 
-    --radius: 0.25rem;
+    /* Radius standard SaaS 2026 (12px) */
+    --radius: 0.75rem;
 
     --gold: 42 55% 45%;
     --gold-light: 45 70% 60%;
@@ -101,7 +102,7 @@
     --input: 218 30% 18%;
     --ring: 42 55% 56%;
 
-    --radius: 0.25rem;
+    --radius: 0.75rem;
 
     /* Couleurs custom luxe */
     --gold: 42 55% 56%;
@@ -141,7 +142,9 @@
 
   body {
     @apply bg-background text-foreground font-body antialiased;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-attachment: fixed;
+    letter-spacing: -0.01em;
   }
   
   .dark body {
@@ -157,7 +160,160 @@
       radial-gradient(ellipse 60% 50% at 100% 100%, hsl(42 40% 80% / 0.3) 0%, transparent 60%);
   }
 
-  h1, h2, h3, h4, h5, h6 { @apply font-display tracking-tight; font-feature-settings: "liga", "kern"; }
+  /* Modern Title Hierarchy & Typography SaaS 2026 */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.025em;
+    font-feature-settings: "liga", "kern";
+    color: inherit;
+  }
+  h1 {
+    font-weight: 800;
+    font-size: clamp(2rem, 3.8vw, 2.75rem);
+    line-height: 1.15;
+  }
+  h2 {
+    font-weight: 750;
+    font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+    line-height: 1.25;
+  }
+  h3 {
+    font-weight: 700;
+    font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+    line-height: 1.35;
+  }
+  h4 {
+    font-weight: 650;
+    font-size: 1.15rem;
+    line-height: 1.4;
+  }
+  h5, h6 {
+    font-weight: 600;
+  }
+
+  /* Universal SaaS Form Inputs (Hauteur 48-52px, coins 12px, bordure 1px #D9D9D9, fond blanc, hover doux, focus bleu/or) */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style) {
+    min-height: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid #D9D9D9;
+    background-color: #ffffff;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    font-size: 0.9375rem;
+    color: #0f172a;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  }
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style) {
+    border-color: rgba(217, 217, 217, 0.25);
+    background-color: rgba(15, 23, 42, 0.9);
+    color: #f8fafc;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style):hover {
+    border-color: #94a3b8;
+    background-color: rgba(248, 250, 252, 0.8);
+  }
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style):hover {
+    border-color: #64748b;
+    background-color: rgba(30, 41, 59, 0.8);
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style):focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  }
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not(.no-modern-style):focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+  }
+
+  /* Universal Textareas avec étirement souris (resize: vertical) et texte ultra-lisible */
+  textarea {
+    resize: vertical !important;
+    min-height: 110px;
+    border-radius: 12px;
+    border: 1px solid #D9D9D9;
+    background-color: #ffffff;
+    padding: 0.875rem 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: #0f172a;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  }
+  .dark textarea {
+    border-color: rgba(217, 217, 217, 0.25);
+    background-color: rgba(15, 23, 42, 0.9);
+    color: #f8fafc;
+  }
+  textarea:hover {
+    border-color: #94a3b8;
+  }
+  .dark textarea:hover {
+    border-color: #64748b;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  }
+  .dark textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+  }
+
+  /* Placeholders haute lisibilité */
+  input::placeholder, textarea::placeholder {
+    color: #94a3b8;
+    opacity: 0.95;
+    font-weight: 400;
+  }
+  .dark input::placeholder, .dark textarea::placeholder {
+    color: #64748b;
+    opacity: 0.95;
+  }
+
+  /* Labels semi-gras au-dessus des champs */
+  label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+    color: #1e293b;
+    letter-spacing: -0.01em;
+  }
+  .dark label {
+    color: #e2e8f0;
+  }
+
+  /* Selects modernisés */
+  select {
+    min-height: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid #D9D9D9;
+    background-color: #ffffff;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    font-size: 0.9375rem;
+    color: #0f172a;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .dark select {
+    border-color: rgba(217, 217, 217, 0.25);
+    background-color: rgba(15, 23, 42, 0.9);
+    color: #f8fafc;
+  }
+  select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  }
 
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: hsl(var(--background)); }
@@ -593,3 +749,230 @@
 .ia-watermark-anim {
   animation: ia-watermark 4s ease-in-out infinite;
 }
+
+/* ==============================================================================
+   CHAMPS DE SAISIE UNIFIÉS (FOND BLANC CASSÉ / TEXTE GRIS FONCÉ / DESIGN PREMIUM)
+   ============================================================================== */
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]),
+textarea,
+select,
+button[role="combobox"],
+[contenteditable="true"] {
+  background-color: #F8F7F4 !important;
+  color: #222222 !important;
+  border: 1px solid #e2e8f0 !important;
+  caret-color: #3b82f6 !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"])::placeholder,
+textarea::placeholder,
+button[role="combobox"] span[data-placeholder] {
+  color: #666666 !important;
+  opacity: 1 !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]):focus,
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]):focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible,
+button[role="combobox"]:focus,
+button[role="combobox"][data-state="open"],
+[contenteditable="true"]:focus {
+  background-color: #F8F7F4 !important;
+  color: #222222 !important;
+  border-color: #3b82f6 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]):hover,
+textarea:hover,
+select:hover,
+button[role="combobox"]:hover {
+  border-color: #cbd5e1 !important;
+}
+
+/* Autofill navigateur (Chrome, Edge, Safari) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #222222 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #F8F7F4 inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+  caret-color: #3b82f6 !important;
+}
+
+/* État désactivé */
+input:disabled,
+textarea:disabled,
+select:disabled,
+button[role="combobox"]:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Sélection de texte dans les champs */
+input::selection,
+textarea::selection {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+
+/* ==============================================================================
+   FORCAGE PADDING INPUTS AVEC ICONES (EMPECHE TOUTE COLLISION DE TEXTE)
+   ============================================================================== */
+input.pl-6, .pl-6 { padding-left: 1.5rem !important; }
+input.pl-7, .pl-7 { padding-left: 1.75rem !important; }
+input.pl-8, .pl-8 { padding-left: 2rem !important; }
+input.pl-9, .pl-9 { padding-left: 2.25rem !important; }
+input.pl-10, .pl-10 { padding-left: 2.5rem !important; }
+input.pl-11, .pl-11 { padding-left: 2.75rem !important; }
+input.pl-12, .pl-12 { padding-left: 3rem !important; }
+input.pl-14, .pl-14 { padding-left: 3.5rem !important; }
+input.pl-16, .pl-16 { padding-left: 4rem !important; }
+input.pr-8, .pr-8 { padding-right: 2rem !important; }
+input.pr-9, .pr-9 { padding-right: 2.25rem !important; }
+input.pr-10, .pr-10 { padding-right: 2.5rem !important; }
+input.pr-11, .pr-11 { padding-right: 2.75rem !important; }
+input.pr-12, .pr-12 { padding-right: 3rem !important; }
+
+/* Permettre aux inputs compacts (lignes devis/factures) d'avoir une hauteur adaptée */
+input.py-1, input.py-2, input.h-auto, input.h-8, input.h-9, input.h-10 {
+  min-height: unset !important;
+  height: auto !important;
+}
+
+/* ==============================================================================
+   SECTION HAUTE LISIBILITÉ & HYPER-CONTRASTE (TOUTES APPLICATIONS & FORMULAIRES)
+   ============================================================================== */
+
+/* 1. Labels de formulaires universels - Contraste maximal #0f172a et typographie ultra-nette */
+label,
+label.text-slate-400,
+label.text-slate-500,
+label.text-slate-600,
+label.text-slate-700,
+label.text-slate-800,
+label.text-slate-900,
+label.text-gray-400,
+label.text-gray-500,
+label.text-gray-600,
+label.text-gray-700,
+label.text-gray-800,
+label.text-gray-900,
+label[class*="text-slate-"],
+label[class*="text-gray-"],
+label[class*="text-"],
+.ia-page label,
+.ia-page label[class*="text-"],
+form label,
+.ia-card label,
+.bg-white label {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+/* Uniquement pour les conteneurs explicitement sombres */
+.bg-slate-900 label,
+.bg-slate-950 label,
+.bg-black label,
+.dark-panel label,
+.bg-slate-900 .ia-card label {
+  color: #f8fafc !important;
+}
+
+.text-white,
+.bg-slate-900 .text-white,
+.bg-slate-800 .text-white,
+.bg-slate-950 .text-white,
+.bg-slate-900 p.text-white,
+.bg-slate-900 span.text-white {
+  color: #ffffff !important;
+}
+
+.bg-slate-900 .text-slate-400,
+.bg-slate-900 .text-slate-300,
+.bg-slate-900 .text-slate-200,
+.bg-slate-800 .text-slate-400,
+.bg-slate-800 .text-slate-300,
+.bg-slate-800 .text-slate-200 {
+  color: #e2e8f0 !important;
+}
+
+/* 2. Textes secondaires, captions et descriptions relevés en contraste sur fonds clairs */
+.ia-page :not(.bg-slate-900):not(.bg-slate-800):not(.bg-slate-950):not(.bg-black) > .text-slate-400,
+.ia-card :not(.bg-slate-900):not(.bg-slate-800):not(.bg-slate-950):not(.bg-black) > .text-slate-400 {
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+.ia-page .text-slate-500,
+.ia-page .text-gray-500,
+.ia-card .text-slate-500,
+.ia-card .text-gray-500 {
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+.ia-page .text-slate-600,
+.ia-page .text-gray-600,
+.ia-card .text-slate-600,
+.ia-card .text-gray-600 {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+.ia-page p[class*="text-slate-"]:not(.text-white),
+.ia-page p[class*="text-gray-"]:not(.text-white) {
+  color: #1e293b !important;
+  font-weight: 500 !important;
+}
+
+/* 3. Placeholders clairs et lisibles */
+input::placeholder,
+textarea::placeholder,
+.ia-page input::placeholder,
+.ia-page textarea::placeholder,
+button[role="combobox"] span[data-placeholder] {
+  color: #475569 !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+}
+
+/* 4. En-têtes de tableaux et grilles financières */
+.ia-page th,
+.ia-page thead tr th,
+.ia-card th,
+table th {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.03em !important;
+}
+
+/* 5. Badges et étiquettes d'état */
+.ia-badge,
+.ia-page .badge {
+  font-weight: 700 !important;
+}
+
+/* 6. Textes des boutons d'options et sélecteurs de type de facture */
+.ia-page button .text-slate-500,
+.ia-page button .text-gray-500 {
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+
+

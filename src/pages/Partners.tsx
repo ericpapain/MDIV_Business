@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Building, Search, Users, Calendar, Globe, Lightbulb, Eye, TrendingUp, Plane, Handshake, Shield, ChevronDown, Star, Send, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Building, Search, Users, Calendar, Globe, Lightbulb, Eye, TrendingUp, Plane, Handshake, Shield, ChevronDown, Star, Send, X } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import partnersHero from "@/assets/partners_hands_map_solid.png";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { SnapCarousel } from "@/components/partners/SnapCarousel";
+import { Emoji } from "@/components/partners/Emoji";
 
 /* ─── Accordion ─── */
 const AccordionSection = ({ index, eyebrow, title, isActive, onClick, children }: { index: number; eyebrow: string; title: string; isActive: boolean; onClick: () => void; children: React.ReactNode }) => (
@@ -35,61 +37,7 @@ const AccordionSection = ({ index, eyebrow, title, isActive, onClick, children }
   </section>
 );
 
-/* ─── Emoji Wrapper to fix Windows rendering & Convert Flags to Images ─── */
-const Emoji = ({ symbol }: { symbol: string }) => {
-  if (!symbol) return null;
-  const chars = Array.from(symbol);
-  if (chars.length >= 2) {
-    const cp1 = chars[0].codePointAt(0);
-    const cp2 = chars[1].codePointAt(0);
-    if (cp1 && cp2 && cp1 >= 0x1f1e6 && cp1 <= 0x1f1ff && cp2 >= 0x1f1e6 && cp2 <= 0x1f1ff) {
-      const code = String.fromCharCode(cp1 - 0x1f1e6 + 97) + String.fromCharCode(cp2 - 0x1f1e6 + 97);
-      return <img src={`https://flagcdn.com/w40/${code}.png`} alt={symbol} className="w-8 h-auto object-contain inline-block drop-shadow-sm rounded-[2px]" />;
-    }
-  }
-  return (
-    <span style={{ fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"' }}>
-      {symbol}
-    </span>
-  );
-};
 
-/* ─── Snap Carousel with Auto-Scroll & Buttons ─── */
-function SnapCarousel({ children }: { children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const iv = setInterval(() => {
-      if (!ref.current) return;
-      const { scrollLeft, scrollWidth, clientWidth } = ref.current;
-      // Scroll by 1 card approximately
-      const cardWidth = 280; 
-      if (scrollLeft + clientWidth >= scrollWidth - 10) {
-        ref.current.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        ref.current.scrollBy({ left: cardWidth, behavior: "smooth" });
-      }
-    }, 5000);
-    return () => clearInterval(iv);
-  }, []);
-
-  const next = () => ref.current?.scrollBy({ left: 280, behavior: "smooth" });
-  const prev = () => ref.current?.scrollBy({ left: -280, behavior: "smooth" });
-
-  return (
-    <div className="relative group">
-      <button onClick={prev} className="absolute -left-3 md:-left-6 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center text-foreground hover:bg-muted z-10 opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg">
-        <ChevronLeft size={18} />
-      </button>
-      <div ref={ref} className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        {children}
-      </div>
-      <button onClick={next} className="absolute -right-3 md:-right-6 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center text-foreground hover:bg-muted z-10 opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg">
-        <ChevronRight size={18} />
-      </button>
-    </div>
-  );
-}
 
 /* ─── Ambassador Card ─── */
 function AmbassadorCard({ amb, isEn, onContact, onClick }: { amb: any; isEn: boolean; onContact: (e: React.MouseEvent) => void; onClick: () => void }) {
@@ -257,13 +205,14 @@ function PartnerCard({ partner, isEn, onContact, onClick }: { partner: any; isEn
 
 /* ─── Field Component ─── */
 function Field({ label, name, type = "text", textarea, required, defaultValue, rows = 3 }: { label: string; name: string; type?: string; textarea?: boolean; required?: boolean; defaultValue?: string; rows?: number }) {
-  const cls = "w-full bg-muted/40 border border-border rounded-sm px-3 py-2 text-xs outline-none focus:border-gold/60 transition-colors placeholder:text-muted-foreground/40";
+  const inputCls = "w-full min-h-[48px] h-12 bg-white dark:bg-slate-900/80 border border-[#D9D9D9] dark:border-slate-700 rounded-[12px] px-3.5 py-2.5 text-sm font-normal text-slate-900 dark:text-slate-100 outline-none hover:border-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/15 transition-all shadow-sm placeholder:text-slate-400";
+  const textareaCls = "w-full min-h-[110px] bg-white dark:bg-slate-900/80 border border-[#D9D9D9] dark:border-slate-700 rounded-[12px] px-3.5 py-2.5 text-sm font-normal text-slate-900 dark:text-slate-100 outline-none hover:border-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/15 transition-all shadow-sm placeholder:text-slate-400 resize-y";
   return (
-    <div className="h-full flex flex-col justify-end">
-      <div className="uppercase tracking-[0.2em] text-muted-foreground flex items-start gap-1.5 text-[9px] mb-1">
-        {label} {required && <span className="text-gold">*</span>}
-      </div>
-      {textarea ? <textarea name={name} rows={rows} defaultValue={defaultValue} required={required} className={cls} /> : <input name={name} type={type} defaultValue={defaultValue} required={required} className={cls} />}
+    <div className="h-full flex flex-col justify-end space-y-1">
+      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+        {label} {required && <span className="text-blue-600 dark:text-gold">*</span>}
+      </label>
+      {textarea ? <textarea name={name} rows={rows} defaultValue={defaultValue} required={required} className={textareaCls} /> : <input name={name} type={type} defaultValue={defaultValue} required={required} className={inputCls} />}
     </div>
   );
 }

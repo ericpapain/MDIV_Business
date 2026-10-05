@@ -170,8 +170,8 @@ ${t("contact.form.msgOutro")}` : "");
               {t("contact.form.newRequest")}
             </button>
           ) : (
-            <button type="submit" className="btn-gold w-full py-4 text-xs uppercase tracking-[0.22em] rounded-sm flex items-center justify-center gap-3">
-              <Send size={14} /> {t("contact.form.submit")}
+            <button type="submit" className="btn-gold w-full min-h-[48px] h-12 text-sm font-semibold tracking-wide rounded-[12px] flex items-center justify-center gap-3 transition-all duration-200 hover:-translate-y-0.5 shadow-md">
+              <Send size={16} /> {t("contact.form.submit")}
             </button>
           )}
         </form>
@@ -181,13 +181,18 @@ ${t("contact.form.msgOutro")}` : "");
 }
 
 function Field({ label, name, type = "text", textarea, defaultValue, required, minLength }: { label: string; name?: string; type?: string; textarea?: boolean; defaultValue?: string; required?: boolean; minLength?: number }) {
-  const cls = "w-full bg-muted/40 border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors";
+  const inputCls = "w-full min-h-[48px] h-12 bg-white dark:bg-slate-900/80 border border-[#D9D9D9] dark:border-slate-700 rounded-[12px] px-4 py-3 text-sm font-normal text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none hover:border-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/15 transition-all shadow-sm";
+  const textareaCls = "w-full min-h-[140px] bg-white dark:bg-slate-900/80 border border-[#D9D9D9] dark:border-slate-700 rounded-[12px] px-4 py-3 text-sm font-normal text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none hover:border-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/15 transition-all shadow-sm resize-y";
   return (
-    <div>
-      <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
-        {label} {required && <span className="text-gold">*</span>}
-      </div>
-      {textarea ? <textarea name={name} rows={8} className={cls} defaultValue={defaultValue} required={required} minLength={minLength} /> : <input name={name} type={type} className={cls} defaultValue={defaultValue} required={required} minLength={minLength} />}
+    <div className="space-y-1.5">
+      <label className="text-sm font-semibold text-slate-800 dark:text-slate-200 block mb-1">
+        {label} {required && <span className="text-blue-600 dark:text-gold">*</span>}
+      </label>
+      {textarea ? (
+        <textarea name={name} rows={6} className={textareaCls} defaultValue={defaultValue} required={required} minLength={minLength} />
+      ) : (
+        <input name={name} type={type} className={inputCls} defaultValue={defaultValue} required={required} minLength={minLength} />
+      )}
     </div>
   );
 }
