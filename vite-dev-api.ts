@@ -984,6 +984,11 @@ Réponds UNIQUEMENT en JSON strict :
             // ===================================================================
             const sampleMeeting = meetingText.slice(0, 7000);
 
+            const heartbeat = setInterval(() => {
+              try { res.write(`: ping\n\n`); } catch { /* connexion fermée */ }
+            }, 8000);
+            res.on('close', () => clearInterval(heartbeat));
+
             (async () => {
               try {
                 // Tour 1 : Secrétaire de séance & Extraction Verbatim
@@ -1107,9 +1112,11 @@ Réponds UNIQUEMENT par ce schéma JSON :
                   report = m ? JSON.parse(m[0]) : {};
                 }
 
+                clearInterval(heartbeat);
                 sendEvent('complete', report);
                 res.end();
               } catch (err: any) {
+                clearInterval(heartbeat);
                 sendEvent('error', { message: err.message || "Erreur de traitement IA du compte-rendu." });
                 res.end();
               }

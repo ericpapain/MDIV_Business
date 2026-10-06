@@ -99,7 +99,7 @@ export function startMeetingAgentsAnalysis(
   });
 
   eventSource.addEventListener('error', (e: any) => {
-    let errorMessage = "Erreur de connexion au flux d'analyse.";
+    let errorMessage = "Connexion au flux d'analyse interrompue (serveur redémarré ou réseau instable). Veuillez cliquer sur Retour puis relancer la génération.";
     try {
        if(e.data) {
          const data = JSON.parse(e.data);
