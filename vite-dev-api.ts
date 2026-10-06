@@ -3132,6 +3132,160 @@ Réponds EXCLUSIVEMENT avec un JSON valide suivant cette structure exacte, sans 
             return res.end(JSON.stringify({ success: true, extracted: extractedData }));
           }
 
+          // ===================================================================
+          // 1.B OCR DOCUMENT VISION MULTIMODAL HAUTE FIDÉLITÉ (OpenAI GPT-4o / GPT-4o-mini Vision)
+          // Factures, Devis, Contrats, Comptes-Rendus, Spécifications Techniques
+          // ===================================================================
+          if ((pathname === '/api/ocr_document_vision.php' || pathname.endsWith('/ocr_document_vision.php')) && req.method === 'POST') {
+            const { fields } = await parseRequestBody(req);
+            const imageBase64 = fields.imageBase64 || fields.image || '';
+            const documentType = fields.document_type || 'auto';
+            const preferHighAccuracy = Boolean(fields.high_accuracy);
+
+            if (!imageBase64) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "Aucune image ou document scanné fourni pour l'analyse OCR Vision." }));
+            }
+
+            const imageUrl = imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
+
+            const specializedPrompts: Record<string, string> = {
+              invoice: `Tu es un expert-comptable et auditeur fiscal. Transcris avec une exactitude mathématique absolue TOUT le contenu de cette facture ou ce reçu.
+1. Extrais l'émetteur (Raison sociale, SIRET, N° TVA, Adresse) et le client destinataire.
+2. Reconstruis l'INTÉGRALITÉ du tableau des prestations en Markdown : Désignation, Quantité, Prix unitaire HT, Taux TVA, Total HT.
+3. Extrais les totaux exacts : Total HT, TVA ventilée, Total TTC, Acomptes et Net à payer.
+4. Extrais les dates (émission, échéance) et conditions de règlement (pénalités Article L. 441-10).
+Ne résume rien, transcris fidèlement chaque caractère.`,
+
+              quote: `Tu es un métreur et directeur commercial expert en chiffrage B2B. Retranscris fidèlement ce devis commercial.
+1. Extrais l'émetteur et le client associé.
+2. Reconstruis l'ensemble du bordereau de prix en tableau Markdown (Désignation, Unité, Quantité, PU HT, Remise, Total HT).
+3. Extrais les totaux HT, TVA et TTC exacts.
+4. Extrais la durée de validité et les modalités d'acompte. Ne saute aucune ligne de chiffrage.`,
+
+              meeting: `Tu es un secrétaire général de direction. Retranscris l'intégralité de ces notes de réunion ou compte-rendu imprimé/manuscrit.
+1. Transcris tous les participants, la date et l'ordre du jour.
+2. Structure le texte en Markdown avec des titres (#, ##), des listes à puces (-) et des tableaux.
+3. Conserve scrupuleusement tous les chiffres cités (budgets, délais, dates jalons).
+4. Extrais la liste exacte des décisions actées et le plan d'action (Qui fait Quoi pour Quand).`,
+
+              contract: `Tu es un juriste d'affaires. Retranscris fidèlement ce contrat ou cette convention.
+1. Transcris l'intégralité des clauses et articles numérotés sans omission.
+2. Identifie les parties (SIREN, représentants légaux).
+3. Conserve les clauses critiques : obligations, délais, pénalités, résiliation, juridiction.`,
+
+              technical: `Tu es un ingénieur technique industriel. Retranscris cette spécification technique ou rapport d'intervention.
+1. Transcris toutes les normes citées (NF C 15-100, DTU, ISO...).
+2. Extrais toutes les valeurs numériques avec leurs unités précises (kVA, Ampères, mm², kW, bars).
+3. Reconstruis les listes d'équipements et réserves techniques constatées.`,
+
+              auto: `Tu es un transcripteur documentaire de très haut niveau pour documents d'entreprises françaises (factures, devis, réunions, contrats).
+1. Transcris TOUT le texte visible, y compris les en-têtes, les petits caractères et les mentions légales.
+2. Reconstruis les tableaux sous forme de tableaux Markdown alignés.
+3. Conserve la mise en page logique : Titres, sous-titres, listes à puces.
+4. Ne fais AUCUN résumé, ne coupe pas le texte, ne modifie aucun chiffre ni aucune date.`
+            };
+
+            const chosenPrompt = specializedPrompts[documentType] || specializedPrompts.auto;
+            let extractedText = '';
+            let modelUsed = '';
+            let confidence = 95.0;
+
+            // Tentative 1 : OpenAI GPT-4o-mini / GPT-4o Vision
+            if (OPENAI_API_KEY && !extractedText) {
+              const modelName = preferHighAccuracy ? 'gpt-4o' : 'gpt-4o-mini';
+              try {
+                const oaiRes = await fetch(OPENAI_URL, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${OPENAI_API_KEY}`
+                  },
+                  body: JSON.stringify({
+                    model: modelName,
+                    messages: [
+                      {
+                        role: 'user',
+                        content: [
+                          { type: 'text', text: chosenPrompt },
+                          { type: 'image_url', image_url: { url: imageUrl, detail: preferHighAccuracy ? 'high' : 'auto' } }
+                        ]
+                      }
+                    ],
+                    temperature: 0.1,
+                    max_tokens: 3500
+                  })
+                });
+
+                if (oaiRes.ok) {
+                  const data: any = await oaiRes.json();
+                  extractedText = (data.choices?.[0]?.message?.content || '').trim();
+                  modelUsed = `OpenAI ${modelName} Vision`;
+                  confidence = 98.9;
+                }
+              } catch (err) {
+                console.warn('[ViteDevAPI] Erreur OpenAI Vision Document:', err);
+              }
+            }
+
+            // Tentative 2 : Groq Vision
+            if (GROQ_API_KEY && !extractedText) {
+              try {
+                const groqRes = await fetch(GROQ_URL, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${GROQ_API_KEY}`
+                  },
+                  body: JSON.stringify({
+                    model: 'llama-3.2-11b-vision-preview',
+                    messages: [
+                      {
+                        role: 'user',
+                        content: [
+                          { type: 'text', text: chosenPrompt },
+                          { type: 'image_url', image_url: { url: imageUrl } }
+                        ]
+                      }
+                    ],
+                    temperature: 0.1,
+                    max_tokens: 2500
+                  })
+                });
+
+                if (groqRes.ok) {
+                  const data: any = await groqRes.json();
+                  extractedText = (data.choices?.[0]?.message?.content || '').trim();
+                  modelUsed = 'Groq Llama-3.2-11b Vision';
+                  confidence = 94.5;
+                }
+              } catch (err) {
+                console.warn('[ViteDevAPI] Erreur Groq Vision Document:', err);
+              }
+            }
+
+            if (!extractedText) {
+              res.statusCode = 502;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "Échec de l'extraction par les modèles Vision IA." }));
+            }
+
+            const wordCount = extractedText.split(/\s+/).filter(w => w.length > 0).length;
+
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify({
+              success: true,
+              text: extractedText,
+              model_used: modelUsed,
+              document_type: documentType,
+              confidence,
+              word_count: wordCount,
+              char_count: extractedText.length,
+              created_at: new Date().toISOString()
+            }));
+          }
+
           // ==========================================
           // 2. GMAIL / OUTLOOK / CALENDAR INTEGRATIONS
           // ==========================================
