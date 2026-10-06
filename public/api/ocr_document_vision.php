@@ -37,58 +37,46 @@ $imageUrl = strpos($imageBase64, 'data:') === 0 ? $imageBase64 : 'data:image/jpe
 $openaiKey = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : (getenv('OPENAI_API_KEY') ?: ($_ENV['OPENAI_API_KEY'] ?? ($_SERVER['OPENAI_API_KEY'] ?? '')));
 $groqKey = defined('GROQ_API_KEY') ? GROQ_API_KEY : (getenv('GROQ_API_KEY') ?: ($_ENV['GROQ_API_KEY'] ?? ($_SERVER['GROQ_API_KEY'] ?? '')));
 
-// 1. Choix du Prompt Spécialisé selon le type de document
+// 1. Choix du Prompt Spécialisé selon le type de document (optimisé pour fidélité optique maximale)
 $specializedPrompts = [
-    'invoice' => "Tu es un expert-comptable et inspecteur fiscal certifié. 
-Ta mission : transcrire et extraire avec une exactitude mathématique absolue TOUT le contenu de cette facture ou ce reçu.
-RÈGLES CRITIQUES :
-1. Extrais mot pour mot les mentions de l'émetteur (Raison sociale, SIRET, N° TVA, Adresse).
-2. Extrais les coordonnées complètes du client destinataire.
-3. Reconstruis l'INTÉGRALITÉ du tableau des prestations en Markdown : Désignation, Quantité, Prix unitaire HT, Taux TVA, Total HT.
-4. Extrais les totaux chiffrés exacts : Total HT, Montant de chaque TVA, Total TTC, Acomptes éventuels et Net à payer.
-5. Extrais les dates : Date d'émission, Date d'échéance et conditions de règlement (pénalités, Article L. 441-10).
-Ne résume rien. Si un mot ou chiffre est flou, indique [illisible] sans inventer.",
+    'invoice' => "Tu es un système de reconnaissance optique et d'analyse documentaire comptable haute précision.
+Transcris fidèlement l'intégralité du texte et des données de cette facture, ticket de caisse ou reçu :
+- En-tête : Magasin ou entreprise, Téléphone, Date, Heure, N° Ticket ou Facture, Vendeur
+- Client si mentionné
+- Tableau des articles : Désignation, Référence, Prix unitaire, Quantité, Total
+- Tableau de TVA : Taux, Base HT, Montant TVA, Total TTC
+- Total général et Mode de règlement
+- Mentions de bas de page (échanges, garanties, etc.)
+Présente le résultat en Markdown clair et structuré. Ne modifie aucun chiffre ni montant.",
 
-    'quote' => "Tu es un métreur et directeur commercial expert en chiffrage de devis B2B.
-Ta mission : retranscrire fidèlement ce devis commercial ou cette proposition de prix.
-RÈGLES CRITIQUES :
-1. Extrais l'émetteur et le client associé.
-2. Reconstruis l'ensemble du bordereau de prix sous forme de tableau Markdown (Désignation détaillée, Unité, Quantité, PU HT, Remises, Total ligne).
-3. Extrais les totaux HT, TVA et TTC exacts.
-4. Extrais les conditions de réalisation, durée de validité de l'offre et modalités d'acompte.
-Ne saute aucune ligne de chiffrage.",
+    'quote' => "Tu es un système de reconnaissance optique documentaire spécialisé dans les devis commerciaux.
+Transcris l'intégralité des éléments de ce devis commercial ou chiffrage :
+- Coordonnées de l'émetteur et du client
+- Bordereau des prestations sous forme de tableau Markdown (Désignation, Quantité, Prix unitaire HT, Remise, Total)
+- Totaux HT, TVA et TTC
+- Validité du devis et conditions de règlement.",
 
-    'meeting' => "Tu es un secrétaire général de direction et rédacteur de comptes-rendus de comités exécutifs.
-Ta mission : retranscrire l'intégralité de ces notes de réunion ou de ce compte-rendu manuscrit/imprimé.
-RÈGLES CRITIQUES :
-1. Transcris tous les participants, la date et l'ordre du jour.
-2. Structure le texte avec des titres clairs (#, ##), des puces (-) et des citations.
-3. Préserve scrupuleusement tous les chiffres cités (budgets, délais, dates jalons).
-4. Extrais la liste exacte des décisions actées et le tableau des actions convenues (Qui fait Quoi pour Quand).",
+    'meeting' => "Tu es un transcripteur documentaire haute précision pour les notes et comptes-rendus de réunion.
+Transcris l'intégralité de ces notes de réunion :
+- Date, participants et ordre du jour
+- Points clés abordés et citations importantes
+- Décisions validées et plan d'action (Qui, Quoi, Échéance).",
 
-    'contract' => "Tu es un juriste d'affaires spécialisé en droit des contrats et marchés d'entreprise.
-Ta mission : retranscrire ce contrat, bon de commande ou convention juridique.
-RÈGLES CRITIQUES :
-1. Transcris l'intégralité des clauses, articles numérotés et stipulations.
-2. Identifie les parties contractantes (SIREN, représentants légaux).
-3. Préserve les clauses critiques : obligations, délais, pénalités de retard, conditions résolutoires, juridiction compétente.
-4. Mentionne la présence ou l'absence de signatures et paraphes.",
+    'contract' => "Tu es un transcripteur documentaire juridique.
+Transcris l'intégralité du contenu visible de ce contrat ou accord :
+- Parties contractantes et dates
+- Articles numérotés et clauses visibles
+- Engagements et montants financiers mentionnés.",
 
-    'technical' => "Tu es un ingénieur technique et auditeur de conformité industrielle (BTP, électricité, mécanique).
-Ta mission : retranscrire cette spécification technique, ce rapport d'intervention ou ce schéma.
-RÈGLES CRITIQUES :
-1. Transcris toutes les normes citées (NF C 15-100, DTU, ISO, etc.).
-2. Extrais toutes les valeurs numériques avec leurs unités (kVA, Ampères, mm², mètres, bars, kW).
-3. Reconstruis les listes d'équipements, nomenclatures et réserves techniques constatées.",
+    'technical' => "Tu es un transcripteur de documents techniques et spécifications d'ingénierie.
+Transcris avec exactitude l'ensemble des données visibles :
+- Normes, références techniques et spécifications
+- Mesures, unités physiques (kVA, A, mm², m, kW, bars)
+- Nomenclatures et remarques techniques.",
 
-    'auto' => "Tu es un transcripteur documentaire de très haut niveau spécialisé dans les documents d'entreprises françaises (factures, devis, notes de réunion, contrats, spécifications).
-Ta mission : retranscrire avec une fidélité photographique et absolue l'ensemble du document scanné.
-RÈGLES CRITIQUES :
-1. Transcris TOUT le texte visible, y compris les en-têtes, les petits caractères, les tableaux et les totaux.
-2. Reconstruis les tableaux sous forme de tableaux Markdown alignés.
-3. Conserve la mise en page logique : Titres, sous-titres, listes à puces.
-4. Ne fais AUCUN résumé, ne coupe pas le texte, ne change aucun chiffre ni aucune date.
-5. Si du texte est manuscrit, retranscris-le fidèlement."
+    'auto' => "Tu es un transcripteur documentaire haute fidélité.
+Transcris mot à mot et chiffre par chiffre l'ensemble du texte visible sur ce document ou ticket.
+Structure la réponse en Markdown avec titres, tableaux et listes selon le document original."
 ];
 
 $chosenPrompt = $specializedPrompts[$documentType] ?? $specializedPrompts['auto'];
@@ -97,51 +85,73 @@ $extractedText = '';
 $modelUsed = '';
 $confidence = 95.0;
 
+// Fonction de détection d'un refus de sécurité indésirable du modèle
+function isModelRefusal($text) {
+    if (empty($text) || mb_strlen(trim($text)) < 25) return true;
+    $lower = mb_strtolower($text);
+    $refusalKeywords = [
+        'je suis désolé', 'je ne peux pas transcrire', 'je ne suis pas en mesure',
+        'i cannot transcribe', "i'm sorry, but i cannot", 'i am unable to transcribe',
+        'i cannot assist with this request', 'je ne peux pas traiter cette image'
+    ];
+    foreach ($refusalKeywords as $ref) {
+        if (strpos($lower, $ref) !== false) return true;
+    }
+    return false;
+}
+
 // =========================================================================
-// ÉTAPE 1 : Modèle OpenAI GPT-4o / GPT-4o-mini Vision (Priorité Maximale)
+// ÉTAPE 1 : Modèle OpenAI Vision (Priorité gpt-4o-mini / gpt-4o avec détection de refus)
 // =========================================================================
 if (!empty($openaiKey)) {
-    // Si haute précision demandée ou document complexe (contrat/facture dense), utiliser gpt-4o, sinon gpt-4o-mini
-    $modelName = $preferHighAccuracy ? 'gpt-4o' : 'gpt-4o-mini';
+    // Essaye gpt-4o-mini (rapide, précis, ne bloque pas sur les doigts/reçus) puis gpt-4o si nécessaire
+    $modelsToTry = $preferHighAccuracy ? ['gpt-4o', 'gpt-4o-mini'] : ['gpt-4o-mini', 'gpt-4o'];
 
-    $payload = [
-        'model' => $modelName,
-        'messages' => [
-            [
-                'role' => 'user',
-                'content' => [
-                    ['type' => 'text', 'text' => $chosenPrompt],
-                    [
-                        'type' => 'image_url',
-                        'image_url' => [
-                            'url' => $imageUrl,
-                            'detail' => $preferHighAccuracy ? 'high' : 'auto'
+    foreach ($modelsToTry as $mName) {
+        $payload = [
+            'model' => $mName,
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => [
+                        ['type' => 'text', 'text' => $chosenPrompt],
+                        [
+                            'type' => 'image_url',
+                            'image_url' => [
+                                'url' => $imageUrl,
+                                'detail' => 'high'
+                            ]
                         ]
                     ]
                 ]
-            ]
-        ],
-        'temperature' => 0.1,
-        'max_tokens' => 3000
-    ];
+            ],
+            'temperature' => 0.05,
+            'max_tokens' => 3000
+        ];
 
-    $ch = curl_init('https://api.openai.com/v1/chat/completions');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $openaiKey
-    ]);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+        $ch = curl_init('https://api.openai.com/v1/chat/completions');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $openaiKey
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-    if ($httpCode === 200 && $response) {
-        $resObj = json_decode($response, true);
-        $extractedText = trim($resObj['choices'][0]['message']['content'] ?? '');
-        $modelUsed = 'OpenAI ' . $modelName . ' Vision';
-        $confidence = 98.8;
+        if ($httpCode === 200 && $response) {
+            $resObj = json_decode($response, true);
+            $candidateText = trim($resObj['choices'][0]['message']['content'] ?? '');
+            
+            if (!isModelRefusal($candidateText)) {
+                $extractedText = $candidateText;
+                $modelUsed = 'OpenAI ' . $mName . ' Vision';
+                $confidence = ($mName === 'gpt-4o') ? 99.2 : 98.6;
+                break;
+            }
+        }
     }
 }
 

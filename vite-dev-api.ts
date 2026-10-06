@@ -4442,6 +4442,107 @@ Génère UNIQUEMENT le corps du mail prêt à l'envoi.`;
               }));
             }
           }
+
+          // Route OCR Multimodal Document Vision (/api/ocr_document_vision.php)
+          if (pathname.endsWith('ocr_document_vision.php')) {
+            const imageBase64 = fields.imageBase64 || fields.image || '';
+            const documentType = fields.document_type || 'auto';
+            const preferHighAccuracy = !!fields.high_accuracy;
+
+            if (!imageBase64) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "Aucune image fournie." }));
+            }
+
+            const imageUrl = imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
+
+            const specializedPrompts: Record<string, string> = {
+              invoice: `Tu es un système de reconnaissance optique et d'analyse documentaire comptable haute précision.
+Transcris fidèlement l'intégralité du texte et des données de cette facture, ticket de caisse ou reçu :
+- En-tête : Magasin ou entreprise, Téléphone, Date, Heure, N° Ticket ou Facture, Vendeur
+- Client si mentionné
+- Tableau des articles : Désignation, Référence, Prix unitaire, Quantité, Total
+- Tableau de TVA : Taux, Base HT, Montant TVA, Total TTC
+- Total général et Mode de règlement
+- Mentions de bas de page (échanges, garanties, etc.)
+Présente le résultat en Markdown clair et structuré. Ne modifie aucun chiffre ni montant.`,
+              quote: `Tu es un système de reconnaissance optique documentaire spécialisé dans les devis commerciaux.
+Transcris l'intégralité des éléments de ce devis commercial ou chiffrage en Markdown (émetteur, client, tableau des prix, totaux HT/TVA/TTC).`,
+              meeting: `Tu es un transcripteur documentaire haute précision pour les notes et comptes-rendus de réunion.
+Transcris la date, participants, points clés, décisions et actions.`,
+              contract: `Tu es un transcripteur documentaire juridique. Transcris les parties, clauses et engagements financiers.`,
+              technical: `Tu es un transcripteur de documents techniques. Transcris les normes, unités physiques et nomenclatures.`,
+              auto: `Tu es un transcripteur documentaire haute fidélité. Transcris mot à mot et chiffre par chiffre tout le texte visible en Markdown.`
+            };
+
+            const chosenPrompt = specializedPrompts[documentType] || specializedPrompts.auto;
+
+            const isModelRefusal = (text: string) => {
+              if (!text || text.trim().length < 25) return true;
+              const lower = text.toLowerCase();
+              return lower.includes('je suis désolé') || lower.includes('je ne peux pas') || lower.includes('cannot transcribe') || lower.includes('unable to transcribe');
+            };
+
+            let extractedText = '';
+            let modelUsed = '';
+            let confidence = 95.0;
+
+            const modelsToTry = preferHighAccuracy ? ['gpt-4o', 'gpt-4o-mini'] : ['gpt-4o-mini', 'gpt-4o'];
+
+            if (OPENAI_API_KEY) {
+              for (const mName of modelsToTry) {
+                try {
+                  const openaiRes = await fetch(OPENAI_URL, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      model: mName,
+                      messages: [{
+                        role: 'user',
+                        content: [
+                          { type: 'text', text: chosenPrompt },
+                          { type: 'image_url', image_url: { url: imageUrl, detail: 'high' } }
+                        ]
+                      }],
+                      temperature: 0.05,
+                      max_tokens: 3000
+                    })
+                  });
+
+                  if (openaiRes.ok) {
+                    const oData = await openaiRes.json();
+                    const candidate = (oData.choices?.[0]?.message?.content || '').trim();
+                    if (!isModelRefusal(candidate)) {
+                      extractedText = candidate;
+                      modelUsed = `OpenAI ${mName} Vision`;
+                      confidence = mName === 'gpt-4o' ? 99.2 : 98.6;
+                      break;
+                    }
+                  }
+                } catch {}
+              }
+            }
+
+            if (!extractedText) {
+              res.statusCode = 502;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "Impossible d'extraire le texte du document avec l'IA Vision." }));
+            }
+
+            const wordCount = extractedText.split(/\s+/).filter(Boolean).length;
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify({
+              success: true,
+              text: extractedText,
+              model_used: modelUsed,
+              document_type: documentType,
+              confidence,
+              word_count: wordCount,
+              char_count: extractedText.length
+            }));
+          }
+
           next();
         } catch (e: any) {
           res.statusCode = 500;
