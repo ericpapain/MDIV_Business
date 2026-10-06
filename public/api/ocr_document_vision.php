@@ -39,15 +39,16 @@ $groqKey = defined('GROQ_API_KEY') ? GROQ_API_KEY : (getenv('GROQ_API_KEY') ?: (
 
 // 1. Choix du Prompt Spécialisé selon le type de document (optimisé pour fidélité optique maximale)
 $specializedPrompts = [
-    'invoice' => "Tu es un système de reconnaissance optique et d'analyse documentaire comptable haute précision.
-Transcris fidèlement l'intégralité du texte et des données de cette facture, ticket de caisse ou reçu :
-- En-tête : Magasin ou entreprise, Téléphone, Date, Heure, N° Ticket ou Facture, Vendeur
+    'invoice' => "Tu es un système de reconnaissance optique et d'analyse documentaire comptable de très haute précision.
+Transcris fidèlement l'intégralité du texte et des données de cette facture, ticket de caisse ou reçu.
+ATTENTION PARTICULIÈRE : Il s'agit souvent d'impressions thermiques ou matricielles. Prends extrêmement soin de bien différencier les chiffres qui se ressemblent (3 et 5, 3 et 6, 8 et 0). Par exemple, vérifie minutieusement si une année est 2026 plutôt que 2023, ou si un numéro est 45.12 ou 43.12.
+- En-tête : Magasin ou entreprise, Téléphone (vérifie bien les chiffres), Date précise (ex: 2026), Heure, N° Ticket ou Facture, Vendeur
 - Client si mentionné
 - Tableau des articles : Désignation, Référence, Prix unitaire, Quantité, Total
 - Tableau de TVA : Taux, Base HT, Montant TVA, Total TTC
 - Total général et Mode de règlement
 - Mentions de bas de page (échanges, garanties, etc.)
-Présente le résultat en Markdown clair et structuré. Ne modifie aucun chiffre ni montant.",
+Présente le résultat en Markdown clair et structuré. Ne modifie aucun chiffre ni montant sous prétexte de correction, transcris exactement ce qui est imprimé.",
 
     'quote' => "Tu es un système de reconnaissance optique documentaire spécialisé dans les devis commerciaux.
 Transcris l'intégralité des éléments de ce devis commercial ou chiffrage :
