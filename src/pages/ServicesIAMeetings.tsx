@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import ServiceHeroImage from '@/components/ia/ServiceHeroImage';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -478,9 +479,7 @@ export default function ServicesIAMeetings() {
 
           {/* Bloc Vidéo */}
           <div className="max-w-sm md:max-w-md lg:max-w-lg w-full rounded-2xl overflow-hidden shadow-xl shadow-blue-600/10 border border-slate-100 flex-shrink-0">
-            <video autoPlay loop muted playsInline className="w-full h-full object-cover">
-              <source src="https://cdn.prod.website-files.com/6373b53b7e4adf70ce44cbd5%2F6a71f36dba060eceb7c770d6_anim%20-%20gestion%20des%20achats_webm.webm" type="video/webm" />
-            </video>
+            <ServiceHeroImage />
           </div>
         </div>
 
