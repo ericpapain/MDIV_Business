@@ -46,44 +46,34 @@ const AnimatedJourneyWidget = () => {
         <h3 className="text-xl font-bold text-center mb-4 gold-text" style={{ fontFamily: "'Inter', sans-serif" }}>
           {isEn ? "Your Modular Journey" : "Votre Parcours Modulaire"}
         </h3>
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {iaJourney.map((step, idx) => {
-            const Icon = iconMap[step.icon];
-            const isActive = idx <= currentStepIndex;
             const isCurrent = idx === currentStepIndex;
             return (
-              <div 
+              <div
                 key={step.id}
                 onClick={() => setCurrentStepIndex(idx)}
-                className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer ${
-                  isCurrent 
-                    ? 'bg-slate-900 border-gold/60 text-white shadow-md' 
-                    : isActive 
-                    ? 'bg-slate-900/60 border-slate-700 text-slate-200' 
-                    : 'bg-slate-900/30 border-slate-800 text-slate-400'
+                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors bg-slate-900 ${
+                  isCurrent ? 'border-gold/70' : 'border-slate-800'
                 }`}
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                    isActive ? 'bg-gold/20 text-gold border border-gold/40' : 'bg-slate-800 text-slate-500'
-                  }`}>
-                    {Icon && <Icon size={18} />}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-bold text-xs sm:text-sm truncate">
-                      {isEn ? step.stepEn : step.step}
-                    </div>
-                    <div className="text-[10px] text-slate-400 truncate">
-                      {isEn ? step.descEn : step.desc}
-                    </div>
-                  </div>
+                <div className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-xs font-bold border ${
+                  isCurrent ? 'border-gold text-gold' : 'border-slate-600 text-slate-400'
+                }`}>
+                  {idx + 1}
                 </div>
-                <div className="shrink-0 text-right">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                    isCurrent ? 'bg-gold/20 text-gold border border-gold/40' : 'text-slate-400'
-                  }`}>
-                    {isEn ? step.roiEn : step.roi}
-                  </span>
+                <div className="flex-1 min-w-0 break-words">
+                  <div className="font-semibold text-sm text-white leading-snug">
+                    {isEn ? step.stepEn : step.step}
+                  </div>
+                  <div className="mt-1 text-xs text-slate-400 leading-relaxed">
+                    {isEn ? step.descEn : step.desc}
+                  </div>
+                  {isCurrent && (
+                    <div className="mt-2 text-xs text-gold leading-snug">
+                      {isEn ? step.roiEn : step.roi}
+                    </div>
+                  )}
                 </div>
               </div>
             );
