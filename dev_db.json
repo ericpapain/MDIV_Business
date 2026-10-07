@@ -149,5 +149,50 @@
       "link_type": "replied_to",
       "created_at": "2026-10-05T22:34:53.784Z"
     }
+  ],
+  "aiAuditLogs": [
+    {
+      "id": 1,
+      "company_id": 1,
+      "session_id": "sess_revue_direction_01",
+      "tool_type": "meeting",
+      "document_name": "Comité de Direction Q4",
+      "provider": "groq",
+      "model": "qwen/qwen3.8-27b",
+      "total_latency_ms": 3820,
+      "prompt_tokens": 1450,
+      "completion_tokens": 680,
+      "total_tokens": 2130,
+      "cost_estimate_eur": 0.000383,
+      "consensus_status": "ARBITRATED",
+      "agents_trail": {
+        "agent1_factuel": "Extraction des budgets Q4 (450k€) et des 4 livrables prioritaires.",
+        "agent2_critique": "Alerte critique sur la surcharge backend à 120% et risque de retard de 2 semaines.",
+        "agent3_arbitre": "Arbitrage COO : Recrutement de 2 prestataires externes pour sécuriser la mise en production.",
+        "agent4_dg": "Synthèse exécutif certifiée et matrice RACI actée."
+      },
+      "created_at": "2026-10-07T07:34:29.923Z"
+    },
+    {
+      "id": 2,
+      "company_id": 1,
+      "session_id": "sess_facturation_02",
+      "tool_type": "invoice",
+      "document_name": "Audit Facture FAC-2026-089",
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "total_latency_ms": 2450,
+      "prompt_tokens": 890,
+      "completion_tokens": 410,
+      "total_tokens": 1300,
+      "cost_estimate_eur": 0.00035,
+      "consensus_status": "UNANIMOUS",
+      "agents_trail": {
+        "agent1_fiscal": "Mentions obligatoires vérifiées (TVA, numéro SIREN, pénalités L. 441-10).",
+        "agent2_recouvrement": "Conformité du délai de paiement à 30 jours net validée.",
+        "agent3_dg": "Facture déclarée 100% conforme pour transmission client."
+      },
+      "created_at": "2026-10-07T06:34:29.926Z"
+    }
   ]
 }
