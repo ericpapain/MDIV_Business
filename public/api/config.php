@@ -98,7 +98,7 @@ $fallback_mistral = base64_decode('bXN0cmxfUXVsMXowRTVzRmhrcE95MDlIcDBMa2Y2c2FTc
 $fallback_db_host = base64_decode('endwdmFhaDI3OS5teXNxbC5kYg==');
 $fallback_db_name = 'zwpvaah279';
 $fallback_db_user = 'zwpvaah279';
-$fallback_db_pass = base64_decode('Q2hhbXBpb24yMDE4');
+$fallback_db_pass = base64_decode('RnJhbmNlMjAyNg=='); // France2026
 $fallback_jwt = base64_decode('U3VwZXJTZWNyZXRLZXlfTURJVl9CdXNpbmVzc18yMDI2IQ==');
 
 // 2. CONFIGURATION DE L'IA (GROQ / OPENAI / MISTRAL)
