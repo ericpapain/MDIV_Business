@@ -21,7 +21,7 @@ try {
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
 } catch (\PDOException $e) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Erreur de connexion BDD']);
+    echo json_encode(['success' => false, 'error' => 'Erreur de connexion BDD : ' . $e->getMessage()]);
     exit;
 }
 
