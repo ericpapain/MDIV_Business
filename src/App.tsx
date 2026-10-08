@@ -1,6 +1,7 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -10,6 +11,7 @@ import { SiteLayout } from "./components/site/SiteLayout";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { AuthRequiredModal } from "./components/auth/AuthRequiredModal";
 
 // ─── Critical routes (loaded eagerly) ───────────────────────────────────────
 import Home from "./pages/Home";
@@ -69,6 +71,7 @@ const AdminAmbassadors = lazy(() => import("./pages/admin/AdminAmbassadors"));
 const AdminApplications = lazy(() => import("./pages/admin/AdminApplications"));
 const AdminPerformance = lazy(() => import("./pages/admin/AdminPerformance"));
 const AdminAISettings = lazy(() => import("./pages/admin/AdminAISettings"));
+const AdminAIGovernance = lazy(() => import("./pages/AdminAIGovernance"));
 
 // ─── Loading fallback ─────────────────────────────────────────────────────────
 const PageLoader = () => (
@@ -79,6 +82,29 @@ const PageLoader = () => (
 
 const queryClient = new QueryClient();
 
+const AuthExplorerListener = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setMessage(customEvent.detail || "Action refusée : Vous devez créer un compte ou vous connecter pour sauvegarder vos données.");
+      setIsOpen(true);
+    };
+    window.addEventListener('auth-explorer-blocked', handler);
+    return () => window.removeEventListener('auth-explorer-blocked', handler);
+  }, []);
+
+  return (
+    <AuthRequiredModal 
+      isOpen={isOpen} 
+      onClose={() => setIsOpen(false)} 
+      description={message}
+    />
+  );
+};
+
 const App = () => (
   <LanguageProvider>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -88,6 +114,7 @@ const App = () => (
           <Sonner />
           <AuthProvider>
             <BrowserRouter>
+              <AuthExplorerListener />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route element={<SiteLayout />}>
@@ -157,6 +184,7 @@ const App = () => (
                     <Route path="ambassadors" element={<AdminAmbassadors />} />
                     <Route path="demandes" element={<AdminApplications />} />
                     <Route path="ai-settings" element={<AdminAISettings />} />
+                    <Route path="ai-governance" element={<AdminAIGovernance />} />
                   </Route>
 
                   <Route path="/demo" element={<DemoFlow />} />

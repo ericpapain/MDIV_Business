@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { 
   Search, ExternalLink, RefreshCw, Globe, Calendar, 
-  MapPin, Building2, Tag, Loader2, Sparkles, CheckCircle2, DollarSign
+  MapPin, Building2, Tag, Loader2, Sparkles, CheckCircle2, DollarSign, Lock
 } from 'lucide-react';
 import { searchTenders, TenderItem } from '@/lib/tenderService';
+import { hasFeatureAccess } from '@/lib/planLimitsService';
 import { toast } from 'sonner';
 
 interface TendersFinderSectionProps {
@@ -24,6 +25,8 @@ export const TendersFinderSection: React.FC<TendersFinderSectionProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [hasSearched, setHasSearched] = useState(false);
+
+  const { allowed: canDecrypt } = hasFeatureAccess('tenders_ai_decrypt');
 
   const handleSearch = async (e?: React.FormEvent, isRefresh: boolean = false) => {
     if (e) e.preventDefault();
@@ -308,17 +311,36 @@ export const TendersFinderSection: React.FC<TendersFinderSectionProps> = ({
                   )}
                 </div>
 
-                {/* Direct Link Action Button */}
-                <div className="shrink-0 flex items-center">
+                {/* Direct Link Action Button & AI Decrypt */}
+                <div className="shrink-0 flex items-center gap-2">
                   <a
                     href={tender.link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <span>Consulter l'appel d'offre</span>
+                    <span>Consulter</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
+                  
+                  <button
+                    onClick={() => {
+                      if (!canDecrypt) {
+                        toast.error("Le Plan Indépendant est requis pour le Décryptage IA.");
+                        return;
+                      }
+                      toast.info("Le Décryptage IA sera bientôt disponible.");
+                    }}
+                    className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      canDecrypt 
+                        ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow-md hover:scale-[1.02]" 
+                        : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+                    }`}
+                    title={!canDecrypt ? "Plan Indépendant requis" : "Décryptage IA"}
+                  >
+                    <span>Décryptage IA</span>
+                    {canDecrypt ? <Sparkles className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+                  </button>
                 </div>
               </div>
             ))}

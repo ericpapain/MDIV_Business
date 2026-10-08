@@ -8,7 +8,7 @@ import {
   ArrowLeft, ArrowRight, FileAudio, FileText, Upload, Plus, History, 
   Loader2, Mic, PlayCircle, Search, Calendar, FileDown, 
   AlertCircle, Camera, CheckCircle2, Sparkles, RefreshCcw,
-  Pause, Play, Square, Trash2, Radio, Volume2, Save, FolderKanban
+  Pause, Play, Square, Trash2, Radio, Volume2, Save, FolderKanban, Lock
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
@@ -31,11 +31,14 @@ import { classifyDocumentContent, ClassificationResult } from '@/lib/documentCla
 import { DocumentMismatchModal } from '@/components/common/DocumentMismatchModal';
 import { FeedbackCorrectionModal } from '@/components/common/FeedbackCorrectionModal';
 import { Brain } from 'lucide-react';
+import { hasFeatureAccess } from '@/lib/planLimitsService';
 
 export default function ServicesIAMeetings() {
   const { language } = useLanguage();
   const { company, token, isAuthenticated } = useAuth();
   const isEn = language === "en";
+
+  const { allowed: canUseMicrophone } = hasFeatureAccess('voice_assistant_meeting');
 
   // Quota Freemium 3 essais invité
   const { 
@@ -543,10 +546,21 @@ export default function ServicesIAMeetings() {
                       {dictationStatus === 'ready' && (
                         <button
                           type="button"
-                          onClick={startLiveDictation}
-                          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold text-sm shadow-lg shadow-red-500/30 transition-all hover:scale-105 active:scale-95"
+                          onClick={() => {
+                            if (!canUseMicrophone) {
+                              toast.error(isEn ? "Upgrade to Indépendant plan to use live dictation" : "Le Plan Indépendant est requis pour utiliser la dictée vocale en direct.");
+                              return;
+                            }
+                            startLiveDictation();
+                          }}
+                          className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-sm transition-all ${
+                            canUseMicrophone 
+                              ? "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/30 hover:scale-105 active:scale-95" 
+                              : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+                          }`}
+                          title={!canUseMicrophone ? "Plan Indépendant requis" : ""}
                         >
-                          <Mic className="w-5 h-5 animate-pulse" />
+                          {canUseMicrophone ? <Mic className="w-5 h-5 animate-pulse" /> : <Lock className="w-5 h-5" />}
                           Démarrer la Dictée Vocale
                         </button>
                       )}

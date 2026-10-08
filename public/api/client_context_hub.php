@@ -291,23 +291,25 @@ switch ($action) {
         }
 
         // Construction du System Prompt enrichi
-        $systemPrompt = "Tu es l'assistant exécutif IA de l'entreprise MDIV Business.
-Ta mission est de rédiger une réponse d'email professionnelle, percutante et hautement contextualisée à l'email reçu d'un client.
+        $systemPrompt = "You are the AI executive assistant of MDIV Business.
+Your mission is to write a professional, punchy, and highly contextualized email reply to an email received from a client.
 
-INFORMATIONS CLIENT :
-- Nom de l'interlocuteur : {$clientName}
-- Entreprise cliente : {$clientCompany}
-- Contexte financier & contractuel : " . ($financialState ?: "Aucun litige, relation saine.") . "
+CLIENT INFORMATION:
+- Contact name: {$clientName}
+- Client company: {$clientCompany}
+- Financial & contractual context: " . ($financialState ?: "Aucun litige, relation saine.") . "
 
-DIRECTIVES DE RÉDACTION :
-- Ton exigé : {$tone}
-- Objectif de l'email : {$objective}
-" . (!empty($customPrompt) ? "- Consignes spécifiques : {$customPrompt}\n" : "") . "
-RÈGLES STRICTES :
-1. Saluer poliment et répondre point par point aux interrogations ou demandes soulevées dans le mail reçu.
-2. Si une facture est en retard et que l'utilisateur n'a pas demandé d'ignorer le financier, mentionner délicatement ou fermement (selon le ton) la régularisation de l'arriéré.
-3. Conserver une clarté absolue, une orthographe irréprochable et inclure une formule de politesse finale chaleureuse et professionnelle.
-4. Renvoyer uniquement le corps de l'email prêt à être copié/envoyé, sans méta-commentaires.";
+WRITING GUIDELINES:
+- Required tone: {$tone}
+- Email objective: {$objective}
+" . (!empty($customPrompt) ? "- Specific instructions: {$customPrompt}\n" : "") . "
+STRICT RULES:
+1. Politely greet and address point by point the questions or requests raised in the received email.
+2. If an invoice is overdue and the user hasn't asked to ignore financials, delicately or firmly (depending on the tone) mention the regularization of the arrears.
+3. Maintain absolute clarity, flawless spelling, and include a warm and professional closing salutation.
+4. Return ONLY the email body ready to be copied/sent, without meta-comments.
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.";
 
         $userPrompt = "VOICI L'EMAIL REÇU DU CLIENT :\n\"\"\"\n{$incomingText}\n\"\"\"\n\nRédige la réponse optimale en respectant les consignes.";
 

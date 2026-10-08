@@ -40,39 +40,41 @@ $locationInstruction = !empty($location)
     ? "CRITÈRE GÉOGRAPHIQUE OBLIGATOIRE : L'utilisateur cible impérativement la zone géographique suivante : \"{$location}\" (Ville, Région ou Pays). Tous les appels d'offres proposés doivent être situés dans ou concerner cette zone \"{$location}\", et le champ \"location\" doit refléter précisément cette localisation."
     : "Localisation : France entière ou Europe selon pertinence.";
 
-$systemPrompt = "Tu es un moteur de veille institutionnelle et d'agrégation d'appels d'offres et d'offres d'emploi (BOAMP, TED Europa, Marchés Publics, Francemarches, APEC, France Travail, Welcome to the Jungle, Indeed).
-À partir de la recherche de l'utilisateur, génère EXACTEMENT {$count} opportunités réalistes, actuelles et hautement qualifiées avec leurs liens de consultation directs.
+$systemPrompt = "You are an institutional intelligence engine and aggregator of public tenders and job offers (BOAMP, TED Europa, Marchés Publics, Francemarches, APEC, France Travail, Welcome to the Jungle, Indeed).
+Based on the user's search, generate EXACTLY {$count} realistic, current, and highly qualified opportunities with their direct consultation links.
 
 {$locationInstruction}
 
-RÈGLE ABSOLUE SUR LES LIENS DIRECTS (ZÉRO ERREUR 404) :
-Interdiction formelle d'inventer des URLs profondes fictives.
-Génère exclusivement des URLs officielles actives et vérifiées :
-- Pour les Marchés Publics / Appels d'Offres :
+ABSOLUTE RULE ON DIRECT LINKS (ZERO 404 ERRORS):
+Strictly forbidden to invent fictional deep URLs.
+Generate exclusively active and verified official URLs:
+- For Public Tenders / Bids:
   * BOAMP : https://www.boamp.fr/pages/avis/?q=" . urlencode($searchCombined) . "
   * TED Europa : https://ted.europa.eu/en/search/result?q=" . urlencode($searchCombined) . "
   * Marchés Publics Info : https://www.marches-publics.info/avis/index.cfm?fa=recherche&mots=" . urlencode($searchCombined) . "
   * Francemarches : https://francemarches.com/recherche?q=" . urlencode($searchCombined) . "
-- Pour les Offres d'Emploi / Recrutement :
+- For Job Offers / Recruitment:
   * APEC : https://www.apec.fr/candidat/recherche-emploi.html/emploi?motsCles=" . urlencode($searchCombined) . "
   * France Travail : https://candidat.francetravail.fr/offres/recherche?motsCles=" . urlencode($query) . "&lieux=" . urlencode(!empty($location) ? $location : 'France') . "
   * Welcome to the Jungle : https://www.welcometothejungle.com/fr/jobs?query=" . urlencode($query) . "
   * Indeed : https://fr.indeed.com/jobs?q=" . urlencode($query) . "&l=" . urlencode(!empty($location) ? $location : 'France') . "
 
-Réponds STRICTEMENT par un tableau JSON valide au format :
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+Respond STRICTLY with a valid JSON array matching this format:
 [
   {
-    \"id\": \"AO-2026-001\",
-    \"title\": \"Titre précis de l'opportunité\",
+    \"id\": \"<GENERATED_ID_AO_XXXX>\",
+    \"title\": \"<GENERATED_PRECISE_OPPORTUNITY_TITLE_FRENCH>\",
     \"platform\": \"BOAMP\" | \"TED Europa\" | \"Marchés-Publics.info\" | \"Francemarches\" | \"APEC\" | \"France Travail\" | \"Welcome to the Jungle\" | \"Indeed\",
-    \"link\": \"URL directe vérifiée\",
-    \"deadline\": \"JJ/MM/AAAA\",
-    \"location\": \"" . (!empty($location) ? $location : "Région / Ville") . "\",
-    \"estimatedBudget\": \"Ex: 50 000 € HT (ou Rémunération selon profil)\",
-    \"buyer\": \"Nom de l'acheteur ou recruteur\",
-    \"sector\": \"Secteur d'activité\"
+    \"link\": \"<VERIFIED_DIRECT_URL>\",
+    \"deadline\": \"<GENERATED_DATE_DD_MM_YYYY>\",
+    \"location\": \"" . (!empty($location) ? $location : "<GENERATED_REGION_CITY>") . "\",
+    \"estimatedBudget\": \"<GENERATED_ESTIMATED_BUDGET_FRENCH>\",
+    \"buyer\": \"<GENERATED_BUYER_OR_RECRUITER_NAME>\",
+    \"sector\": \"<GENERATED_SECTOR_FRENCH>\"
   }
-]>";
+]";
 
 try {
     $userMsg = "Recherche d'appels d'offres / opportunités : \"{$query}\"." . (!empty($location) ? " Zone / Localisation : \"{$location}\"." : "") . " Nombre d'offres souhaité : {$count}. Offset : {$offset}.";

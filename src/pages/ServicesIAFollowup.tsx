@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { EnterpriseAuthBar } from '@/components/site/EnterpriseAuthBar';
 import { 
   ArrowLeft, ArrowRight, Search, Send, BarChart2, Bell, CheckCircle2, AlertTriangle, 
-  Clock, ShieldAlert, Sparkles, Loader2, Mail, Copy, Check, FileText, RefreshCcw
+  Clock, ShieldAlert, Sparkles, Loader2, Mail, Copy, Check, FileText, RefreshCcw, Lock
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -20,11 +20,14 @@ import {
   FollowupGenerateRequest
 } from '@/lib/followupService';
 import { fetchIntegrationsStatus } from '@/lib/emailAssistantService';
+import { hasFeatureAccess } from '@/lib/planLimitsService';
 
 export default function ServicesIAFollowup() {
   const { language } = useLanguage();
   const { company } = useAuth();
   const isEn = language === "en";
+
+  const { allowed: canUseFollowup } = hasFeatureAccess('sales_auto_reminders');
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'action'>('action');
 
@@ -370,11 +373,20 @@ export default function ServicesIAFollowup() {
                     </div>
 
                     <button 
-                      onClick={handleGenerateAI}
+                      onClick={() => {
+                        if (!canUseFollowup) {
+                          toast.error("Le Plan TPE est requis pour générer des relances intelligentes.");
+                          return;
+                        }
+                        handleGenerateAI();
+                      }}
                       disabled={isGenerating}
-                      className="w-full ia-btn-primary py-3 mb-6 text-sm font-bold flex justify-center items-center gap-2"
+                      className={`w-full py-3 mb-6 text-sm font-bold flex justify-center items-center gap-2 transition-all ${
+                        canUseFollowup ? "ia-btn-primary" : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 rounded-xl"
+                      }`}
+                      title={!canUseFollowup ? "Plan TPE requis" : ""}
                     >
-                      {isGenerating ? <><Loader2 className="animate-spin" size={16}/> Rédaction en cours...</> : <><Sparkles size={16}/> Générer le brouillon</>}
+                      {isGenerating ? <><Loader2 className="animate-spin" size={16}/> Rédaction en cours...</> : <>{canUseFollowup ? <Sparkles size={16}/> : <Lock size={16} />} Générer le brouillon</>}
                     </button>
 
                     {generatedBody && (

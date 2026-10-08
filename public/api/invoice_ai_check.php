@@ -33,11 +33,13 @@ try {
     // ===================================================================
 
     // Tour 1 : Auditeur Fiscal & Juriste B2B
-    $fiscalPrompt = "Tu es l'Auditeur Fiscal & Juriste B2B.
-Analyse les éléments de cette facture :
-- Vérifie la conformité légale (mentions obligatoires selon le Code de commerce et Code général des impôts).
-- Détecte les risques d'amende pour omission de mentions ou non-conformité Factur-X / PDP 2026.
-Sois direct et rigoureux (environ 80 à 100 mots)." . $companyPromptInjection;
+    $fiscalPrompt = "You are the Tax Auditor & B2B Legal Counsel.
+Analyze the elements of this invoice:
+- Verify legal compliance (mandatory mentions according to the Commercial Code and General Tax Code).
+- Detect fine risks for omission of mentions or non-compliance with Factur-X / PDP 2026.
+Be direct and rigorous (around 80 to 100 words).
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE ALL YOUR RESPONSES STRICTLY IN FRENCH." . $companyPromptInjection;
 
     $res1 = callGroqApi([
         ['role' => 'system', 'content' => $fiscalPrompt],
@@ -46,9 +48,11 @@ Sois direct et rigoureux (environ 80 à 100 mots)." . $companyPromptInjection;
     $fiscalAudit = trim($res1['choices'][0]['message']['content'] ?? "Audit fiscal terminé.");
 
     // Tour 2 : Contrôleur de Gestion & Risques d'Impayés
-    $financialPrompt = "Tu es le Contrôleur de Gestion & Responsable Recouvrement.
-Évalue la cohérence des montants, les risques d'impayés et les clauses protectrices (pénalités de retard, indemnité forfaitaire de 40€, délai de paiement L. 441-10 C. com.).
-Reste concis (environ 80 à 100 mots)." . $companyPromptInjection;
+    $financialPrompt = "You are the Management Controller & Collection Manager.
+Evaluate the consistency of the amounts, the risks of unpaid debts, and the protective clauses (late penalties, flat €40 indemnity, payment term L. 441-10 C. com.).
+Be concise (around 80 to 100 words).
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE ALL YOUR RESPONSES STRICTLY IN FRENCH." . $companyPromptInjection;
 
     $res2 = callGroqApi([
         ['role' => 'system', 'content' => $financialPrompt],
@@ -57,17 +61,19 @@ Reste concis (environ 80 à 100 mots)." . $companyPromptInjection;
     $financialAudit = trim($res2['choices'][0]['message']['content'] ?? "Audit financier terminé.");
 
     // Tour 3 : Expert-Comptable & Consensus Final
-    $systemPrompt = "Tu es l'Expert-Comptable en chef.
-Clôture la délibération entre l'Auditeur Fiscal et le Contrôleur de Gestion.
-Émets la certification de conformité finale sous forme JSON strict.
+    $systemPrompt = "You are the Chief Accountant.
+Close the deliberation between the Tax Auditor and the Management Controller.
+Issue the final compliance certification strictly in JSON format.
 $companyPromptInjection
 
-Tu dois répondre UNIQUEMENT par un objet JSON valide avec ce schéma :
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+You must respond ONLY with a valid JSON object matching this schema:
 {
-  \"isValid\": true,
-  \"errors\": [],
-  \"warnings\": [\"Avertissement éventuel ou point de vigilance...\"],
-  \"suggestedMentions\": [\"Mention légale recommandée (ex: Indemnité forfaitaire de 40€ pour frais de recouvrement en cas de retard)\"],
+  \"isValid\": <CALCULATED_BOOLEAN>,
+  \"errors\": [\"<ERROR_STRING_FRENCH_1>\"],
+  \"warnings\": [\"<WARNING_STRING_FRENCH_1>\"],
+  \"suggestedMentions\": [\"<SUGGESTED_MENTION_FRENCH_1>\"],
   \"deliberation_trail\": {
     \"fiscal_audit\": " . json_encode(mb_substr($fiscalAudit, 0, 200)) . ",
     \"financial_audit\": " . json_encode(mb_substr($financialAudit, 0, 200)) . "

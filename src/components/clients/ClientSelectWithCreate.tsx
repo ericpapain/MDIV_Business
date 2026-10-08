@@ -26,6 +26,7 @@ interface ClientSelectWithCreateProps {
   required?: boolean;
   placeholder?: string;
   className?: string;
+  theme?: 'light' | 'dark';
 }
 
 export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
@@ -34,7 +35,8 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
   label = "Client associé",
   required = false,
   placeholder = "Sélectionner un client...",
-  className = ""
+  className = "",
+  theme = "light"
 }) => {
   const { company, token, isAuthenticated } = useAuth();
   
@@ -172,7 +174,7 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
     <div className={`relative ${isDropdownOpen ? 'z-[9999]' : 'z-20'} ${className}`}>
       {/* Label and "+ Nouveau client" button */}
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-bold text-slate-900 flex items-center gap-2">
+        <label className={`text-sm font-bold flex items-center gap-2 ${theme === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>
           <Building2 size={16} className="text-blue-500" />
           {label} {required && <span className="text-blue-500">*</span>}
         </label>
@@ -190,15 +192,15 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
 
       {/* Selected Client Display or Select Trigger */}
       {selectedClient ? (
-        <div className="flex items-center justify-between p-3.5 bg-[#F8F7F4] border border-slate-200 rounded-xl shadow-sm group hover:border-blue-400 transition-all">
+        <div className={`flex items-center justify-between p-3.5 border rounded-xl shadow-sm group transition-all ${theme === 'dark' ? 'bg-slate-800/80 border-slate-700 hover:border-blue-500' : 'bg-[#F8F7F4] border-slate-200 hover:border-blue-400'}`}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 font-bold text-sm">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm ${theme === 'dark' ? 'bg-blue-900/50 border-blue-800 text-blue-400' : 'bg-blue-50 border-blue-200 text-blue-600'}`}>
               {selectedClient.company?.charAt(0) || selectedClient.name?.charAt(0) || 'C'}
             </div>
             <div>
-              <div className="text-sm font-semibold text-[#222222] flex items-center gap-2">
+              <div className={`text-sm font-semibold flex items-center gap-2 ${theme === 'dark' ? 'text-slate-200' : 'text-[#222222]'}`}>
                 {selectedClient.company || selectedClient.name}
-                <span className="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-1.5 py-0.5 rounded-full">
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${theme === 'dark' ? 'bg-blue-900/40 text-blue-400 border border-blue-800' : 'bg-blue-50 text-blue-600 border border-blue-200'}`}>
                   Client sélectionné
                 </span>
               </div>
@@ -224,9 +226,9 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
             type="button"
             role="combobox"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-full flex items-center justify-between px-3.5 py-3 bg-[#F8F7F4] border border-slate-200 rounded-xl text-left text-sm text-[#222222] hover:border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm cursor-pointer"
+            className={`w-full flex items-center justify-between px-3.5 py-3 border rounded-xl text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm cursor-pointer ${theme === 'dark' ? 'bg-slate-800/80 border-slate-700 hover:border-slate-600 text-slate-200 focus:border-blue-500' : 'bg-[#F8F7F4] border-slate-200 hover:border-slate-300 text-[#222222] focus:border-blue-500'}`}
           >
-            <span className={selectedClient ? "text-[#222222]" : "text-[#666666]"} data-placeholder="true">
+            <span className={selectedClient ? (theme === 'dark' ? "text-slate-200" : "text-[#222222]") : (theme === 'dark' ? "text-slate-400" : "text-[#666666]")} data-placeholder="true">
               {placeholder}
             </span>
             <ChevronDown size={16} className={`text-slate-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />

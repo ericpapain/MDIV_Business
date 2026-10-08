@@ -33,24 +33,26 @@ try {
         exit;
     }
 
-    $systemPrompt = "Tu es un expert en communication exécutive et en rédaction professionnelle B2B pour MDIV Business.
-Rédige un email exceptionnel en français selon les consignes :
-- Tâche demandée : $task
-- Ton : $tone
-- Objectif : $objective
+    $systemPrompt = "You are an expert in executive communication and B2B professional writing for MDIV Business.
+Write an exceptional email in French following these instructions:
+- Task: $task
+- Tone: $tone
+- Objective: $objective
 
-GARDE-FOU ANTI-GRIBOUILLAGE :
-Si le texte fourni est du charabia, une suite aléatoire de caractères sans signification, ou un texte totalement hors contexte sans aucun sens métier :
-Ne génère PAS de faux email absurde.
-Réponds STRICTEMENT par ce message d'erreur explicite et bienveillant :
+ANTI-GIBBERISH SAFEGUARD:
+If the provided text is gibberish, a random sequence of characters, or totally out of context without business sense:
+DO NOT generate an absurd fake email.
+Respond STRICTLY with this explicit and polite error message:
 \"⚠️ Votre saisie semble incomplète ou incompréhensible. Pour rédiger un email professionnel, veuillez indiquer au minimum l'objet, le destinataire et le message clé à transmettre (ex: relance facture d'acompte, proposition commerciale, confirmation de rendez-vous).\"
 
-Règles de style :
-1. Objet d'email clair, percutant et professionnel (ex: « Objet : ... » en première ligne).
-2. Salutation soignée et adaptée au ton ($tone).
-3. Corps fluide, sans jargon superflu, orienté valeur et courtoisie professionnelle.
-4. Formule de politesse élégante et signature professionnelle.
-5. Ne pas entourer de balises inutiles, fournir le texte prêt à l'envoi.";
+STYLE RULES:
+1. Clear, punchy, and professional subject line (e.g., \"Objet : ...\" on the first line).
+2. Polished greeting suited to the tone ($tone).
+3. Fluid body, no unnecessary jargon, value-oriented and displaying professional courtesy.
+4. Elegant closing and professional signature.
+5. Do not wrap in unnecessary tags, output the text ready to send.
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.";
 
     $userPrompt = "Voici les notes ou l'ébauche de l'email :\n\n" . $text;
 

@@ -85,27 +85,20 @@ if (!empty($groqKey)) {
 }
 
 if (!$extractedData) {
-    // Fallback intelligent réaliste
-    $merchants = [
-        ['name' => 'TOTAL ENERGIES RELAIS', 'cat' => 'carburant', 'ttc' => 84.50, 'tva' => 14.08, 'ht' => 70.42, 'rate' => 20],
-        ['name' => 'POINT.P MATERIAUX BTP', 'cat' => 'materiaux', 'ttc' => 348.90, 'tva' => 58.15, 'ht' => 290.75, 'rate' => 20],
-        ['name' => 'KILOUTOU LOCATION MATERIEL', 'cat' => 'location', 'ttc' => 216.00, 'tva' => 36.00, 'ht' => 180.00, 'rate' => 20],
-        ['name' => 'LEROY MERLIN PRO', 'cat' => 'outillage', 'ttc' => 129.90, 'tva' => 21.65, 'ht' => 108.25, 'rate' => 20]
-    ];
-    $s = $merchants[array_rand($merchants)];
-    $extractedData = [
-        'merchant' => $s['name'],
-        'date' => date('Y-m-d'),
-        'invoice_number' => 'REC-' . rand(100000, 999999),
-        'category' => $s['cat'],
-        'amount_ht' => $s['ht'],
-        'tva_rate' => $s['rate'],
-        'amount_tva' => $s['tva'],
-        'amount_ttc' => $s['ttc'],
-        'payment_method' => 'cb',
-        'raw_text' => $s['name'] . " - Total TTC: " . $s['ttc'] . " EUR. Payé par CB."
-    ];
+    http_response_code(422);
+    echo json_encode([
+        'success' => false,
+        'error' => "L'IA n'a pas pu extraire de manière fiable les données du reçu."
+    ]);
+    exit;
 }
+
+// Correction du TTC (garantir la cohérence mathématique)
+$ht = (float)($extractedData['amount_ht'] ?? 0);
+$tva = (float)($extractedData['amount_tva'] ?? 0);
+$extractedData['amount_ht'] = round($ht, 2);
+$extractedData['amount_tva'] = round($tva, 2);
+$extractedData['amount_ttc'] = round($ht + $tva, 2);
 
 echo json_encode([
     'success' => true,

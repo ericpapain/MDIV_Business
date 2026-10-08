@@ -104,12 +104,13 @@ export async function verifySupplierIban(params: {
   amountTTC?: number;
   companyId?: number;
 }): Promise<IbanSecurityCheckResult> {
-  const response = await fetch(getApiUrl('fraud_check_iban.php'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      company_id: params.companyId || 1,
-      supplier_name: params.supplierName || '',
+    if (!params.companyId) throw new Error("Authentification requise pour vérifier l'IBAN.");
+    const response = await fetch(getApiUrl('fraud_check_iban.php'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        company_id: params.companyId,
+        supplier_name: params.supplierName || '',
       supplier_siret: params.supplierSiret || '',
       iban: params.iban,
       invoice_number: params.invoiceNumber || '',
@@ -160,7 +161,8 @@ export async function fetchBankReconciliationQueue(companyId?: number): Promise<
   unreconciledCount: number;
   queue: ReconciliationItem[];
 }> {
-  const response = await fetch(getApiUrl('bank_reconciliation.php') + `?company_id=${companyId || 1}`);
+  if (!companyId) return { totalTransactions: 0, unreconciledCount: 0, queue: [] };
+  const response = await fetch(getApiUrl('bank_reconciliation.php') + `?company_id=${companyId}`);
   if (!response.ok) throw new Error("Erreur lors du chargement des relevés bancaires.");
   return response.json();
 }

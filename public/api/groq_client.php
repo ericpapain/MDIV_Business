@@ -59,6 +59,15 @@ function callLlmProvider($url, $apiKey, $data, $providerName, $stream = false) {
  * @param bool $useJsonMode Activer le mode JSON strict (response_format)
  */
 function callGroqApi($messages, $model = null, $stream = false, $useJsonMode = true) {
+    // Injection d'une directive globale pour bloquer les prix et forcer le renvoi vers le contact
+    $globalConstraint = "\n\nCRITICAL DIRECTIVE: NEVER mention exact costs, prices, or financial estimates. Instead, if pricing or costs are relevant, direct the user to 'Nous contacter pour une étude de prix' using exactly this markdown link: [Nous contacter pour une étude de prix](/contact)";
+    foreach ($messages as &$msg) {
+        if (isset($msg['role']) && $msg['role'] === 'system') {
+            $msg['content'] .= $globalConstraint;
+        }
+    }
+    unset($msg);
+
     $settings = function_exists('get_active_ai_settings') ? get_active_ai_settings() : [
         'primaryProvider' => 'openai',
         'groqModel' => 'qwen/qwen3.8-27b',

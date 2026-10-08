@@ -4,7 +4,7 @@
       "id": 1,
       "company_name": "MDIV Entreprise Démo",
       "email": "direction@mdiv-business.fr",
-      "password_hash": "$2y$10$e.w2O9VvV107Y0GqWkM4Kek73Pz9B3QhZkJwGq7uM3mF3y7kR0N7q",
+      "password_hash": "hash_dev_demo",
       "status": "active",
       "created_at": "2026-09-28T10:00:00.000Z"
     },
@@ -12,7 +12,7 @@
       "id": 2,
       "company_name": "Cabinet Dupont & Associés",
       "email": "contact@dupont-associes.com",
-      "password_hash": "$2y$10$e.w2O9VvV107Y0GqWkM4Kek73Pz9B3QhZkJwGq7uM3mF3y7kR0N7q",
+      "password_hash": "hash_dev_demo",
       "status": "active",
       "created_at": "2026-09-28T11:00:00.000Z"
     },

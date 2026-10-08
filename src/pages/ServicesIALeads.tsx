@@ -17,6 +17,7 @@ import {
 } from '@/lib/leadsGeneratorService';
 import { AuthRequiredModal } from '@/components/auth/AuthRequiredModal';
 import { useGuestQuota } from '@/hooks/useGuestQuota';
+import { hasFeatureAccess } from '@/lib/planLimitsService';
 
 function getSafeWebsiteUrl(companyName: string, website?: string, location?: string): string {
   if (website && website.startsWith('http') && !website.includes('example.com') && !website.includes('fictive') && !website.includes('placeholder')) {
@@ -113,6 +114,10 @@ export default function ServicesIALeads() {
   };
 
   const handleExport = (format: 'excel' | 'crm') => {
+    if (format === 'excel' && !hasFeatureAccess('leads_export_excel').allowed) {
+      toast.error("L'export Excel nécessite le forfait Indépendant ou supérieur.");
+      return;
+    }
     if (selectedLeads.length === 0) {
       toast.error("Veuillez sélectionner au moins un lead à exporter.");
       return;

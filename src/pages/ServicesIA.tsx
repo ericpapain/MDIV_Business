@@ -22,6 +22,8 @@ const AnimatedJourneyWidget = () => {
     return () => clearInterval(timer);
   }, []);
 
+
+
   const iconMap: Record<string, any> = { Search, Target, Zap, Users, Rocket };
   const stepColors = [
     "hsl(42, 65%, 45%)", // Or foncé

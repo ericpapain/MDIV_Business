@@ -44,46 +44,63 @@ try {
     $tone = $brandSettings['tone'] ?? 'Professionnel et inspirant';
     $keywords = $brandSettings['keywords'] ?? 'IA, performance, rentabilité, automatisation';
 
-    $channelList = implode(', ', $channels);
+    // Construire dynamiquement les règles d'or en fonction des canaux demandés
+    $rules = "";
+    $channelNames = [];
+    foreach ($channels as $c) {
+        $c = strtolower($c);
+        if (in_array($c, ['linkedin'])) {
+            $channelNames[] = "LinkedIn";
+            $rules .= "1. LINKEDIN: Punchy hook, line breaks for mobile reading, 3-5 emojis, high-value insight, CTA, 3-5 hashtags.\n";
+        } elseif (in_array($c, ['x', 'twitter'])) {
+            $channelNames[] = "X (Twitter)";
+            $rules .= "2. TWITTER / X: Ultra-punchy, direct (< 280 chars) or Thread structure. Dynamic emojis, 2-3 hashtags.\n";
+        } elseif (in_array($c, ['instagram'])) {
+            $channelNames[] = "Instagram";
+            $rules .= "3. INSTAGRAM: Visual storytelling, start with \"[📸 Visuel suggéré : ...] \", expressive emojis, 8-12 hashtags.\n";
+        } elseif (in_array($c, ['facebook'])) {
+            $channelNames[] = "Facebook";
+            $rules .= "4. FACEBOOK: Engaging community post, ask a question to generate comments, 2-3 emojis, link in first comment or end of post.\n";
+        } elseif (in_array($c, ['newsletter'])) {
+            $channelNames[] = "Newsletter";
+            $rules .= "5. NEWSLETTER: Catchy email subject as title, warm greeting, 3 bulleted key takeaways, clear CTA.\n";
+        } elseif (in_array($c, ['blog', 'article blog'])) {
+            $channelNames[] = "Article Blog";
+            $rules .= "6. BLOG: SEO H1 Title, catchy intro, 2 structured [H2] sub-sections, actionable conclusion.\n";
+        } elseif (in_array($c, ['youtube', 'script vidéo'])) {
+            $channelNames[] = "Script Vidéo (YouTube)";
+            $rules .= "7. YOUTUBE: Hook (first 5 seconds), intro, main content broken down into bullet points, outro with subscribe CTA.\n";
+        } elseif (in_array($c, ['telegram'])) {
+            $channelNames[] = "Telegram";
+            $rules .= "8. TELEGRAM: Direct, concise, action-oriented, bold text for key elements, 1-2 emojis, direct link.\n";
+        } else {
+            $channelNames[] = ucfirst($c);
+            $rules .= "- $c: Adapt tone for this specific channel.\n";
+        }
+    }
 
-    $systemPrompt = "Tu es un directeur éditorial d'élite et copywriter B2B expert en croissance multicanale pour MDIV Business.
-Tu dois décliner le contenu source pour CHACUN des canaux demandés : $channelList.
+    $channelList = implode(', ', $channelNames);
 
-RÈGLES D'OR DE DÉCLINAISON PAR CANAL :
-1. LINKEDIN :
-   - Accroche percutante (Hook) dès la 1ère ligne.
-   - Aération ligne par ligne avec sauts de lignes pour lecture mobile.
-   - 3 à 5 emojis professionnels et stratégiques (📌, 💡, 🚀, 📈, 🤝, 🎯).
-   - Enseignement métier à haute valeur ajoutée suivi d'un Call-To-Action engageant.
-   - 3 à 5 hashtags professionnels.
+    $systemPrompt = "You are an elite editorial director and B2B copywriter expert in multi-channel growth for MDIV Business.
+You must adapt the source content ONLY for the following requested channels: $channelList.
+DO NOT generate content for any other channel.
 
-2. TWITTER / X :
-   - Style ultra-percutant, direct et concis (< 280 caractères) ou structure Thread (1/2, 2/2).
-   - Emojis dynamiques (⚡, 🔥, 🧵) et 2-3 hashtags.
+GOLDEN RULES FOR REQUESTED CHANNELS:
+$rules
 
-3. INSTAGRAM :
-   - Récit visuel et humain.
-   - Suggestion du visuel en première ligne : \"[📸 Visuel suggéré : ...] \".
-   - Emojis expressifs (✨, 🎯, 📸, 🔥) et 8 à 12 hashtags en bas.
+Target audience: $targetAudience
+Brand tone: $tone
+Strategic keywords: $keywords
 
-4. NEWSLETTER :
-   - Objet d'email accrocheur en titre.
-   - Salutation chaleureuse, storytelling d'ouverture, 3 enseignements clés à puces, et CTA clair.
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
 
-5. BLOG :
-   - Titre H1 SEO, chapô accrocheur, 2 sous-parties [H2] structurées et conclusion actionnable.
-
-Audience cible : $targetAudience
-Ton de marque : $tone
-Mots-clés stratégiques : $keywords
-
-Tu dois répondre UNIQUEMENT par un tableau JSON valide de ce format :
+You must respond ONLY with a valid JSON array of this format:
 [
   {
-    \"channel\": \"NomDuCanal\",
-    \"title\": \"Titre accrocheur spécifique\",
-    \"body\": \"Texte complet et formaté avec sauts de ligne et emojis adaptés au canal...\",
-    \"hashtags\": [\"#Hashtag1\", \"#Hashtag2\"]
+    \"channel\": \"<CHANNEL_NAME>\",
+    \"title\": \"<GENERATED_CATCHY_TITLE_FRENCH>\",
+    \"body\": \"<GENERATED_FORMATTED_BODY_TEXT_FRENCH>\",
+    \"hashtags\": [\"<HASHTAG_1>\", \"<HASHTAG_2>\"]
   }
 ]";
 

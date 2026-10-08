@@ -3,6 +3,34 @@ import { MessageSquare, Send, Sparkles, Loader2, CheckCircle2, ChevronDown, Chev
 import { requestDeepDive } from '@/lib/deepDiveService';
 import { toast } from 'sonner';
 
+// Fonction de formatage ultra-rapide pour rendre le gras et les listes
+const formatAIResponse = (text: string) => {
+  if (!text) return null;
+  return text.split('\n').map((line, i) => {
+    if (!line.trim()) return <div key={i} className="h-1.5" />; // Espace vide
+    
+    const isListItem = line.trim().startsWith('- ') || line.trim().match(/^\[\d+\]/);
+    let content = line.trim();
+    if (content.startsWith('- ')) {
+      content = content.substring(2);
+    }
+
+    // Extraction du gras ( **texte** )
+    const parts = content.split(/(\*\*.*?\*\*)/g);
+
+    return (
+      <div key={i} className={`text-slate-800 ${isListItem ? 'pl-4 relative before:content-["•"] before:absolute before:-left-0.5 before:text-blue-500' : ''}`}>
+        {parts.map((part, j) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={j} className="font-bold text-slate-900">{part.slice(2, -2)}</strong>;
+          }
+          return part;
+        })}
+      </div>
+    );
+  });
+};
+
 interface DeepDiveMessage {
   id: string;
   question: string;
@@ -91,8 +119,8 @@ export const SectionDeepDive: React.FC<SectionDeepDiveProps> = ({
               </div>
 
               {/* Réponse IA formatée */}
-              <div className="pl-5 border-l-2 border-blue-400/50 space-y-1.5 text-slate-800 leading-relaxed whitespace-pre-line font-medium">
-                {msg.answer}
+              <div className="pl-5 border-l-2 border-blue-400/50 space-y-1 text-sm leading-relaxed font-medium">
+                {formatAIResponse(msg.answer)}
               </div>
 
               {/* Points clés si présents */}

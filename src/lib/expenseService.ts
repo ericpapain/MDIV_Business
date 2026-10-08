@@ -33,8 +33,14 @@ export async function fetchExpenses(
   companyId?: number,
   filters?: { projectId?: string; clientId?: number; category?: string }
 ): Promise<{ expenses: Expense[]; stats: ExpenseStats }> {
-  const cid = companyId || 1;
-  const params = new URLSearchParams({ company_id: cid.toString() });
+  if (!companyId) {
+    return {
+      expenses: [],
+      stats: { totalHT: 0, totalTVA: 0, totalTTC: 0, count: 0, byCategory: {} }
+    };
+  }
+  
+  const params = new URLSearchParams({ company_id: companyId.toString() });
   if (filters?.projectId) params.append('project_id', filters.projectId);
   if (filters?.clientId) params.append('client_id', filters.clientId.toString());
   if (filters?.category) params.append('category', filters.category);
@@ -52,7 +58,9 @@ export async function saveExpense(
   expense: Partial<Expense>,
   companyId?: number
 ): Promise<{ success: boolean; expense: Expense }> {
-  const cid = companyId || expense.company_id || 1;
+  const cid = companyId || expense.company_id;
+  if (!cid) throw new Error("Authentification requise pour enregistrer une dépense.");
+
   const res = await fetch(getApiUrl('expenses.php'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -63,8 +71,8 @@ export async function saveExpense(
 }
 
 export async function deleteExpense(id: string, companyId?: number): Promise<boolean> {
-  const cid = companyId || 1;
-  const res = await fetch(getApiUrl(`expenses.php?id=${id}&company_id=${cid}`), {
+  if (!companyId) throw new Error("Authentification requise pour supprimer une dépense.");
+  const res = await fetch(getApiUrl(`expenses.php?id=${id}&company_id=${companyId}`), {
     method: 'DELETE'
   });
   if (!res.ok) throw new Error('Erreur lors de la suppression');
@@ -73,6 +81,6 @@ export async function deleteExpense(id: string, companyId?: number): Promise<boo
 }
 
 export function getExpensesExportUrl(companyId?: number): string {
-  const cid = companyId || 1;
-  return getApiUrl(`expenses_export.php?company_id=${cid}`);
+  if (!companyId) return '#';
+  return getApiUrl(`expenses_export.php?company_id=${companyId}`);
 }

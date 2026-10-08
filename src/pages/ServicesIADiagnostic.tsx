@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnterpriseAuthBar } from "@/components/site/EnterpriseAuthBar";
-import { ArrowLeft, ArrowRight, Check, BarChart3, Brain, Loader2, Upload, FileText, Download, Square, CheckSquare, Wrench, Lightbulb, PlayCircle, Sparkles, Globe, Camera, RefreshCcw, BookmarkPlus, History } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, BarChart3, Brain, Loader2, Upload, FileText, Download, Square, CheckSquare, Wrench, Lightbulb, PlayCircle, Sparkles, Globe, Camera, RefreshCcw, BookmarkPlus, History, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { fetchNextDiagnosticStep, startAgentsDiscussion, uploadDiagnosticDocument, DiagnosticMessage, AgentMessage, DiagnosticFinalReport } from "@/lib/diagnosticService";
 import { getApiUrl } from "@/lib/apiConfig";
@@ -14,11 +14,14 @@ import { AuthRequiredModal } from "@/components/auth/AuthRequiredModal";
 import { SaveWorkModal } from "@/components/saved-work/SaveWorkModal";
 import { SavedWorkDrawer } from "@/components/saved-work/SavedWorkDrawer";
 import { SectionDeepDive } from "@/components/common/SectionDeepDive";
+import { hasFeatureAccess } from "@/lib/planLimitsService";
 
 export default function ServicesIADiagnostic() {
   const { language } = useLanguage();
   const { company } = useAuth();
   const isEn = language === "en";
+
+  const { allowed: canExportPdf } = hasFeatureAccess('export_pdf_audit');
 
   const {
     remainingTrials,
@@ -243,6 +246,10 @@ export default function ServicesIADiagnostic() {
 
   const downloadPDF = () => {
     if (!finalReport) return;
+    if (!canExportPdf) {
+      toast.error(isEn ? "Upgrade to Indépendant plan to export PDF" : "Le Plan Indépendant est requis pour télécharger le PDF.");
+      return;
+    }
     
     const form = document.createElement('form');
     form.method = 'POST';
@@ -446,8 +453,15 @@ export default function ServicesIADiagnostic() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10 pt-4 border-t border-slate-100">
-              <button onClick={downloadPDF} className="ia-btn-primary flex justify-center items-center gap-2 text-sm py-3 px-6 cursor-pointer">
-                <Download size={18} /> {isEn ? "Download Complete PDF" : "Télécharger mon rapport PDF"}
+              <button 
+                onClick={downloadPDF} 
+                className={`flex justify-center items-center gap-2 text-sm py-3 px-6 ${
+                  canExportPdf ? "ia-btn-primary cursor-pointer" : "bg-slate-100 text-slate-400 rounded-xl font-bold cursor-not-allowed border border-slate-200"
+                }`}
+                title={!canExportPdf ? "Plan Indépendant requis" : ""}
+              >
+                {canExportPdf ? <Download size={18} /> : <Lock size={18} />} 
+                {isEn ? "Download Complete PDF" : "Télécharger mon rapport PDF"}
               </button>
               <button
                 onClick={() => setIsSaveModalOpen(true)}

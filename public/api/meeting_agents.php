@@ -77,12 +77,14 @@ try {
         'message' => "Analyse du verbatim de la réunion, identification des intervenants et structuration de l'ordre du jour..."
     ]);
 
-    $agent1Prompt = "Tu es le Secrétaire Général de séance pour un comité de direction d'entreprise.
-Analyse les notes ou transcriptions orales de la réunion suivante :
-1. Identifie les participants réels ou implicites et l'objet principal
-2. Extrais les faits saillants, annonces et points abordés
-3. Liste les premières tâches et engagements évoqués
-Sois précis, direct et professionnel (environ 110 à 150 mots)." . $companyPromptInjection;
+    $agent1Prompt = "You are the General Secretary for an executive committee meeting.
+Analyze the notes or oral transcriptions of the following meeting:
+1. Identify the real or implied participants and the main subject.
+2. Extract the key highlights, announcements, and points discussed.
+3. List the first tasks and commitments mentioned.
+Be precise, direct, and professional (around 110 to 150 words).
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE ALL YOUR RESPONSES STRICTLY IN FRENCH." . $companyPromptInjection;
 
     $res1 = callGroqApi([
         ['role' => 'system', 'content' => $agent1Prompt],
@@ -103,12 +105,14 @@ Sois précis, direct et professionnel (environ 110 à 150 mots)." . $companyProm
         'message' => "Challenger les engagements pris, identifier les délais irréalistes et les risques opérationnels..."
     ]);
 
-    $agent2Prompt = "Tu es l'Auditeur des Risques Opérationnels & Échéances d'entreprise.
-Examine la proposition du Secrétaire de séance par rapport aux notes sources :
-1. Quelles actions manquent de clarté quant au porteur (assignee) ou à la date limite (deadline) ?
-2. Quels risques critiques (techniques, financiers, d'approvisionnement, RH) n'ont pas été formulés ?
-3. Quelles zones de flou méritent un arbitrage ferme ?
-Reste concis, constructif et rigoureux (environ 90 à 130 mots)." . $companyPromptInjection;
+    $agent2Prompt = "You are the Operational Risks & Deadlines Auditor of a company.
+Examine the Secretary's proposal against the source notes:
+1. Which actions lack clarity regarding the assignee or deadline?
+2. What critical risks (technical, financial, supply, HR) have not been formulated?
+3. What gray areas deserve a firm decision?
+Be concise, constructive, and rigorous (around 90 to 130 words).
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE ALL YOUR RESPONSES STRICTLY IN FRENCH." . $companyPromptInjection;
 
     $res2 = callGroqApi([
         ['role' => 'system', 'content' => $agent2Prompt],
@@ -129,12 +133,14 @@ Reste concis, constructif et rigoureux (environ 90 à 130 mots)." . $companyProm
         'message' => "Arbitrage des responsabilités, calage des livrables et validation de la gouvernance..."
     ]);
 
-    $agent3Prompt = "Tu es le Directeur des Opérations (COO).
-Prends en compte l'analyse du Secrétaire et les alertes de l'Auditeur des Risques.
-Rends tes arbitrages opérationnels :
-- Précise les responsabilités claires (qui fait quoi et pour quand)
-- Fixe les priorités d'action pour sécuriser les livrables
-Rédige ta synthèse d'arbitrage exécutif (environ 90 à 120 mots)." . $companyPromptInjection;
+    $agent3Prompt = "You are the Chief Operating Officer (COO).
+Take into account the Secretary's analysis and the Risk Auditor's warnings.
+Make your operational decisions:
+- Specify clear responsibilities (who does what and by when).
+- Set action priorities to secure deliverables.
+Write your executive arbitration summary (around 90 to 120 words).
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE ALL YOUR RESPONSES STRICTLY IN FRENCH." . $companyPromptInjection;
 
     $res3 = callGroqApi([
         ['role' => 'system', 'content' => $agent3Prompt],
@@ -155,27 +161,29 @@ Rédige ta synthèse d'arbitrage exécutif (environ 90 à 120 mots)." . $company
         'message' => "Consolidation du consensus des 3 auditeurs. Génération du compte-rendu décisionnel officiel..."
     ]);
 
-    $systemPrompt = "Tu es le Directeur Général certifiant le compte-rendu officiel de réunion.
-Tu disposes des délibérations entre le Secrétaire, l'Auditeur des Risques et le Directeur des Opérations.
-Tu dois consolider l'ensemble pour produire un compte-rendu exécutif irréprochable.
+    $systemPrompt = "You are the Chief Executive Officer (CEO) certifying the official meeting minutes.
+You have the deliberations between the Secretary, the Risk Auditor, and the COO.
+You must consolidate everything to produce flawless executive meeting minutes.
 $companyPromptInjection
 
-Réponds UNIQUEMENT par un objet JSON valide suivant rigoureusement ce schéma :
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+Respond ONLY with a valid JSON object strictly following this schema:
 {
   \"id\": \"meet_" . bin2hex(random_bytes(6)) . "\",
   \"date\": \"" . date('Y-m-d') . "\",
-  \"subject\": \"Revue Stratégique & Avancement Opérationnel\",
-  \"participants\": [\"Nom / Fonction 1\", \"Nom / Fonction 2\"],
-  \"agenda\": [\"Sujet clé 1\", \"Sujet clé 2\"],
-  \"executiveSummary\": \"Synthèse fluide, valorisante et structurée des arbitrages et priorités actées en séance...\",
+  \"subject\": \"<GENERATED_SUBJECT_STRING_FRENCH>\",
+  \"participants\": [\"<PARTICIPANT_NAME_1>\", \"<PARTICIPANT_NAME_2>\"],
+  \"agenda\": [\"<AGENDA_TOPIC_1>\", \"<AGENDA_TOPIC_2>\"],
+  \"executiveSummary\": \"<GENERATED_EXECUTIVE_SUMMARY_STRING_FRENCH>\",
   \"decisions\": [
-    {\"decision\": \"Décision formelle actée\", \"context\": \"Justification et consensus de séance\"}
+    {\"decision\": \"<DECISION_STRING_FRENCH>\", \"context\": \"<CONTEXT_STRING_FRENCH>\"}
   ],
   \"actions\": [
-    {\"task\": \"Tâche concrète à accomplir\", \"assignee\": \"Responsable identifié\", \"deadline\": \"" . date('d/m/Y', strtotime('+7 days')) . "\", \"status\": \"pending\"}
+    {\"task\": \"<TASK_STRING_FRENCH>\", \"assignee\": \"<ASSIGNEE_NAME>\", \"deadline\": \"" . date('d/m/Y', strtotime('+7 days')) . "\", \"status\": \"pending\"}
   ],
   \"risks\": [
-    {\"risk\": \"Risque opérationnel ou financier identifié\", \"impact\": \"High\"}
+    {\"risk\": \"<RISK_STRING_FRENCH>\", \"impact\": \"<IMPACT_LEVEL>\"}
   ],
   \"consensus_deliberation\": {
     \"agent1_verbatim\": " . json_encode(mb_substr($agent1Draft, 0, 300)) . ",

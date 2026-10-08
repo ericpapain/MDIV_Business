@@ -62,10 +62,24 @@ export const FintechPricingTab: React.FC = () => {
       badge: "Offre Spéciale Lancement",
       essentialPrice: 0,
       essentialAnnualPrice: 0,
-      users: "1 utilisateur",
-      invoicesLimit: "150 factures / an",
+      essentialFeatures: [
+        "Diagnostic (Audit) & ROI : 3 audits/mois (Sans export PDF)",
+        "Préparation Réunion : Sans assistance vocale",
+        "Chatbot RAG : 1 document max (2 MB)",
+      ],
+      purchasesFeatures: [
+        "Scanner OCR : 10 scans/mois",
+        "Paiements simplifiés : Non inclus",
+        "Assistant Email IA : Non inclus",
+      ],
+      salesFeatures: [
+        "Studio Multi-Canal : 3 générations/mois (LinkedIn)",
+        "Prospection Leads : 5 recherches (Sans export)",
+        "Appels d'Offres : 2 recherches (Décryptage IA bloqué)",
+        "Devis & Factures : 10 devis/an (Sans Factur-X)",
+        "Relances : Manuelles uniquement",
+      ],
       welcomeBonus: ["1 vérification IBAN offerte", "1 signature électronique offerte"],
-      notes: "*Le module Essentiel est à 0€ / mois HT pendant les douze premiers mois suivant la création (sur justificatif K-bis / avis SIRENE)."
     },
     independent: {
       name: "Indépendants & Micro-Entreprises",
@@ -75,11 +89,23 @@ export const FintechPricingTab: React.FC = () => {
       essentialAnnualPrice: 10.80,
       purchasesPrice: 15,
       salesPrice: 15,
-      users: "1 utilisateur",
-      invoicesLimit: "150 factures / an",
-      purchasesInvoices: "500 factures / an",
-      purchasesPayments: "20 paiements simplifiés / mois",
-      salesInvoices: "250 factures / an",
+      essentialFeatures: [
+        "Diagnostic (Audit) & ROI : 10 audits/mois avec Export PDF",
+        "Préparation Réunion : Assistant Vocal Activé",
+        "Chatbot RAG : 3 documents max (10 MB)",
+      ],
+      purchasesFeatures: [
+        "Scanner OCR : 500 factures/an",
+        "Paiements simplifiés : 20/mois",
+        "Assistant Email : Activé (50 mails/mois triés & traités par IA)",
+      ],
+      salesFeatures: [
+        "Studio Multi-Canal : 20 générations/mois (Tous réseaux)",
+        "Prospection Leads : 50 recherches (Export Excel débloqué)",
+        "Appels d'Offres : 20 recherches (Décryptage IA inclus)",
+        "Devis & Factures : 250 factures/an (Norme Factur-X)",
+        "Relances : Assistant IA Standard",
+      ],
       welcomeBonus: ["1 vérification IBAN offerte", "1 signature électronique offerte"],
       purchasesBonus: "10 vérifications IBAN offertes",
       salesBonus: "10 signatures électroniques offertes"
@@ -92,11 +118,23 @@ export const FintechPricingTab: React.FC = () => {
       essentialAnnualPrice: 35.10,
       purchasesPrice: 25,
       salesPrice: 25,
-      users: "5 utilisateurs inclus",
-      invoicesLimit: "200 factures / an",
-      purchasesInvoices: "1000 factures / an",
-      purchasesPayments: "50 paiements simplifiés / mois",
-      salesInvoices: "500 factures / an",
+      essentialFeatures: [
+        "Diagnostic (Audit) & ROI : 50 audits/mois (Mode Challenge IA & Benchmark)",
+        "Préparation Réunion : Illimité",
+        "Chatbot RAG : 10 documents",
+      ],
+      purchasesFeatures: [
+        "Scanner OCR : 1000 factures/an",
+        "Paiements SEPA 1-clic & Rapprochement bancaire auto",
+        "Assistant Email : IA Illimitée",
+      ],
+      salesFeatures: [
+        "Studio Multi-Canal : Illimité (Mode Challenge IA)",
+        "Prospection Leads : 500 recherches (Sauvegarde CRM)",
+        "Appels d'Offres : 200 recherches (Sauvegarde BDD)",
+        "Devis & Factures : 500 factures/an (Liens de paiement sécurisés)",
+        "Relances : Alertes & relances automatiques en 1 clic",
+      ],
       welcomeBonus: ["10 vérifications IBAN offertes", "5 signatures électroniques offertes"],
       purchasesBonus: "20 vérifications IBAN offertes",
       salesBonus: "20 signatures électroniques offertes"
@@ -109,11 +147,22 @@ export const FintechPricingTab: React.FC = () => {
       essentialAnnualPrice: 89.10,
       purchasesPrice: 30,
       salesPrice: 30,
-      users: "10 utilisateurs inclus",
-      invoicesLimit: "300 factures / an",
-      purchasesInvoices: "2500 factures / an",
-      purchasesPayments: "100 paiements simplifiés / mois",
-      salesInvoices: "1000 factures / an",
+      essentialFeatures: [
+        "Intelligence Maximale : Mode Fusion (Astra + Groq) partout",
+        "Gouvernance : Interface AdminAIGovernance",
+        "Chatbot RAG : Illimité",
+      ],
+      purchasesFeatures: [
+        "Scanner OCR : 2500 factures/an",
+        "Banque : Bouclier anti-fraude faux IBAN illimité",
+        "Assistant Email : Hub de traitement dédié",
+      ],
+      salesFeatures: [
+        "Studio Multi-Canal : Intelligence Maximale",
+        "Prospection Leads & Appels d'Offres : Requêtes illimitées",
+        "Devis & Factures : 1000 factures/an (Signature électronique illimitée)",
+        "Relances : Cycle complet automatisé",
+      ],
       welcomeBonus: ["20 vérifications IBAN offertes", "10 signatures électroniques offertes"],
       purchasesBonus: "50 vérifications IBAN offertes",
       salesBonus: "50 signatures électroniques offertes"
@@ -307,30 +356,15 @@ export const FintechPricingTab: React.FC = () => {
 
             {/* Inclusions clés */}
             <div className="space-y-2.5 text-xs text-slate-700">
-              <div className="flex items-center gap-2 font-bold text-slate-900">
-                <Users size={15} className="text-blue-500 flex-shrink-0" />
-                {current.users}
-              </div>
-              <div className="flex items-center gap-2 font-bold text-slate-900">
-                <FileText size={15} className="text-blue-500 flex-shrink-0" />
-                {current.invoicesLimit}
-              </div>
-              <div className="flex items-center gap-2 text-slate-600">
-                <Check size={14} className="text-emerald-500 flex-shrink-0" />
-                <span><strong>Achats :</strong> Centralisation factures & scan OCR mobile</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-600">
-                <Check size={14} className="text-emerald-500 flex-shrink-0" />
-                <span><strong>Ventes :</strong> Devis & factures e-invoicing conformes</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-600">
-                <Check size={14} className="text-emerald-500 flex-shrink-0" />
-                <span><strong>Banque :</strong> Connexion bancaire & export pré-comptable</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-600">
-                <Check size={14} className="text-emerald-500 flex-shrink-0" />
-                <span><strong>Classeur Intelligent :</strong> Stockage & recherche IA</span>
-              </div>
+              {current.essentialFeatures.map((feat, idx) => {
+                const [boldPart, rest] = feat.split(' : ');
+                return (
+                  <div key={idx} className="flex items-start gap-2 text-slate-600">
+                    <Check size={14} className="text-emerald-500 flex-shrink-0 mt-0.5" />
+                    <span><strong>{boldPart}</strong> {rest ? `: ${rest}` : ''}</span>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Offre de bienvenue */}
@@ -374,30 +408,15 @@ export const FintechPricingTab: React.FC = () => {
               </div>
 
               <div className="space-y-2.5 text-xs text-slate-700">
-                <div className="flex items-center gap-2 font-bold text-slate-900">
-                  <FileCheck size={15} className="text-emerald-500 flex-shrink-0" />
-                  {'purchasesInvoices' in current ? current.purchasesInvoices : '500 factures / an'}
-                </div>
-                <div className="flex items-center gap-2 font-bold text-slate-900">
-                  <CreditCard size={15} className="text-emerald-500 flex-shrink-0" />
-                  {'purchasesPayments' in current ? current.purchasesPayments : '20 paiements / mois'}
-                </div>
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Check size={14} className="text-emerald-500 flex-shrink-0" />
-                  <span>Collecte auto factures (Internet, Télécom, Énergie)</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Check size={14} className="text-emerald-500 flex-shrink-0" />
-                  <span>Adresse e-mail dédiée d'import automatique</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Check size={14} className="text-emerald-500 flex-shrink-0" />
-                  <span>Paiements SEPA 1-clic & virements XML</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Check size={14} className="text-emerald-500 flex-shrink-0" />
-                  <span>Bouclier anti-fraude aux faux IBAN</span>
-                </div>
+                {current.purchasesFeatures?.map((feat, idx) => {
+                  const [boldPart, rest] = feat.split(' : ');
+                  return (
+                    <div key={idx} className="flex items-start gap-2 text-slate-600">
+                      <Check size={14} className="text-emerald-500 flex-shrink-0 mt-0.5" />
+                      <span><strong>{boldPart}</strong> {rest ? `: ${rest}` : ''}</span>
+                    </div>
+                  );
+                })}
               </div>
 
               {'purchasesBonus' in current && (
@@ -462,30 +481,15 @@ export const FintechPricingTab: React.FC = () => {
               </div>
 
               <div className="space-y-2.5 text-xs text-slate-700">
-                <div className="flex items-center gap-2 font-bold text-slate-900">
-                  <FileText size={15} className="text-purple-500 flex-shrink-0" />
-                  {'salesInvoices' in current ? current.salesInvoices : '250 factures / an'}
-                </div>
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Check size={14} className="text-purple-500 flex-shrink-0" />
-                  <span>Liens de paiement sécurisés intégrés aux factures</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Check size={14} className="text-purple-500 flex-shrink-0" />
-                  <span>Alertes retards & relances automatiques d'impayés</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Check size={14} className="text-purple-500 flex-shrink-0" />
-                  <span>Signature électronique sécurisée sur les devis</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Check size={14} className="text-purple-500 flex-shrink-0" />
-                  <span>Catalogue de produits & conversion devis en facture</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Check size={14} className="text-purple-500 flex-shrink-0" />
-                  <span>Connecteurs facturation (Axonaut, Odoo, Quickbooks…)</span>
-                </div>
+                {current.salesFeatures?.map((feat, idx) => {
+                  const [boldPart, rest] = feat.split(' : ');
+                  return (
+                    <div key={idx} className="flex items-start gap-2 text-slate-600">
+                      <Check size={14} className="text-purple-500 flex-shrink-0 mt-0.5" />
+                      <span><strong>{boldPart}</strong> {rest ? `: ${rest}` : ''}</span>
+                    </div>
+                  );
+                })}
               </div>
 
               {'salesBonus' in current && (

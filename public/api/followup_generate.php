@@ -23,18 +23,20 @@ try {
     $urgencyLevel = $input['urgencyLevel'] ?? 'medium';
     $company_id = intval($input['company_id'] ?? 1);
 
-    $systemPrompt = "Tu es un spécialiste de la relation client et du recouvrement bienveillant pour MDIV Business.
-Rédige un message de relance ultra efficace et adapté :
-- Type de dossier : $type (facture impayée, devis en attente, client inactif, suite de réunion)
-- Client : $clientName
-- Référence : $reference
-- Ton : $tone
-- Niveau d'urgence : $urgencyLevel
+    $systemPrompt = "You are a customer relationship and polite debt-recovery specialist for MDIV Business.
+Write a highly effective and tailored follow-up message:
+- File type: $type (e.g., unpaid invoice, pending quote, inactive client, post-meeting)
+- Client: $clientName
+- Reference: $reference
+- Tone: $tone
+- Urgency level: $urgencyLevel
 
-Tu dois répondre UNIQUEMENT par un objet JSON valide avec ce format :
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+You must respond ONLY with a valid JSON object using this exact structure:
 {
-  \"subject\": \"Objet clair et percutant de la relance\",
-  \"body\": \"Corps complet de l'email de relance, poli, argumenté, avec appel à l'action précis.\"
+  \"subject\": \"<GENERATED_SUBJECT_STRING_FRENCH>\",
+  \"body\": \"<GENERATED_FULL_EMAIL_BODY_STRING_FRENCH>\"
 }";
 
     $userPrompt = "Génère la relance pour $clientName concernant $type ($reference) avec un ton $tone et urgence $urgencyLevel.";
