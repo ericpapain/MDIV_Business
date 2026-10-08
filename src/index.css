@@ -911,6 +911,12 @@ label.text-\\[\\#CDA751\\],
   color: #CDA751 !important;
 }
 
+label.gold-text,
+.dark label.gold-text,
+.bg-slate-900 label.gold-text {
+  color: transparent !important;
+}
+
 .text-white,
 .bg-slate-900 .text-white,
 .bg-slate-800 .text-white,
