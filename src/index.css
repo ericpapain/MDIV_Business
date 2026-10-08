@@ -892,6 +892,10 @@ form label,
   -webkit-font-smoothing: antialiased !important;
 }
 
+label.text-\\[\\#CDA751\\] {
+  color: #CDA751 !important;
+}
+
 /* Uniquement pour les conteneurs explicitement sombres */
 .bg-slate-900 label,
 .bg-slate-950 label,
@@ -899,6 +903,18 @@ form label,
 .dark-panel label,
 .bg-slate-900 .ia-card label {
   color: #f8fafc !important;
+}
+
+label.text-\\[\\#CDA751\\],
+.dark label.text-\\[\\#CDA751\\],
+.bg-slate-900 label.text-\\[\\#CDA751\\] {
+  color: #CDA751 !important;
+}
+
+label.gold-text,
+.dark label.gold-text,
+.bg-slate-900 label.gold-text {
+  color: transparent !important;
 }
 
 .text-white,

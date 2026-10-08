@@ -209,8 +209,8 @@ function Field({ label, name, type = "text", textarea, required, defaultValue, r
   const textareaCls = "w-full min-h-[110px] bg-white dark:bg-slate-900/80 border border-[#D9D9D9] dark:border-slate-700 rounded-[12px] px-3.5 py-2.5 text-sm font-normal text-slate-900 dark:text-slate-100 outline-none hover:border-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/15 transition-all shadow-sm placeholder:text-slate-400 resize-y";
   return (
     <div className="h-full flex flex-col justify-end space-y-1">
-      <label className="text-xs font-semibold text-[#CDA751] block mb-1">
-        {label} {required && <span className="text-[#CDA751]">*</span>}
+      <label className="text-xs font-semibold gold-text block mb-1">
+        {label} {required && <span className="gold-text">*</span>}
       </label>
       {textarea ? <textarea name={name} rows={rows} defaultValue={defaultValue} required={required} className={textareaCls} /> : <input name={name} type={type} defaultValue={defaultValue} required={required} className={inputCls} />}
     </div>
