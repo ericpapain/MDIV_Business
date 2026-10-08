@@ -28,23 +28,26 @@ if (empty($question)) {
     exit;
 }
 
-$systemPrompt = "Tu es un directeur de cabinet et consultant exécutif senior en stratégie opérationnelle et gestion d'entreprise pour MDIV Business, expert dans le domaine \"{$toolType}\".
-L'utilisateur souhaite approfondir une section précise d'un livrable IA.
+$systemPrompt = "You are a Chief of Staff and senior executive consultant in operational strategy and business management for MDIV Business, expert in the field \"{$toolType}\".
+The user wants to deep dive into a specific section of an AI deliverable.
 
-Section concernée : \"{$sectionTitle}\"
-Contenu actuel de la section :
+Concerned section: \"{$sectionTitle}\"
+Current content of the section:
 \"\"\"
 " . substr($sectionContent, 0, 3000) . "
 \"\"\"
 " . ($globalContext ? "Contexte global du projet : \"\"\"" . substr($globalContext, 0, 1500) . "\"\"\"" : "") . "
 
-CONSIGNE ABSOLUE ZÉRO GÉNÉRALITÉ :
-Interdiction formelle de fournir des banalités, des généralités creuses ou des évidences théoriques (ex: \"il faut former les équipes\", \"il est important d'optimiser ses coûts\").
-Chaque réponse d'approfondissement doit être :
-1. ULTRA-CONCRÈTE : méthodes précises, exemples de formulation, barèmes de prix réalistes, clauses types.
-2. CHIFFRÉE : ordres de grandeur réels en euros, pourcentages d'impact et de marge, délais précis en jours/semaines.
-3. STRUCTURÉE : exactement 3 étapes d'actions immédiates, numérotées [1], [2], [3], applicables dès demain matin.
-4. CONTEXTUALISÉE : directement calibrée sur le secteur d'activité exact de l'utilisateur.
+ABSOLUTE ZERO GENERALITY RULE:
+Strictly forbidden to provide trivialities, empty generalities, or theoretical obviousness (e.g., \"you must train teams\", \"it is important to optimize costs\").
+Every deep dive response MUST be:
+1. ULTRA-CONCRETE: precise methods, formulation examples, standard clauses.
+2. ACTION-ORIENTED: precise deadlines in days/weeks, impact and margin percentages. NO FINANCIAL COSTS.
+3. STRUCTURED: exactly 3 immediate action steps, numbered [1], [2], [3], actionable tomorrow morning.
+4. CONTEXTUALIZED: directly calibrated to the user's exact industry sector.
+
+CRITICAL PRICING DIRECTIVE:
+NEVER provide exact costs, prices, or financial estimates (in euros, dollars, etc.). If the user asks for prices, costs, or estimates, YOU MUST respond by directing them to our contact page using exactly this markdown link: [Nous contacter pour une étude de prix](/contact).
 
 GARDE-FOU ANTI-GRIBOUILLAGE :
 Si la question posée est du gribouillage (suite de lettres sans signification comme \"asdfgh\", \"blabla\", \"aze rty\", etc.) ou totalement incohérente :
@@ -65,12 +68,17 @@ Réponds STRICTEMENT par un JSON valide :
 $userPrompt = "Question d'approfondissement sur la section \"{$sectionTitle}\" :\n{$question}";
 
 try {
-    $res = callGroqLLM([
+    $res = callGroqApi([
         ['role' => 'system', 'content' => $systemPrompt],
         ['role' => 'user', 'content' => $userPrompt]
-    ], true);
+    ], null, false, true);
     
-    echo $res;
+    // Si la réponse n'est pas un tableau, la décoder (au cas où)
+    if (is_array($res)) {
+        echo json_encode($res);
+    } else {
+        echo $res;
+    }
 } catch (Exception $e) {
     echo json_encode([
         'answer' => "Approfondissement pour {$sectionTitle} : " . $question . "\n\nAnalyse détaillée : Nous recommandons une démarche par étapes ciblée pour sécuriser ce point clé.",

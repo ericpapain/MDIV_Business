@@ -47,10 +47,12 @@ try {
     // ===================================================================
 
     // Tour 1 : Métreur & Chiffreur Technique
-    $estimatorPrompt = "Tu es le Métreur & Chiffreur Technique en chef.
-Découpe les prestations demandées en tâches opérationnelles claires, quantifiables et réalistes.
-Pour chaque tâche, estime les fournitures, la main d'œuvre et les coûts indicatifs hors taxes.
-Sois précis et direct (environ 100 à 130 mots)." . $companyPromptInjection;
+    $estimatorPrompt = "You are the Chief Technical Estimator.
+Break down the requested services into clear, quantifiable, and realistic operational tasks.
+For each task, estimate supplies, labor, and indicative costs (excluding tax).
+Be precise and direct (around 100 to 130 words).
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE ALL YOUR RESPONSES STRICTLY IN FRENCH." . $companyPromptInjection;
 
     $res1 = callGroqApi([
         ['role' => 'system', 'content' => $estimatorPrompt],
@@ -59,12 +61,14 @@ Sois précis et direct (environ 100 à 130 mots)." . $companyPromptInjection;
     $technicalDraft = trim($res1['choices'][0]['message']['content'] ?? "Découpage technique effectué.");
 
     // Tour 2 : Auditeur des Marges & Risques
-    $marginAuditorPrompt = "Tu es l'Auditeur des Marges & Risques de Chantier / Projet.
-Examine le découpage technique ci-dessus :
-1. Quels frais annexes, consommables ou aléas n'ont pas été pris en compte ?
-2. Comment optimiser la rentabilité tout en restant compétitif sur le marché ?
-3. Quelles clauses de protection (délai de validité du devis, révision des prix) recommandes-tu ?
-Reste concis et incisif (environ 80 à 110 mots)." . $companyPromptInjection;
+    $marginAuditorPrompt = "You are the Project/Site Margins & Risks Auditor.
+Examine the technical breakdown above:
+1. What additional costs, consumables, or contingencies have not been considered?
+2. How can profitability be optimized while remaining competitive in the market?
+3. What protective clauses (quote validity period, price revision) do you recommend?
+Be concise and incisive (around 80 to 110 words).
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE ALL YOUR RESPONSES STRICTLY IN FRENCH." . $companyPromptInjection;
 
     $res2 = callGroqApi([
         ['role' => 'system', 'content' => $marginAuditorPrompt],
@@ -73,29 +77,31 @@ Reste concis et incisif (environ 80 à 110 mots)." . $companyPromptInjection;
     $marginCritique = trim($res2['choices'][0]['message']['content'] ?? "Audit des marges finalisé.");
 
     // Tour 3 : Directeur Commercial & Consensus Final (JSON)
-    $systemPrompt = "Tu es le Directeur Commercial & Négociateur pour MDIV Business.
-Tu clôtures l'arbitrage entre le Métreur Technique et l'Auditeur des Marges.
-Génère la proposition commerciale définitive avec des lignes de devis réalistes, valorisantes et conformes aux normes du secteur.
+    $systemPrompt = "You are the Commercial Director & Negotiator for MDIV Business.
+You finalize the arbitration between the Technical Estimator and the Margin Auditor.
+Generate the final commercial proposal with realistic, value-adding quote lines compliant with industry standards.
 $companyPromptInjection
 
-GARDE-FOU ANTI-GRIBOUILLAGE :
-Si la saisie client est incohérente, fantaisiste ou dénuée de sens métier, renvoie :
+ANTI-GIBBERISH SAFEGUARD:
+If the client input is incoherent, fanciful, or lacks business sense, return:
 {\"error\": \"Votre saisie semble incomplète ou incompréhensible. Pour générer un devis précis, veuillez indiquer au minimum la nature des prestations souhaitées, le contexte du client et les quantités ou budgets indicatifs.\"}
 
-Tu dois répondre UNIQUEMENT par un objet JSON valide suivant rigoureusement cette structure :
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+You must respond ONLY with a valid JSON object strictly following this structure:
 {
   \"suggestedLines\": [
     {
-      \"id\": \"1\",
-      \"description\": \"Intitulé précis et valorisant de la prestation\",
-      \"quantity\": 1,
-      \"unitPriceHT\": 1200,
-      \"vatRate\": 20,
-      \"discountPercentage\": 0
+      \"id\": \"<GENERATED_LINE_ID>\",
+      \"description\": \"<GENERATED_DESCRIPTION_STRING_FRENCH>\",
+      \"quantity\": <CALCULATED_INTEGER_QUANTITY>,
+      \"unitPriceHT\": <CALCULATED_FLOAT_PRICE>,
+      \"vatRate\": <CALCULATED_FLOAT_VAT>,
+      \"discountPercentage\": <CALCULATED_FLOAT_DISCOUNT>
     }
   ],
-  \"executiveSummary\": \"Synthèse commerciale valorisante des objectifs, garanties et bénéfices du devis...\",
-  \"paymentTerms\": \"Conditions de règlement équilibrées (ex: Acompte 30% à la signature, 40% à mi-parcours, solde à la livraison)\",
+  \"executiveSummary\": \"<GENERATED_EXECUTIVE_SUMMARY_STRING_FRENCH>\",
+  \"paymentTerms\": \"<GENERATED_PAYMENT_TERMS_STRING_FRENCH>\",
   \"consensus_deliberation\": {
     \"technical_estimation\": " . json_encode(mb_substr($technicalDraft, 0, 250)) . ",
     \"margin_audit\": " . json_encode(mb_substr($marginCritique, 0, 250)) . "

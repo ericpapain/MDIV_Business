@@ -135,6 +135,15 @@ async function callMistralProvider(messages: any[], jsonMode: boolean, model = '
  * Moteur d'appel IA multi-fournisseurs dynamique piloté par l'Admin MDIV Business
  */
 async function callLLM(messages: any[], jsonMode = false): Promise<any> {
+  const NO_PRICE_INSTRUCTION = "\n\nDIRECTIVE OBLIGATOIRE ET ABSOLUE : Tu ne dois JAMAIS générer ni mentionner de montants, de coûts, de budgets ou de prix (euros, dollars, etc.) dans ta réponse textuelle ou tes résumés. Si on te demande un prix, tu dois OBLIGATOIREMENT le remplacer par le texte exact suivant : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'. S'il y a des champs numériques stricts (unitPriceHT, total, etc.) dans le format JSON demandé, force-les à 0.";
+
+  const sysIdx = messages.findIndex((m: any) => m.role === 'system');
+  if (sysIdx !== -1) {
+    messages[sysIdx].content += NO_PRICE_INSTRUCTION;
+  } else {
+    messages.unshift({ role: 'system', content: NO_PRICE_INSTRUCTION });
+  }
+
   const db = loadDevDb();
   const settings = db.aiSettings || {
     primaryProvider: 'groq',
@@ -345,6 +354,43 @@ export function devApiPlugin(): Plugin {
           return res.end();
         }
 
+        // OBJECTIF 2 : SÉCURISATION GLOBALE (BLOCAGE DES EXPLORATEURS)
+        const protectedMutationPaths = [
+          '/api/clients.php',
+          '/api/quotes.php',
+          '/api/invoices.php',
+          '/api/projects.php',
+          '/api/expenses.php',
+          '/api/integrations.php',
+          '/api/users.php',
+          '/api/prompts.php'
+        ];
+        
+        if (protectedMutationPaths.includes(pathname)) {
+          const auth = req.headers.authorization || '';
+          if (!auth.startsWith('Bearer ')) {
+            if (req.method !== 'GET') {
+              res.statusCode = 401;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({
+                success: false,
+                error: "UNAUTHORIZED_EXPLORER",
+                message: "Action refusée : Vous devez créer un compte ou vous connecter pour sauvegarder vos données."
+              }));
+            } else {
+              res.setHeader('Content-Type', 'application/json');
+              if (pathname === '/api/expenses.php') {
+                return res.end(JSON.stringify({
+                  success: true,
+                  expenses: [],
+                  stats: { totalHT: 0, totalTVA: 0, totalTTC: 0, count: 0, byCategory: {} }
+                }));
+              }
+              return res.end(JSON.stringify([]));
+            }
+          }
+        }
+
         try {
           // ===================================================================
           // 0. CONFIGURATION & SWITCH DES MODÈLES IA (PANEL ADMIN)
@@ -494,7 +540,7 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide suivant exactement cette s
 
             try {
               const messages = [
-                { role: 'system', content: systemPrompt },
+                { role: 'system', content: systemPrompt + "\n\nDIRECTIVE OBLIGATOIRE : Tu ne dois plus parler des coûts ou des prix des choses. À la place, mets obligatoirement : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'" },
                 { role: 'user', content: `Texte du document à classifier :\n\n${sample}` }
               ];
               const aiRes = await callLLM(messages, true);
@@ -835,7 +881,7 @@ Tu dois répondre UNIQUEMENT par un objet JSON valide respectant rigoureusement 
                 const userPrompt = `Document source :\n${docSample}\n\nDélibération des experts :\n- Agent 1 (Analyste) : ${agent1Draft}\n- Agent 2 (Auditeur) : ${agent2Critique}\n- Agent 3 (Stratège) : ${agent3Arbitration}\n\nGénère le rapport JSON final certifié.`;
 
                 const groqRes = await callLLM([
-                  { role: 'system', content: systemPrompt },
+                  { role: 'system', content: systemPrompt + "\n\nDIRECTIVE OBLIGATOIRE : Tu ne dois plus parler des coûts ou des prix des choses. À la place, mets obligatoirement : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'" },
                   { role: 'user', content: userPrompt }
                 ], true);
 
@@ -1099,7 +1145,7 @@ Réponds UNIQUEMENT par ce schéma JSON :
                 const userPrompt = `Notes de réunion source :\n${sampleMeeting}\n\nDélibération du comité :\n- Secrétaire : ${agent1Draft}\n- Auditeur des Risques : ${agent2Critique}\n- Directeur des Opérations : ${agent3Arbitration}\n\nGénère le compte-rendu JSON certifié.`;
 
                 const groqRes = await callLLM([
-                  { role: 'system', content: systemPrompt },
+                  { role: 'system', content: systemPrompt + "\n\nDIRECTIVE OBLIGATOIRE : Tu ne dois plus parler des coûts ou des prix des choses. À la place, mets obligatoirement : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'" },
                   { role: 'user', content: userPrompt }
                 ], true);
 
@@ -1557,7 +1603,11 @@ Réponds en JSON strict :
             }
 
             // Vérification du mot de passe
-            if (foundCompany.password_hash && foundCompany.password_hash !== "hash_dev_" + password && password !== "demo" && password !== "password" && password !== "Champion2018" && password !== "StrongPassword2026!") {
+            // Les mots de passe "backdoor" ont été supprimés pour des raisons de sécurité.
+            // On vérifie uniquement le hash de la base de données.
+            const isDevHashMatch = foundCompany.password_hash === "hash_dev_" + password;
+            // Pour une implémentation complète, on vérifierait aussi avec bcrypt, mais pour le dev_db.json on utilise ce format.
+            if (foundCompany.password_hash && !isDevHashMatch) {
               res.statusCode = 401;
               res.setHeader('Content-Type', 'application/json');
               return res.end(JSON.stringify({ error: "Mot de passe incorrect." }));
@@ -2023,7 +2073,7 @@ Mots-clés et technologies : ${keywords}`;
 
             try {
               const aiRes = await callLLM([
-                { role: 'system', content: systemPrompt },
+                { role: 'system', content: systemPrompt + "\n\nDIRECTIVE OBLIGATOIRE : Tu ne dois plus parler des coûts ou des prix des choses. À la place, mets obligatoirement : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'" },
                 { role: 'user', content: userPrompt }
               ], false);
 
@@ -2218,7 +2268,7 @@ Réponds STRICTEMENT par un tableau JSON valide au format :
 ]`;
 
             const groqRes = await callLLM([
-              { role: 'system', content: systemPrompt },
+              { role: 'system', content: systemPrompt + "\n\nDIRECTIVE OBLIGATOIRE : Tu ne dois plus parler des coûts ou des prix des choses. À la place, mets obligatoirement : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'" },
               { role: 'user', content: `Contenu source à décliner :\n\n${sourceContent}` }
             ], true);
 
@@ -2461,7 +2511,7 @@ Réponds STRICTEMENT par un objet JSON valide avec cette structure :
             const userPrompt = `Client / Prospect : ${clientContext || 'Client'}\nProjet et besoins exprimés : ${projectDescription}`;
 
             const groqRes = await callLLM([
-              { role: 'system', content: systemPrompt },
+              { role: 'system', content: systemPrompt + "\n\nDIRECTIVE OBLIGATOIRE : Tu ne dois plus parler des coûts ou des prix des choses. À la place, mets obligatoirement : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'" },
               { role: 'user', content: userPrompt }
             ], true);
 
@@ -2536,7 +2586,7 @@ Réponds STRICTEMENT par un JSON valide :
 }`;
 
             const groqRes = await callLLM([
-              { role: 'system', content: systemPrompt },
+              { role: 'system', content: systemPrompt + "\n\nDIRECTIVE OBLIGATOIRE : Tu ne dois plus parler des coûts ou des prix des choses. À la place, mets obligatoirement : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'" },
               { role: 'user', content: `Question d'approfondissement sur la section "${sectionTitle}" :\n${question}` }
             ], true);
 
@@ -2616,7 +2666,7 @@ Réponds STRICTEMENT par un tableau JSON valide au format :
               const userPrompt = `Recherche d'appels d'offres / opportunités : "${query}".${location ? ` Zone géographique / Localisation ciblée : "${location}".` : ''} Nombre d'offres souhaité : ${count}. Offset de pagination : ${offset}.`;
 
               const groqRes = await callLLM([
-                { role: 'system', content: systemPrompt },
+                { role: 'system', content: systemPrompt + "\n\nDIRECTIVE OBLIGATOIRE : Tu ne dois plus parler des coûts ou des prix des choses. À la place, mets obligatoirement : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'" },
                 { role: 'user', content: userPrompt }
               ], false);
 
@@ -3004,6 +3054,61 @@ Réponds STRICTEMENT par un tableau JSON valide au format :
 
 
           // ==========================================
+          // 0B. EXTRACTION LIGNES FACTURE DEPUIS OCR (/api/invoice_extract_lines.php)
+          // ==========================================
+          if (pathname === '/api/invoice_extract_lines.php' && req.method === 'POST') {
+            const { fields } = await parseRequestBody(req);
+            const ocrText = fields.ocr_text || '';
+
+            if (!ocrText) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "Aucun texte OCR fourni." }));
+            }
+
+            const systemPrompt = `Tu es un expert comptable et un spécialiste de la facturation.
+Ta mission est d'extraire les articles, produits ou services d'un texte généré par OCR (reconnaissance optique) d'un ticket de caisse ou d'une facture.
+
+RÈGLE D'OR :
+Tu ne dois inventer aucune prestation (NE GÉNÈRE PAS de tâches génériques comme 'Extraction de facture', 'Calcul de la TVA' ou 'Audit' !). Tu dois te baser UNIQUEMENT sur les articles listés dans le texte fourni.
+Pour chaque article, extrait la désignation, la quantité, le prix unitaire HT et le taux de TVA estimé. Si tu ne trouves pas le prix HT mais seulement le TTC, essaie de déduire le HT selon la TVA ou fournis le TTC.
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+Réponds STRICTEMENT par un objet JSON valide avec la structure suivante, sans aucun autre texte (pas de markdown) :
+{
+  "suggestedLines": [
+    { "id": "1", "description": "Nom exact de l'article sur le ticket", "quantity": 1, "unitPriceHT": 15.00, "vatRate": 20, "discountPercentage": 0 }
+  ]
+}`;
+
+            const userPrompt = `TEXTE OCR DE LA FACTURE / TICKET DE CAISSE :\n"""\n${ocrText}\n"""\nExtrais les articles en JSON.`;
+
+            try {
+              const aiRes = await callLLM([
+                { role: 'system', content: systemPrompt + "\n\nDIRECTIVE OBLIGATOIRE : Tu ne dois plus parler des coûts ou des prix des choses. À la place, mets obligatoirement : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'" },
+                { role: 'user', content: userPrompt }
+              ], true);
+
+              const content = aiRes.choices?.[0]?.message?.content || '{}';
+              let parsed: any = {};
+              try {
+                parsed = JSON.parse(content);
+              } catch {
+                const match = content.match(/\{[\s\S]*\}/);
+                if (match) parsed = JSON.parse(match[0]);
+              }
+
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify(parsed));
+            } catch (err: any) {
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: err.message || "Erreur OCR" }));
+            }
+          }
+
+          // ==========================================
           // 1. OCR VISION MULTIMODAL (/api/ocr_vision_parse.php)
           // ==========================================
           if (pathname === '/api/ocr_vision_parse.php' && req.method === 'POST') {
@@ -3056,7 +3161,7 @@ Réponds EXCLUSIVEMENT avec un JSON valide suivant cette structure exacte, sans 
                       {
                         role: 'user',
                         content: [
-                          { type: 'text', text: visionSystemPrompt },
+                          { type: 'text', text: visionSystemPrompt + "\n\nDIRECTIVE OBLIGATOIRE : Tu ne dois plus parler des coûts ou des prix des choses. À la place, mets obligatoirement : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'" },
                           { type: 'image_url', image_url: { url: imageUrl } }
                         ]
                       }
@@ -3094,7 +3199,7 @@ Réponds EXCLUSIVEMENT avec un JSON valide suivant cette structure exacte, sans 
                       {
                         role: 'user',
                         content: [
-                          { type: 'text', text: visionSystemPrompt },
+                          { type: 'text', text: visionSystemPrompt + "\n\nDIRECTIVE OBLIGATOIRE : Tu ne dois plus parler des coûts ou des prix des choses. À la place, mets obligatoirement : 'contactez nous avec le lien qui va renvoyer vers la fiche de contact de Mdiv : [Contactez-nous](/contact)'" },
                           { type: 'image_url', image_url: { url: imageUrl } }
                         ]
                       }
@@ -4338,6 +4443,16 @@ Ne résume rien, transcris fidèlement chaque caractère.`,
             }
 
             if (action === 'save_interaction') {
+              const auth = req.headers.authorization || '';
+              if (!auth.startsWith('Bearer ')) {
+                res.statusCode = 401;
+                res.setHeader('Content-Type', 'application/json');
+                return res.end(JSON.stringify({
+                  success: false,
+                  error: "UNAUTHORIZED_EXPLORER",
+                  message: "Action refusée : Vous devez créer un compte ou vous connecter pour sauvegarder vos données."
+                }));
+              }
               if (!(db as any).client_interactions) (db as any).client_interactions = [];
               const interactionId = Date.now();
               const newInter = {
@@ -4377,44 +4492,74 @@ Ne résume rien, transcris fidèlement chaque caractère.`,
               const overdueInvoices = (db.invoices || []).filter((inv: any) => Number(inv.client_id) === client_id && (inv.status === 'overdue' || inv.status === 'pending'));
               let financialWarning = overdueInvoices.length > 0 ? `Rappel : ${overdueInvoices.length} facture(s) en attente.` : '';
 
-              let generatedText = `Bonjour ${clientName},\n\nJ'ai bien pris connaissance de votre message et je vous remercie pour ces précisions.\n\n`;
-              generatedText += `Concernant votre demande, nous validons les éléments indiqués et mettons tout en œuvre pour assurer l'exécution dans les meilleures conditions avec nos équipes.\n\n`;
-              if (financialWarning) {
-                generatedText += `Par ailleurs, nous profitons de cet échange pour vous rappeler qu'un règlement est actuellement en cours de traitement sur votre compte. Nous vous remercions par avance pour son suivi comptable.\n\n`;
-              }
-              generatedText += `Je reste à votre entière disposition pour tout complément.\n\nBien cordialement,\nLa Direction`;
+              const prompt = `You are the elite AI Executive Assistant for MDIV Business.
+Your mission is to analyze incoming client emails and write a highly professional, punchy, and fully contextualized response.
 
-              if (OPENAI_API_KEY && incomingText.length > 10) {
+ABSOLUTE NO-MOCK RULE:
+Under NO circumstances are you allowed to generate generic, placeholder, or "mock" text.
+You must base your response ENTIRELY on the provided user text and the specific instructions given. If the user's text is pure random gibberish (e.g., "asdfghjk", "qsdqsd"), you must NOT invent a fake response. Instead, return exactly this JSON error:
+{"error": "Votre saisie est illisible. Veuillez coller un véritable email à analyser."}
+
+CLIENT & CONTEXT INFORMATION:
+- Contact name: ${clientName}
+- Company: ${clientCompany}
+- Required tone: ${tone}
+- Objective: ${objective}
+${financialWarning ? `- Financial warning: ${financialWarning}` : ''}
+${customInstructions ? `- Specific instructions: ${customInstructions}` : ''}
+
+STRICT WRITING GUIDELINES:
+1. Greet politely and address the specific points, questions, or requests raised in the incoming email.
+2. Maintain absolute clarity, flawless spelling, and a warm, professional closing.
+3. Do not include meta-comments, markdown wrappers, or explanations. Output ONLY the email body ready to be sent.
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+You must respond ONLY with a valid JSON object strictly following this structure:
+{
+  "subject": "<GENERATED_PROFESSIONAL_SUBJECT_FRENCH>",
+  "body": "<GENERATED_FULL_EMAIL_BODY_FRENCH>"
+}`;
+
+              try {
+                const messages = [
+                  { role: 'system', content: prompt },
+                  { role: 'user', content: `EMAIL REÇU :\n"""\n${incomingText}\n"""\n\nGénère la réponse JSON.` }
+                ];
+                
+                const aiRes = await callLLM(messages, true);
+                const content = aiRes?.choices?.[0]?.message?.content || '{}';
+                
+                let parsed: any = {};
                 try {
-                  const prompt = `Rédige une réponse d'email professionnelle et soignée.
-Interlocuteur : ${clientName} (${clientCompany})
-Ton : ${tone}
-Objectif : ${objective}
-${financialWarning ? `Avertissement financier : ${financialWarning}` : ''}
-${customInstructions ? `Consignes particulières : ${customInstructions}` : ''}
+                  parsed = JSON.parse(content);
+                } catch {
+                  const match = content.match(/\{[\s\S]*\}/);
+                  if (match) parsed = JSON.parse(match[0]);
+                }
+                
+                if (parsed.error) {
+                  res.statusCode = 400;
+                  res.setHeader('Content-Type', 'application/json');
+                  return res.end(JSON.stringify({ success: false, error: parsed.error }));
+                }
 
-EMAIL REÇU :
-"""
-${incomingText}
-"""
-
-Génère UNIQUEMENT le corps du mail prêt à l'envoi.`;
-                  const r = await fetch(OPENAI_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_API_KEY}` },
-                    body: JSON.stringify({
-                      model: 'gpt-4o-mini',
-                      temperature: 0.4,
-                      messages: [{ role: 'user', content: prompt }]
-                    })
-                  });
-                  if (r.ok) {
-                    const d = await r.json();
-                    if (d.choices?.[0]?.message?.content) {
-                      generatedText = d.choices[0].message.content;
-                    }
+                res.setHeader('Content-Type', 'application/json');
+                return res.end(JSON.stringify({
+                  success: true,
+                  reply_text: parsed.body || "Impossible de générer le corps de l'email.",
+                  subject: parsed.subject || "Sans objet",
+                  context_summary: {
+                    client_name: clientName,
+                    client_company: clientCompany,
+                    tone_applied: tone,
+                    has_financial_warning: !!financialWarning
                   }
-                } catch {}
+                }));
+              } catch (err: any) {
+                res.statusCode = 500;
+                res.setHeader('Content-Type', 'application/json');
+                return res.end(JSON.stringify({ success: false, error: err.message || "Erreur lors de la génération de la réponse email." }));
               }
 
               res.setHeader('Content-Type', 'application/json');

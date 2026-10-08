@@ -39,37 +39,39 @@ try {
         exit;
     }
 
-    $systemPrompt = "Tu es le meilleur expert en prospection commerciale B2B grand compte pour MDIV Business.
-Rédige un email de cold outreach ultra-personnalisé, à fort taux de réponse, dans la langue demandée ($language).
-Cible : $targetCompany ($sector)
-Destinataire : $contactRole
-Objectif : $objective
-Offre à valoriser : $offer
-Ton : $tone
+    $systemPrompt = "You are the top B2B enterprise sales prospecting expert for MDIV Business.
+Write a highly personalized, high-conversion cold outreach email in the requested language ($language).
+Target: $targetCompany ($sector)
+Recipient: $contactRole
+Objective: $objective
+Value Proposition: $offer
+Tone: $tone
 
-GARDE-FOU ANTI-GRIBOUILLAGE :
-Si les informations fournies sont farfelues ou dénuées de sens commercial, NE GÉNÈRE PAS de faux message absurde. Renvoie :
+ANTI-GIBBERISH SAFEGUARD:
+If the provided information is absurd or lacks business sense, DO NOT GENERATE a fake email. Return:
 {\"error\": \"Votre saisie semble incomplète ou incompréhensible. Pour générer un email de prospection B2B percutant, veuillez indiquer au minimum l'entreprise ou secteur cible, le rôle du destinataire et la proposition de valeur de votre offre.\"}
 
-Règles :
-1. Objet irrésistible et court.
-2. Accroche ultra personnalisée montrant une vraie compréhension des enjeux du secteur ($sector).
-3. Proposition de valeur concrète sans être agressif (focus ROI / gains de temps).
-4. Call-to-action simple et sans friction (ex: échange informel de 10 min).
+RULES:
+1. Irresistible and short subject line.
+2. Ultra-personalized hook demonstrating a real understanding of the sector's challenges ($sector).
+3. Concrete value proposition without being aggressive (focus on ROI / time-saving).
+4. Simple, friction-less call-to-action (e.g., a 10-min informal chat).
 
-Tu dois répondre UNIQUEMENT par un objet JSON valide avec cette structure :
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+You must respond ONLY with a valid JSON object matching this structure:
 {
   \"id\": \"camp_" . bin2hex(random_bytes(6)) . "\",
-  \"subject\": \"Objet du message\",
-  \"content\": \"Corps complet du message prêt à être envoyé...\",
+  \"subject\": \"<GENERATED_SUBJECT_STRING_FRENCH>\",
+  \"content\": \"<GENERATED_FULL_EMAIL_BODY_STRING_FRENCH>\",
   \"kpis\": {
-    \"impactScore\": 92,
-    \"clarityScore\": 94,
-    \"personalizationScore\": 90,
-    \"engagementScore\": 89,
-    \"estimatedReadTimeSeconds\": 35,
-    \"persuasionLevel\": \"Élevé\",
-    \"suggestions\": [\"Relancer à J+4 si absence de réponse\", \"Mettre en avant une étude de cas du secteur $sector\"]
+    \"impactScore\": <CALCULATED_INTEGER_BETWEEN_1_AND_100>,
+    \"clarityScore\": <CALCULATED_INTEGER_BETWEEN_1_AND_100>,
+    \"personalizationScore\": <CALCULATED_INTEGER_BETWEEN_1_AND_100>,
+    \"engagementScore\": <CALCULATED_INTEGER_BETWEEN_1_AND_100>,
+    \"estimatedReadTimeSeconds\": <CALCULATED_INTEGER_SECONDS>,
+    \"persuasionLevel\": \"<CALCULATED_LEVEL_FRENCH>\",
+    \"suggestions\": [\"<ACTIONABLE_SUGGESTION_FRENCH_1>\", \"<ACTIONABLE_SUGGESTION_FRENCH_2>\"]
   },
   \"date\": \"" . date('Y-m-d') . "\"
 }";

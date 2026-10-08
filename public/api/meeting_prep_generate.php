@@ -1,7 +1,7 @@
 <?php
 // public/api/meeting_prep_generate.php
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/groq_client.php';
+require_once __DIR__ . '/multi_llm_orchestrator.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -19,34 +19,36 @@ try {
     $meetingDate = $input['meetingDate'] ?? date('d/m/Y');
     $meetingContext = $input['meetingContext'] ?? '';
     $meetingObjective = $input['meetingObjective'] ?? 'Concrétiser le contrat de prestations';
-    $company_id = intval($input['company_id'] ?? 1);
+    $company_id = intval($input['company_id'] ?? 0);
+    if (!$company_id) {
+        throw new Exception("Authentification requise pour préparer une réunion.");
+    }
 
-    $systemPrompt = "Tu es un coach en négociation stratégique et directeur d'avant-vente pour MDIV Business.
-Rédige un briefing d'avant-RDV complet et immédiatement exploitable par le commercial ou dirigeant.
-Tu dois répondre UNIQUEMENT par un objet JSON valide suivant exactement cette structure :
+    $systemPrompt = "You are a strategic negotiation coach and pre-sales director for MDIV Business.
+Write a comprehensive and immediately actionable pre-meeting briefing for the sales rep or executive.
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+You must respond ONLY with a valid JSON object strictly following this structure:
 {
-  \"oneLinerSummary\": \"Synthèse en une phrase de l'enjeu capital de ce rendez-vous.\",
-  \"clientSummary\": \"Résumé concis de la situation du client et de ses attentes prioritaires.\",
-  \"opportunities\": [\"Opportunité 1\", \"Opportunité 2\"],
-  \"risks\": [\"Risque 1 à anticiper\", \"Risque 2\"],
-  \"probableObjections\": [\"Objection prévisible (ex: coût, délais, sécurité) et comment y répondre.\"],
-  \"recommendedQuestions\": [\"Question ouverte percutante 1\", \"Question 2\"],
-  \"discoveryStrategy\": \"Conseil tactique d'écoute active et de posture commerciale...\",
-  \"meetingObjectives\": [\"Objectif minimum : ...\", \"Objectif idéal : ...\"],
-  \"recommendedActions\": [\"Action immédiate à engager à la fin du RDV\"]
+  \"oneLinerSummary\": \"<GENERATED_ONE_LINER_SUMMARY_FRENCH>\",
+  \"clientSummary\": \"<GENERATED_CLIENT_SUMMARY_FRENCH>\",
+  \"opportunities\": [\"<OPPORTUNITY_1>\", \"<OPPORTUNITY_2>\"],
+  \"risks\": [\"<RISK_1>\", \"<RISK_2>\"],
+  \"probableObjections\": [\"<OBJECTION_AND_RESPONSE_FRENCH>\"],
+  \"recommendedQuestions\": [\"<RECOMMENDED_QUESTION_FRENCH_1>\", \"<RECOMMENDED_QUESTION_FRENCH_2>\"],
+  \"discoveryStrategy\": \"<GENERATED_DISCOVERY_STRATEGY_FRENCH>\",
+  \"meetingObjectives\": [\"<MINIMUM_OBJECTIVE_FRENCH>\", \"<IDEAL_OBJECTIVE_FRENCH>\"],
+  \"recommendedActions\": [\"<IMMEDIATE_RECOMMENDED_ACTION_FRENCH>\"]
 }";
 
     $userPrompt = "Client : $clientName\nDate du RDV : $meetingDate\nObjectif visé : $meetingObjective\nContexte / Notes : " . ($meetingContext ?: 'Premier rendez-vous de négociation.');
 
-    $messages = [
-        ['role' => 'system', 'content' => $systemPrompt],
-        ['role' => 'user', 'content' => $userPrompt]
-    ];
+    $orchestrator = new MultiLLMOrchestrator();
+    $response = $orchestrator->executePrompt('meeting_prep', $systemPrompt, $userPrompt, $company_id, null);
 
-    $response = callGroqApi($messages, null, false, true);
-
-    if (isset($response['choices'][0]['message']['content'])) {
-        $content = $response['choices'][0]['message']['content'];
+    if (isset($response['success']) && $response['success']) {
+        $content = $response['content'];
         $data = json_decode($content, true);
 
         if (!$data && preg_match('/\{.*\}/s', $content, $m)) {

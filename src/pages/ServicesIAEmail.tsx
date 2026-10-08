@@ -7,7 +7,7 @@ import { EnterpriseAuthBar } from '@/components/site/EnterpriseAuthBar';
 import { 
   ArrowLeft, ArrowRight, Mail, Edit3, History, Link as LinkIcon, 
   Sparkles, Loader2, CheckCircle2, Copy, Trash2, 
-  RefreshCcw, AlertTriangle, MessageSquare, Send, Save
+  RefreshCcw, AlertTriangle, MessageSquare, Send, Save, Lock
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
@@ -39,14 +39,17 @@ import { ClientContextPanel } from '@/components/clients/ClientContextPanel';
 import { IncomingEmailHandler } from '@/components/email/IncomingEmailHandler';
 import { generateContextualEmailReply, saveClientInteraction } from '@/lib/clientContextHubService';
 import { Client } from '@/lib/quoteService';
-
-const toneOptions: EmailTone[] = ['Professionnel', 'Commercial', 'Court & Percutant', 'Empathique', 'Formel', 'Chaleureux'];
-const objectiveOptions: EmailObjective[] = ['Nouvel email', 'Réponse stratégique', 'Négociation', 'Prise de contact', 'Suivi de projet'];
+import { hasFeatureAccess } from '@/lib/planLimitsService';
 
 export default function ServicesIAEmail() {
   const { language } = useLanguage();
   const { company, token, isAuthenticated } = useAuth();
   const isEn = language === "en";
+
+  const { allowed: canUseOutlookSync } = hasFeatureAccess('email_outlook_sync');
+
+  const toneOptions: EmailTone[] = ['Professionnel', 'Commercial', 'Court & Percutant', 'Empathique', 'Formel', 'Chaleureux'];
+  const objectiveOptions: EmailObjective[] = ['Nouvel email', 'Réponse stratégique', 'Négociation', 'Prise de contact', 'Suivi de projet'];
 
   // Quota Freemium 3 essais invité
   const { 
@@ -467,7 +470,7 @@ export default function ServicesIAEmail() {
             )}
 
             {/* Barre de Contexte Client Omnicanal */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 relative group">
               <div className="w-full md:w-96">
                 <ClientSelectWithCreate
                   selectedClientId={selectedClient?.id}
@@ -478,14 +481,14 @@ export default function ServicesIAEmail() {
               </div>
 
               {/* Sélecteur de mode de travail Email */}
-              <div className="flex items-center gap-2 p-1 bg-slate-950/80 border border-slate-800 rounded-xl w-full md:w-auto">
+              <div className="flex items-center gap-2 p-1 bg-white border border-slate-200 rounded-xl w-full md:w-auto shadow-sm">
                 <button
                   type="button"
                   onClick={() => setEmailWorkMode('write')}
                   className={`flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
                     emailWorkMode === 'write'
                       ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
                   <Edit3 className="w-3.5 h-3.5 inline mr-1.5" />
@@ -497,7 +500,7 @@ export default function ServicesIAEmail() {
                   className={`flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
                     emailWorkMode === 'reply_inbound'
                       ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5 inline mr-1.5" />
@@ -809,10 +812,19 @@ export default function ServicesIAEmail() {
                   ) : (
                     <button 
                       type="button"
-                      onClick={() => handleToggleConnect('microsoft')}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition-colors shadow-md shadow-blue-500/20"
+                      onClick={() => {
+                        if (!canUseOutlookSync) {
+                          toast.error("Le Plan Indépendant est requis pour la synchronisation Outlook.");
+                          return;
+                        }
+                        handleToggleConnect('microsoft');
+                      }}
+                      className={`w-full py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition-colors shadow-md ${
+                        canUseOutlookSync ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20" : "bg-slate-300 text-slate-500 cursor-not-allowed border-none shadow-none"
+                      }`}
+                      title={!canUseOutlookSync ? "Plan Indépendant requis" : ""}
                     >
-                      <LinkIcon size={18} /> Connecter Microsoft 365
+                      {canUseOutlookSync ? <LinkIcon size={18} /> : <Lock size={18} />} Connecter Microsoft 365
                     </button>
                   )}
                 </div>

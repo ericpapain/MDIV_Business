@@ -1,7 +1,7 @@
 <?php
 // public/api/leads_search.php
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/groq_client.php';
+require_once __DIR__ . '/multi_llm_orchestrator.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -21,47 +21,48 @@ try {
     $companySize = $input['companySize'] ?? '50 à 250 salariés (PME / ETI)';
     $targetFunction = $input['targetFunction'] ?? 'Directeur Général / DSI';
     $keywords = $input['keywords'] ?? 'automatisation, digitalisation';
-    $company_id = intval($input['company_id'] ?? 1);
+    $company_id = intval($input['company_id'] ?? 0);
+    if (!$company_id) {
+        throw new Exception("Authentification requise pour générer des leads.");
+    }
 
-    $systemPrompt = "Tu es un moteur de prospection et d'intelligence commerciale B2B spécialisé pour MDIV Business.
-À partir des filtres de ciblage demandés, génère une liste de 4 à 6 entreprises cibles crédibles et hautement qualifiées avec leur profil d'enrichissement IA.
+    $systemPrompt = "You are a specialized B2B prospecting and sales intelligence engine for MDIV Business.
+Based on the requested targeting filters, generate a list of 4 to 6 credible, highly qualified target companies with their AI enrichment profile.
 
-RÈGLE ABSOLUE POUR LES SITES WEB (ZÉRO LIEN MORT 404) :
-Interdiction formelle d'inventer des URLs profondes fictives ou des noms de domaine fantaisistes (comme 'https://exemple.fr' ou 'https://entreprise-inventee.fr').
-Pour chaque entreprise :
-- Si l'entreprise est très connue, renseigne son domaine officiel vérifié (ex: 'https://www.bouygues.com', 'https://www.sncf.com', 'https://www.veolia.fr').
-- Dans tous les autres cas, génère OBLIGATOIREMENT une URL Google Search directe au format exact :
-  \"https://www.google.com/search?q=\" suivi du nom de l'entreprise et de sa ville encodés (ex: \"https://www.google.com/search?q=Eiffage+Lyon+site+officiel\").
-Ce lien doit impérativement fonctionner à 100% lors du clic.
+ABSOLUTE RULE FOR WEBSITES (ZERO 404 DEAD LINKS):
+Strictly forbidden to invent fictional deep URLs or fictional domains (like 'https://example.fr' or 'https://entreprise-inventee.fr').
+For each company:
+- If the company is very well known, provide its official verified domain (e.g., 'https://www.bouygues.com', 'https://www.sncf.com', 'https://www.veolia.fr').
+- In all other cases, you MUST generate a direct Google Search URL using this exact format:
+  \"https://www.google.com/search?q=\" followed by the URL-encoded company name and city (e.g., \"https://www.google.com/search?q=Eiffage+Lyon+site+officiel\").
+This link must work 100% of the time when clicked.
 
-Tu dois répondre UNIQUEMENT par un tableau JSON valide respectant rigoureusement ce schéma :
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+You must respond ONLY with a valid JSON array strictly following this schema:
 [
   {
-    \"companyName\": \"Nom de l'entreprise\",
+    \"companyName\": \"<GENERATED_COMPANY_NAME>\",
     \"sector\": \"$sector\",
     \"size\": \"$companySize\",
-    \"location\": \"Ville, $country\",
-    \"website\": \"URL officielle ou https://www.google.com/search?q=NomEntreprise+Ville\",
-    \"digitalMaturityScore\": \"Moyen\", // Faible | Moyen | Élevé | Très élevé
-    \"aiPotentialScore\": \"Élevé\", // Faible | Moyen | Élevé | Très élevé
-    \"purchaseProbability\": \"Élevé\", // Faible | Moyen | Élevé | Très élevé
-    \"decisionMakerName\": \"Prénom Nom\",
+    \"location\": \"<GENERATED_CITY>, $country\",
+    \"website\": \"<VERIFIED_DOMAIN_OR_GOOGLE_SEARCH_URL>\",
+    \"digitalMaturityScore\": \"<CALCULATED_SCORE_FRENCH>\",
+    \"aiPotentialScore\": \"<CALCULATED_SCORE_FRENCH>\",
+    \"purchaseProbability\": \"<CALCULATED_SCORE_FRENCH>\",
+    \"decisionMakerName\": \"<GENERATED_FIRSTNAME_LASTNAME>\",
     \"decisionMakerFunction\": \"$targetFunction\",
-    \"technologiesUsed\": [\"ERP SAP\", \"Microsoft 365\", \"Salesforce\"]
+    \"technologiesUsed\": [\"<TECH_1>\", \"<TECH_2>\", \"<TECH_3>\"]
   }
 ]";
 
     $userPrompt = "Cible demandée :\nSecteur : $sector\nPays : $country\nRégion : $region\nTaille : $companySize\nFonction visée : $targetFunction\nMots-clés : $keywords";
 
-    $messages = [
-        ['role' => 'system', 'content' => $systemPrompt],
-        ['role' => 'user', 'content' => $userPrompt]
-    ];
+    $orchestrator = new MultiLLMOrchestrator();
+    $response = $orchestrator->executePrompt('leads_generator', $systemPrompt, $userPrompt, $company_id, null);
 
-    $response = callGroqApi($messages, null, false, true);
-
-    if (isset($response['choices'][0]['message']['content'])) {
-        $content = $response['choices'][0]['message']['content'];
+    if (isset($response['success']) && $response['success']) {
+        $content = $response['content'];
         $data = json_decode($content, true);
 
         if (!$data && preg_match('/\[.*\]/s', $content, $m)) {

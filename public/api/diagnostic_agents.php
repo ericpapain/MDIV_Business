@@ -63,13 +63,15 @@ try {
 
     // Initialisation de la conversation des experts
     $messages = [
-        ["role" => "system", "content" => "Tu joues le rôle de deux experts en transformation digitale d'entreprise qui débattent pour conseiller un dirigeant non-technique :
-- L'Expert Stratégie évalue l'impact business, le gain de temps et le retour sur investissement.
-- L'Expert Technique évalue la simplicité de mise en place et les outils adaptés aux équipes non-développeurs.
+        ["role" => "system", "content" => "You are roleplaying as two digital transformation experts debating to advise a non-technical CEO:
+- The 'Expert Stratégie' (Strategy Expert) evaluates business impact, time savings, and ROI.
+- The 'Expert Technique' (Technical Expert) evaluates implementation simplicity and tools suitable for non-developers.
 
-RÈGLE MAJEURE SUR LE MULTI-CHOIX : L'utilisateur a pu sélectionner PLUSIEURS choix par question. Tu dois obligatoirement prendre en compte l'ENSEMBLE des réponses cochées pour analyser les besoins combinés de l'entreprise.
+CRITICAL MULTI-CHOICE RULE: The user may have selected MULTIPLE options per question. You MUST take ALL checked answers into account to analyze the combined needs of the company.
 
-Voici les réponses et le profil complet de l'entreprise (incluant le contenu analysé de leur site web si disponible) : " . $profile_text]
+CRITICAL REQUIREMENT: YOU MUST GENERATE ALL YOUR RESPONSES AND DEBATES STRICTLY IN FRENCH. DO NOT OUTPUT ANY ENGLISH TEXT.
+
+Here are the user's answers and the complete company profile (including scraped website content if available): " . $profile_text]
     ];
 
     $agents = ["Expert Stratégie", "Expert Technique"];
@@ -80,11 +82,11 @@ Voici les réponses et le profil complet de l'entreprise (incluant le contenu an
     for ($i = 0; $i < $turns; $i++) {
         $current_agent = $agents[$i % 2];
         
-        $prompt = "C'est à toi de parler, $current_agent. ";
+        $prompt = "It is your turn to speak, $current_agent. ";
         if ($i == 0) {
-            $prompt .= "Fais une première analyse claire et accessible des défis de cette entreprise en tenant compte de TOUS leurs choix exprimés et des informations tirées de leur site web. Propose des pistes concrètes sans jargon. IMPORTANT : Si tu manques d'informations cruciales pour faire un bon diagnostic, au lieu de répondre normalement, réponds UNIQUEMENT avec ce JSON strict : {\"action\":\"interrupt\", \"question\":\"La question supplémentaire que tu veux poser au client, ou demande-lui d'importer un document (ex: devis, facture).\"}";
+            $prompt .= "Provide a clear, accessible initial analysis of this company's challenges considering ALL their expressed choices and website data. Suggest concrete, jargon-free avenues for improvement. IMPORTANT: If you lack crucial information to make a good diagnosis, DO NOT answer normally. INSTEAD, reply ONLY with this strict JSON: {\"action\":\"interrupt\", \"question\":\"The specific follow-up question you want to ask the client, or ask them to upload a document (e.g., quote, invoice).\"}. REMEMBER: OUTPUT IN FRENCH.";
         } else {
-            $prompt .= "Réagis de façon constructive et accessible au message précédent. Fais une réponse fluide, concrète et concise (3-4 phrases max).";
+            $prompt .= "React constructively and accessibly to the previous message. Provide a fluid, concrete, and concise response (max 3-4 sentences). REMEMBER: OUTPUT IN FRENCH.";
         }
 
         $messages[] = ["role" => "user", "content" => $prompt];

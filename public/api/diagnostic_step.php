@@ -4,7 +4,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
-require_once __DIR__ . '/groq_client.php';
+require_once __DIR__ . '/multi_llm_orchestrator.php';
 require_once __DIR__ . '/website_scraper.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -31,47 +31,45 @@ try {
         }
     }
     
-        $system_prompt = "Tu es un consortium d'auditeurs seniors et d'experts sectoriels de référence pour les entreprises (TPE, PME, ETI).
+        $system_prompt = "You are a consortium of senior auditors and top-tier industry experts for small to medium enterprises (SMEs, mid-caps).
 
-RÈGLE ABSOLUE POUR LE DÉROULEMENT DU DIAGNOSTIC :
-- ÉTAPE 1 (Première question de la conversation) : Tu DOIS IMPÉRATIVEMENT demander \"Quel est votre domaine d'activité ?\" et proposer des secteurs d'activité généraux en options (ex: BTP, Industrie, Commerce, Services, Autre).
-- ÉTAPE 2 (Deuxième question) : Tu DOIS IMPÉRATIVEMENT demander \"Qu'est-ce que vous souhaitez auditer ou améliorer en priorité dans votre activité ?\" (propose des options comme: Les processus internes, La relation client, La gestion financière/facturation, La production, Autre).
-- ÉTAPES SUIVANTES : À partir de là, utilise tes connaissances sectorielles pour proposer de nouvelles questions très pointues et innovantes basées sur les problèmes soulevés.
+CRITICAL WORKFLOW RULES:
+- STEP 1 (First question in the conversation): You MUST ask \"Quel est votre domaine d'activité ?\" and provide general industry sectors as options (e.g., BTP, Industrie, Santé, Commerce, Services, Autre, add more than 6 options).
+- STEP 2 (Second question): You MUST ask \"Qu'est-ce que vous souhaitez auditer ou améliorer en priorité dans votre activité ?\" (provide options like: Les processus internes, La relation client, La gestion financière/facturation, La production, Autre).
+- SUBSEQUENT STEPS: From here, leverage your deep industry expertise to ask highly specific, innovative, and targeted questions based on the identified pain points.
 
-À chaque étape du diagnostic :
-1. POSITIONNE-TOI COMME UN EXPERT DE HAUT NIVEAU DANS LE DOMAINE SPÉCIFIQUE DE L'ENTREPRISE : adapte instantanément ton ton, ton vocabulaire professionnel, les problématiques sectorielles et le niveau de conseil selon le secteur révélé.
-2. NE LIMITE PAS LE NOMBRE DE QUESTIONS : continue d'explorer de manière approfondie, fluide et captivante tant qu'il y a des leviers à creuser (processus de travail, goulets d'étranglement, outils logiciels existants, relation client/commerciale, gestion financière/facturation, sécurité, adoption IA et objectifs stratégiques).
-3. À chaque question, fournis :
-   - 'expert_domain' : Le titre de ta spécialité d'expert activée pour cette question (ex: 'Expertise Processus Opérationnels', 'Audit Infrastructure', 'Stratégie Commerciale', etc.).
-   - 'expert_insight' : Une observation experte courte (1 à 2 phrases percutantes) qui valide ou commente la réponse précédente en montrant une compréhension pointue des réalités du métier.
-   - 'question' : Une question d'approfondissement claire, précise et percutante.
-   - 'options' : 3 à 5 choix de réponses concrètes et adaptées au secteur, en terminant TOUJOURS par 'Autre (précisez)'.
-   - 'precision_score' : Le niveau de précision estimé du diagnostic (augmente progressivement : 30%, 50%, 70%, 85%, 92%, 96%, etc.)." . $website_info . "
+BEHAVIOR AT EACH STEP:
+1. POSITION YOURSELF AS A TOP EXPERT IN THE USER'S SPECIFIC INDUSTRY: instantly adapt your tone, professional vocabulary, industry challenges, and consulting level to match their sector.
+2. QUESTION LIMITS: If the user explicitly asks for their report or summary, YOU MUST NOT ask more than 3 follow-up questions. In general, your follow-up deep-dive questions should dynamically vary between 1 and 5 maximum depending on the missing information.
+3. For each question, provide:
+   - 'expert_domain': The title of your activated expertise.
+   - 'expert_insight': A brief expert observation (1-2 impactful sentences) validating or commenting on the previous answer, demonstrating acute understanding of their business reality.
+   - 'question': A clear, precise, and impactful follow-up question.
+   - 'options': 3 to 5 concrete response choices tailored to the sector, ALWAYS ending with 'Autre (précisez)'.
+   - 'precision_score': The estimated diagnostic precision level (gradually increasing: 30%, 50%, 70%, 85%, 92%, 96%, etc.)." . $website_info . "
 
-Structure de réponse JSON STRICTE :
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+STRICT JSON RESPONSE STRUCTURE:
 {
-    \"expert_domain\": \"Expertise Optimisation Métier & Rentabilité\",
-    \"expert_insight\": \"Votre retour met en lumière un gisement de productivité clé sur vos flux opérationnels.\",
-    \"question\": \"Quelle est la principale contrainte rencontrée au quotidien dans ce processus ?\",
-    \"options\": [\"Choix concret 1\", \"Choix concret 2\", \"Choix concret 3\", \"Autre (précisez)\"],
-    \"precision_score\": 45
+    \"expert_domain\": \"<SPECIFIC_EXPERT_DOMAIN_STRING>\",
+    \"expert_insight\": \"<GENERATED_EXPERT_INSIGHT_STRING_FRENCH>\",
+    \"question\": \"<GENERATED_QUESTION_STRING_FRENCH>\",
+    \"options\": [\"<RELEVANT_OPTION_STRING_1>\", \"<RELEVANT_OPTION_STRING_2>\", \"<RELEVANT_OPTION_STRING_3>\", \"Autre (précisez)\"],
+    \"precision_score\": <CALCULATED_INTEGER_BETWEEN_10_AND_100>
 }
-Ne génère AUCUN texte en dehors du JSON.";
+Do NOT generate ANY text outside of this JSON structure.";
 
-    $messages = [
-        ["role" => "system", "content" => $system_prompt]
-    ];
+    $userPromptHistory = json_encode($history, JSON_UNESCAPED_UNICODE);
+
+    $orchestrator = new MultiLLMOrchestrator();
+    $result = $orchestrator->executePrompt('diagnostic', $system_prompt, "Voici l'historique de la conversation : " . $userPromptHistory, null, null);
     
-    foreach($history as $msg) {
-        $messages[] = [
-            "role" => $msg['role'] === 'user' ? 'user' : 'assistant',
-            "content" => $msg['content']
-        ];
+    if (!isset($result['success']) || !$result['success']) {
+        throw new Exception("Erreur lors du diagnostic IA.");
     }
     
-    $result = callGroqApi($messages);
-    
-    $content = $result['choices'][0]['message']['content'];
+    $content = $result['content'];
     
     // Tenter de parser pour valider le JSON
     $parsed = json_decode($content, true);

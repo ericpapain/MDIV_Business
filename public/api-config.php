@@ -8,12 +8,7 @@ $db_user = 'zwpvaah279';
 $db_pass = 'Champion2018';
 $db_charset = 'utf8mb4';
 
-// Identifiants administrateur
-// En production, il est recommandé de stocker le hash (généré par password_hash)
-// Ici nous gardons la logique pour hacher et vérifier de manière sécurisée.
-define('ADMIN_USERNAME', 'champion');
-// Le mot de passe en clair (à ne pas exposer). Pour une vraie sécurité, on peut le remplacer par son hash généré : $2y$10$...
-define('ADMIN_PASSWORD_PLAIN', 'Champion2018#'); 
+// Les identifiants administrateur sont désormais gérés de manière sécurisée en base de données.
 
 $dsn = "mysql:host=$db_host;dbname=$db_name;charset=$db_charset";
 $options = [

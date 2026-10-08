@@ -10,7 +10,7 @@ $model = $input['model'] ?? null;
 $start_time = microtime(true);
 
 $test_messages = [
-    ['role' => 'system', 'content' => 'Tu es un assistant de test de connectivité MDIV Business.'],
+    ['role' => 'system', 'content' => 'You are a connectivity test assistant for MDIV Business. CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE STRICTLY IN FRENCH.'],
     ['role' => 'user', 'content' => 'Réponds uniquement par le mot "Connecté".']
 ];
 

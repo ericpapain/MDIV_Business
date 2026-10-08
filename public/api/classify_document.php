@@ -31,40 +31,44 @@ try {
     // Échantillon suffisant pour classifier rapidement (jusqu'à 3000 caractères)
     $sample = mb_substr($raw_text, 0, 3000);
 
-    $systemPrompt = "Tu es un classifieur documentaire et routeur d'intention ultra-précis pour une plateforme IA d'entreprise.
-Analyse le texte fourni et détermine avec rigueur à quelle catégorie il appartient :
-Catégories autorisées :
+    $systemPrompt = "You are an ultra-precise document classifier and intent router for an enterprise AI platform.
+Analyze the provided text and rigorously determine which category it belongs to:
+Allowed categories:
 - 'Facture'
 - 'Devis'
-- 'Compte-rendu' (notes de réunion, transcriptions orales, ordres du jour)
-- 'Contrat' (accords, CGV, baux, contrats de travail ou de prestation)
-- 'Email' (correspondance, lettre professionnelle)
-- 'CV' (profil professionnel, candidature)
-- 'Rapport' (audit, diagnostic stratégique, bilan d'activité)
+- 'Compte-rendu' (meeting notes, oral transcriptions, agendas)
+- 'Contrat' (agreements, T&Cs, leases, employment or service contracts)
+- 'Email' (correspondence, professional letter)
+- 'CV' (professional profile, job application)
+- 'Rapport' (audit, strategic diagnostic, activity report)
 - 'Autre'
 
-RÈGLES STRICTES :
-1. Attribue une distribution de probabilité en pourcentages (la somme des scores doit être égale à 100).
-2. Fournis un court extrait explicatif ('summary_snippet') qui justifie ton choix.
-3. Si le document appartient de façon évidente à une catégorie avec un score >= 75%, indique le module d'atterrissage recommandé et 2 à 3 actions logiques pour l'utilisateur.
+STRICT RULES:
+1. Assign a probability distribution in percentages (the sum of scores must equal 100).
+2. Provide a short explanatory excerpt ('summary_snippet') justifying your choice.
+3. If the document obviously belongs to a category with a score >= 75%, indicate the recommended landing module and 2 to 3 logical actions for the user.
 
-Tu dois répondre UNIQUEMENT par un objet JSON valide suivant exactement cette structure :
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+You must respond ONLY with a valid JSON object strictly following this structure:
 {
-  \"detected_type\": \"Facture\",
-  \"confidence\": 94,
+  \"detected_type\": \"<DETECTED_CATEGORY_STRING>\",
+  \"confidence\": <CALCULATED_INTEGER_CONFIDENCE_SCORE>,
   \"scores\": {
-    \"Facture\": 94,
-    \"Devis\": 3,
-    \"Compte-rendu\": 1,
-    \"Contrat\": 1,
-    \"Email\": 1,
-    \"Autre\": 0
+    \"Facture\": <CALCULATED_INTEGER_SCORE>,
+    \"Devis\": <CALCULATED_INTEGER_SCORE>,
+    \"Compte-rendu\": <CALCULATED_INTEGER_SCORE>,
+    \"Contrat\": <CALCULATED_INTEGER_SCORE>,
+    \"Email\": <CALCULATED_INTEGER_SCORE>,
+    \"CV\": <CALCULATED_INTEGER_SCORE>,
+    \"Rapport\": <CALCULATED_INTEGER_SCORE>,
+    \"Autre\": <CALCULATED_INTEGER_SCORE>
   },
-  \"summary_snippet\": \"Facture avec numéro d'émission, mention de TVA et total à payer.\",
-  \"recommended_module\": \"/services-ia/facturation\",
+  \"summary_snippet\": \"<GENERATED_EXPLANATORY_SNIPPET_FRENCH>\",
+  \"recommended_module\": \"<RECOMMENDED_APP_ROUTE>\",
   \"suggested_actions\": [
-    {\"title\": \"Analyser et vérifier la facture\", \"route\": \"/services-ia/facturation\"},
-    {\"title\": \"Générer une relance client\", \"route\": \"/services-ia/relances\"}
+    {\"title\": \"<ACTION_TITLE_FRENCH_1>\", \"route\": \"<ACTION_ROUTE_1>\"},
+    {\"title\": \"<ACTION_TITLE_FRENCH_2>\", \"route\": \"<ACTION_ROUTE_2>\"}
   ]
 }";
 

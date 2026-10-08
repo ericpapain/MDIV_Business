@@ -21,10 +21,13 @@ import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid
 } from 'recharts';
+import { hasFeatureAccess } from '@/lib/planLimitsService';
 
 export default function ServicesIABenchmark() {
   const { language } = useLanguage();
   const isEn = language === "en";
+
+  const { allowed: canUseBenchmarkRoi } = hasFeatureAccess('benchmark_roi');
 
   const {
     remainingTrials,
@@ -637,8 +640,21 @@ export default function ServicesIABenchmark() {
            <button className="ia-btn-primary px-8 py-4 font-bold text-base shadow-xl shadow-blue-500/20">
              Réserver un Audit IA Gratuit
            </button>
-           <button className="ia-btn-secondary px-8 py-4 font-bold text-base bg-white">
-             <Download size={18} className="mr-2 inline" /> Télécharger mon PDF
+           <button 
+             onClick={() => {
+               if (!canUseBenchmarkRoi) {
+                 toast.error("Le Plan TPE est requis pour télécharger le rapport détaillé.");
+                 return;
+               }
+               toast.success("Téléchargement du PDF en cours...");
+             }}
+             className={`px-8 py-4 font-bold text-base rounded-xl transition-all flex items-center justify-center ${
+               canUseBenchmarkRoi ? "ia-btn-secondary bg-white" : "bg-slate-300 text-slate-500 cursor-not-allowed border-none"
+             }`}
+             title={!canUseBenchmarkRoi ? "Plan TPE requis" : ""}
+           >
+             {canUseBenchmarkRoi ? <Download size={18} className="mr-2 inline" /> : <Lock size={18} className="mr-2 inline" />} 
+             Télécharger mon PDF
            </button>
            <button onClick={() => window.location.reload()} className="px-8 py-4 font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 rounded-xl transition-colors flex items-center">
              <RefreshCcw size={18} className="mr-2 inline" /> Refaire une analyse

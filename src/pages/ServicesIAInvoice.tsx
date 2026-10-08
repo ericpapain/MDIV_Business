@@ -6,7 +6,7 @@ import { EnterpriseAuthBar } from '@/components/site/EnterpriseAuthBar';
 import { 
   ArrowLeft, FileText, Download, Plus, Trash2, 
   Sparkles, Loader2, Calculator, Users, Box, Save, AlertTriangle, CheckCircle2,
-  TrendingUp, CreditCard, Clock, FileWarning, Camera, ChevronDown, ChevronUp, Eye
+  TrendingUp, CreditCard, Clock, FileWarning, Camera, ChevronDown, ChevronUp, Eye, Lock
 } from 'lucide-react';
 import { getInvoicePDFBlob } from '@/lib/pdfExportService';
 import { PdfPreviewModal } from '@/components/ui/PdfPreviewModal';
@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { fetchClients, fetchProducts, generateQuoteAIAssist, Client, Product, QuoteLine } from '@/lib/quoteService';
 import { 
   fetchInvoiceKPIs, fetchInvoicesList, checkInvoiceWithAI, exportInvoicePDF,
-  deleteInvoice, saveInvoice,
+  deleteInvoice, saveInvoice, extractInvoiceLinesFromOCR,
   InvoiceKPIs, Invoice, InvoiceAICheckResult 
 } from '@/lib/invoiceService';
 import { DocumentUploadCapture } from '@/components/ui/DocumentUploadCapture';
@@ -42,12 +42,18 @@ import { FintechPricingTab } from '@/components/fintech/FintechPricingTab';
 import { useGuestQuota } from '@/hooks/useGuestQuota';
 import { classifyDocumentContent, ClassificationResult } from '@/lib/documentClassifierService';
 import { DocumentMismatchModal } from '@/components/common/DocumentMismatchModal';
+import { hasFeatureAccess } from '@/lib/planLimitsService';
 
 export default function ServicesIAInvoice() {
   const { language } = useLanguage();
   const { company, token, isAuthenticated } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const isEn = language === "en";
+
+  const { allowed: canUseFacturX } = hasFeatureAccess('facturx_export');
+  const { allowed: canUseFraudShield } = hasFeatureAccess('bank_fraud_shield');
+  const { allowed: canUseSepa } = hasFeatureAccess('bank_sepa_1click');
+  const { allowed: canUseReconciliation } = hasFeatureAccess('bank_auto_reconciliation');
 
   // Quota Freemium 3 essais invité
   const { 
@@ -458,10 +464,7 @@ export default function ServicesIAInvoice() {
 
     setIsParsingOcr(true);
     try {
-      const res = await generateQuoteAIAssist({
-        clientContext: selectedClientId ? "Client existant sélectionné" : "Client extrait du document",
-        projectDescription: "Extrais les prestations, quantités et montants depuis ce texte scanné par OCR :\n\n" + ocrText
-      }, company?.id);
+      const res = await extractInvoiceLinesFromOCR(ocrText, company?.id);
 
       if (res && res.suggestedLines && res.suggestedLines.length > 0) {
         setLines(res.suggestedLines);
@@ -1289,9 +1292,20 @@ export default function ServicesIAInvoice() {
 
                 <button
                   type="button"
-                  onClick={handleGenerateFacturX}
+                  onClick={() => {
+                    if (!canUseFacturX) {
+                      toast.error("Le Plan Indépendant est requis pour générer le XML Factur-X.");
+                      return;
+                    }
+                    handleGenerateFacturX();
+                  }}
                   disabled={isGeneratingFacturX || lines.length === 0}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 disabled:opacity-50"
+                  className={`w-full py-3 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 ${
+                    canUseFacturX 
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-indigo-500/25" 
+                      : "bg-slate-300 text-slate-500 cursor-not-allowed border-none shadow-none"
+                  }`}
+                  title={!canUseFacturX ? "Plan Indépendant requis" : ""}
                 >
                   {isGeneratingFacturX ? (
                     <>
@@ -1300,7 +1314,7 @@ export default function ServicesIAInvoice() {
                     </>
                   ) : (
                     <>
-                      <Sparkles size={15} />
+                      {canUseFacturX ? <Sparkles size={15} /> : <Lock size={15} />}
                       Générer Factur-X conforme DGFIP
                     </>
                   )}
@@ -1504,11 +1518,20 @@ export default function ServicesIAInvoice() {
                     />
                     <button
                       type="button"
-                      onClick={handleVerifyIban}
+                      onClick={() => {
+                        if (!canUseFraudShield) {
+                          toast.error("Le Plan PME est requis pour l'Anti-Fraude IBAN.");
+                          return;
+                        }
+                        handleVerifyIban();
+                      }}
                       disabled={isCheckingIban}
-                      className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors whitespace-nowrap flex items-center gap-1.5"
+                      className={`px-4 py-2 font-bold text-xs rounded-xl transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                        canUseFraudShield ? "bg-slate-900 hover:bg-slate-800 text-white" : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                      }`}
+                      title={!canUseFraudShield ? "Plan PME requis" : ""}
                     >
-                      {isCheckingIban ? <Loader2 size={13} className="animate-spin" /> : <ShieldCheck size={13} />}
+                      {isCheckingIban ? <Loader2 size={13} className="animate-spin" /> : (canUseFraudShield ? <ShieldCheck size={13} /> : <Lock size={13} />)}
                       Auditer
                     </button>
                   </div>
@@ -1948,9 +1971,20 @@ export default function ServicesIAInvoice() {
 
                   <button
                     type="button"
-                    onClick={handleExecuteSepa}
+                    onClick={() => {
+                      if (!canUseSepa) {
+                        toast.error("Le Plan TPE est requis pour le Virement SEPA.");
+                        return;
+                      }
+                      handleExecuteSepa();
+                    }}
                     disabled={isPayingSepa || selectedExpenseIds.length === 0}
-                    className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    className={`w-full py-3.5 text-white font-extrabold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${
+                      canUseSepa 
+                        ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-500/25" 
+                        : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                    }`}
+                    title={!canUseSepa ? "Plan TPE requis" : ""}
                   >
                     {isPayingSepa ? (
                       <>
@@ -1959,7 +1993,7 @@ export default function ServicesIAInvoice() {
                       </>
                     ) : (
                       <>
-                        <Send size={16} />
+                        {canUseSepa ? <Send size={16} /> : <Lock size={16} />}
                         Générer l'ordre de virement SEPA
                       </>
                     )}
@@ -2071,11 +2105,22 @@ export default function ServicesIAInvoice() {
                       <div className="self-center">
                         <button
                           type="button"
-                          onClick={() => handleReconcile(item.bank_transaction_id, item.candidate_document.id, item.candidate_document.type)}
+                          onClick={() => {
+                            if (!canUseReconciliation) {
+                              toast.error("Le Plan TPE est requis pour le Rapprochement Bancaire.");
+                              return;
+                            }
+                            handleReconcile(item.bank_transaction_id, item.candidate_document.id, item.candidate_document.type);
+                          }}
                           disabled={isMatching}
-                          className="px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 whitespace-nowrap disabled:opacity-50"
+                          className={`px-5 py-3 text-white font-bold text-xs rounded-xl transition-all flex items-center gap-2 whitespace-nowrap disabled:opacity-50 ${
+                            canUseReconciliation 
+                              ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md" 
+                              : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                          }`}
+                          title={!canUseReconciliation ? "Plan TPE requis" : ""}
                         >
-                          {isMatching ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                          {isMatching ? <Loader2 size={14} className="animate-spin" /> : (canUseReconciliation ? <Check size={14} /> : <Lock size={14} />)}
                           Rapprocher en 1 clic
                         </button>
                       </div>

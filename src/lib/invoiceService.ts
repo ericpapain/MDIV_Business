@@ -58,12 +58,15 @@ export async function deleteInvoice(id: string, companyId?: number): Promise<boo
  * Enregistre ou met à jour une facture en base de données.
  */
 export async function saveInvoice(invoiceData: any, companyId?: number): Promise<any> {
+  const cid = companyId || invoiceData.company_id;
+  if (!cid) throw new Error("Authentification requise pour enregistrer une facture.");
+
   const response = await fetch(getApiUrl('invoices.php'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       ...invoiceData,
-      company_id: companyId || invoiceData.company_id || 1
+      company_id: cid
     })
   });
   if (!response.ok) {
@@ -175,5 +178,26 @@ export async function exportInvoicePDF(invoiceData: any, companyId?: number) {
     console.error("Erreur lors de la génération PDF de la facture:", error);
     throw error;
   }
+}
+
+/**
+ * Extrait les lignes d'articles, quantités et montants à partir d'un texte OCR de facture/ticket
+ */
+export async function extractInvoiceLinesFromOCR(ocrText: string, companyId?: number): Promise<any> {
+  const response = await fetch(getApiUrl('invoice_extract_lines.php'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ocr_text: ocrText, company_id: companyId })
+  });
+  
+  if (!response.ok) {
+    let err = "Erreur lors de l'extraction IA des lignes.";
+    try {
+      const d = await response.json();
+      if (d.error) err = d.error;
+    } catch {}
+    throw new Error(err);
+  }
+  return response.json();
 }
 

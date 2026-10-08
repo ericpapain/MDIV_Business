@@ -1,7 +1,7 @@
 <?php
 // public/api/email_analyze.php
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/groq_client.php';
+require_once __DIR__ . '/multi_llm_orchestrator.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -31,31 +31,32 @@ try {
     $readTimeSeconds = max(5, intval(($wordCount / 200) * 60));
 
     // Audit sémantique réel par le modèle IA
-    $systemPrompt = "Tu es un auditeur de communication d'entreprise. Évalue rigoureusement la qualité du texte d'email fourni.
-Critères :
-- clarityScore (0-100) : Clarté du propos et structure.
-- professionalismScore (0-100) : Politesse, vocabulaire soutenu, absence de familiarité excessive.
-- qualityScore (0-100) : Efficacité globale pour atteindre son objectif commercial ou professionnel.
-Réponds UNIQUEMENT par un objet JSON valide avec ce format :
+    $systemPrompt = "You are a corporate communication auditor. Rigorously evaluate the quality of the provided email text.
+
+CRITICAL RULES:
+- clarityScore (0-100): Clarity of the message and structure.
+- professionalismScore (0-100): Politeness, formal vocabulary, absence of excessive familiarity.
+- qualityScore (0-100): Overall effectiveness in achieving its commercial or professional goal.
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+Respond ONLY with a valid JSON object using this exact structure:
 {
-  \"clarityScore\": 85,
-  \"professionalismScore\": 90,
-  \"qualityScore\": 88
+  \"clarityScore\": <CALCULATED_INTEGER_BETWEEN_0_AND_100>,
+  \"professionalismScore\": <CALCULATED_INTEGER_BETWEEN_0_AND_100>,
+  \"qualityScore\": <CALCULATED_INTEGER_BETWEEN_0_AND_100>
 }";
 
-    $messages = [
-        ['role' => 'system', 'content' => $systemPrompt],
-        ['role' => 'user', 'content' => "Email à analyser :\n\n" . $text]
-    ];
-
-    $response = callGroqApi($messages, null, false, true);
+    $orchestrator = new MultiLLMOrchestrator();
+    $company_id = intval($input['company_id'] ?? 1); // Pass or default to 1 if user wants for test (already protected elsewhere)
+    $response = $orchestrator->executePrompt('email_analyze', $systemPrompt, "Email à analyser :\n\n" . $text, $company_id, null);
 
     $clarity = 75;
     $professionalism = 80;
     $quality = 78;
 
-    if (isset($response['choices'][0]['message']['content'])) {
-        $content = $response['choices'][0]['message']['content'];
+    if (isset($response['success']) && $response['success']) {
+        $content = $response['content'];
         $data = json_decode($content, true);
         if (!$data && preg_match('/\{.*\}/s', $content, $m)) {
             $data = json_decode($m[0], true);

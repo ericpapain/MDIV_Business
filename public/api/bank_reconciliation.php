@@ -15,42 +15,15 @@ require_once __DIR__ . '/config.php';
 
 $dbPath = __DIR__ . '/../../dev_db.json';
 $db = file_exists($dbPath) ? json_decode(file_get_contents($dbPath), true) : [];
-$companyId = isset($_GET['company_id']) ? intval($_GET['company_id']) : 1;
+$companyId = isset($_GET['company_id']) ? intval($_GET['company_id']) : 0;
+if (!$companyId) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
 
-// Initialisation des transactions bancaires de référence réelles si la table n'existe pas encore
 if (empty($db['bank_transactions'])) {
-    $db['bank_transactions'] = [
-        [
-            'id' => 'tx_101',
-            'company_id' => 1,
-            'date' => date('Y-m-d', strtotime('-2 days')),
-            'label' => 'VIR SEPA RECU GROUPE INDUSTRIEL DE L EST FAC-2026-0042',
-            'amount' => 2880.00,
-            'type' => 'credit',
-            'is_reconciled' => false,
-            'matched_document_id' => null
-        ],
-        [
-            'id' => 'tx_102',
-            'company_id' => 1,
-            'date' => date('Y-m-d', strtotime('-5 days')),
-            'label' => 'PRELEVEMENT TOTALENERGIES STATIONS 49182',
-            'amount' => -85.50,
-            'type' => 'debit',
-            'is_reconciled' => false,
-            'matched_document_id' => null
-        ],
-        [
-            'id' => 'tx_103',
-            'company_id' => 1,
-            'date' => date('Y-m-d', strtotime('-10 days')),
-            'label' => 'VIR SEPA EMIS POINT P CHANTIER 8820',
-            'amount' => -1420.00,
-            'type' => 'debit',
-            'is_reconciled' => false,
-            'matched_document_id' => null
-        ]
-    ];
+    $db['bank_transactions'] = [];
     file_put_contents($dbPath, json_encode($db, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 

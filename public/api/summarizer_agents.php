@@ -156,12 +156,14 @@ sendSSE('agent_message', [
     'message' => "Analyse et extraction factuelle de « $doc_name » en mode $modeTitle..."
 ]);
 
-$agent1Prompt = "Tu es l'Analyste Factuel en chef d'un cabinet de conseil de direction.
-Analyse le document fourni et propose une première extraction brute structurée :
-1. Faits majeurs, chiffres clés, dates et clauses irréfutables
-2. Objectifs explicites formulés dans le texte
-3. Premières pistes d'actions et décisions opérationnelles suggérées
-Sois concis, direct et strictement factuel (environ 110 à 150 mots)." . $companyPromptInjection;
+$agent1Prompt = "You are the Chief Factual Analyst of a management consulting firm.
+Analyze the provided document and propose a structured raw initial extraction:
+1. Major facts, key figures, dates, and irrefutable clauses
+2. Explicit objectives formulated in the text
+3. Initial actionable insights and suggested operational decisions
+Be concise, direct, and strictly factual (around 110 to 150 words).
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE ALL YOUR RESPONSES STRICTLY IN FRENCH." . $companyPromptInjection;
 
 $res1 = callGroqApi([
     ['role' => 'system', 'content' => $agent1Prompt],
@@ -180,13 +182,15 @@ sendSSE('agent_message', [
     'message' => "Challenger la proposition d'Agent 1, détection des angles morts et des risques critiques..."
 ]);
 
-$agent2Prompt = "Tu es l'Auditeur Critique & Challenger de Risques.
-Évalue avec exigence la proposition de l'Analyste Factuel par rapport au document source.
-Identifie :
-1. Une omission, imprécision ou chiffre manquant dans la proposition d'Agent 1
-2. Un risque opérationnel, juridique, RH ou financier critique sous-estimé
-3. Un point d'arbitrage que la direction doit impérativement trancher
-Reste incisif, direct et constructif (environ 90 à 130 mots)." . $companyPromptInjection;
+$agent2Prompt = "You are the Critical Auditor & Risk Challenger.
+Strictly evaluate the Factual Analyst's proposal against the source document.
+Identify:
+1. An omission, inaccuracy, or missing figure in Agent 1's proposal
+2. An underestimated critical operational, legal, HR, or financial risk
+3. An arbitration point that management must absolutely decide on
+Be incisive, direct, and constructive (around 90 to 130 words).
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE ALL YOUR RESPONSES STRICTLY IN FRENCH." . $companyPromptInjection;
 
 $res2 = callGroqApi([
     ['role' => 'system', 'content' => $agent2Prompt],
@@ -205,12 +209,14 @@ sendSSE('agent_message', [
     'message' => "Arbitrage des divergences entre Analyste et Auditeur, priorisation selon le mode $modeTitle..."
 ]);
 
-$agent3Prompt = "Tu es le Stratège Exécutif & Arbitre Métier.
-Prends en compte la proposition initiale d'Agent 1 et les objections critiques formulées par Agent 2.
-Rends un arbitrage exécutif clair pour le mode $modeTitle :
-- Quelles critiques d'Agent 2 sont validées et intégrées ?
-- Quels compromis opérationnels ou financiers doivent être actés pour maximiser la valeur et sécuriser l'exécution ?
-Rédige ta synthèse d'arbitrage (environ 90 à 120 mots)." . $companyPromptInjection;
+$agent3Prompt = "You are the Executive Strategist & Business Arbitrator.
+Take into account Agent 1's initial proposal and the critical objections raised by Agent 2.
+Make a clear executive arbitration for the $modeTitle mode:
+- Which of Agent 2's criticisms are validated and integrated?
+- What operational or financial trade-offs must be made to maximize value and secure execution?
+Write your arbitration summary (around 90 to 120 words).
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE ALL YOUR RESPONSES STRICTLY IN FRENCH." . $companyPromptInjection;
 
 $res3 = callGroqApi([
     ['role' => 'system', 'content' => $agent3Prompt],
@@ -229,37 +235,40 @@ sendSSE('agent_message', [
     'message' => "Consensus validé entre les 3 auditeurs. Génération et certification de la synthèse exécutive finale..."
 ]);
 
-$systemPrompt = "Tu es le Directeur Général & Juge de Synthèse.
-Tu clôtures la délibération entre l'Analyste, l'Auditeur des Risques et le Stratège.
-Intègre leurs consensus et arbitrages pour produire la synthèse exécutive finale selon le mode : $modeTitle.
+$systemPrompt = "You are the Chief Executive Officer & Synthesis Judge.
+You close the deliberation between the Analyst, the Risk Auditor, and the Strategist.
+Integrate their consensus and arbitrations to produce the final executive synthesis according to the mode: $modeTitle.
 
 $modeInstructions
 $companyPromptInjection
 
-RÈGLE ABSOLUE DE VÉRACITÉ : Base-toi UNIQUEMENT et EXCLUSIVEMENT sur les informations réellement présentes dans le document fourni et validées lors de la délibération.
-Tu dois répondre UNIQUEMENT par un objet JSON valide respectant rigoureusement ce schéma :
+ABSOLUTE TRUTH RULE: Base yourself SOLELY and EXCLUSIVELY on the information actually present in the provided document and validated during the deliberation.
+
+CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+
+You must respond ONLY with a valid JSON object strictly respecting this schema:
 {
   \"id\": \"$doc_id\",
   \"documentName\": \"$doc_name\",
   \"mode\": \"$mode\",
   \"date\": \"" . date('Y-m-d') . "\",
   \"kpis\": {
-    \"readabilityScore\": 88,
-    \"pageCount\": 1,
-    \"estimatedTimeSavedMinutes\": 35
+    \"readabilityScore\": <CALCULATED_INTEGER_SCORE>,
+    \"pageCount\": <CALCULATED_INTEGER_COUNT>,
+    \"estimatedTimeSavedMinutes\": <CALCULATED_INTEGER_MINUTES>
   },
-  \"keywords\": [\"terme1\", \"terme2\", \"terme3\", \"terme4\", \"terme5\"],
-  \"majorConcepts\": [\"concept majeur 1\", \"concept majeur 2\", \"concept majeur 3\"],
-  \"executiveSummary\": \"Texte rédigé selon les règles strictes de longueur, de structure et de ton du mode $mode...\",
-  \"objectives\": [\"Objectif 1 extrait du document\"],
-  \"keyPoints\": [\"Point clé 1 structuré selon le mode $mode\"],
-  \"risks\": [\"Risque réel identifié\"],
+  \"keywords\": [\"<KEYWORD_1>\", \"<KEYWORD_2>\", \"<KEYWORD_3>\", \"<KEYWORD_4>\", \"<KEYWORD_5>\"],
+  \"majorConcepts\": [\"<CONCEPT_1>\", \"<CONCEPT_2>\", \"<CONCEPT_3>\"],
+  \"executiveSummary\": \"<GENERATED_EXECUTIVE_SUMMARY_STRING_FRENCH>\",
+  \"objectives\": [\"<EXTRACTED_OBJECTIVE_FRENCH_1>\"],
+  \"keyPoints\": [\"<KEY_POINT_FRENCH_1>\"],
+  \"risks\": [\"<IDENTIFIED_RISK_FRENCH_1>\"],
   \"recommendedActions\": [
-    {\"action\": \"Action 1\", \"context\": \"Contexte et bénéfice attendu\"}
+    {\"action\": \"<ACTION_FRENCH_1>\", \"context\": \"<CONTEXT_BENEFIT_FRENCH>\"}
   ],
-  \"decisions\": [\"Décision 1 à acter\"],
-  \"deadlines\": [\"Échéance 1\"],
-  \"stakeholders\": [\"Direction Générale\", \"Équipes Opérationnelles\"],
+  \"decisions\": [\"<DECISION_FRENCH_1>\"],
+  \"deadlines\": [\"<DEADLINE_1>\"],
+  \"stakeholders\": [\"<STAKEHOLDER_1>\", \"<STAKEHOLDER_2>\"],
   \"consensus_deliberation\": {
     \"agent1_extraction\": " . json_encode(mb_substr($agent1Draft, 0, 300)) . ",
     \"agent2_challenge\": " . json_encode(mb_substr($agent2Critique, 0, 300)) . ",

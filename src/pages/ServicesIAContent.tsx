@@ -23,6 +23,8 @@ import { SaveWorkModal } from '@/components/saved-work/SaveWorkModal';
 import { SavedWorkDrawer } from '@/components/saved-work/SavedWorkDrawer';
 import { VersionSelectorBar } from '@/components/common/VersionSelectorBar';
 import { SectionDeepDive } from '@/components/common/SectionDeepDive';
+import { hasFeatureAccess } from '@/lib/planLimitsService';
+import { Lock } from 'lucide-react';
 
 const CHANNELS_CONFIG = [
   { 
@@ -131,7 +133,7 @@ export default function ServicesIAContent() {
   // Studio State
   const [sourceType, setSourceType] = useState<'text' | 'url' | 'file'>('text');
   const [sourceContent, setSourceContent] = useState('');
-  const [selectedChannels, setSelectedChannels] = useState<string[]>(['linkedin']);
+  const [selectedChannels, setSelectedChannels] = useState<string[]>(CHANNELS_CONFIG.map(c => c.id));
   const [targetAudience, setTargetAudience] = useState('');
   
   const [isGenerating, setIsGenerating] = useState(false);
@@ -184,6 +186,10 @@ export default function ServicesIAContent() {
   };
 
   const toggleChannel = (id: string) => {
+    if (id !== 'linkedin' && !hasFeatureAccess('multi_channel_all_networks').allowed) {
+      toast.error("Le forfait Créateur est limité à LinkedIn. Passez au plan Indépendant pour débloquer tous les canaux !");
+      return;
+    }
     if (selectedChannels.includes(id)) {
       if (selectedChannels.length > 1) setSelectedChannels(selectedChannels.filter(c => c !== id));
       else toast.error("Veuillez conserver au moins un canal de diffusion.");
@@ -449,18 +455,28 @@ export default function ServicesIAContent() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {CHANNELS_CONFIG.map(channel => {
                     const isSelected = selectedChannels.includes(channel.id);
+                    const isLocked = channel.id !== 'linkedin' && !hasFeatureAccess('multi_channel_all_networks').allowed;
                     const Icon = channel.icon;
                     return (
                       <button 
                         key={channel.id}
+                        type="button"
+                        disabled={isLocked}
                         onClick={() => toggleChannel(channel.id)}
-                        className={`flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border transition-all ${
+                        className={`flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border transition-all relative ${
                           isSelected 
                             ? `${channel.activeBg} text-white shadow-md ${channel.border} scale-[1.02]` 
-                            : `bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50`
+                            : isLocked
+                              ? 'bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed'
+                              : `bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50`
                         }`}
                       >
-                        <Icon size={20} className={isSelected ? 'text-white' : channel.text} />
+                        {isLocked && (
+                          <div className="absolute top-2 right-2 text-slate-400">
+                            <Lock size={12} />
+                          </div>
+                        )}
+                        <Icon size={20} className={isSelected ? 'text-white' : isLocked ? 'text-slate-400' : channel.text} />
                         <span className="text-xs font-bold text-center leading-tight">{channel.name}</span>
                       </button>
                     )

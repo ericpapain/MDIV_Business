@@ -19,7 +19,13 @@ $dbPath = __DIR__ . '/../../dev_db.json';
 $useMysql = isset($pdo) && $pdo instanceof PDO;
 
 if ($method === 'GET') {
-    $companyId = isset($_GET['company_id']) ? (int)$_GET['company_id'] : 1;
+    $companyId = isset($_GET['company_id']) ? (int)$_GET['company_id'] : 0;
+    
+    if (!$companyId) {
+        echo json_encode(['success' => false, 'error' => 'Unauthorized or missing company_id']);
+        exit;
+    }
+
     $projectId = $_GET['project_id'] ?? null;
     $clientId = isset($_GET['client_id']) ? (int)$_GET['client_id'] : null;
     $category = $_GET['category'] ?? null;
@@ -92,7 +98,14 @@ if ($method === 'POST') {
     $rawInput = file_get_contents('php://input');
     $data = json_decode($rawInput, true);
 
-    $companyId = (int)($data['company_id'] ?? 1);
+    $companyId = (int)($data['company_id'] ?? 0);
+    
+    if (!$companyId) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Unauthorized or missing company_id']);
+        exit;
+    }
+
     $expense = [
         'id' => $data['id'] ?? ('exp_' . time() . '_' . rand(100, 999)),
         'company_id' => $companyId,
