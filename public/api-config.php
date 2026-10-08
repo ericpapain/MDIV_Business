@@ -5,7 +5,7 @@
 $db_host = 'zwpvaah279.mysql.db';
 $db_name = 'zwpvaah279';
 $db_user = 'zwpvaah279';
-$db_pass = 'Champion2018';
+$db_pass = 'France2026';
 $db_charset = 'utf8mb4';
 
 // Les identifiants administrateur sont désormais gérés de manière sécurisée en base de données.
