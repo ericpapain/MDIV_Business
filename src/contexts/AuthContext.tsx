@@ -5,6 +5,7 @@ export interface CompanyData {
   id: number;
   name: string;
   email: string;
+  plan_tier?: string;
 }
 
 // Structure du contexte
@@ -46,6 +47,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setCompany(newCompany);
     localStorage.setItem('mdiv_token', newToken);
     localStorage.setItem('mdiv_company', JSON.stringify(newCompany));
+    
+    // Mapping DB enum -> Frontend PlanTier
+    if (newCompany.plan_tier) {
+      const planMapping: Record<string, string> = {
+        'free': 'creator',
+        'starter': 'independent',
+        'pro': 'tpe',
+        'enterprise': 'pme'
+      };
+      const frontendPlan = planMapping[newCompany.plan_tier] || 'creator';
+      localStorage.setItem('mdiv_user_plan', frontendPlan);
+      window.dispatchEvent(new Event('user_plan_changed'));
+    }
   };
 
   const logout = () => {
@@ -53,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setCompany(null);
     localStorage.removeItem('mdiv_token');
     localStorage.removeItem('mdiv_company');
+    localStorage.removeItem('mdiv_user_plan');
   };
 
   return (
