@@ -52,8 +52,16 @@ Exemple : Si un plat coûte 8.90€ TTC avec 10% de TVA, tu dois renvoyer 8.09 d
 
 CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
 
+INSTRUCTION DE HAUTE PRÉCISION (PRENDS TON TEMPS) :
+L'extraction doit être chirurgicale et mathématiquement parfaite. Avant de générer les lignes, utilise le champ `_thinking` pour faire ton raisonnement étape par étape.
+1. Identifie chaque article et son prix affiché.
+2. Détermine si le prix affiché est HT ou TTC (regarde les totaux du ticket pour comprendre).
+3. Pose le calcul exact de conversion TTC -> HT pour CHAQUE article. (ex: 8.90 / 1.10 = 8.09)
+4. Vérifie que la somme de tes HT + TVA correspond au total du ticket.
+
 Réponds STRICTEMENT par un objet JSON valide avec la structure suivante, sans aucun autre texte (pas de markdown) :
 {
+  \"_thinking\": \"Ton raisonnement mathématique étape par étape ici...\",
   \"suggestedLines\": [
     { \"id\": \"1\", \"description\": \"Nom exact de l'article sur le ticket\", \"quantity\": 1, \"unitPriceHT\": 15.00, \"vatRate\": 20, \"discountPercentage\": 0 }
   ]
