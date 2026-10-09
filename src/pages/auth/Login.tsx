@@ -160,7 +160,7 @@ export const Login = () => {
                 <Label htmlFor="password" className="text-xs font-bold text-slate-700">
                   {isEn ? "Password" : "Mot de passe"}
                 </Label>
-                <Link to="/contact" className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                <Link to="/forgot-password" className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">
                   {isEn ? "Forgot password?" : "Mot de passe oublié ?"}
                 </Link>
               </div>

@@ -210,7 +210,9 @@ function get_db_connection() {
                 'plan_tier' => "ENUM('free', 'starter', 'pro', 'enterprise') DEFAULT 'free'",
                 'company_status' => "ENUM('ACTIVE', 'SIREN_PENDING', 'MANUAL', 'INACTIVE') DEFAULT 'ACTIVE'",
                 'data_source' => "ENUM('INSEE', 'INPI', 'BODACC', 'PAPPERS', 'MANUAL') DEFAULT 'INSEE'",
-                'official_data' => "JSON NULL"
+                'official_data' => "JSON NULL",
+                'reset_token' => "VARCHAR(255) NULL",
+                'reset_expires' => "DATETIME NULL"
             ];
             foreach ($extended_cols as $cName => $cDef) {
                 if (!isset($existing_cols[$cName])) {
@@ -235,11 +237,28 @@ function get_db_connection() {
               `email_verified` TINYINT(1) DEFAULT 1,
               `verification_token` VARCHAR(255) DEFAULT NULL,
               `status` ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
+              `reset_token` VARCHAR(255) DEFAULT NULL,
+              `reset_expires` DATETIME DEFAULT NULL,
               `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               INDEX `idx_user_email` (`email`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
+
+        // Migration douce pour users
+        try {
+            $cols_stmt_users = $pdo->query("SHOW COLUMNS FROM `users`");
+            $existing_cols_users = [];
+            while ($row = $cols_stmt_users->fetch(PDO::FETCH_ASSOC)) {
+                $existing_cols_users[$row['Field']] = true;
+            }
+            if (!isset($existing_cols_users['reset_token'])) {
+                $pdo->exec("ALTER TABLE `users` ADD COLUMN `reset_token` VARCHAR(255) NULL");
+            }
+            if (!isset($existing_cols_users['reset_expires'])) {
+                $pdo->exec("ALTER TABLE `users` ADD COLUMN `reset_expires` DATETIME NULL");
+            }
+        } catch (Throwable $eCols) {}
 
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS `company_api_cache` (
