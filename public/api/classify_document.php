@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/multi_llm_orchestrator.php';
 // public/api/classify_document.php
 /**
  * Service de Classification Documentaire & Garde-Fou d'Intention
@@ -81,11 +82,7 @@ You must respond ONLY with a valid JSON object strictly following this structure
 
     if (isset($response['choices'][0]['message']['content'])) {
         $content = trim($response['choices'][0]['message']['content']);
-        $data = json_decode($content, true);
-
-        if (!$data && preg_match('/\{[\s\S]*\}/', $content, $m)) {
-            $data = json_decode($m[0], true);
-        }
+        $data = MultiLLMOrchestrator::cleanAndDecodeJson($content);
 
         if (!$data || !isset($data['detected_type'])) {
             throw new Exception("Classification impossible.");

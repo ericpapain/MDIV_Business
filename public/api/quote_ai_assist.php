@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/multi_llm_orchestrator.php';
 // public/api/quote_ai_assist.php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/groq_client.php';
@@ -119,11 +120,7 @@ You must respond ONLY with a valid JSON object strictly following this structure
 
     if (isset($response['choices'][0]['message']['content'])) {
         $content = trim($response['choices'][0]['message']['content']);
-        $data = json_decode($content, true);
-
-        if (!$data && preg_match('/\{[\s\S]*\}/', $content, $m)) {
-            $data = json_decode($m[0], true);
-        }
+        $data = MultiLLMOrchestrator::cleanAndDecodeJson($content);
 
         if (is_array($data) && isset($data['error'])) {
             http_response_code(400);
