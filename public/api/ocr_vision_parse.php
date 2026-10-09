@@ -80,14 +80,25 @@ if (!empty($groqKey)) {
         $content = $resObj['choices'][0]['message']['content'] ?? '';
         require_once __DIR__ . '/multi_llm_orchestrator.php';
         $extractedData = MultiLLMOrchestrator::cleanAndDecodeJson($content);
+        
+        if (!$extractedData) {
+            file_put_contents(__DIR__ . '/ocr_error_log.txt', date('Y-m-d H:i:s') . " - Parse Failed. Raw content:\n" . $content . "\n\n", FILE_APPEND);
+        }
+    } else {
+        file_put_contents(__DIR__ . '/ocr_error_log.txt', date('Y-m-d H:i:s') . " - HTTP $httpCode. Response:\n" . $response . "\n\n", FILE_APPEND);
+        $extractedData = null; // Will trigger the error below
     }
+} else {
+    http_response_code(500);
+    echo json_encode(['error' => "La clé d'API Groq est manquante pour l'OCR Vision."]);
+    exit;
 }
 
 if (!$extractedData) {
     http_response_code(422);
     echo json_encode([
         'success' => false,
-        'error' => "L'IA n'a pas pu extraire de manière fiable les données du reçu."
+        'error' => "L'IA n'a pas pu extraire de manière fiable les données du reçu. Veuillez vérifier que l'image est nette."
     ]);
     exit;
 }

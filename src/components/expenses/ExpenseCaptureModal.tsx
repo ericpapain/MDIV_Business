@@ -142,10 +142,13 @@ export const ExpenseCaptureModal: React.FC<ExpenseCaptureModalProps> = ({
     setAmountTTC(Math.round((amountHT + tva) * 100) / 100);
   };
 
+  const [isOcrSuccess, setIsOcrSuccess] = useState(false);
+
   const handleProcessImage = async (file: File) => {
     try {
       setStep('parsing');
       setParsingProgress("Optimisation du reçu...");
+      setIsOcrSuccess(false);
 
       const base64 = await fileToOptimizedBase64(file);
       setPreviewImage(base64);
@@ -168,11 +171,12 @@ export const ExpenseCaptureModal: React.FC<ExpenseCaptureModalProps> = ({
         setNotes(extracted.raw_text);
       }
 
+      setIsOcrSuccess(true);
       setStep('edit');
       toast.success("Facture analysée avec succès par IA Vision !");
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Erreur lors de l'analyse OCR.");
+      toast.error(err.message || "Erreur lors de l'analyse OCR. Saisie manuelle requise.");
       setStep('edit'); // Permet quand même à l'utilisateur de saisir manuellement
     }
   };
@@ -349,8 +353,8 @@ export const ExpenseCaptureModal: React.FC<ExpenseCaptureModalProps> = ({
         {/* ÉTAPE 3 : Vérification, affectation projet et enregistrement */}
         {step === 'edit' && (
           <form onSubmit={handleSave} className="space-y-5">
-            {previewImage && (
-              <div className="flex items-center justify-between p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs">
+            {previewImage && isOcrSuccess && (
+              <div className="flex items-center justify-between p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs mb-4">
                 <div className="flex items-center gap-2 text-amber-900">
                   <CheckCircle2 size={16} className="text-amber-600" />
                   <span className="font-bold">Image analysée avec succès par l'OCR Vision</span>
@@ -361,6 +365,21 @@ export const ExpenseCaptureModal: React.FC<ExpenseCaptureModalProps> = ({
                   className="text-slate-500 hover:text-slate-900 font-bold underline text-[11px] cursor-pointer"
                 >
                   Scanner un autre reçu
+                </button>
+              </div>
+            )}
+            
+            {previewImage && !isOcrSuccess && (
+              <div className="flex items-center justify-between p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs mb-4">
+                <div className="flex items-center gap-2 text-rose-900">
+                  <span className="font-bold">L'analyse OCR a échoué. Veuillez saisir les informations manuellement.</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStep('capture')}
+                  className="text-slate-500 hover:text-slate-900 font-bold underline text-[11px] cursor-pointer"
+                >
+                  Réessayer un scan
                 </button>
               </div>
             )}
