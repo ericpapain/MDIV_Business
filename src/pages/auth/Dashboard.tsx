@@ -362,7 +362,7 @@ export const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Espace Entreprise Multi-tenant */}
-        <div className="bg-card border border-[hsl(221,83%,53%)]/30 rounded-3xl shadow-2xl p-6 md:p-8 mb-8 backdrop-blur-xl">
+        <div className="bg-white border border-[hsl(221,83%,53%)]/30 rounded-3xl shadow-2xl p-6 md:p-8 mb-8 backdrop-blur-xl">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               {company?.logo ? (
@@ -514,7 +514,7 @@ export const Dashboard = () => {
             </div>
 
             {/* Barre de Recherche & Filtres */}
-            <div className="bg-card border border-border rounded-2xl p-4 flex flex-col md:flex-row items-center gap-3">
+            <div className="bg-white border border-border rounded-2xl p-4 flex flex-col md:flex-row items-center gap-3">
               <div className="relative flex-1 w-full">
                 <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                 <input
@@ -549,7 +549,7 @@ export const Dashboard = () => {
                 <p className="text-xs">Chargement de vos devis...</p>
               </div>
             ) : filteredQuotes.length === 0 ? (
-              <div className="bg-card border border-dashed border-border rounded-3xl p-12 text-center">
+              <div className="bg-white border border-dashed border-border rounded-3xl p-12 text-center">
                 <FileText className="mx-auto h-12 w-12 text-gray-600 mb-3" />
                 <h3 className="text-base font-bold text-foreground mb-1">Aucun devis trouvé</h3>
                 <p className="text-xs text-muted-foreground mb-6 max-w-md mx-auto">
@@ -564,7 +564,7 @@ export const Dashboard = () => {
                 </Link>
               </div>
             ) : (
-              <div className="bg-card border border-[hsl(221,83%,53%)]/20 rounded-2xl overflow-hidden shadow-xl">
+              <div className="bg-white border border-[hsl(221,83%,53%)]/20 rounded-2xl overflow-hidden shadow-xl">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-50 border-b border-border text-muted-foreground uppercase tracking-wider font-semibold">
@@ -673,7 +673,7 @@ export const Dashboard = () => {
             </div>
 
             {/* Recherche Projets */}
-            <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
+            <div className="bg-white border border-border rounded-2xl p-4 flex items-center gap-3">
               <Search size={15} className="text-muted-foreground" />
               <input
                 type="text"
@@ -691,7 +691,7 @@ export const Dashboard = () => {
                 <p className="text-xs">Chargement de vos projets...</p>
               </div>
             ) : filteredProjects.length === 0 ? (
-              <div className="bg-card border border-dashed border-border rounded-3xl p-12 text-center">
+              <div className="bg-white border border-dashed border-border rounded-3xl p-12 text-center">
                 <FolderKanban className="mx-auto h-12 w-12 text-gray-600 mb-3" />
                 <h3 className="text-base font-bold text-foreground mb-1">Aucun projet enregistré</h3>
                 <p className="text-xs text-muted-foreground mb-6 max-w-md mx-auto">
@@ -707,7 +707,7 @@ export const Dashboard = () => {
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProjects.map((p) => (
-                  <div key={p.id} className="bg-card border border-[hsl(221,83%,53%)]/20 rounded-2xl p-5 hover:border-[hsl(221,83%,53%)]/50 transition-all flex flex-col justify-between group shadow-lg">
+                  <div key={p.id} className="bg-white border border-[hsl(221,83%,53%)]/20 rounded-2xl p-5 hover:border-[hsl(221,83%,53%)]/50 transition-all flex flex-col justify-between group shadow-lg">
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-3">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
@@ -789,7 +789,7 @@ export const Dashboard = () => {
             </div>
 
             {/* Recherche Clients */}
-            <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
+            <div className="bg-white border border-border rounded-2xl p-4 flex items-center gap-3">
               <Search size={15} className="text-muted-foreground" />
               <input
                 type="text"
@@ -806,7 +806,7 @@ export const Dashboard = () => {
                 <p className="text-xs">Chargement des clients...</p>
               </div>
             ) : filteredClients.length === 0 ? (
-              <div className="bg-card border border-dashed border-border rounded-3xl p-12 text-center">
+              <div className="bg-white border border-dashed border-border rounded-3xl p-12 text-center">
                 <Users className="mx-auto h-12 w-12 text-gray-600 mb-3" />
                 <h3 className="text-base font-bold text-foreground mb-1">Aucun client trouvé</h3>
                 <p className="text-xs text-muted-foreground mb-6 max-w-md mx-auto">
@@ -822,7 +822,7 @@ export const Dashboard = () => {
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredClients.map((c) => (
-                  <div key={c.id} className="bg-card border border-[hsl(221,83%,53%)]/20 rounded-2xl p-5 hover:border-[hsl(221,83%,53%)]/50 transition-all shadow-lg">
+                  <div key={c.id} className="bg-white border border-[hsl(221,83%,53%)]/20 rounded-2xl p-5 hover:border-[hsl(221,83%,53%)]/50 transition-all shadow-lg">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 rounded-xl bg-[hsl(221,83%,53%)]/15 border border-[hsl(221,83%,53%)]/30 flex items-center justify-center text-[hsl(221,83%,53%)] font-bold text-sm">
                         {c.company?.charAt(0) || c.name?.charAt(0) || 'C'}

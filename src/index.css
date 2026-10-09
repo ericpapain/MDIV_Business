@@ -549,6 +549,7 @@
    ============================================= */
 
 .ia-page {
+  /* Variables IA spécifiques */
   --ia-primary: 221 83% 53%;
   --ia-secondary: 263 70% 50%;
   --ia-success: 160 84% 39%;
@@ -558,8 +559,33 @@
   --ia-text-muted: 215 16% 47%;
   --ia-border: 214 32% 91%;
 
-  background: hsl(var(--ia-bg));
-  color: hsl(var(--ia-text));
+  /* FORCER LES VARIABLES TAILWIND EN MODE CLAIR (Blanc cassé / SaaS) */
+  --background: 45 35% 98%;
+  --foreground: 222 47% 11%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  
+  --primary: 221 83% 53%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 218 20% 90%;
+  --secondary-foreground: 222 47% 11%;
+  
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
 
 .ia-page * {
