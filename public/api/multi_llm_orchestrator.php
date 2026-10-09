@@ -24,9 +24,19 @@ class MultiLLMOrchestrator {
         
         $data = json_decode($cleaned, true);
         if (!$data) {
-            // Tente de trouver un objet {} ou un tableau []
-            if (preg_match('/(?:\{[\s\S]*\}|\[[\s\S]*\])/', $cleaned, $m)) {
-                $data = json_decode($m[0], true);
+            // Extraction robuste sans regex gourmande pour éviter les limites de PCRE
+            $firstCurly = strpos($cleaned, '{');
+            $lastCurly = strrpos($cleaned, '}');
+            $firstSquare = strpos($cleaned, '[');
+            $lastSquare = strrpos($cleaned, ']');
+
+            $objLen = ($firstCurly !== false && $lastCurly !== false && $lastCurly > $firstCurly) ? ($lastCurly - $firstCurly + 1) : 0;
+            $arrLen = ($firstSquare !== false && $lastSquare !== false && $lastSquare > $firstSquare) ? ($lastSquare - $firstSquare + 1) : 0;
+
+            if ($objLen > 0 && $objLen > $arrLen) {
+                $data = json_decode(substr($cleaned, $firstCurly, $objLen), true);
+            } elseif ($arrLen > 0) {
+                $data = json_decode(substr($cleaned, $firstSquare, $arrLen), true);
             }
         }
         
