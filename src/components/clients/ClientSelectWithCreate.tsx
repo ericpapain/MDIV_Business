@@ -174,16 +174,16 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
     <div className={`relative ${isDropdownOpen ? 'z-[9999]' : 'z-20'} ${className}`}>
       {/* Label and "+ Nouveau client" button */}
       <div className="flex items-center justify-between mb-2">
-        <label className={`text-sm font-bold flex items-center gap-2 ${theme === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>
-          <Building2 size={16} className="text-blue-500" />
-          {label} {required && <span className="text-blue-500">*</span>}
+        <label className={`text-sm font-bold flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+          <Building2 size={16} className={theme === 'dark' ? 'text-indigo-400' : 'text-blue-500'} />
+          {label} {required && <span className={theme === 'dark' ? 'text-indigo-400' : 'text-blue-500'}>*</span>}
         </label>
         
         <button
           type="button"
           onClick={handleOpenCreate}
           id="btn-add-new-client"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 rounded-lg transition-all shadow-sm hover:scale-[1.02] cursor-pointer"
+          className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg transition-all shadow-sm hover:scale-[1.02] cursor-pointer ${theme === 'dark' ? 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 border border-indigo-500/30' : 'bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200'}`}
         >
           <UserPlus size={13} />
           + Nouveau client
@@ -192,19 +192,19 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
 
       {/* Selected Client Display or Select Trigger */}
       {selectedClient ? (
-        <div className={`flex items-center justify-between p-3.5 border rounded-xl shadow-sm group transition-all ${theme === 'dark' ? 'bg-slate-800/80 border-slate-700 hover:border-blue-500' : 'bg-[#F8F7F4] border-slate-200 hover:border-blue-400'}`}>
+        <div className={`flex items-center justify-between p-3.5 border rounded-xl shadow-sm group transition-all ${theme === 'dark' ? 'bg-slate-800/40 border-slate-800/80 hover:bg-slate-800/60' : 'bg-[#F8F7F4] border-slate-200 hover:border-blue-400'}`}>
           <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm ${theme === 'dark' ? 'bg-blue-900/50 border-blue-800 text-blue-400' : 'bg-blue-50 border-blue-200 text-blue-600'}`}>
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm ${theme === 'dark' ? 'bg-indigo-500/20 border border-indigo-500/30 text-indigo-400' : 'bg-blue-50 border-blue-200 text-blue-600'}`}>
               {selectedClient.company?.charAt(0) || selectedClient.name?.charAt(0) || 'C'}
             </div>
             <div>
-              <div className={`text-sm font-semibold flex items-center gap-2 ${theme === 'dark' ? 'text-slate-200' : 'text-[#222222]'}`}>
+              <div className={`text-sm font-semibold flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-[#222222]'}`}>
                 {selectedClient.company || selectedClient.name}
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${theme === 'dark' ? 'bg-blue-900/40 text-blue-400 border border-blue-800' : 'bg-blue-50 text-blue-600 border border-blue-200'}`}>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full border ${theme === 'dark' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-blue-50 text-blue-600 border-blue-200'}`}>
                   Client sélectionné
                 </span>
               </div>
-              <div className="text-xs text-slate-500 flex items-center gap-3 mt-0.5">
+              <div className={`text-xs flex items-center gap-3 mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                 <span>Contact : {selectedClient.name}</span>
                 {selectedClient.email && <span>• {selectedClient.email}</span>}
                 {selectedClient.phone && <span>• {selectedClient.phone}</span>}
@@ -226,9 +226,9 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
             type="button"
             role="combobox"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className={`w-full flex items-center justify-between px-3.5 py-3 border rounded-xl text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm cursor-pointer ${theme === 'dark' ? 'bg-slate-800/80 border-slate-700 hover:border-slate-600 text-slate-200 focus:border-blue-500' : 'bg-[#F8F7F4] border-slate-200 hover:border-slate-300 text-[#222222] focus:border-blue-500'}`}
+            className={`w-full flex items-center justify-between px-3.5 py-3 border rounded-xl text-left text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all shadow-sm cursor-pointer ${theme === 'dark' ? 'bg-slate-800/40 border-slate-800/80 hover:bg-slate-800/60 text-white focus:border-indigo-500' : 'bg-[#F8F7F4] border-slate-200 hover:border-slate-300 text-[#222222] focus:border-blue-500'}`}
           >
-            <span className={selectedClient ? (theme === 'dark' ? "text-slate-200" : "text-[#222222]") : (theme === 'dark' ? "text-slate-400" : "text-[#666666]")} data-placeholder="true">
+            <span className={selectedClient ? (theme === 'dark' ? "text-white" : "text-[#222222]") : (theme === 'dark' ? "text-slate-400" : "text-[#666666]")} data-placeholder="true">
               {placeholder}
             </span>
             <ChevronDown size={16} className={`text-slate-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
