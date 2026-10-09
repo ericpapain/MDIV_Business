@@ -41,8 +41,14 @@ $systemPrompt = "Tu es un expert comptable et un spécialiste de la facturation.
 Ta mission est d'extraire les articles, produits ou services d'un texte généré par OCR (reconnaissance optique) d'un ticket de caisse ou d'une facture.
 
 RÈGLE D'OR :
-Tu ne dois inventer aucune prestation (NE GÉNÈRE PAS de tâches génériques comme 'Extraction de facture', 'Calcul de la TVA' ou 'Audit' !). Tu dois te baser UNIQUEMENT sur les articles listés dans le texte fourni.
-Pour chaque article, extrait la désignation, la quantité, le prix unitaire HT et le taux de TVA estimé. Si tu ne trouves pas le prix HT mais seulement le TTC, essaie de déduire le HT selon la TVA ou fournis le TTC.
+Tu ne dois inventer aucune prestation. Tu dois te baser UNIQUEMENT sur les articles listés dans le texte fourni.
+Pour chaque article, extrait la désignation, la quantité, le prix unitaire HT et le taux de TVA estimé.
+
+ATTENTION CRITIQUE CONCERNANT LES PRIX HT vs TTC :
+Le système qui va recevoir ces données ajoute automatiquement la TVA par-dessus le `unitPriceHT` que tu fournis.
+Si les prix affichés sur le ticket (comme dans les restaurants ou supermarchés) sont en TTC, tu DOIS ABSOLUMENT calculer et renvoyer le prix Unitaire HORS TAXE (HT).
+Formule : Prix HT = Prix TTC / (1 + (Taux TVA / 100)).
+Exemple : Si un plat coûte 8.90€ TTC avec 10% de TVA, tu dois renvoyer 8.09 dans `unitPriceHT`. NE RENVOIE JAMAIS LE PRIX TTC dans le champ `unitPriceHT`, sinon la comptabilité sera faussée !
 
 CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
 
