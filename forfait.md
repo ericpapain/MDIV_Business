@@ -89,3 +89,26 @@ Si cette répartition correspond parfaitement au design de vos captures, je peux
 1. Mettre à jour l'interface `FintechPricingTab.tsx` pour afficher les fonctionnalités IA sous forme de "Check (✓)" dans les bonnes colonnes.
 2. Développer le verrouillage logique dans le code (ex: masquer le bouton "Export Excel" sur la page Leads si l'utilisateur est Profil Créateur).
 Dites-moi si c'est validé !
+
+---
+
+## 3. Configuration en Base de Données (Documentation Technique)
+
+Si vous souhaitez **créer ou modifier manuellement un compte** pour tester les accès ou accorder des droits à un client, voici les informations de la structure MySQL :
+
+*   **Table cible :** `companies`
+*   **Colonne des droits :** `plan_tier` (Type `ENUM`)
+
+Pour changer le forfait d'une entreprise, vous devez utiliser l'une de ces 4 valeurs exactes (en minuscules) :
+
+| Forfait Commercial (UI) | Valeur exacte en Base de Données (`plan_tier`) | Droits accordés |
+| :--- | :--- | :--- |
+| **Créateur (0€)** | `'free'` | Cadenas sur la majorité des fonctions avancées (OCR bloqué, Moteur Vectoriel bloqué, pas d'export). |
+| **Indépendant (12€)** | `'starter'` | Débloque les fonctions intermédiaires (Exports, connexions basiques). |
+| **TPE (39€)** | `'pro'` | Débloque les fonctionnalités avancées (Paiement 1 clic, modèles d'IA supérieurs). |
+| **PME (99€)** | `'enterprise'` | **Zéro cadenas.** Débloque 100% de la plateforme (Fintech, Gouvernance IA, Rapprochement bancaire...). |
+
+**Exemple de requête SQL pour surclasser une entreprise :**
+```sql
+UPDATE companies SET plan_tier = 'enterprise' WHERE email = 'contact@mon-entreprise.com';
+```
