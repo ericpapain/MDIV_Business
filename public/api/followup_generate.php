@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/multi_llm_orchestrator.php';
 // public/api/followup_generate.php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/groq_client.php';
@@ -50,11 +51,7 @@ You must respond ONLY with a valid JSON object using this exact structure:
 
     if (isset($response['choices'][0]['message']['content'])) {
         $content = $response['choices'][0]['message']['content'];
-        $data = json_decode($content, true);
-
-        if (!$data && preg_match('/\{.*\}/s', $content, $m)) {
-            $data = json_decode($m[0], true);
-        }
+        $data = MultiLLMOrchestrator::cleanAndDecodeJson($content);
 
         if (!$data || !isset($data['body'])) {
             throw new Exception("Réponse IA non valide.");

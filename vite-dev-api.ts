@@ -1211,8 +1211,34 @@ Structure de réponse JSON STRICTE :
               { role: 'user', content: `Historique des réponses précédentes : ${JSON.stringify(history)}` }
             ], true);
 
-            res.setHeader('Content-Type', 'application/json');
-            return res.end(groqRes.choices[0].message.content);
+            let content = groqRes.choices[0].message.content;
+            content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+            
+            try {
+              // Test de parsing
+              const parsed = JSON.parse(content);
+              // S'assurer que "Autre" est présent dans les options
+              const hasAutre = parsed.options?.some((opt: string) => opt.toLowerCase().includes('autre') || opt.toLowerCase().includes('other'));
+              if (!hasAutre && parsed.options) {
+                parsed.options.push('Autre (précisez)');
+              }
+              content = JSON.stringify(parsed);
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(content);
+            } catch (err) {
+              // Extraction regex de sécurité si parse échoue
+              const match = content.match(/\{[\s\S]*\}/);
+              if (match) {
+                try {
+                  const parsedFallback = JSON.parse(match[0]);
+                  res.setHeader('Content-Type', 'application/json');
+                  return res.end(JSON.stringify(parsedFallback));
+                } catch (e) {}
+              }
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ error: "Le format renvoyé par l'IA est invalide.", raw: content }));
+            }
           }
 
           if (pathname === '/api/diagnostic_agents.php') {

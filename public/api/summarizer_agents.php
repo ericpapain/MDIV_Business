@@ -288,13 +288,7 @@ $response = callGroqApi($messages, null, false, true);
 
 if (isset($response['choices'][0]['message']['content'])) {
     $content = $response['choices'][0]['message']['content'];
-    $reportData = json_decode($content, true);
-
-    if (!$reportData) {
-        if (preg_match('/\{[\s\S]*\}/', $content, $m)) {
-            $reportData = json_decode($m[0], true);
-        }
-    }
+    $reportData = MultiLLMOrchestrator::cleanAndDecodeJson($content);
 
     if (!$reportData) {
         throw new Exception("Format de réponse IA invalide pour la synthèse.");

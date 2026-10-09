@@ -78,9 +78,8 @@ if (!empty($groqKey)) {
     if ($httpCode === 200 && $response) {
         $resObj = json_decode($response, true);
         $content = $resObj['choices'][0]['message']['content'] ?? '';
-        if (preg_match('/\{[\s\S]*\}/', $content, $matches)) {
-            $extractedData = json_decode($matches[0], true);
-        }
+        require_once __DIR__ . '/multi_llm_orchestrator.php';
+        $extractedData = MultiLLMOrchestrator::cleanAndDecodeJson($content);
     }
 }
 

@@ -83,12 +83,8 @@ try {
         ['role' => 'user', 'content' => $userMsg]
     ], false);
 
-    $tendersData = json_decode($res, true);
-    if (!is_array($tendersData)) {
-        if (preg_match('/\[[\s\S]*\]/', $res, $matches)) {
-            $tendersData = json_decode($matches[0], true);
-        }
-    }
+    require_once __DIR__ . '/multi_llm_orchestrator.php';
+    $tendersData = MultiLLMOrchestrator::cleanAndDecodeJson($res);
 
     if (is_array($tendersData)) {
         foreach ($tendersData as &$tender) {

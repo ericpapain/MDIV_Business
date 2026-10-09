@@ -48,7 +48,12 @@ You must respond ONLY with a valid JSON object strictly following this structure
     $response = $orchestrator->executePrompt('meeting_prep', $systemPrompt, $userPrompt, $company_id, null);
 
     if (isset($response['success']) && $response['success']) {
-        $content = $response['content'];
+        $content = trim($response['content']);
+        
+        // Remove markdown formatting
+        $content = preg_replace('/^```(?:json)?|```$/im', '', $content);
+        $content = trim($content);
+
         $data = json_decode($content, true);
 
         if (!$data && preg_match('/\{.*\}/s', $content, $m)) {
@@ -56,12 +61,14 @@ You must respond ONLY with a valid JSON object strictly following this structure
         }
 
         if (!$data || !isset($data['oneLinerSummary'])) {
-            throw new Exception("Réponse IA non valide pour le briefing.");
+            error_log("Failed to parse LLM response: " . $content);
+            throw new Exception("Réponse IA non valide pour le briefing. Veuillez réessayer. Détail: format inattendu de l'IA.");
         }
 
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
     } else {
-        throw new Exception("Aucune réponse du modèle IA.");
+        $msg = $response['error'] ?? 'Inconnue';
+        throw new Exception("Erreur de l'IA: " . $msg);
     }
 
 } catch (Exception $e) {

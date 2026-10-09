@@ -57,10 +57,7 @@ Respond ONLY with a valid JSON object using this exact structure:
 
     if (isset($response['success']) && $response['success']) {
         $content = $response['content'];
-        $data = json_decode($content, true);
-        if (!$data && preg_match('/\{.*\}/s', $content, $m)) {
-            $data = json_decode($m[0], true);
-        }
+        $data = MultiLLMOrchestrator::cleanAndDecodeJson($content);
         if ($data) {
             $clarity = intval($data['clarityScore'] ?? $clarity);
             $professionalism = intval($data['professionalismScore'] ?? $professionalism);

@@ -11,23 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-echo json_encode([
-    [
-        'id' => 'meet_up_1',
-        'title' => 'Cadrage Stratégique & Audit IA',
-        'dateTime' => date('d/m/Y 14:30', strtotime('+2 days')),
-        'clientName' => 'Groupe Industriel de l\'Est',
-        'clientId' => 1,
-        'location' => 'Visioconférence Teams',
-        'source' => 'teams'
-    ],
-    [
-        'id' => 'meet_up_2',
-        'title' => 'Présentation Solution sur mesure',
-        'dateTime' => date('d/m/Y 10:00', strtotime('+4 days')),
-        'clientName' => 'Nova Biotech SAS',
-        'clientId' => 2,
-        'location' => 'Siège Nova Biotech (Lyon)',
-        'source' => 'outlook'
-    ]
-], JSON_UNESCAPED_UNICODE);
+// Pour le moment, l'intégration du calendrier n'est pas finalisée,
+// on retourne un tableau vide pour éviter d'afficher des données fictives aux vrais utilisateurs.
+echo json_encode([], JSON_UNESCAPED_UNICODE);

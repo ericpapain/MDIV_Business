@@ -13,6 +13,27 @@ class MultiLLMOrchestrator {
     }
 
     /**
+     * Nettoie une chaîne de caractères issue d'un LLM (ex: balises markdown ```json)
+     * et tente de la décoder en JSON.
+     */
+    public static function cleanAndDecodeJson($string) {
+        $cleaned = trim($string);
+        // Supprimer les balises markdown ```json et ```
+        $cleaned = preg_replace('/^```(?:json)?|```$/im', '', $cleaned);
+        $cleaned = trim($cleaned);
+        
+        $data = json_decode($cleaned, true);
+        if (!$data) {
+            // Tente de trouver un objet {} ou un tableau []
+            if (preg_match('/(?:\{[\s\S]*\}|\[[\s\S]*\])/', $cleaned, $m)) {
+                $data = json_decode($m[0], true);
+            }
+        }
+        
+        return $data;
+    }
+
+    /**
      * Point d'entrée principal pour une application
      */
     public function executePrompt($appKey, $systemPrompt, $userPrompt, $companyId = null, $userId = null) {

@@ -470,25 +470,26 @@ export default function ServicesIAEmail() {
             )}
 
             {/* Barre de Contexte Client Omnicanal */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 relative group">
+            <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl shadow-xl overflow-hidden backdrop-blur-md p-4 flex flex-col md:flex-row items-center justify-between gap-4 relative group transition-all">
               <div className="w-full md:w-96">
                 <ClientSelectWithCreate
                   selectedClientId={selectedClient?.id}
                   onSelectClient={(c) => setSelectedClient(c)}
                   label="Client destinataire / interlocuteur lié"
                   placeholder="Rechercher ou lier un client pour contexte 360°..."
+                  theme="dark"
                 />
               </div>
 
               {/* Sélecteur de mode de travail Email */}
-              <div className="flex items-center gap-2 p-1 bg-white border border-slate-200 rounded-xl w-full md:w-auto shadow-sm">
+              <div className="flex items-center gap-2 p-1 bg-slate-800/50 border border-slate-700/50 rounded-xl w-full md:w-auto shadow-sm">
                 <button
                   type="button"
                   onClick={() => setEmailWorkMode('write')}
                   className={`flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
                     emailWorkMode === 'write'
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      ? 'bg-indigo-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
                   <Edit3 className="w-3.5 h-3.5 inline mr-1.5" />
@@ -500,7 +501,7 @@ export default function ServicesIAEmail() {
                   className={`flex-1 md:flex-initial px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
                     emailWorkMode === 'reply_inbound'
                       ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5 inline mr-1.5" />
