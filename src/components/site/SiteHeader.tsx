@@ -64,7 +64,7 @@ export function SiteHeader() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const location = useLocation();
-  const isIAPage = location.pathname.startsWith('/services-ia') || location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/tarifs' || location.pathname === '/diagnostic-ia';
+  const isIAPage = location.pathname.startsWith('/services-ia') || location.pathname === '/dashboard' || location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/tarifs' || location.pathname === '/diagnostic-ia';
   const isEn = language === 'en';
 
   const navRef = useRef<HTMLDivElement>(null);
