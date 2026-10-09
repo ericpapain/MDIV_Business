@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { MessageSquare, Send, Sparkles, Loader2, CheckCircle2, ChevronDown, ChevronUp, CornerDownRight } from 'lucide-react';
+import { MessageSquare, Send, Sparkles, Loader2, CheckCircle2, CornerDownRight, Lock } from 'lucide-react';
 import { requestDeepDive } from '@/lib/deepDiveService';
 import { toast } from 'sonner';
+import { getCurrentUserPlan } from '@/lib/planLimitsService';
 
 // Fonction de formatage ultra-rapide pour rendre le gras et les listes
 const formatAIResponse = (text: string) => {
@@ -67,8 +68,26 @@ export const SectionDeepDive: React.FC<SectionDeepDiveProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Gestion des quotas liés aux forfaits
+  const currentPlan = getCurrentUserPlan();
+  const limits: Record<string, number> = {
+    creator: 1, // Plan basique : 1 seule question d'approfondissement
+    independent: 3,
+    tpe: 10,
+    pme: 999 // Illimité
+  };
+  const maxRequests = limits[currentPlan] || 1;
+  const requestsMade = messages.length;
+  const hasReachedLimit = requestsMade >= maxRequests;
+
   const handleSubmit = async (e?: React.FormEvent, customQuestion?: string) => {
     if (e) e.preventDefault();
+    
+    if (hasReachedLimit) {
+      toast.error(`Vous avez atteint la limite de ${maxRequests} question(s) pour votre forfait actuel.`);
+      return;
+    }
+
     const query = (customQuestion || question).trim();
     if (!query) return;
 
@@ -143,7 +162,7 @@ export const SectionDeepDive: React.FC<SectionDeepDiveProps> = ({
       )}
 
       {/* Suggestion Chips */}
-      {suggestedQuestions.length > 0 && messages.length === 0 && (
+      {suggestedQuestions.length > 0 && messages.length === 0 && !hasReachedLimit && (
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-2 text-[11px]">
           <span className="text-slate-600 font-bold flex items-center gap-1 shrink-0">
             <Sparkles className="w-3 h-3 text-amber-500" /> Approfondir :
@@ -165,30 +184,53 @@ export const SectionDeepDive: React.FC<SectionDeepDiveProps> = ({
       {/* Input Form */}
       <form onSubmit={(e) => handleSubmit(e)} className="flex items-center gap-2">
         <div className="relative flex-1">
-          <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+          {hasReachedLimit ? (
+             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-amber-500" />
+          ) : (
+             <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+          )}
+          
           <input
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            disabled={isLoading}
-            placeholder={placeholder || `Poser une question pour approfondir « ${sectionTitle} »...`}
-            className="w-full pl-8 pr-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-xs"
+            disabled={isLoading || hasReachedLimit}
+            placeholder={
+              hasReachedLimit 
+                ? `Limite atteinte (${maxRequests}/${maxRequests}). Passez au forfait supérieur.`
+                : (placeholder || `Poser une question pour approfondir « ${sectionTitle} »...`)
+            }
+            className={`w-full pl-8 pr-3 py-2 rounded-xl border text-xs font-medium outline-none transition-all shadow-xs ${
+              hasReachedLimit
+                ? 'bg-amber-50/50 border-amber-200 text-amber-900 placeholder:text-amber-600/70 cursor-not-allowed'
+                : 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+            }`}
           />
         </div>
 
         <button
           type="submit"
-          disabled={isLoading || !question.trim()}
+          disabled={isLoading || !question.trim() || hasReachedLimit}
           className="inline-flex items-center justify-center p-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-xs shadow-blue-500/20 disabled:opacity-40 disabled:pointer-events-none shrink-0"
-          title="Envoyer la question d'approfondissement"
+          title={hasReachedLimit ? "Passez au forfait supérieur" : "Envoyer la question d'approfondissement"}
         >
           {isLoading ? (
             <Loader2 className="w-4 h-4 animate-spin" />
+          ) : hasReachedLimit ? (
+            <Lock className="w-4 h-4" />
           ) : (
             <Send className="w-4 h-4" />
           )}
         </button>
       </form>
+      
+      {/* Alerte visuelle pour l'upsell */}
+      {hasReachedLimit && (
+        <div className="mt-2 text-[10px] text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 flex items-center justify-between">
+          <span>Vous avez utilisé toutes vos requêtes d'approfondissement pour cette section.</span>
+          <a href="/tarifs" className="font-bold underline hover:text-amber-900">Voir les forfaits</a>
+        </div>
+      )}
     </div>
   );
 };
