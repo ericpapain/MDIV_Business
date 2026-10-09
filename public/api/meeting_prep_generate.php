@@ -28,6 +28,8 @@ try {
 Write a comprehensive and immediately actionable pre-meeting briefing for the sales rep or executive.
 
 CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+YOU MUST ESCAPE ALL DOUBLE QUOTES INSIDE THE JSON STRINGS. DO NOT USE DOUBLE QUOTES INSIDE TEXT WITHOUT ESCAPING THEM LIKE \".
+DO NOT WRAP YOUR RESPONSE IN MARKDOWN BLOCKS. START DIRECTLY WITH { AND END WITH }.
 
 You must respond ONLY with a valid JSON object strictly following this structure:
 {
@@ -48,20 +50,10 @@ You must respond ONLY with a valid JSON object strictly following this structure
     $response = $orchestrator->executePrompt('meeting_prep', $systemPrompt, $userPrompt, $company_id, null);
 
     if (isset($response['success']) && $response['success']) {
-        $content = trim($response['content']);
-        
-        // Remove markdown formatting
-        $content = preg_replace('/^```(?:json)?|```$/im', '', $content);
-        $content = trim($content);
-
-        $data = json_decode($content, true);
-
-        if (!$data && preg_match('/\{.*\}/s', $content, $m)) {
-            $data = json_decode($m[0], true);
-        }
+        $data = MultiLLMOrchestrator::cleanAndDecodeJson($response['content']);
 
         if (!$data || !isset($data['oneLinerSummary'])) {
-            error_log("Failed to parse LLM response: " . $content);
+            file_put_contents(__DIR__ . '/meeting_error_log.txt', date('Y-m-d H:i:s') . " - Parse Failed. Raw content:\n" . $response['content'] . "\n\n", FILE_APPEND);
             throw new Exception("Réponse IA non valide pour le briefing. Veuillez réessayer. Détail: format inattendu de l'IA.");
         }
 
