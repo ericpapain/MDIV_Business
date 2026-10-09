@@ -71,8 +71,19 @@ Do NOT generate ANY text outside of this JSON structure.";
     
     $content = $result['content'];
     
+    // Nettoyage Markdown potentiel
+    $content = preg_replace('/```json\s*/', '', $content);
+    $content = preg_replace('/```\s*/', '', $content);
+    
     // Tenter de parser pour valider le JSON
     $parsed = json_decode($content, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        preg_match('/\{.*\}/s', $content, $matches);
+        if (!empty($matches)) {
+            $parsed = json_decode($matches[0], true);
+        }
+    }
+
     if ($parsed && isset($parsed['question']) && isset($parsed['options'])) {
         // S'assurer que "Autre" est bien présent
         $hasAutre = false;
@@ -86,14 +97,11 @@ Do NOT generate ANY text outside of this JSON structure.";
         if (!$hasAutre) {
             $parsed['options'][] = 'Autre (précisez)';
         }
-        // S'assurer que total_questions est valide
-        if (!isset($parsed['total_questions']) || $parsed['total_questions'] < 3 || $parsed['total_questions'] > 7) {
-            $parsed['total_questions'] = 5;
-        }
         echo json_encode($parsed, JSON_UNESCAPED_UNICODE);
     } else {
-        // Fallback : renvoyer le contenu brut tel quel
-        echo $content;
+        // Si vraiment l'IA n'a pas sorti de JSON valide, on renvoie une erreur JSON propre
+        http_response_code(500);
+        echo json_encode(["error" => "Le format renvoyé par l'IA est invalide.", "raw" => $content]);
     }
 
 } catch (Exception $e) {
