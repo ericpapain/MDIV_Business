@@ -80,6 +80,22 @@ export function Step1Hero({ onStart }: Props) {
           </div>
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 ml-2" />
         </motion.button>
+
+        <motion.a
+          href="/services-ia"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="group relative inline-flex items-center justify-center gap-3 rounded-2xl border border-blue-500/30 bg-blue-900/20 px-8 py-5 text-sm font-semibold text-blue-100 transition-all hover:bg-blue-900/40 text-left"
+        >
+          <div className="bg-blue-500/20 p-2 rounded-full">
+            <Building2 className="w-5 h-5 text-blue-400" />
+          </div>
+          <div>
+            <div className="block font-bold text-base mb-0.5">Portail IA M.DIV</div>
+            <div className="block font-normal text-xs text-blue-300">Accéder à nos services réels</div>
+          </div>
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 ml-2" />
+        </motion.a>
       </motion.div>
     </div>
   );
