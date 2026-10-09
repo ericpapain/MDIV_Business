@@ -29,3 +29,20 @@ Ce fichier répertorie tous les comptes système et les comptes de démonstratio
 
 > 💡 **Conseil pour ta présentation de demain :** 
 > Si tu veux faire une démo fluide sans jamais être bloqué par un écran "Passez au forfait supérieur", connecte-toi avec `pme@demo.com` (MDP: `password`).
+
+---
+
+## 3. Comment modifier un mot de passe manuellement (Base de Données)
+
+L'application utilise le standard de sécurité PHP `bcrypt` pour crypter les mots de passe. Tu ne peux donc pas écrire un mot de passe en clair dans phpMyAdmin, ni utiliser la fonction `MD5` native de MySQL.
+
+Si tu dois modifier manuellement le mot de passe d'un compte directement dans phpMyAdmin (colonne `password_hash` des tables `users` ou `companies`), voici les deux méthodes :
+
+### Méthode A : Utiliser un générateur Bcrypt en ligne (Le plus facile)
+1. Va sur un site comme **[Bcrypt Generator](https://bcrypt-generator.com/)**.
+2. Dans la case "String", tape le mot de passe souhaité.
+3. Clique sur **Encrypt** (avec le paramètre "Rounds" sur 10).
+4. Le site génère un hash (ex: `$2y$10$wI5F...`). Copie ce texte et colle-le dans phpMyAdmin dans le champ `password_hash`.
+
+### Méthode B : Copier le Hash d'un autre compte
+Si tu connais déjà le mot de passe d'un autre compte (ex: `eric` -> `eric2026`), copie simplement la valeur de sa colonne `password_hash` et colle-la sur le compte cible. Les deux comptes partageront alors le même mot de passe.
