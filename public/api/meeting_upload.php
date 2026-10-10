@@ -56,6 +56,8 @@ Your role is to:
 {\"error\": \"Le document fourni ne semble pas être un compte-rendu ou des notes de réunion (ex: document administratif hors contexte). L'IA n'a pas pu identifier le sujet de la réunion. Veuillez importer un fichier pertinent.\"}
 
 CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+YOU MUST ESCAPE ALL DOUBLE QUOTES INSIDE THE JSON STRINGS. DO NOT USE DOUBLE QUOTES INSIDE TEXT WITHOUT ESCAPING THEM LIKE \".
+DO NOT WRAP YOUR RESPONSE IN MARKDOWN BLOCKS. START DIRECTLY WITH { AND END WITH }.
 
 You must respond ONLY with a valid JSON object conforming to this structure:
 {
