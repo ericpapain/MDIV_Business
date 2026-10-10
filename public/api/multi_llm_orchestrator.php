@@ -153,13 +153,16 @@ class MultiLLMOrchestrator {
                 $key = defined('GROQ_API_KEY') ? GROQ_API_KEY : getenv('GROQ_API_KEY');
             }
             
+            $settings = function_exists('get_active_ai_settings') ? get_active_ai_settings() : ['temperature' => 0.7];
+            $temperature = floatval($settings['temperature'] ?? 0.7);
+
             $payload = json_encode([
                 'model' => $model['code'],
                 'messages' => [
                     ['role' => 'system', 'content' => $systemPrompt],
                     ['role' => 'user', 'content' => $userPrompt]
                 ],
-                'temperature' => 0.2
+                'temperature' => $temperature
             ]);
 
             curl_setopt($ch, CURLOPT_URL, $url);
