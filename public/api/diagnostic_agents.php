@@ -32,7 +32,9 @@ require_once __DIR__ . '/website_scraper.php';
 function sendSSE($event, $data) {
     echo "event: $event\n";
     echo "data: " . json_encode($data, JSON_UNESCAPED_UNICODE) . "\n\n";
-    flush();
+    echo ": " . str_repeat(" ", 4096) . "\n\n";
+    @flush();
+    @ob_flush();
 }
 
 $company_id = isset($_GET['company_id']) ? intval($_GET['company_id']) : 1;
