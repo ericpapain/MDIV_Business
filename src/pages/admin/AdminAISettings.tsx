@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Cpu, Zap, Sparkles, Shield, RefreshCw, CheckCircle2, AlertTriangle, ArrowRight, Gauge, Save, Loader2, PlayCircle, Layers, Database, Server, Check } from "lucide-react";
+import { Cpu, Zap, Sparkles, Shield, RefreshCw, CheckCircle2, AlertTriangle, ArrowRight, Gauge, Save, Loader2, PlayCircle, Layers, Database, Server, Check, Thermometer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AIConsensusAuditDashboard } from "@/components/admin/AIConsensusAuditDashboard";
 
@@ -383,6 +383,35 @@ export default function AdminAISettings() {
             />
             <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
+        </div>
+
+        {/* Option Température Globale */}
+        <div className="pt-4 mt-4 border-t border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4 text-sm">
+          <div className="flex items-center gap-3">
+            <Thermometer size={18} className="text-primary" />
+            <div>
+              <span className="font-semibold text-foreground">Température (Créativité vs Précision)</span>
+              <p className="text-xs text-muted-foreground mt-1 max-w-xl">
+                Basse (0.1) : IA plus analytique, factuelle et précise. Haute (1.0) : IA plus créative et flexible.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 min-w-[200px]">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-muted-foreground">Précis</span>
+              <span className="text-sm font-bold text-primary">{settings.temperature}</span>
+              <span className="text-xs font-bold text-muted-foreground">Créatif</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={settings.temperature}
+              onChange={e => setSettings(s => ({ ...s, temperature: parseFloat(e.target.value) }))}
+              className="w-full accent-primary cursor-pointer"
+            />
+          </div>
         </div>
       </div>
 
