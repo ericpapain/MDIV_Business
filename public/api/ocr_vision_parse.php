@@ -47,7 +47,49 @@ Réponds EXCLUSIVEMENT avec un JSON valide suivant cette structure exacte :
   \"raw_text\": \"Résumé textuel\"
 }";
 
-if (!empty($groqKey)) {
+// Instructions pour garantir un JSON strict sans texte additionnel
+$prompt .= "\nIMPORTANT: Tu dois renvoyer UNIQUEMENT le JSON. Aucun texte avant, aucun texte après.";
+
+if (!empty($openaiKey)) {
+    $payload = [
+        'model' => 'gpt-4o-mini',
+        'messages' => [
+            [
+                'role' => 'user',
+                'content' => [
+                    ['type' => 'text', 'text' => $prompt],
+                    ['type' => 'image_url', 'image_url' => ['url' => $imageUrl, 'detail' => 'high']]
+                ]
+            ]
+        ],
+        'temperature' => 0.05,
+        'max_tokens' => 800
+    ];
+
+    $ch = curl_init('https://api.openai.com/v1/chat/completions');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $openaiKey
+    ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode === 200 && $response) {
+        $resObj = json_decode($response, true);
+        $content = $resObj['choices'][0]['message']['content'] ?? '';
+        require_once __DIR__ . '/multi_llm_orchestrator.php';
+        $extractedData = MultiLLMOrchestrator::cleanAndDecodeJson($content);
+    } else {
+        file_put_contents(__DIR__ . '/ocr_error_log.txt', date('Y-m-d H:i:s') . " - OpenAI HTTP $httpCode. Response:\n" . $response . "\n\n", FILE_APPEND);
+    }
+}
+
+// Fallback Groq si OpenAI a échoué ou n'est pas configuré
+if (!$extractedData && !empty($groqKey)) {
     $payload = [
         'model' => 'llama-3.2-11b-vision-preview',
         'messages' => [
@@ -82,16 +124,19 @@ if (!empty($groqKey)) {
         $extractedData = MultiLLMOrchestrator::cleanAndDecodeJson($content);
         
         if (!$extractedData) {
-            file_put_contents(__DIR__ . '/ocr_error_log.txt', date('Y-m-d H:i:s') . " - Parse Failed. Raw content:\n" . $content . "\n\n", FILE_APPEND);
+            file_put_contents(__DIR__ . '/ocr_error_log.txt', date('Y-m-d H:i:s') . " - Groq Parse Failed. Raw content:\n" . $content . "\n\n", FILE_APPEND);
         }
     } else {
-        file_put_contents(__DIR__ . '/ocr_error_log.txt', date('Y-m-d H:i:s') . " - HTTP $httpCode. Response:\n" . $response . "\n\n", FILE_APPEND);
-        $extractedData = null; // Will trigger the error below
+        file_put_contents(__DIR__ . '/ocr_error_log.txt', date('Y-m-d H:i:s') . " - Groq HTTP $httpCode. Response:\n" . $response . "\n\n", FILE_APPEND);
     }
-} else {
-    http_response_code(500);
-    echo json_encode(['error' => "La clé d'API Groq est manquante pour l'OCR Vision."]);
-    exit;
+}
+
+if (!$extractedData) {
+    if (empty($openaiKey) && empty($groqKey)) {
+        http_response_code(500);
+        echo json_encode(['error' => "Aucune clé d'API (OpenAI ou Groq) n'est configurée pour l'OCR Vision."]);
+        exit;
+    }
 }
 
 if (!$extractedData) {
