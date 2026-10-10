@@ -119,10 +119,12 @@ class MultiLLMOrchestrator {
         $level = $config['intelligence_level'];
         $models = [];
         
-        // Mock de récupération DB des modèles actifs
-        $gptAstra = ['id' => 1, 'code' => 'gpt-6-astra', 'provider' => 'OpenAI'];
-        $mistral = ['id' => 4, 'code' => 'mistral-large-latest', 'provider' => 'Mistral'];
-        $groqMixtral = ['id' => 5, 'code' => 'mixtral-8x7b-32768', 'provider' => 'Groq'];
+        // Récupération des paramètres pour utiliser de vrais modèles (au lieu de mocks)
+        $settings = function_exists('get_active_ai_settings') ? get_active_ai_settings() : ['openaiModel' => 'gpt-4o-mini', 'mistralModel' => 'mistral-small-latest', 'groqModel' => 'qwen/qwen3.8-27b'];
+        
+        $gptAstra = ['id' => 1, 'code' => $settings['openaiModel'] ?? 'gpt-4o-mini', 'provider' => 'OpenAI'];
+        $mistral = ['id' => 4, 'code' => $settings['mistralModel'] ?? 'mistral-small-latest', 'provider' => 'Mistral'];
+        $groqMixtral = ['id' => 5, 'code' => $settings['groqModel'] ?? 'qwen/qwen3.8-27b', 'provider' => 'Groq'];
 
         if ($level === 'Standard') {
             $models[] = $gptAstra;
