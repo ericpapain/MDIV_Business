@@ -49,6 +49,8 @@ BEHAVIOR AT EACH STEP:
    - 'precision_score': The estimated diagnostic precision level (gradually increasing: 30%, 50%, 70%, 85%, 92%, 96%, etc.)." . $website_info . "
 
 CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+YOU MUST ESCAPE ALL DOUBLE QUOTES INSIDE THE JSON STRINGS. DO NOT USE DOUBLE QUOTES INSIDE TEXT WITHOUT ESCAPING THEM LIKE \".
+DO NOT WRAP YOUR RESPONSE IN MARKDOWN BLOCKS. START DIRECTLY WITH { AND END WITH }.
 
 STRICT JSON RESPONSE STRUCTURE:
 {
@@ -71,18 +73,8 @@ Do NOT generate ANY text outside of this JSON structure.";
     
     $content = $result['content'];
     
-    // Nettoyage Markdown potentiel
-    $content = preg_replace('/```json\s*/', '', $content);
-    $content = preg_replace('/```\s*/', '', $content);
-    
-    // Tenter de parser pour valider le JSON
-    $parsed = json_decode($content, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        preg_match('/\{.*\}/s', $content, $matches);
-        if (!empty($matches)) {
-            $parsed = json_decode($matches[0], true);
-        }
-    }
+    // Parser le JSON robuste
+    $parsed = MultiLLMOrchestrator::cleanAndDecodeJson($content);
 
     if ($parsed && isset($parsed['question']) && isset($parsed['options'])) {
         // S'assurer que "Autre" est bien présent
