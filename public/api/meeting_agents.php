@@ -29,7 +29,9 @@ require_once __DIR__ . '/context_engine.php';
 function sendSSE($event, $data) {
     echo "event: $event\n";
     echo "data: " . json_encode($data, JSON_UNESCAPED_UNICODE) . "\n\n";
-    flush();
+    echo ": " . str_repeat(" ", 4096) . "\n\n";
+    @flush();
+    @ob_flush();
 }
 
 $context = $_GET['context'] ?? '';

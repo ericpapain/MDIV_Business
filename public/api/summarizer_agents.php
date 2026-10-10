@@ -28,7 +28,10 @@ require_once __DIR__ . '/context_engine.php';
 function sendSSE($event, $data) {
     echo "event: $event\n";
     echo "data: " . json_encode($data, JSON_UNESCAPED_UNICODE) . "\n\n";
-    flush();
+    // Forcer le flush du buffer Nginx/Apache (4KB)
+    echo ": " . str_repeat(" ", 4096) . "\n\n";
+    @flush();
+    @ob_flush();
 }
 
 $doc_id = $_GET['doc_id'] ?? '';

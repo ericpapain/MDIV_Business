@@ -203,6 +203,10 @@ class MultiLLMOrchestrator {
             if ($httpCode === 200) {
                 $resJson = json_decode($result, true);
                 $rawResponse = $resJson['choices'][0]['message']['content'] ?? '';
+            } else {
+                // Log the error for debugging
+                $logMsg = date('Y-m-d H:i:s') . " - Orchestrator Error ($httpCode) for model {$model['code']}: $result\n";
+                @file_put_contents(__DIR__ . '/orchestrator_error.log', $logMsg, FILE_APPEND);
             }
 
             $responses[] = [
@@ -235,11 +239,15 @@ class MultiLLMOrchestrator {
             $wComp = ($weights['completeness'] ?? 25) / 100;
             $wSrc  = ($weights['source'] ?? 25) / 100;
 
-            $res['final_aggregated_score'] = 
-                ($res['confidence_score'] * $wConf) + 
-                ($res['reasoning_score'] * $wReas) + 
-                ($res['completeness_score'] * $wComp) + 
-                ($res['source_quality_score'] * $wSrc);
+            if (empty(trim($res['raw_response']))) {
+                $res['final_aggregated_score'] = 0;
+            } else {
+                $res['final_aggregated_score'] = 
+                    ($res['confidence_score'] * $wConf) + 
+                    ($res['reasoning_score'] * $wReas) + 
+                    ($res['completeness_score'] * $wComp) + 
+                    ($res['source_quality_score'] * $wSrc);
+            }
         }
         return $responses;
     }
