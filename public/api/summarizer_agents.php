@@ -18,6 +18,7 @@ if (function_exists('apache_setenv')) {
 }
 @ini_set('zlib.output_compression', 0);
 @ini_set('implicit_flush', 1);
+@set_time_limit(0);
 while (ob_get_level() > 0) { ob_end_flush(); }
 ob_implicit_flush(1);
 
@@ -245,6 +246,8 @@ $companyPromptInjection
 ABSOLUTE TRUTH RULE: Base yourself SOLELY and EXCLUSIVELY on the information actually present in the provided document and validated during the deliberation.
 
 CRITICAL REQUIREMENT: YOU MUST GENERATE YOUR FINAL RESPONSE AND ALL USER-FACING TEXT STRICTLY IN FRENCH.
+YOU MUST ESCAPE ALL DOUBLE QUOTES INSIDE THE JSON STRINGS. DO NOT USE DOUBLE QUOTES INSIDE TEXT WITHOUT ESCAPING THEM LIKE \".
+DO NOT WRAP YOUR RESPONSE IN MARKDOWN BLOCKS. START DIRECTLY WITH { AND END WITH }.
 
 You must respond ONLY with a valid JSON object strictly respecting this schema:
 {
