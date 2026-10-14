@@ -289,3 +289,36 @@ CREATE TABLE IF NOT EXISTS `company_expenses` (
     ON DELETE SET NULL 
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 11. Table des Actualités Principales du Hero (Slider d'accueil)
+CREATE TABLE IF NOT EXISTS `hero_news` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(255) NOT NULL,
+  `comment` TEXT NOT NULL,
+  `image_url` VARCHAR(500) NOT NULL,
+  `link_url` VARCHAR(500) DEFAULT NULL,
+  `tag` VARCHAR(100) DEFAULT 'Actualité Principale',
+  `order_num` INT DEFAULT 0,
+  `is_active` TINYINT(1) DEFAULT 1,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 12. Table des Articles de Blog / Actualités BNE
+CREATE TABLE IF NOT EXISTS `blog_articles` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(255) NOT NULL,
+  `category` VARCHAR(100) NOT NULL DEFAULT 'BNE BUSINESS',
+  `color` VARCHAR(50) DEFAULT 'gold',
+  `date` VARCHAR(50) NOT NULL,
+  `desc` TEXT NOT NULL,
+  `img` VARCHAR(500) NOT NULL,
+  `tags` JSON DEFAULT NULL,
+  `sections` JSON DEFAULT NULL COMMENT 'Sections alternées {image, subtitle, text}',
+  `is_featured` TINYINT(1) DEFAULT 0 COMMENT 'Article principal / À la une du blog',
+  `show_in_slider` TINYINT(1) DEFAULT 0 COMMENT 'Afficher dans le slider hero de l\'accueil',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+

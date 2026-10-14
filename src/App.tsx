@@ -74,6 +74,9 @@ const AdminApplications = lazy(() => import("./pages/admin/AdminApplications"));
 const AdminPerformance = lazy(() => import("./pages/admin/AdminPerformance"));
 const AdminAISettings = lazy(() => import("./pages/admin/AdminAISettings"));
 const AdminAIGovernance = lazy(() => import("./pages/AdminAIGovernance"));
+const AdminHeroNews = lazy(() => import("./pages/admin/AdminHeroNews"));
+const AdminBlog = lazy(() => import("./pages/admin/AdminBlog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
 
 // ─── Loading fallback ─────────────────────────────────────────────────────────
 const PageLoader = () => (
@@ -170,12 +173,15 @@ const App = () => (
                     <Route path="/sejours-bne" element={<SejoursBNE />} />
                     <Route path="/accompagnement-bne" element={<AccompagnementBNE />} />
                     <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:id" element={<BlogPost />} />
                   </Route>
 
                   {/* Admin */}
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
+                    <Route path="blog" element={<AdminBlog />} />
+                    <Route path="actualites" element={<AdminHeroNews />} />
                     <Route path="performance" element={<AdminPerformance />} />
                     <Route path="members" element={<AdminMembers />} />
                     <Route path="partners" element={<AdminPartners />} />

@@ -135,6 +135,129 @@ if ($stats_count == 0) {
     $pdo->exec("INSERT INTO site_stats (id, ambassadors_count, partners_count, events_count, trips_count, participants_count, members_count, countries_count, satisfaction_rate) VALUES (1, 0, 0, 0, 0, 0, 10, 4, '87%')");
 }
 
+// Table des Actualités Hero
+$pdo->exec("CREATE TABLE IF NOT EXISTS hero_news (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    comment TEXT NOT NULL,
+    image_url VARCHAR(500) NOT NULL,
+    link_url VARCHAR(500) DEFAULT NULL,
+    tag VARCHAR(100) DEFAULT 'Actualité Principale',
+    order_num INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+try {
+    $news_count = $pdo->query("SELECT COUNT(*) FROM hero_news")->fetchColumn();
+    if ($news_count == 0) {
+        $stmtSeed = $pdo->prepare("INSERT INTO hero_news (title, comment, image_url, link_url, tag, order_num, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmtSeed->execute([
+            "Sommet BNE Casablanca 2026 : 450 Dirigeants Réunis",
+            "La plus grande rencontre d'affaires inter-entreprises du continent africain avec signature de partenariats stratégiques majeurs.",
+            "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
+            "/evenements",
+            "Événement Majeur",
+            1,
+            1
+        ]);
+        $stmtSeed->execute([
+            "Mission Économique & Immersion BNE à Abidjan",
+            "Accélération des opportunités d'investissement, rencontres B2B qualifiées par IA et visites de sites industriels phares.",
+            "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+            "/sejours-bne",
+            "Séjour Immersif",
+            2,
+            1
+        ]);
+        $stmtSeed->execute([
+            "Intelligence Artificielle & Alliances Transfrontalières",
+            "Déploiement de notre infrastructure d'intelligence décisionnelle pour connecter les décideurs d'Europe et d'Afrique.",
+            "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
+            "/services-ia",
+            "Stratégie & IA",
+            3,
+            1
+        ]);
+    }
+} catch (PDOException $e) {}
+
+// Table des Articles de Blog
+$pdo->exec("CREATE TABLE IF NOT EXISTS blog_articles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    category VARCHAR(100) NOT NULL DEFAULT 'BNE BUSINESS',
+    color VARCHAR(50) DEFAULT 'gold',
+    date VARCHAR(50) NOT NULL,
+    `desc` TEXT NOT NULL,
+    img VARCHAR(500) NOT NULL,
+    tags JSON DEFAULT NULL,
+    sections JSON DEFAULT NULL,
+    is_featured TINYINT(1) DEFAULT 0,
+    show_in_slider TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+try {
+    $blog_count = $pdo->query("SELECT COUNT(*) FROM blog_articles")->fetchColumn();
+    if ($blog_count == 0) {
+        $stmtBlogSeed = $pdo->prepare("INSERT INTO blog_articles (title, category, color, date, `desc`, img, tags, sections, is_featured, show_in_slider) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmtBlogSeed->execute([
+            "Le Maroc, 4ème producteur automobile d'Afrique : la montée en puissance",
+            "BNE BUSINESS",
+            "gold",
+            "16/06/2026",
+            "Morocco consolidates its position as the 4th largest African car producer with 46,000 vehicles/year and investments of USD 400M.",
+            "https://www.infomediaire.net/wp-content/uploads/2023/06/automobile.jpg",
+            json_encode(["#industrie", "#automobile", "#Maroc"]),
+            json_encode([
+                [
+                    "image" => "https://www.infomediaire.net/wp-content/uploads/2023/06/automobile.jpg",
+                    "subtitle" => "Un hub industriel stratégique aux portes de l'Europe et de l'Afrique",
+                    "text" => "Le Maroc confirme sa trajectoire d'excellence industrielle en consolidant son statut de plaque tournante automobile internationale. Grâce à des infrastructures modernes telles que Tanger Med et des zones franches dynamiques, le royaume attire les plus grands constructeurs et équipementiers mondiaux."
+                ],
+                [
+                    "image" => "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80",
+                    "subtitle" => "Transition vers l'électrique et montée en gamme technologique",
+                    "text" => "Avec des investissements dépassant 400 millions de dollars, les usines intègrent désormais des lignes robotisées avancées et anticipent la transition énergétique. L'écosystème local compte plus de 250 équipementiers de rang 1 et 2, permettant d'atteindre un taux d'intégration locale record."
+                ],
+                [
+                    "image" => "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80",
+                    "subtitle" => "Synergies d'affaires et opportunités pour les membres BNE",
+                    "text" => "Pour les dirigeants et investisseurs du réseau BNE, ce secteur offre d'immenses opportunités de co-investissement, de logistique transfrontalière et de partenariats technologiques de premier plan."
+                ]
+            ]),
+            1,
+            1
+        ]);
+        $stmtBlogSeed->execute([
+            "Cybersécurité en Afrique : les entreprises face aux nouvelles menaces",
+            "BNE EXPERTISE",
+            "emerald-500",
+            "15/06/2026",
+            "Les cyberattaques en Afrique augmentent de 35% par an. Comment les entreprises se protègent en 2026.",
+            "https://mtsgroup.ma/wp-content/uploads/2024/10/MTS-GROUP-AFRICA-CSE-cybersecurity-in-Africa.-The-scene-should-show-a-digital-map-of-Africa-glowing-in-blue-with-circui.webp",
+            json_encode(["#cybersécurité", "#Afrique", "#protection"]),
+            json_encode([
+                [
+                    "image" => "https://mtsgroup.ma/wp-content/uploads/2024/10/MTS-GROUP-AFRICA-CSE-cybersecurity-in-Africa.-The-scene-should-show-a-digital-map-of-Africa-glowing-in-blue-with-circui.webp",
+                    "subtitle" => "Une menace exponentielle sur les systèmes bancaires et télécoms",
+                    "text" => "Face à l'explosion des transactions mobiles et à la numérisation accélérée des institutions financières en Afrique, la sécurisation des flux de données est devenue une priorité absolue de souveraineté."
+                ],
+                [
+                    "image" => "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80",
+                    "subtitle" => "Gouvernance des risques et architectures hermétiques",
+                    "text" => "Les entreprises leaders adoptent des protocoles Zero Trust, forment continuellement leurs équipes contre le phishing ciblé et auditent régulièrement leurs infrastructures critiques."
+                ]
+            ]),
+            0,
+            0
+        ]);
+    }
+} catch (PDOException $e) {}
+
 // --- Gestion des Vidéos ---
 if ($action === 'add_video' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $data->title ?? 'Sans titre';
@@ -477,5 +600,127 @@ if ($action === 'update_site_stats' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
+// --- Gestion des Actualités Hero (Slider) ---
+if ($action === 'get_hero_news' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $stmt = $pdo->query("SELECT * FROM hero_news ORDER BY order_num ASC, created_at DESC");
+    echo json_encode(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+    exit();
+}
+
+if ($action === 'save_hero_news' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = isset($data->id) && !empty($data->id) ? (int)$data->id : null;
+    $title = $data->title ?? '';
+    $comment = $data->comment ?? '';
+    $image_url = $data->image_url ?? '';
+    $link_url = $data->link_url ?? '';
+    $tag = $data->tag ?? 'Actualité Principale';
+    $order_num = isset($data->order_num) ? (int)$data->order_num : 0;
+    $is_active = isset($data->is_active) ? (int)$data->is_active : 1;
+
+    if (empty($title) || empty($comment) || empty($image_url)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Titre, commentaire et image requis']);
+        exit();
+    }
+
+    if ($id) {
+        $stmt = $pdo->prepare("UPDATE hero_news SET title = ?, comment = ?, image_url = ?, link_url = ?, tag = ?, order_num = ?, is_active = ? WHERE id = ?");
+        $stmt->execute([$title, $comment, $image_url, $link_url, $tag, $order_num, $is_active, $id]);
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO hero_news (title, comment, image_url, link_url, tag, order_num, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$title, $comment, $image_url, $link_url, $tag, $order_num, $is_active]);
+    }
+    echo json_encode(['success' => true]);
+    exit();
+}
+
+if ($action === 'delete_hero_news' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = isset($data->id) ? (int)$data->id : 0;
+    $stmt = $pdo->prepare("DELETE FROM hero_news WHERE id = ?");
+    $stmt->execute([$id]);
+    echo json_encode(['success' => true]);
+    exit();
+}
+
+// --- Gestion des Articles de Blog ---
+if ($action === 'get_blog_articles' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $stmt = $pdo->query("SELECT * FROM blog_articles ORDER BY is_featured DESC, created_at DESC");
+    $articles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+    foreach ($articles as &$art) {
+        if (isset($art['tags']) && is_string($art['tags'])) $art['tags'] = json_decode($art['tags'], true) ?: [];
+        if (isset($art['sections']) && is_string($art['sections'])) $art['sections'] = json_decode($art['sections'], true) ?: [];
+    }
+    echo json_encode(['success' => true, 'data' => $articles]);
+    exit();
+}
+
+if ($action === 'save_blog_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = isset($data->id) && !empty($data->id) ? (int)$data->id : null;
+    $title = $data->title ?? '';
+    $category = $data->category ?? 'BNE BUSINESS';
+    $color = $data->color ?? 'gold';
+    $date = $data->date ?? date('d/m/Y');
+    $desc = $data->desc ?? '';
+    $img = $data->img ?? '';
+    $tags = json_encode($data->tags ?? []);
+    $sections = json_encode($data->sections ?? []);
+    $is_featured = isset($data->is_featured) && $data->is_featured ? 1 : 0;
+    $show_in_slider = isset($data->show_in_slider) && $data->show_in_slider ? 1 : 0;
+
+    if (empty($title) || empty($desc) || empty($img)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Titre, description et image requis']);
+        exit();
+    }
+
+    if ($is_featured) {
+        try { $pdo->exec("UPDATE blog_articles SET is_featured = 0"); } catch (PDOException $e) {}
+    }
+
+    if ($id) {
+        $stmt = $pdo->prepare("UPDATE blog_articles SET title = ?, category = ?, color = ?, date = ?, `desc` = ?, img = ?, tags = ?, sections = ?, is_featured = ?, show_in_slider = ? WHERE id = ?");
+        $stmt->execute([$title, $category, $color, $date, $desc, $img, $tags, $sections, $is_featured, $show_in_slider, $id]);
+        $articleId = $id;
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO blog_articles (title, category, color, date, `desc`, img, tags, sections, is_featured, show_in_slider) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$title, $category, $color, $date, $desc, $img, $tags, $sections, $is_featured, $show_in_slider]);
+        $articleId = $pdo->lastInsertId();
+    }
+
+    // Synchronisation avec le slider Hero de l'accueil
+    $blogLink = "/blog/" . $articleId;
+    if ($show_in_slider) {
+        $chk = $pdo->prepare("SELECT id FROM hero_news WHERE link_url = ?");
+        $chk->execute([$blogLink]);
+        $existingHero = $chk->fetch();
+        if ($existingHero) {
+            $upd = $pdo->prepare("UPDATE hero_news SET title = ?, comment = ?, image_url = ?, tag = ?, is_active = 1 WHERE id = ?");
+            $upd->execute([$title, $desc, $img, $category, $existingHero['id']]);
+        } else {
+            $ins = $pdo->prepare("INSERT INTO hero_news (title, comment, image_url, link_url, tag, order_num, is_active) VALUES (?, ?, ?, ?, ?, 1, 1)");
+            $ins->execute([$title, $desc, $img, $blogLink, $category]);
+        }
+    } else {
+        $del = $pdo->prepare("DELETE FROM hero_news WHERE link_url = ?");
+        $del->execute([$blogLink]);
+    }
+
+    echo json_encode(['success' => true, 'id' => $articleId]);
+    exit();
+}
+
+if ($action === 'delete_blog_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = isset($data->id) ? (int)$data->id : 0;
+    $stmt = $pdo->prepare("DELETE FROM blog_articles WHERE id = ?");
+    $stmt->execute([$id]);
+
+    $del = $pdo->prepare("DELETE FROM hero_news WHERE link_url = ?");
+    $del->execute(["/blog/" . $id]);
+
+    echo json_encode(['success' => true]);
+    exit();
+}
+
 http_response_code(400);
 echo json_encode(['success' => false, 'error' => 'Action inconnue']);
+

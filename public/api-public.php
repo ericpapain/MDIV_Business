@@ -113,5 +113,96 @@ if ($action === 'site_stats') {
     exit();
 }
 
+if ($action === 'hero_news') {
+    try {
+        $stmt = $pdo->query("SELECT * FROM hero_news WHERE is_active = 1 ORDER BY order_num ASC, created_at DESC");
+        $news = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        if (count($news) === 0) {
+            // Fallback si la table vient d'être créée ou est vide
+            $news = [
+                [
+                    'id' => 1,
+                    'title' => "Sommet BNE Casablanca 2026 : 450 Dirigeants Réunis",
+                    'comment' => "La plus grande rencontre d'affaires inter-entreprises du continent africain avec signature de partenariats stratégiques majeurs.",
+                    'image_url' => "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
+                    'link_url' => "/evenements",
+                    'tag' => "Événement Majeur",
+                    'order_num' => 1,
+                    'is_active' => 1
+                ],
+                [
+                    'id' => 2,
+                    'title' => "Mission Économique & Immersion BNE à Abidjan",
+                    'comment' => "Accélération des opportunités d'investissement, rencontres B2B qualifiées par IA et visites de sites industriels phares.",
+                    'image_url' => "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+                    'link_url' => "/sejours-bne",
+                    'tag' => "Séjour Immersif",
+                    'order_num' => 2,
+                    'is_active' => 1
+                ],
+                [
+                    'id' => 3,
+                    'title' => "Intelligence Artificielle & Alliances Transfrontalières",
+                    'comment' => "Déploiement de notre infrastructure d'intelligence décisionnelle pour connecter les décideurs d'Europe et d'Afrique.",
+                    'image_url' => "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
+                    'link_url' => "/services-ia",
+                    'tag' => "Stratégie & IA",
+                    'order_num' => 3,
+                    'is_active' => 1
+                ]
+            ];
+        }
+        echo json_encode(['success' => true, 'data' => $news]);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => true, 'data' => []]);
+    }
+    exit();
+}
+
+if ($action === 'blog_articles') {
+    try {
+        $stmt = $pdo->query("SELECT * FROM blog_articles ORDER BY is_featured DESC, created_at DESC");
+        $articles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        foreach ($articles as &$art) {
+            if (isset($art['tags']) && is_string($art['tags'])) {
+                $art['tags'] = json_decode($art['tags'], true) ?: [];
+            }
+            if (isset($art['sections']) && is_string($art['sections'])) {
+                $art['sections'] = json_decode($art['sections'], true) ?: [];
+            }
+        }
+        echo json_encode(['success' => true, 'data' => $articles]);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => true, 'data' => []]);
+    }
+    exit();
+}
+
+if ($action === 'blog_article') {
+    $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM blog_articles WHERE id = ?");
+        $stmt->execute([$id]);
+        $article = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($article) {
+            if (isset($article['tags']) && is_string($article['tags'])) {
+                $article['tags'] = json_decode($article['tags'], true) ?: [];
+            }
+            if (isset($article['sections']) && is_string($article['sections'])) {
+                $article['sections'] = json_decode($article['sections'], true) ?: [];
+            }
+            echo json_encode(['success' => true, 'data' => $article]);
+        } else {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Article introuvable']);
+        }
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit();
+}
+
 http_response_code(400);
 echo json_encode(['success' => false, 'error' => 'Action inconnue']);
+

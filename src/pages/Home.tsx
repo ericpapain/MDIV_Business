@@ -14,6 +14,7 @@ import { AnimatedClip } from "@/components/site/AnimatedClip";
 import { AboutBNE } from "@/components/site/AboutBNE";
 import { TestimonialFlag } from "@/components/site/TestimonialFlag";
 import { TestimonialsCarousel } from "@/components/site/TestimonialsCarousel";
+import HeroTypingSlider from "@/components/home/HeroTypingSlider";
 
 // Vidéo de paysage cinématographique hébergée sur Google Cloud Storage (sans restriction CORS ni hotlinking)
 const DEMO_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4";
@@ -253,14 +254,8 @@ export default function Home() {
             <div className="eyebrow mb-6 flex items-center gap-3">
               <span className="w-8 h-px bg-gold/60" /> {t("home.hero.eyebrow")}
             </div>
-            <h1 className="font-display text-5xl md:text-7xl lg:text-[88px] leading-[0.95] tracking-tight mb-8">
-              {t("home.hero.title1")}<br />
-              <em className="font-serif italic text-gold-light">{t("home.hero.title2")}</em><br />
-              {t("home.hero.title3")} <span className="gold-text">{t("home.hero.title4")}</span>
-            </h1>
-            <p className="text-lg text-foreground/80 max-w-xl mb-10 leading-relaxed">
-              {t("home.hero.desc")}
-            </p>
+            {/* Conteneur dynamique : saisie au clavier (typing code) puis transition slider cartes actualités */}
+            <HeroTypingSlider />
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/experience" className="btn-gold px-8 py-4 text-xs uppercase tracking-[0.24em] rounded-sm flex items-center gap-3 justify-center group">
                 {t("home.hero.btn1")} <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
