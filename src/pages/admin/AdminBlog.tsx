@@ -1,24 +1,25 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  BookOpen, 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Check, 
-  X, 
-  Star, 
-  Image as ImageIcon, 
-  Sparkles, 
-  Layers, 
-  ExternalLink, 
-  Sliders, 
-  Loader2, 
+import {
+  BookOpen,
+  Plus,
+  Trash2,
+  Edit,
+  Check,
+  X,
+  Star,
+  Image as ImageIcon,
+  Sparkles,
+  Layers,
+  ExternalLink,
+  Sliders,
+  Loader2,
   Calendar,
   Eye,
   RefreshCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export interface BlogSection {
   image: string;
@@ -102,7 +103,7 @@ export default function AdminBlog() {
       queryClient.invalidateQueries({ queryKey: ["admin-blog-articles"] });
       queryClient.invalidateQueries({ queryKey: ["blog-articles"] });
       queryClient.invalidateQueries({ queryKey: ["hero-news"] });
-      toast({ 
+      toast({
         title: editingId ? "Article modifié" : "Article publié avec succès",
         description: showInSlider ? "L'article est également synchronisé dans le slider d'accueil !" : undefined
       });
@@ -167,8 +168,8 @@ export default function AdminBlog() {
     setIsFeatured(Boolean(art.is_featured));
     setShowInSlider(Boolean(art.show_in_slider));
     setSections(
-      Array.isArray(art.sections) && art.sections.length > 0 
-        ? art.sections 
+      Array.isArray(art.sections) && art.sections.length > 0
+        ? art.sections
         : [{ image: art.img, subtitle: "Aperçu général", text: art.desc }]
     );
     setIsFormOpen(true);
@@ -200,10 +201,10 @@ export default function AdminBlog() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !desc.trim() || !img.trim()) {
-      toast({ 
-        variant: "destructive", 
-        title: "Champs requis", 
-        description: "Le titre, le résumé et l'image de couverture sont obligatoires." 
+      toast({
+        variant: "destructive",
+        title: "Champs requis",
+        description: "Le titre, le résumé et l'image de couverture sont obligatoires."
       });
       return;
     }
@@ -293,7 +294,7 @@ export default function AdminBlog() {
             <div className="grid md:grid-cols-2 gap-6">
               {/* Titre */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
+                <label className="font-display text-xl text-foreground">
                   Titre de l'article <span className="text-gold">*</span>
                 </label>
                 <input
@@ -309,7 +310,7 @@ export default function AdminBlog() {
               {/* Catégorie */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
+                  <label className="font-display text-xl text-foreground">
                     Catégorie
                   </label>
                   <button
@@ -356,7 +357,7 @@ export default function AdminBlog() {
 
               {/* Date */}
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
+                <label className="font-display text-xl text-foreground">
                   Date de publication
                 </label>
                 <input
@@ -370,22 +371,19 @@ export default function AdminBlog() {
 
               {/* Image de couverture */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
-                  Image principale de couverture (URL) <span className="text-gold">*</span>
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://..."
+                <ImageUpload
+                  label="Image principale de couverture"
+                  labelClassName="font-display text-xl text-foreground"
+                  placeholder="URL de l'image ou cliquer sur 'Télécharger du PC'"
                   value={img}
-                  onChange={(e) => setImg(e.target.value)}
-                  className="w-full bg-background/80 border border-border/80 focus:border-gold rounded-sm px-4 py-2.5 text-sm text-foreground outline-none transition-colors"
+                  onChange={setImg}
                   required
                 />
               </div>
 
               {/* Résumé / Description */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
+                <label className="font-display text-xl text-foreground">
                   Résumé / Extrait d'accroche <span className="text-gold">*</span>
                 </label>
                 <textarea
@@ -400,7 +398,7 @@ export default function AdminBlog() {
 
               {/* Tags */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
+                <label className="font-display text-xl text-foreground">
                   Tags (séparés par des virgules)
                 </label>
                 <input
@@ -430,22 +428,20 @@ export default function AdminBlog() {
                   <button
                     type="button"
                     onClick={() => setShowInSlider(true)}
-                    className={`px-4 py-1.5 rounded-sm text-xs uppercase font-bold tracking-wider transition-all flex items-center gap-1.5 ${
-                      showInSlider 
-                        ? "bg-gold text-black shadow-md shadow-gold/20" 
-                        : "bg-black/40 text-muted-foreground hover:text-foreground border border-border"
-                    }`}
+                    className={`px-4 py-1.5 rounded-sm text-xs uppercase font-bold tracking-wider transition-all flex items-center gap-1.5 ${showInSlider
+                      ? "bg-gold text-black shadow-md shadow-gold/20"
+                      : "bg-black/40 text-muted-foreground hover:text-foreground border border-border"
+                      }`}
                   >
                     <Check size={14} /> Oui
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowInSlider(false)}
-                    className={`px-4 py-1.5 rounded-sm text-xs uppercase font-bold tracking-wider transition-all flex items-center gap-1.5 ${
-                      !showInSlider 
-                        ? "bg-white/10 text-white border border-white/20" 
-                        : "bg-black/40 text-muted-foreground hover:text-foreground border border-border"
-                    }`}
+                    className={`px-4 py-1.5 rounded-sm text-xs uppercase font-bold tracking-wider transition-all flex items-center gap-1.5 ${!showInSlider
+                      ? "bg-white/10 text-white border border-white/20"
+                      : "bg-black/40 text-muted-foreground hover:text-foreground border border-border"
+                      }`}
                   >
                     <X size={14} /> Non
                   </button>
@@ -467,22 +463,20 @@ export default function AdminBlog() {
                   <button
                     type="button"
                     onClick={() => setIsFeatured(true)}
-                    className={`px-4 py-1.5 rounded-sm text-xs uppercase font-bold tracking-wider transition-all flex items-center gap-1.5 ${
-                      isFeatured 
-                        ? "bg-gold text-black shadow-md shadow-gold/20" 
-                        : "bg-black/40 text-muted-foreground hover:text-foreground border border-border"
-                    }`}
+                    className={`px-4 py-1.5 rounded-sm text-xs uppercase font-bold tracking-wider transition-all flex items-center gap-1.5 ${isFeatured
+                      ? "bg-gold text-black shadow-md shadow-gold/20"
+                      : "bg-black/40 text-muted-foreground hover:text-foreground border border-border"
+                      }`}
                   >
                     <Check size={14} /> Oui
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsFeatured(false)}
-                    className={`px-4 py-1.5 rounded-sm text-xs uppercase font-bold tracking-wider transition-all flex items-center gap-1.5 ${
-                      !isFeatured 
-                        ? "bg-white/10 text-white border border-white/20" 
-                        : "bg-black/40 text-muted-foreground hover:text-foreground border border-border"
-                    }`}
+                    className={`px-4 py-1.5 rounded-sm text-xs uppercase font-bold tracking-wider transition-all flex items-center gap-1.5 ${!isFeatured
+                      ? "bg-white/10 text-white border border-white/20"
+                      : "bg-black/40 text-muted-foreground hover:text-foreground border border-border"
+                      }`}
                   >
                     <X size={14} /> Non
                   </button>
@@ -541,25 +535,17 @@ export default function AdminBlog() {
 
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <label className="text-[11px] uppercase tracking-wider font-semibold text-foreground/80">
-                            URL de l'image pour cette section
-                          </label>
-                          <input
-                            type="url"
-                            placeholder="https://images.unsplash.com/..."
+                          <ImageUpload
+                            label="Image de cette section"
+                            labelClassName="text-[11px] uppercase tracking-wider font-semibold text-white"
+                            placeholder="URL de l'image ou cliquer sur 'Télécharger du PC'"
                             value={section.image}
-                            onChange={(e) => handleSectionChange(idx, "image", e.target.value)}
-                            className="w-full bg-background/80 border border-border/80 focus:border-gold rounded-sm px-3 py-2 text-xs text-foreground outline-none transition-colors"
+                            onChange={(val) => handleSectionChange(idx, "image", val)}
                           />
-                          {section.image && (
-                            <div className="h-24 rounded overflow-hidden border border-border mt-2">
-                              <img src={section.image} alt="" className="w-full h-full object-cover" />
-                            </div>
-                          )}
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[11px] uppercase tracking-wider font-semibold text-foreground/80">
+                          <label className="text-[11px] uppercase tracking-wider font-semibold text-white">
                             Sous-titre de la section
                           </label>
                           <input
@@ -570,7 +556,7 @@ export default function AdminBlog() {
                             className="w-full bg-background/80 border border-border/80 focus:border-gold rounded-sm px-3 py-2 text-xs text-foreground outline-none transition-colors"
                           />
 
-                          <label className="text-[11px] uppercase tracking-wider font-semibold text-foreground/80 pt-1 block">
+                          <label className="text-[11px] uppercase tracking-wider font-semibold text-white pt-1 block">
                             Texte détaillé / Contenu
                           </label>
                           <textarea
@@ -644,11 +630,10 @@ export default function AdminBlog() {
               return (
                 <div
                   key={art.id}
-                  className={`rounded-sm border transition-all duration-300 overflow-hidden flex flex-col justify-between group ${
-                    isFeat 
-                      ? "border-gold/60 bg-[#0c1013] shadow-lg shadow-gold/5" 
-                      : "border-border/70 hover:border-gold/40 bg-[#0a0d0f]"
-                  }`}
+                  className={`rounded-sm border transition-all duration-300 overflow-hidden flex flex-col justify-between group ${isFeat
+                    ? "border-gold/60 bg-[#0c1013] shadow-lg shadow-gold/5"
+                    : "border-border/70 hover:border-gold/40 bg-[#0a0d0f]"
+                    }`}
                 >
                   <div>
                     {/* Image */}

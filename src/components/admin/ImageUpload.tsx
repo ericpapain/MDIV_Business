@@ -6,9 +6,19 @@ interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
   label?: string;
+  labelClassName?: string;
+  placeholder?: string;
+  required?: boolean;
 }
 
-export function ImageUpload({ value, onChange, label = "Image URL" }: ImageUploadProps) {
+export function ImageUpload({ 
+  value, 
+  onChange, 
+  label = "Image URL",
+  labelClassName = "text-sm font-medium text-foreground",
+  placeholder = "URL de l'image ou cliquer sur 'Télécharger du PC'",
+  required = false
+}: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,20 +58,24 @@ export function ImageUpload({ value, onChange, label = "Image URL" }: ImageUploa
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-foreground">{label}</label>
-      <div className="flex flex-col sm:flex-row gap-3">
+      {label && (
+        <label className={labelClassName}>
+          {label} {required && <span className="text-gold">*</span>}
+        </label>
+      )}
+      <div className="flex flex-col sm:flex-row gap-2.5">
         <div className="relative flex-1">
-          <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" />
           <input 
             type="text" 
             value={value} 
             onChange={(e) => onChange(e.target.value)}
-            className="w-full bg-background border border-border rounded-sm pl-10 pr-4 py-2 text-sm focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all" 
-            placeholder="URL de l'image ou cliquer sur 'Importer'"
+            className="w-full bg-background/80 border border-border/80 rounded-sm pl-9 pr-3 py-2 text-xs text-foreground focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all" 
+            placeholder={placeholder}
           />
         </div>
         
-        <div>
+        <div className="shrink-0">
           <input 
             type="file" 
             ref={fileInputRef} 
@@ -73,22 +87,26 @@ export function ImageUpload({ value, onChange, label = "Image URL" }: ImageUploa
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="w-full sm:w-auto btn-ghost-gold px-4 py-2 text-xs uppercase tracking-wider rounded-sm flex items-center justify-center gap-2 border border-gold/30 hover:bg-gold/10 whitespace-nowrap disabled:opacity-50"
+            className="w-full sm:w-auto px-3.5 py-2 text-xs uppercase tracking-wider rounded-sm flex items-center justify-center gap-2 border border-gold/40 bg-gold/10 hover:bg-gold/20 text-gold hover:text-gold-light whitespace-nowrap disabled:opacity-50 transition-all font-semibold cursor-pointer shadow-sm"
           >
             {isUploading ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin text-gold" />
             ) : (
-              <Upload size={16} />
+              <Upload size={14} className="text-gold" />
             )}
-            Importer
+            {isUploading ? "Envoi..." : "Télécharger du PC"}
           </button>
         </div>
       </div>
       
       {value && (
-        <div className="mt-3 p-2 bg-[#0a0d0f] rounded-sm border border-border inline-block max-w-[200px]">
+        <div className="mt-2.5 p-1.5 bg-[#0a0d0f] rounded-sm border border-border inline-block max-w-[220px]">
           <div className="relative aspect-video rounded-sm overflow-hidden bg-black/50">
-            <img src={value.startsWith('http') || value.startsWith('/') ? value : `/${value}`} alt="Aperçu" className="w-full h-full object-cover" />
+            <img 
+              src={value.startsWith('http') || value.startsWith('/') ? value : `/${value}`} 
+              alt="Aperçu" 
+              className="w-full h-full object-cover" 
+            />
           </div>
         </div>
       )}
