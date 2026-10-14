@@ -340,6 +340,367 @@ export function devApiPlugin(): Plugin {
         const urlObj = new URL(req.url || '/', 'http://localhost:8080');
         const pathname = urlObj.pathname;
 
+        if (pathname === '/api-public.php') {
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Content-Type', 'application/json');
+          const action = urlObj.searchParams.get('action');
+          if (action === 'hero_news') {
+            const db = loadDevDb();
+            let news = (db as any).hero_news;
+            if (!news || news.length === 0) {
+              news = [
+                {
+                  id: 1,
+                  title: "Sommet BNE Casablanca 2026 : 450 Dirigeants Réunis",
+                  comment: "La plus grande rencontre d'affaires inter-entreprises du continent africain avec signature de partenariats stratégiques majeurs.",
+                  image_url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
+                  link_url: "/evenements",
+                  tag: "Événement Majeur",
+                  order_num: 1,
+                  is_active: 1
+                },
+                {
+                  id: 2,
+                  title: "Mission Économique & Immersion BNE à Abidjan",
+                  comment: "Accélération des opportunités d'investissement, rencontres B2B qualifiées par IA et visites de sites industriels phares.",
+                  image_url: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+                  link_url: "/sejours-bne",
+                  tag: "Séjour Immersif",
+                  order_num: 2,
+                  is_active: 1
+                },
+                {
+                  id: 3,
+                  title: "Intelligence Artificielle & Alliances Transfrontalières",
+                  comment: "Déploiement de notre infrastructure d'intelligence décisionnelle pour connecter les décideurs d'Europe et d'Afrique.",
+                  image_url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
+                  link_url: "/services-ia",
+                  tag: "Stratégie & IA",
+                  order_num: 3,
+                  is_active: 1
+                }
+              ];
+              (db as any).hero_news = news;
+              saveDevDb(db);
+            }
+            return res.end(JSON.stringify({ success: true, data: news.filter((n: any) => n.is_active !== 0) }));
+          }
+
+          if (action === 'blog_articles') {
+            const db = loadDevDb();
+            if (!(db as any).blog_articles || (db as any).blog_articles.length === 0) {
+              (db as any).blog_articles = [
+                {
+                  id: 1,
+                  title: "Le Maroc, 4ème producteur automobile d'Afrique : la montée en puissance",
+                  category: "BNE BUSINESS",
+                  color: "gold",
+                  date: "16/06/2026",
+                  desc: "Morocco consolidates its position as the 4th largest African car producer with 46,000 vehicles/year and investments of USD 400M.",
+                  img: "https://www.infomediaire.net/wp-content/uploads/2023/06/automobile.jpg",
+                  tags: ["#industrie", "#automobile", "#Maroc"],
+                  is_featured: 1,
+                  show_in_slider: 1,
+                  sections: [
+                    {
+                      image: "https://www.infomediaire.net/wp-content/uploads/2023/06/automobile.jpg",
+                      subtitle: "Un hub industriel stratégique aux portes de l'Europe et de l'Afrique",
+                      text: "Le Maroc confirme sa trajectoire d'excellence industrielle en consolidant son statut de plaque tournante automobile internationale. Grâce à des infrastructures modernes telles que Tanger Med et des zones franches dynamiques, le royaume attire les plus grands constructeurs et équipementiers mondiaux."
+                    },
+                    {
+                      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80",
+                      subtitle: "Transition vers l'électrique et montée en gamme technologique",
+                      text: "Avec des investissements dépassant 400 millions de dollars, les usines intègrent désormais des lignes robotisées avancées et anticipent la transition énergétique. L'écosystème local compte plus de 250 équipementiers de rang 1 et 2, permettant d'atteindre un taux d'intégration locale record."
+                    },
+                    {
+                      image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80",
+                      subtitle: "Synergies d'affaires et opportunités pour les membres BNE",
+                      text: "Pour les dirigeants et investisseurs du réseau BNE, ce secteur offre d'immenses opportunités de co-investissement, de logistique transfrontalière et de partenariats technologiques de premier plan."
+                    }
+                  ]
+                },
+                {
+                  id: 2,
+                  title: "Cybersécurité en Afrique : les entreprises face aux nouvelles menaces",
+                  category: "BNE EXPERTISE",
+                  color: "emerald-500",
+                  date: "15/06/2026",
+                  desc: "Les cyberattaques en Afrique augmentent de 35% par an. Comment les entreprises se protègent en 2026.",
+                  img: "https://mtsgroup.ma/wp-content/uploads/2024/10/MTS-GROUP-AFRICA-CSE-cybersecurity-in-Africa.-The-scene-should-show-a-digital-map-of-Africa-glowing-in-blue-with-circui.webp",
+                  tags: ["#cybersécurité", "#Afrique", "#protection"],
+                  is_featured: 0,
+                  show_in_slider: 0,
+                  sections: [
+                    {
+                      image: "https://mtsgroup.ma/wp-content/uploads/2024/10/MTS-GROUP-AFRICA-CSE-cybersecurity-in-Africa.-The-scene-should-show-a-digital-map-of-Africa-glowing-in-blue-with-circui.webp",
+                      subtitle: "Une menace exponentielle sur les systèmes bancaires et télécoms",
+                      text: "Face à l'explosion des transactions mobiles et à la numérisation accélérée des institutions financières en Afrique, la sécurisation des flux de données est devenue une priorité absolue de souveraineté."
+                    },
+                    {
+                      image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80",
+                      subtitle: "Gouvernance des risques et architectures hermétiques",
+                      text: "Les entreprises leaders adoptent des protocoles Zero Trust, forment continuellement leurs équipes contre le phishing ciblé et auditent régulièrement leurs infrastructures critiques."
+                    }
+                  ]
+                },
+                {
+                  id: 3,
+                  title: "E-commerce beauté en Afrique : +15% de croissance annuelle",
+                  category: "BNE INSIGHTS",
+                  color: "gold",
+                  date: "14/06/2026",
+                  desc: "Les ventes en ligne de cosmétiques en Afrique croissent de 15% par an. Plateformes, marques et tendances.",
+                  img: "https://panafricanbeauty.com/wp-content/uploads/2017/01/12-things.jpg",
+                  tags: ["#ecommerce", "#beauté", "#Afrique"],
+                  is_featured: 0,
+                  show_in_slider: 0,
+                  sections: [
+                    {
+                      image: "https://panafricanbeauty.com/wp-content/uploads/2017/01/12-things.jpg",
+                      subtitle: "Une classe moyenne connectée et exigeante",
+                      text: "Le marché cosmétique africain connaît une transformation sans précédent, tirée par une jeunesse urbaine connectée et friande de produits adaptés aux spécificités locales."
+                    },
+                    {
+                      image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80",
+                      subtitle: "Logistique du dernier kilomètre et paiement mobile",
+                      text: "Le succès des marques repose sur l'intégration transparente du Mobile Money et des partenariats fiables avec les transporteurs express locaux."
+                    }
+                  ]
+                },
+                {
+                  id: 4,
+                  title: "L'Afrique construit plus vite que jamais : +7,1% de croissance des Infrastructures",
+                  category: "BNE BUSINESS",
+                  color: "gold",
+                  date: "14/06/2026",
+                  desc: "Le secteur des infrastructures africain croît de 7,1% par an pour atteindre 363 milliards USD en 2031. Opportunités massives.",
+                  img: "https://fr.le360.ma/resizer/v2/34EWUQBKCVAXFATUWWZO7IUFR4.jpg?auth=869e94ca59a8dd7324fd07cbf74a99cf2062d8761c934d34fd050572523ab7ee&smart=true&width=1216&height=684",
+                  tags: ["#Infrastructures", "#Afrique", "#croissance"],
+                  is_featured: 0,
+                  show_in_slider: 0,
+                  sections: [
+                    {
+                      image: "https://fr.le360.ma/resizer/v2/34EWUQBKCVAXFATUWWZO7IUFR4.jpg?auth=869e94ca59a8dd7324fd07cbf74a99cf2062d8761c934d34fd050572523ab7ee&smart=true&width=1216&height=684",
+                      subtitle: "Ports, autoroutes et corridors logistiques modernes",
+                      text: "L'accélération de la ZLECAf (Zone de Libre-Échange Continentale Africaine) catalyse des investissements records dans les infrastructures de transport et d'énergie."
+                    }
+                  ]
+                },
+                {
+                  id: 5,
+                  title: "Transport maritime vert : vers des navires zéro émission",
+                  category: "BNE EXPERTISE",
+                  color: "emerald-500",
+                  date: "13/06/2026",
+                  desc: "L'industrie maritime s'engage vers le zéro émission. GNL, hydrogène, voiles solaires et propulsion éolienne.",
+                  img: "https://media.sudouest.fr/8326334/1200x-1/38479712.jpg",
+                  tags: ["#transport", "#maritime", "#vert"],
+                  is_featured: 0,
+                  show_in_slider: 0,
+                  sections: [
+                    {
+                      image: "https://media.sudouest.fr/8326334/1200x-1/38479712.jpg",
+                      subtitle: "Décarbonation des routes maritimes intercontinentales",
+                      text: "Les armateurs investissent massivement dans les carburants alternatifs pour répondre aux nouvelles normes environnementales de l'Organisation Maritime Internationale."
+                    }
+                  ]
+                },
+                {
+                  id: 6,
+                  title: "Comment MDIV a doublé la conversion client en 90 jours",
+                  category: "BNE INSIGHTS",
+                  color: "gold",
+                  date: "12/06/2026",
+                  desc: "Étude de cas MDIV Business : stratégie de digitalisation et refonte de l'écosystème B2B.",
+                  img: "https://sestoidee.it/wp-content/uploads/2025/03/specialistes-wix.webp",
+                  tags: ["#MDIV", "#conversion", "#digitalisation"],
+                  is_featured: 0,
+                  show_in_slider: 0,
+                  sections: [
+                    {
+                      image: "https://sestoidee.it/wp-content/uploads/2025/03/specialistes-wix.webp",
+                      subtitle: "Alignement stratégique entre IA et qualification humaine",
+                      text: "En combinant des algorithmes prédictifs de scoring de leads avec un accompagnement sur-mesure lors de séjours d'immersion, MDIV optimise radicalement le cycle de vente B2B."
+                    }
+                  ]
+                }
+              ];
+              saveDevDb(db);
+            }
+            return res.end(JSON.stringify({ success: true, data: (db as any).blog_articles }));
+          }
+
+          if (action === 'blog_article') {
+            const id = urlObj.searchParams.get('id');
+            const db = loadDevDb();
+            const articles = (db as any).blog_articles || [];
+            const article = articles.find((a: any) => a.id == id);
+            if (article) {
+              return res.end(JSON.stringify({ success: true, data: article }));
+            } else {
+              res.statusCode = 404;
+              return res.end(JSON.stringify({ success: false, error: 'Article introuvable' }));
+            }
+          }
+        }
+
+        if (pathname === '/api-admin.php') {
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+          res.setHeader('Content-Type', 'application/json');
+          if (req.method === 'OPTIONS') {
+            res.statusCode = 204;
+            return res.end();
+          }
+          const action = urlObj.searchParams.get('action');
+
+          if (action === 'get_blog_articles') {
+            const db = loadDevDb();
+            if (!(db as any).blog_articles) (db as any).blog_articles = [];
+            return res.end(JSON.stringify({ success: true, data: (db as any).blog_articles }));
+          }
+
+          if (action === 'save_blog_article') {
+            const { fields } = await parseRequestBody(req);
+            const db = loadDevDb();
+            if (!(db as any).blog_articles) (db as any).blog_articles = [];
+            const item = { ...fields };
+
+            if (item.is_featured) {
+              // Un-feature others
+              (db as any).blog_articles.forEach((a: any) => { a.is_featured = 0; });
+            }
+
+            let articleId = item.id;
+            if (articleId) {
+              const idx = (db as any).blog_articles.findIndex((a: any) => a.id == articleId);
+              if (idx !== -1) {
+                (db as any).blog_articles[idx] = { ...(db as any).blog_articles[idx], ...item };
+              } else {
+                (db as any).blog_articles.push(item);
+              }
+            } else {
+              articleId = Date.now();
+              item.id = articleId;
+              item.created_at = new Date().toISOString();
+              (db as any).blog_articles.unshift(item);
+            }
+
+            // Sync with hero_news if show_in_slider is true
+            if (!(db as any).hero_news) (db as any).hero_news = [];
+            const blogLink = `/blog/${articleId}`;
+            const existingHeroIdx = (db as any).hero_news.findIndex((h: any) => h.link_url === blogLink);
+
+            if (item.show_in_slider) {
+              const heroItem = {
+                id: 'blog-' + articleId,
+                title: item.title,
+                comment: item.desc || item.title,
+                image_url: item.img,
+                link_url: blogLink,
+                tag: item.category || 'Article Blog',
+                order_num: 1,
+                is_active: 1
+              };
+              if (existingHeroIdx !== -1) {
+                (db as any).hero_news[existingHeroIdx] = { ...(db as any).hero_news[existingHeroIdx], ...heroItem };
+              } else {
+                (db as any).hero_news.unshift(heroItem);
+              }
+            } else {
+              if (existingHeroIdx !== -1) {
+                (db as any).hero_news.splice(existingHeroIdx, 1);
+              }
+            }
+
+            saveDevDb(db);
+            return res.end(JSON.stringify({ success: true, id: articleId }));
+          }
+
+          if (action === 'delete_blog_article') {
+            const { fields } = await parseRequestBody(req);
+            const db = loadDevDb();
+            if ((db as any).blog_articles) {
+              (db as any).blog_articles = (db as any).blog_articles.filter((a: any) => a.id != fields.id);
+            }
+            if ((db as any).hero_news) {
+              (db as any).hero_news = (db as any).hero_news.filter((h: any) => h.link_url !== `/blog/${fields.id}`);
+            }
+            saveDevDb(db);
+            return res.end(JSON.stringify({ success: true }));
+          }
+
+          if (action === 'get_hero_news') {
+            const db = loadDevDb();
+            if (!(db as any).hero_news) {
+              (db as any).hero_news = [
+                {
+                  id: 1,
+                  title: "Sommet BNE Casablanca 2026 : 450 Dirigeants Réunis",
+                  comment: "La plus grande rencontre d'affaires inter-entreprises du continent africain avec signature de partenariats stratégiques majeurs.",
+                  image_url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
+                  link_url: "/evenements",
+                  tag: "Événement Majeur",
+                  order_num: 1,
+                  is_active: 1
+                },
+                {
+                  id: 2,
+                  title: "Mission Économique & Immersion BNE à Abidjan",
+                  comment: "Accélération des opportunités d'investissement, rencontres B2B qualifiées par IA et visites de sites industriels phares.",
+                  image_url: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+                  link_url: "/sejours-bne",
+                  tag: "Séjour Immersif",
+                  order_num: 2,
+                  is_active: 1
+                },
+                {
+                  id: 3,
+                  title: "Intelligence Artificielle & Alliances Transfrontalières",
+                  comment: "Déploiement de notre infrastructure d'intelligence décisionnelle pour connecter les décideurs d'Europe et d'Afrique.",
+                  image_url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
+                  link_url: "/services-ia",
+                  tag: "Stratégie & IA",
+                  order_num: 3,
+                  is_active: 1
+                }
+              ];
+              saveDevDb(db);
+            }
+            return res.end(JSON.stringify({ success: true, data: (db as any).hero_news }));
+          }
+          if (action === 'save_hero_news') {
+            const { fields } = await parseRequestBody(req);
+            const db = loadDevDb();
+            if (!(db as any).hero_news) (db as any).hero_news = [];
+            const item = { ...fields };
+            if (item.id) {
+              const idx = (db as any).hero_news.findIndex((n: any) => n.id == item.id);
+              if (idx !== -1) {
+                (db as any).hero_news[idx] = { ...(db as any).hero_news[idx], ...item };
+              } else {
+                (db as any).hero_news.push(item);
+              }
+            } else {
+              item.id = Date.now();
+              item.created_at = new Date().toISOString();
+              (db as any).hero_news.unshift(item);
+            }
+            saveDevDb(db);
+            return res.end(JSON.stringify({ success: true }));
+          }
+          if (action === 'delete_hero_news') {
+            const { fields } = await parseRequestBody(req);
+            const db = loadDevDb();
+            if ((db as any).hero_news) {
+              (db as any).hero_news = (db as any).hero_news.filter((n: any) => n.id != fields.id);
+              saveDevDb(db);
+            }
+            return res.end(JSON.stringify({ success: true }));
+          }
+        }
+
         if (!pathname.startsWith('/api/')) {
           return next();
         }

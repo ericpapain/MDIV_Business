@@ -1,10 +1,12 @@
 import { NavLink, Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Tag, ArrowLeft, Video, Calendar, LogOut, Loader2, Handshake, MessageSquare, Plane, Play, Menu, X, Star, TrendingUp, Cpu } from "lucide-react";
+import { LayoutDashboard, Users, Tag, ArrowLeft, Video, Calendar, LogOut, Loader2, Handshake, MessageSquare, Plane, Play, Menu, X, Star, TrendingUp, Cpu, Newspaper, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const items = [
   { to: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard, end: true },
+  { to: "/admin/blog", label: "Blog & Actualités", icon: BookOpen },
+  { to: "/admin/actualites", label: "Actualités Hero", icon: Newspaper },
   { to: "/admin/ai-settings", label: "Modèles & Fournisseurs IA", icon: Cpu },
   { to: "/admin/performance", label: "Pilotage & Performance", icon: TrendingUp },
   { to: "/admin/demandes", label: "Candidatures", icon: Star },

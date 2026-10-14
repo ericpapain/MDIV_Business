@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Plane, MapPin, Loader2, Edit, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, Plane, MapPin, Loader2, Edit, Clock, ChevronDown, ChevronUp, Check, X, Sliders } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { useToast } from "@/hooks/use-toast";
 
@@ -45,6 +45,7 @@ export default function AdminSejours() {
   const [program, setProgram] = useState<ProgramDay[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showProgram, setShowProgram] = useState(false);
+  const [showInSlider, setShowInSlider] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -65,6 +66,7 @@ export default function AdminSejours() {
   const resetForm = () => {
     setTitle(""); setTitleEn(""); setDate(""); setLocation(""); setDescription(""); setDescriptionEn("");
     setImageUrl(""); setPrice(""); setBilletterieUrl(""); setEventCode(""); setProgram([]); setEditingId(null); setShowProgram(false);
+    setShowInSlider(false);
   };
 
   const submitSejour = useMutation({
@@ -84,8 +86,29 @@ export default function AdminSejours() {
       if (!d.success) throw new Error(d.error);
       return d;
     },
-    onSuccess: () => {
-      toast({ title: editingId ? "Séjour modifié" : "Séjour créé" });
+    onSuccess: async () => {
+      if (showInSlider) {
+        try {
+          await fetch("/api-admin.php?action=save_hero_news", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title,
+              comment: description,
+              image_url: imageUrl,
+              tag: "Immersion BNE",
+              link_url: "/sejours-bne",
+            }),
+          });
+          queryClient.invalidateQueries({ queryKey: ["hero-news"] });
+        } catch (e) {
+          console.error("Slider sync failed:", e);
+        }
+      }
+      toast({ 
+        title: editingId ? "Séjour modifié" : "Séjour créé",
+        description: showInSlider ? "Le séjour est également affiché dans le slider d'accueil !" : undefined
+      });
       resetForm();
       queryClient.invalidateQueries({ queryKey: ["admin-events"] });
     },
@@ -208,6 +231,43 @@ export default function AdminSejours() {
               <div>
                 <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Description (EN) <span className="text-gold/50">optionnel</span></label>
                 <textarea value={descriptionEn} onChange={e => setDescriptionEn(e.target.value)} rows={3} placeholder="English description..." className="w-full px-3.5 py-2.5 bg-muted/30 border border-border rounded-xl text-sm resize-y min-h-[80px]" />
+              </div>
+
+              {/* Slider Toggle */}
+              <div className="p-3.5 rounded-sm border border-gold/40 bg-gold/5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Sliders size={15} className="text-gold" />
+                  <span className="text-xs uppercase tracking-wider font-bold text-foreground">
+                    Afficher dans le slider d'accueil ?
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Si OUI, ce séjour immersif défilera avec son image et ses infos dans le carrousel principal de la page d'accueil.
+                </p>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowInSlider(true)}
+                    className={`px-3.5 py-1.5 rounded-sm text-xs uppercase font-bold tracking-wider transition-all flex items-center gap-1.5 ${
+                      showInSlider 
+                        ? "bg-gold text-black shadow-md shadow-gold/20" 
+                        : "bg-black/40 text-muted-foreground hover:text-foreground border border-border"
+                    }`}
+                  >
+                    <Check size={13} /> Oui
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowInSlider(false)}
+                    className={`px-3.5 py-1.5 rounded-sm text-xs uppercase font-bold tracking-wider transition-all flex items-center gap-1.5 ${
+                      !showInSlider 
+                        ? "bg-white/10 text-white border border-white/20" 
+                        : "bg-black/40 text-muted-foreground hover:text-foreground border border-border"
+                    }`}
+                  >
+                    <X size={13} /> Non
+                  </button>
+                </div>
               </div>
 
               {/* Programme Section */}
