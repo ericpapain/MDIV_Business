@@ -1,21 +1,22 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Newspaper, 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Check, 
-  X, 
-  ExternalLink, 
-  Image as ImageIcon, 
-  ArrowUpDown, 
-  Eye, 
+import {
+  Newspaper,
+  Plus,
+  Trash2,
+  Edit,
+  Check,
+  X,
+  ExternalLink,
+  Image as ImageIcon,
+  ArrowUpDown,
+  Eye,
   Sparkles,
   Loader2,
   RefreshCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 interface HeroNewsItem {
   id: number;
@@ -84,7 +85,7 @@ export default function AdminHeroNews() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-hero-news"] });
       queryClient.invalidateQueries({ queryKey: ["hero-news"] });
-      toast({ 
+      toast({
         title: editingId ? "Actualité modifiée" : "Actualité ajoutée",
         description: "Les modifications sont immédiatement répercutées sur la page d'accueil."
       });
@@ -274,7 +275,7 @@ export default function AdminHeroNews() {
             <div className="grid md:grid-cols-2 gap-6">
               {/* Titre */}
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
+                <label className="font-display text-xl text-foreground">
                   Titre de l'actualité <span className="text-gold">*</span>
                 </label>
                 <input
@@ -289,7 +290,7 @@ export default function AdminHeroNews() {
 
               {/* Tag / Badge */}
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
+                <label className="font-display text-xl text-foreground">
                   Badge / Catégorie
                 </label>
                 <input
@@ -303,16 +304,12 @@ export default function AdminHeroNews() {
 
               {/* Image URL */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90 flex items-center justify-between">
-                  <span>URL de l'image <span className="text-gold">*</span></span>
-                  <span className="text-[11px] text-muted-foreground">Recommandé : format paysage (16:9) haute définition</span>
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/photo-..."
+                <ImageUpload
+                  label="URL de l'image"
+                  labelClassName="font-display text-xl text-foreground"
+                  placeholder="https://images.unsplash.com/... ou cliquer sur 'Télécharger du PC'"
                   value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  className="w-full bg-background/80 border border-border/80 focus:border-gold rounded-sm px-4 py-2.5 text-sm text-foreground outline-none transition-colors"
+                  onChange={(val) => setFormData({ ...formData, image_url: val })}
                   required
                 />
 
@@ -334,7 +331,7 @@ export default function AdminHeroNews() {
 
               {/* Commentaire / Description */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
+                <label className="font-display text-xl text-foreground">
                   Commentaire correspondant <span className="text-gold">*</span>
                 </label>
                 <textarea
@@ -349,7 +346,7 @@ export default function AdminHeroNews() {
 
               {/* Lien URL */}
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
+                <label className="font-display text-xl text-foreground">
                   Lien de redirection (Optionnel)
                 </label>
                 <input
@@ -364,7 +361,7 @@ export default function AdminHeroNews() {
               {/* Ordre & Statut */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
+                  <label className="font-display text-xl text-foreground">
                     Ordre d'apparition
                   </label>
                   <input
@@ -377,7 +374,7 @@ export default function AdminHeroNews() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-wider font-semibold text-foreground/90">
+                  <label className="font-display text-xl text-foreground">
                     Statut dans le slider
                   </label>
                   <div className="pt-2">
@@ -490,11 +487,10 @@ export default function AdminHeroNews() {
               return (
                 <div
                   key={item.id}
-                  className={`group rounded-sm border transition-all duration-300 overflow-hidden flex flex-col justify-between ${
-                    isActive 
-                      ? "border-border/80 hover:border-gold/50 bg-[#0c1013]" 
-                      : "border-border/30 bg-[#080a0c]/60 opacity-60"
-                  }`}
+                  className={`group rounded-sm border transition-all duration-300 overflow-hidden flex flex-col justify-between ${isActive
+                    ? "border-border/80 hover:border-gold/50 bg-[#0c1013]"
+                    : "border-border/30 bg-[#080a0c]/60 opacity-60"
+                    }`}
                 >
                   {/* Visuel Carte */}
                   <div>
@@ -508,7 +504,7 @@ export default function AdminHeroNews() {
                         }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0c1013] via-transparent to-black/30" />
-                      
+
                       {/* Badge Tag */}
                       <div className="absolute top-3 left-3 flex items-center gap-2">
                         <span className="text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-sm bg-black/70 backdrop-blur-sm border border-gold/40 text-gold font-bold">
@@ -529,7 +525,7 @@ export default function AdminHeroNews() {
                       <h3 className="font-display text-base text-foreground group-hover:text-gold-light transition-colors line-clamp-2">
                         {item.title}
                       </h3>
-                      
+
                       <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
                         {item.comment}
                       </p>
@@ -548,11 +544,10 @@ export default function AdminHeroNews() {
                   <div className="p-4 pt-3 border-t border-border/50 bg-black/30 flex items-center justify-between gap-2">
                     <button
                       onClick={() => toggleActiveStatus(item)}
-                      className={`text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-sm border transition-colors flex items-center gap-1.5 ${
-                        isActive
-                          ? "border-emerald-500/40 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
-                          : "border-border text-muted-foreground hover:text-foreground"
-                      }`}
+                      className={`text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-sm border transition-colors flex items-center gap-1.5 ${isActive
+                        ? "border-emerald-500/40 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
+                        : "border-border text-muted-foreground hover:text-foreground"
+                        }`}
                     >
                       {isActive ? <Check size={12} /> : <X size={12} />}
                       {isActive ? "Visible" : "Masqué"}

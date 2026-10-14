@@ -245,7 +245,7 @@ async function extractTextFromBuffer(buffer: Buffer, filename: string): Promise<
 /**
  * Parser de requête universel (JSON + Multipart/Form-Data avec extraction de texte)
  */
-function parseRequestBody(req: http.IncomingMessage): Promise<{ fields: Record<string, any>; files: Array<{ name: string; filename: string; text: string }> }> {
+function parseRequestBody(req: http.IncomingMessage): Promise<{ fields: Record<string, any>; files: Array<{ name: string; filename: string; text: string; buffer?: Buffer }> }> {
   return new Promise((resolve) => {
     const chunks: Buffer[] = [];
     req.on('data', chunk => { chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)); });
@@ -270,7 +270,7 @@ function parseRequestBody(req: http.IncomingMessage): Promise<{ fields: Record<s
           const rawString = buffer.toString('binary');
           const parts = rawString.split('--' + boundary);
           const fields: Record<string, any> = {};
-          const files: Array<{ name: string; filename: string; text: string }> = [];
+          const files: Array<{ name: string; filename: string; text: string; buffer?: Buffer }> = [];
 
           for (const part of parts) {
             if (!part || part.trim() === '' || part.trim() === '--') continue;
@@ -289,7 +289,7 @@ function parseRequestBody(req: http.IncomingMessage): Promise<{ fields: Record<s
                 const filename = filenameMatch[1];
                 const bodyBuffer = Buffer.from(bodyPart, 'binary');
                 const textContent = await extractTextFromBuffer(bodyBuffer, filename);
-                files.push({ name: fieldName, filename, text: textContent });
+                files.push({ name: fieldName, filename, text: textContent, buffer: bodyBuffer });
               } else {
                 fields[fieldName] = Buffer.from(bodyPart, 'binary').toString('utf-8');
               }
@@ -339,6 +339,22 @@ export function devApiPlugin(): Plugin {
       server.middlewares.use(async (req, res, next) => {
         const urlObj = new URL(req.url || '/', 'http://localhost:8080');
         const pathname = urlObj.pathname;
+
+        if (pathname === '/api-auth.php') {
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Content-Type', 'application/json');
+          const action = urlObj.searchParams.get('action');
+          if (action === 'check') {
+            return res.end(JSON.stringify({ authenticated: true, user: { username: 'admin' } }));
+          }
+          if (action === 'login') {
+            return res.end(JSON.stringify({ success: true, message: 'Connexion réussie' }));
+          }
+          if (action === 'logout') {
+            return res.end(JSON.stringify({ success: true }));
+          }
+          return res.end(JSON.stringify({ authenticated: true }));
+        }
 
         if (pathname === '/api-public.php') {
           res.setHeader('Access-Control-Allow-Origin', '*');
@@ -554,6 +570,23 @@ export function devApiPlugin(): Plugin {
             return res.end();
           }
           const action = urlObj.searchParams.get('action');
+
+          if (action === 'upload_image' && req.method === 'POST') {
+            const { files } = await parseRequestBody(req);
+            const file = files[0];
+            if (!file || !file.buffer) {
+              res.statusCode = 400;
+              return res.end(JSON.stringify({ success: false, error: "Aucun fichier reçu" }));
+            }
+            const ext = (path.extname(file.filename || '') || '.jpg').toLowerCase();
+            const filename = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}${ext}`;
+            const uploadDir = path.resolve(process.cwd(), 'public/assets/uploads');
+            if (!fs.existsSync(uploadDir)) {
+              fs.mkdirSync(uploadDir, { recursive: true });
+            }
+            fs.writeFileSync(path.join(uploadDir, filename), file.buffer);
+            return res.end(JSON.stringify({ success: true, url: `/assets/uploads/${filename}` }));
+          }
 
           if (action === 'get_blog_articles') {
             const db = loadDevDb();
