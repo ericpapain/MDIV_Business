@@ -1,184 +1,259 @@
+// src/pages/admin/AdminDashboard.tsx - MDIV Business Analytics Suite
 import { useState, useEffect } from "react";
-import { TrendingUp, Users, Video, Calendar, ArrowUpRight, Loader2, Save, BarChart2 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  BarChart3,
+  RefreshCw,
+  Download,
+  Settings,
+  Radio,
+  SlidersHorizontal,
+  Calendar,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const COLORS = ["hsl(var(--gold))", "hsl(var(--gold-light))", "hsl(var(--gold-deep))", "hsl(var(--muted-foreground))"];
+import { AnalyticsKpiGrid } from "@/components/admin/analytics/AnalyticsKpiGrid";
+import { AnalyticsTrafficChart } from "@/components/admin/analytics/AnalyticsTrafficChart";
+import { AnalyticsTopPagesTable } from "@/components/admin/analytics/AnalyticsTopPagesTable";
+import { AnalyticsGeoSection } from "@/components/admin/analytics/AnalyticsGeoSection";
+import { AnalyticsVisitorHistory } from "@/components/admin/analytics/AnalyticsVisitorHistory";
+import { AnalyticsUserJourney } from "@/components/admin/analytics/AnalyticsUserJourney";
+import { AnalyticsSourcesSection } from "@/components/admin/analytics/AnalyticsSourcesSection";
+import { AnalyticsDevicesSection } from "@/components/admin/analytics/AnalyticsDevicesSection";
+import { AnalyticsRealtimeWidget } from "@/components/admin/analytics/AnalyticsRealtimeWidget";
+import { AnalyticsHomeCountersModal } from "@/components/admin/analytics/AnalyticsHomeCountersModal";
+import type { AnalyticsData } from "@/components/admin/analytics/types";
 
 export default function AdminDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ["admin-stats"],
+  const [period, setPeriod] = useState<string>("30d");
+  const [isHomeModalOpen, setIsHomeModalOpen] = useState(false);
+  const [secondsRemaining, setSecondsRemaining] = useState(15);
+
+  // 1. Requête principale des Analytics (période sélectionnée)
+  const {
+    data: analyticsData,
+    isLoading,
+    isRefetching,
+    refetch,
+    error,
+  } = useQuery<AnalyticsData>({
+    queryKey: ["admin-analytics", period],
     queryFn: async () => {
-      const res = await fetch("/api-admin.php?action=stats");
+      const res = await fetch(`/api-analytics.php?action=dashboard&period=${period}`);
+      if (!res.ok) throw new Error("Impossible de charger les données analytics");
       const json = await res.json();
-      return json.data;
-    }
+      return json;
+    },
+    staleTime: 10000,
   });
 
-  const { data: siteStats, isLoading: statsLoading } = useQuery({
-    queryKey: ["site-stats"],
+  // 2. Requête du flux temps réel (toutes les 15 secondes)
+  const { data: realtimeData, refetch: refetchRealtime } = useQuery({
+    queryKey: ["admin-realtime"],
     queryFn: async () => {
-      const res = await fetch("/api-admin.php?action=get_site_stats");
-      const json = await res.json();
-      return json.data;
-    }
+      const res = await fetch("/api-analytics.php?action=realtime");
+      if (!res.ok) return null;
+      return res.json();
+    },
+    refetchInterval: 15000,
   });
 
-  const [formData, setFormData] = useState({
-    ambassadors_count: 0,
-    partners_count: 0,
-    events_count: 0,
-    trips_count: 0,
-    participants_count: 0,
-    members_count: 10,
-    countries_count: 4,
-    satisfaction_rate: '87%'
-  });
-
+  // Compte à rebours 15 secondes
   useEffect(() => {
-    if (siteStats) {
-      setFormData({
-        ambassadors_count: Math.max(siteStats.ambassadors_count || 0, siteStats.auto_ambassadors || 0),
-        partners_count: Math.max(siteStats.partners_count || 0, siteStats.auto_partners || 0),
-        events_count: Math.max(siteStats.events_count || 0, siteStats.auto_events || 0),
-        trips_count: Math.max(siteStats.trips_count || 0, siteStats.auto_trips || 0),
-        participants_count: Math.max(siteStats.participants_count || 0, siteStats.auto_participants || 0),
-        members_count: siteStats.members_count || 0,
-        countries_count: siteStats.countries_count || 0,
-        satisfaction_rate: siteStats.satisfaction_rate || '0%'
+    const timer = setInterval(() => {
+      setSecondsRemaining((prev) => {
+        if (prev <= 1) {
+          return 15;
+        }
+        return prev - 1;
       });
-    }
-  }, [siteStats]);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const updateStats = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await fetch("/api-admin.php?action=update_site_stats", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const d = await res.json();
-      if (!d.success) throw new Error(d.error);
-      return d;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["site-stats"] });
-      toast({ title: "Statistiques mises à jour", description: "La page d'accueil reflète maintenant ces nouvelles valeurs." });
-    },
-    onError: (err: any) => {
-      toast({ variant: "destructive", title: "Erreur", description: err.message });
-    }
-  });
-
-  const handleStatsSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateStats.mutate(formData);
+  const handleManualRefresh = () => {
+    refetch();
+    refetchRealtime();
+    setSecondsRemaining(15);
+    toast({
+      title: "Actualisation en cours",
+      description: "Les métriques de trafic ont été rafraîchies.",
+    });
   };
 
-  if (isLoading || statsLoading) {
-    return <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-gold w-8 h-8" /></div>;
+  const handleExportCsv = () => {
+    window.open(`/api-analytics.php?action=export_csv&period=${period}`, "_blank");
+  };
+
+  if (isLoading && !analyticsData) {
+    return (
+      <div className="py-24 flex flex-col items-center justify-center gap-3">
+        <Loader2 className="animate-spin text-[#D4AF37] w-10 h-10" />
+        <span className="text-sm font-medium text-slate-400">
+          Chargement de la suite Analytics MDIV...
+        </span>
+      </div>
+    );
   }
 
-  const byCountry = stats?.countries?.map((c: any) => ({ name: c.country, v: parseInt(c.count) })) || [];
+  if (error || !analyticsData) {
+    return (
+      <div className="py-16 text-center">
+        <div className="inline-flex p-3 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 mb-3">
+          <AlertCircle size={24} />
+        </div>
+        <h3 className="text-lg font-semibold text-white mb-1">
+          Erreur de connexion Analytics
+        </h3>
+        <p className="text-sm text-slate-400 mb-4 max-w-md mx-auto">
+          Impossible de récupérer les statistiques d'audience. Veuillez vérifier la connexion à la base de données.
+        </p>
+        <button
+          onClick={() => refetch()}
+          className="btn-gold px-4 py-2 text-xs uppercase tracking-wider"
+        >
+          Réessayer
+        </button>
+      </div>
+    );
+  }
+
+  // Fusionner les données temps réel si disponibles
+  const kpis = {
+    ...analyticsData.kpis,
+    realtime_active: {
+      ...analyticsData.kpis.realtime_active,
+      value: realtimeData?.activeCount ?? analyticsData.kpis.realtime_active.value,
+    },
+  };
+
+  const activePages = realtimeData?.activePages || [];
+  const recentFeed = realtimeData?.recentFeed || [];
+
+  // Extraire les listes uniques pour les filtres
+  const availableCountries = Array.from(
+    new Set(analyticsData.countries.map((c) => c.country).filter(Boolean) as string[])
+  );
+  const availablePages = Array.from(
+    new Set(analyticsData.topPages.map((p) => p.page_path).filter(Boolean))
+  );
 
   return (
-    <div className="">
-      <div className="mb-10">
-        <div className="eyebrow mb-2">Tableau de bord</div>
-        <h1 className="font-display text-4xl">Pilotage du Site</h1>
-      </div>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-        {[
-          { I: Users, t: "Visites Totales", v: stats?.total_visits || 0, d: "Historique", c: "text-success" },
-          { I: Calendar, t: "Événements à venir", v: stats?.upcoming_events || 0, d: "Programme", c: "text-success" },
-          { I: Video, t: "Vidéos en ligne", v: stats?.total_videos || 0, d: "Playlist", c: "text-gold" },
-          { I: TrendingUp, t: "Membres inscrits", v: stats?.total_members || 0, d: "Réseau", c: "text-success" },
-        ].map((s) => (
-          <div key={s.t} className="luxe-card p-5 rounded-sm">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-9 h-9 rounded-sm bg-emerald-deep/50 gold-border flex items-center justify-center"><s.I size={14} className="text-primary" /></div>
-              <div className={`text-[10px] uppercase tracking-[0.22em] flex items-center gap-1 ${s.c}`}><ArrowUpRight size={10} /> {s.d}</div>
-            </div>
-            <div className="font-display text-3xl gold-text">{s.v}</div>
-            <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mt-1">{s.t}</div>
+    <div className="space-y-6 pb-16">
+      {/* HEADER DE LA PAGE ANALYTICS */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-white/10">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-[#D4AF37]">
+              MDIV Business · Analytics Suite
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Direct actif
+            </span>
           </div>
-        ))}
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-5 mb-10">
-        <div className="luxe-card p-6 rounded-sm">
-          <div className="eyebrow mb-5">Répartition des visites (Top Pays)</div>
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie data={byCountry} dataKey="v" nameKey="name" innerRadius={60} outerRadius={90} paddingAngle={3}>
-                {byCountry.map((_, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-              </Pie>
-              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--gold) / 0.4)", borderRadius: 2 }} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="space-y-1.5 mt-2 max-h-32 overflow-y-auto">
-            {byCountry.map((b: any, i: number) => (
-              <div key={b.name} className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-sm" style={{ background: COLORS[i % COLORS.length] }} /> {b.name}</span>
-                <span className="font-mono text-muted-foreground">{b.v} visites</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="luxe-card p-6 rounded-sm flex flex-col">
-          <div className="eyebrow mb-5 flex items-center gap-2"><BarChart2 size={14} className="text-gold" /> Statistiques Globales (Accueil)</div>
-          <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
-            Ces valeurs sont affichées sur la page d'accueil du site pour présenter l'envergure du réseau. Vous pouvez les ajuster manuellement pour inclure votre historique.
+          <h1 className="font-display text-3xl lg:text-4xl font-bold text-white tracking-tight">
+            Vue d'ensemble & Tableau de Bord Analytics
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">
+            Suivi centralisé du trafic, des conversions et du parcours des visiteurs sur l'ensemble du site.
           </p>
-          <form onSubmit={handleStatsSubmit} className="space-y-4 flex-1 flex flex-col">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Ambassadeurs</label>
-                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.ambassadors_count} onChange={e => setFormData({...formData, ambassadors_count: parseInt(e.target.value) || 0})} />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Partenaires</label>
-                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.partners_count} onChange={e => setFormData({...formData, partners_count: parseInt(e.target.value) || 0})} />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Événements</label>
-                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.events_count} onChange={e => setFormData({...formData, events_count: parseInt(e.target.value) || 0})} />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Séjours</label>
-                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.trips_count} onChange={e => setFormData({...formData, trips_count: parseInt(e.target.value) || 0})} />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Membres (Hero)</label>
-                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.members_count} onChange={e => setFormData({...formData, members_count: parseInt(e.target.value) || 0})} />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Pays (Hero)</label>
-                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.countries_count} onChange={e => setFormData({...formData, countries_count: parseInt(e.target.value) || 0})} />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Satisfaction (Hero)</label>
-                <input type="text" className="input-field py-2 px-3 text-sm" value={formData.satisfaction_rate} onChange={e => setFormData({...formData, satisfaction_rate: e.target.value})} />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">Participants Total</label>
-                <input type="number" className="input-field py-2 px-3 text-sm" value={formData.participants_count} onChange={e => setFormData({...formData, participants_count: parseInt(e.target.value) || 0})} />
-              </div>
-            </div>
-            <div className="pt-2 mt-auto">
-              <button type="submit" disabled={updateStats.isPending} className="btn-gold w-full py-2.5 flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
-                {updateStats.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Enregistrer
-              </button>
-            </div>
-          </form>
+        </div>
+
+        {/* ACTIONS DU HEADER */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Bouton de mise à jour des compteurs vitrine */}
+          <button
+            onClick={() => setIsHomeModalOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-slate-200 transition-colors"
+            title="Modifier les statistiques affichées sur la page d'accueil"
+          >
+            <Settings size={14} className="text-[#D4AF37]" />
+            <span>Compteurs Accueil</span>
+          </button>
+
+          {/* Bouton Export CSV */}
+          <button
+            onClick={handleExportCsv}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-black/40 hover:bg-black/60 border border-white/10 text-xs font-medium text-slate-200 transition-colors"
+          >
+            <Download size={14} />
+            <span>Export CSV</span>
+          </button>
+
+          {/* Bouton Rafraîchir */}
+          <button
+            onClick={handleManualRefresh}
+            disabled={isRefetching}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#D4AF37] hover:bg-[#e5be48] text-black text-xs font-semibold shadow-md transition-all active:scale-95 disabled:opacity-50"
+          >
+            <RefreshCw size={14} className={isRefetching ? "animate-spin" : ""} />
+            <span>{isRefetching ? "Actualisation..." : "Rafraîchir"}</span>
+          </button>
         </div>
       </div>
+
+      {/* SECTION 9 : VISITEURS EN TEMPS RÉEL (Surveillance en direct) */}
+      <AnalyticsRealtimeWidget
+        activeCount={kpis.realtime_active.value}
+        activePages={activePages}
+        recentFeed={recentFeed}
+        onRefreshManual={handleManualRefresh}
+        secondsRemaining={secondsRemaining}
+      />
+
+      {/* SECTION 1 : KPI PRINCIPAUX (8 Cartes Modernes) */}
+      <AnalyticsKpiGrid kpis={kpis} isLoading={isRefetching} />
+
+      {/* SECTION 2 : ÉVOLUTION DU TRAFIC (Graphique Interactif) */}
+      <AnalyticsTrafficChart
+        data={analyticsData.timeline}
+        period={period}
+        onPeriodChange={(p) => setPeriod(p)}
+        isLoading={isRefetching}
+      />
+
+      {/* SECTION 3 : PAGES LES PLUS VISITÉES */}
+      <AnalyticsTopPagesTable pages={analyticsData.topPages} />
+
+      {/* SECTION 6 : PARCOURS UTILISATEUR & ENTONNOIR (Funnel) */}
+      <AnalyticsUserJourney journeys={analyticsData.journeys} />
+
+      {/* SECTION 4 : GÉOLOCALISATION DES VISITEURS */}
+      <AnalyticsGeoSection
+        countries={analyticsData.countries}
+        cities={analyticsData.cities}
+      />
+
+      {/* SECTION 7 & 8 : SOURCES DE TRAFIC + APPAREILS / NAVIGATEURS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AnalyticsSourcesSection sources={analyticsData.sources} />
+        <AnalyticsDevicesSection
+          devices={analyticsData.devices}
+          browsers={analyticsData.browsers}
+          os={analyticsData.os}
+        />
+      </div>
+
+      {/* SECTION 5 : HISTORIQUE DÉTAILLÉ DES VISITEURS (Journal complet & CSV) */}
+      <AnalyticsVisitorHistory
+        history={analyticsData.history}
+        period={period}
+        onFilterChange={() => {}}
+        availableCountries={availableCountries}
+        availablePages={availablePages}
+      />
+
+      {/* MODAL / TIROIR DE MODIFICATION DES STATS VITRINE D'ACCUEIL */}
+      <AnalyticsHomeCountersModal
+        isOpen={isHomeModalOpen}
+        onClose={() => setIsHomeModalOpen(false)}
+      />
     </div>
   );
 }

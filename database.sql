@@ -321,4 +321,34 @@ CREATE TABLE IF NOT EXISTS `blog_articles` (
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 13. Table des Visites & Événements Analytics (Tableau de bord de type GA4/Matomo/Plausible)
+CREATE TABLE IF NOT EXISTS `analytics_visits` (
+  `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `session_id` VARCHAR(100) NOT NULL,
+  `visitor_id` VARCHAR(100) NOT NULL,
+  `ip_address` VARCHAR(45) NOT NULL,
+  `country` VARCHAR(100) DEFAULT 'France',
+  `country_code` VARCHAR(10) DEFAULT 'FR',
+  `city` VARCHAR(150) DEFAULT 'Paris',
+  `page_path` VARCHAR(255) NOT NULL,
+  `page_title` VARCHAR(255) DEFAULT '',
+  `referrer` VARCHAR(500) DEFAULT '',
+  `referrer_source` VARCHAR(100) DEFAULT 'Direct',
+  `user_agent` TEXT,
+  `browser` VARCHAR(100) DEFAULT 'Chrome',
+  `os` VARCHAR(100) DEFAULT 'Windows',
+  `device_type` VARCHAR(50) DEFAULT 'Desktop',
+  `duration_seconds` INT DEFAULT 0,
+  `is_exit` TINYINT(1) DEFAULT 0,
+  `is_bounce` TINYINT(1) DEFAULT 0,
+  `conversion_event` VARCHAR(100) DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `last_activity_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_analytics_session` (`session_id`),
+  INDEX `idx_analytics_visitor` (`visitor_id`),
+  INDEX `idx_analytics_created` (`created_at`),
+  INDEX `idx_analytics_page` (`page_path`),
+  INDEX `idx_analytics_country` (`country`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 

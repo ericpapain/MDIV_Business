@@ -16,7 +16,7 @@ const mainNavKeys = [
   { to: "/offres", key: "nav.offers" },
   { to: "/evenements", key: "nav.events" },
   { to: "/partenaires", key: "nav.partners", labelFr: "Partenaires & Ambassadeurs", labelEn: "Partners & Ambassadors" },
-  { to: "/tarifs", key: "Tarifs" },
+  { to: "/sejours-bne", key: "nav.sejours_bne", labelFr: "Séjours BNE", labelEn: "BNE Trips" },
   { to: "/contact", key: "nav.contact" },
   { to: "/blog", key: "Blog" },
   { to: "/charte", key: "La Charte" },
@@ -64,7 +64,8 @@ export function SiteHeader() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const location = useLocation();
-  const isIAPage = location.pathname.startsWith('/services-ia') || location.pathname === '/dashboard' || location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/tarifs' || location.pathname === '/diagnostic-ia';
+  // Section Services IA fermée / En maintenance : maintien de la navigation MDIV Business
+  const isIAPage = false;
   const isEn = language === 'en';
 
   const navRef = useRef<HTMLDivElement>(null);

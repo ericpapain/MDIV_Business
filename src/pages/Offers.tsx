@@ -391,11 +391,8 @@ export default function Offers() {
                           </div>
 
                           <div className="flex flex-col gap-3 mt-auto">
-                            <a href="/services-ia" target="_blank" rel="noopener noreferrer" className="w-full text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-sm flex items-center justify-center gap-2 transition-colors font-medium border border-blue-500/30">
-                              {t("home.hero_live.ai_services_btn") || "Découvrir nos services IA"} <ArrowRight size={14} />
-                            </a>
-                            <Link to="/services-ia/diagnostic" className="w-full text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-foreground rounded-sm flex items-center justify-center gap-2 transition-all font-bold shadow-[0_0_20px_rgba(37,99,235,0.4)]">
-                              {t("home.hero_live.ai_diag_btn") || "Diagnostic IA gratuit"} <Zap size={14} className="fill-white/20" />
+                            <Link to="/contact?subject=Offre Club IA Privé" className="w-full text-center px-6 py-3.5 text-xs uppercase tracking-[0.22em] bg-gold/10 hover:bg-gold/20 text-gold rounded-sm flex items-center justify-center gap-2 transition-colors font-medium border border-gold/30">
+                              Accès Réservé Club BNE <ArrowRight size={14} />
                             </Link>
                           </div>
                         </div>

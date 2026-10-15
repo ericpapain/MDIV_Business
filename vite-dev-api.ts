@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 import mammoth from 'mammoth';
+import { handleDevAnalyticsRequest } from './vite-dev-analytics';
 
 function getEnvVar(key: string): string {
   if (process.env[key]) return process.env[key]!;
@@ -732,6 +733,43 @@ export function devApiPlugin(): Plugin {
             }
             return res.end(JSON.stringify({ success: true }));
           }
+
+          if (action === 'get_site_stats') {
+            const db = loadDevDb();
+            let stats = (db as any).site_stats;
+            if (!stats) {
+              stats = {
+                ambassadors_count: 14,
+                partners_count: 28,
+                events_count: 12,
+                trips_count: 6,
+                participants_count: 480,
+                members_count: 150,
+                countries_count: 8,
+                satisfaction_rate: '94%',
+                auto_ambassadors: 14,
+                auto_partners: 28,
+                auto_events: 12,
+                auto_trips: 6,
+                auto_participants: 480
+              };
+              (db as any).site_stats = stats;
+              saveDevDb(db);
+            }
+            return res.end(JSON.stringify({ success: true, data: stats }));
+          }
+
+          if (action === 'update_site_stats' && req.method === 'POST') {
+            const { fields } = await parseRequestBody(req);
+            const db = loadDevDb();
+            (db as any).site_stats = { ...((db as any).site_stats || {}), ...fields };
+            saveDevDb(db);
+            return res.end(JSON.stringify({ success: true }));
+          }
+        }
+
+        if (pathname === '/api-analytics.php') {
+          return handleDevAnalyticsRequest(req, res, urlObj);
         }
 
         if (!pathname.startsWith('/api/')) {

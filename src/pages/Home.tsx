@@ -27,48 +27,25 @@ function AIAppsBlock() {
     <div className="glass-strong p-4 rounded-sm relative corner-deco flex flex-col mt-4 overflow-hidden shadow-[0_0_15px_rgba(212,175,55,0.1)]">
       <div className="absolute inset-0 bg-gold/5 animate-pulse-soft pointer-events-none" />
       <div className="relative z-10 flex flex-col h-full">
-        <div className="flex items-center justify-between mb-3">
-          <Link to="/services-ia" className="eyebrow flex items-center gap-2 text-primary text-[13px] hover:text-gold-light transition-colors group">
-            <Sparkles size={12} className="animate-pulse text-gold" /> 
-            Découvrir nos services et app IA
-            <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+        <div className="flex items-center justify-between mb-2">
+          <div className="eyebrow flex items-center gap-2 text-primary text-[13px]">
+            <Sparkles size={12} className="text-gold" /> 
+            Pôle Technologies & IA
+          </div>
+          <div className="text-[9px] uppercase tracking-[0.2em] bg-gold/10 text-gold border border-gold/30 px-2 py-0.5 rounded-sm font-semibold">
+            Accès Privé
+          </div>
+        </div>
+
+        <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+          L'accès public aux applications IA est temporairement fermé. Le déploiement est réservé aux membres officiels et séjours d'immersion BNE.
+        </p>
+
+        <div className="mt-auto pt-2 border-t border-border/50 flex justify-between items-center text-[10px] text-muted-foreground">
+          <span>Déploiement BNE 2026</span>
+          <Link to="/contact?subject=Demande accès IA" className="text-primary hover:text-gold-light underline">
+            En savoir plus ➔
           </Link>
-          <div className="text-[9px] uppercase tracking-[0.2em] bg-primary/20 text-primary border border-primary/30 px-1.5 py-0.5 rounded-sm animate-pulse-soft">
-            Coming Soon
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2 overflow-y-auto pr-1" style={{ maxHeight: "160px" }}>
-          {/* App 1 */}
-          <div className="group relative bg-background/60 p-2.5 rounded-sm border border-border/50 hover:border-gold/30 transition-colors">
-            <div className="flex justify-between items-start mb-1">
-              <h4 className="font-display text-sm text-foreground group-hover:text-gold-light transition-colors">Diagnostic IA Express</h4>
-              <span className="text-[8px] uppercase tracking-wider text-muted-foreground bg-muted px-1 py-0.5 rounded-sm">Sept 2026</span>
-            </div>
-            <p className="text-[11px] text-muted-foreground mb-1.5 line-clamp-1">Audit rapide de votre maturité numérique et opportunités.</p>
-            <Link to="/services-ia" className="text-[9px] uppercase tracking-wider text-primary hover:text-gold-light flex items-center gap-1 w-fit">
-              Découvrir l'application <ArrowRight size={10} />
-            </Link>
-          </div>
-          
-          {/* App 2 */}
-          <div className="group relative bg-background/60 p-2.5 rounded-sm border border-border/50 hover:border-gold/30 transition-colors">
-            <div className="flex justify-between items-start mb-1">
-              <h4 className="font-display text-sm text-foreground group-hover:text-gold-light transition-colors">Devis & Facturation IA</h4>
-              <span className="text-[8px] uppercase tracking-wider text-muted-foreground bg-muted px-1 py-0.5 rounded-sm">Sept 2026</span>
-            </div>
-            <p className="text-[11px] text-muted-foreground mb-1.5 line-clamp-1">Génération automatique avec calcul TVA et export PDF.</p>
-            <Link to="/services-ia" className="text-[9px] uppercase tracking-wider text-primary hover:text-gold-light flex items-center gap-1 w-fit">
-              Découvrir l'application <ArrowRight size={10} />
-            </Link>
-          </div>
-        </div>
-
-        <div className="mt-3 pt-2 border-t border-border/50">
-          <div className="text-[10px] text-muted-foreground flex justify-between items-center">
-            <span>Dernière sortie : <strong>Moteur IA Stratégique</strong></span>
-            <span className="text-success text-[9px] uppercase border border-success/30 px-1 rounded-sm">Live</span>
-          </div>
         </div>
       </div>
     </div>
