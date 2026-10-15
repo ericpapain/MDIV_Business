@@ -16,7 +16,6 @@ const mainNavKeys = [
   { to: "/offres", key: "nav.offers" },
   { to: "/evenements", key: "nav.events" },
   { to: "/partenaires", key: "nav.partners", labelFr: "Partenaires & Ambassadeurs", labelEn: "Partners & Ambassadors" },
-  { to: "/sejours-bne", key: "nav.sejours_bne", labelFr: "Séjours BNE", labelEn: "BNE Trips" },
   { to: "/contact", key: "nav.contact" },
   { to: "/blog", key: "Blog" },
   { to: "/charte", key: "La Charte" },
