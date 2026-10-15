@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { trackConversion } from "@/services/analyticsTracker";
 
 export default function Contact() {
   const { t } = useLanguage();
@@ -108,6 +109,7 @@ ${t("contact.form.msgOutro")}` : "");
               }
 
               setSent(true);
+              trackConversion("Formulaire contact");
               toast.success(t("contact.form.success"));
             } catch (error: any) {
               console.error("Erreur détaillée lors de l'envoi:", error);

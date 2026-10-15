@@ -12,6 +12,7 @@ import { AdminLayout } from "./components/admin/AdminLayout";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AuthRequiredModal } from "./components/auth/AuthRequiredModal";
+import { AnalyticsTracker } from "./components/analytics/AnalyticsTracker";
 
 // ─── Critical routes (loaded eagerly) ───────────────────────────────────────
 import Home from "./pages/Home";
@@ -41,8 +42,8 @@ const AccompagnementBNE = lazy(() => import("./pages/AccompagnementBNE"));
 const Blog = lazy(() => import("./pages/Blog"));
 const DemoFlow = lazy(() => import("./pages/Demo/DemoFlow"));
 
-// ─── Services IA (lazy-loaded) ───────────────────────────────────────────────
-const ServicesIA = lazy(() => import("./pages/ServicesIA"));
+// ─── Services IA (Section Fermée / Accès restreint) ─────────────────────────
+const ServicesIAClosed = lazy(() => import("./pages/ServicesIAClosed"));
 const ServicesIACategory = lazy(() => import("./pages/ServicesIACategory"));
 const ServicesIADiagnostic = lazy(() => import("./pages/ServicesIADiagnostic"));
 const ServicesIACalcROI = lazy(() => import("./pages/ServicesIACalcROI"));
@@ -119,6 +120,7 @@ const App = () => (
           <Sonner />
           <AuthProvider>
             <BrowserRouter>
+              <AnalyticsTracker />
               <AuthExplorerListener />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
@@ -148,27 +150,11 @@ const App = () => (
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/avis" element={<Avis />} />
                     <Route path="/charte" element={<Charte />} />
-                    {/* Services IA */}
-                    <Route path="/services-ia" element={<ServicesIA />} />
-                    <Route path="/services-ia/diagnostic" element={<ServicesIADiagnostic />} />
-                    <Route path="/diagnostic-ia" element={<ServicesIADiagnostic />} />
-                    <Route path="/services-ia/calc-roi" element={<ServicesIACalcROI />} />
-                    <Route path="/services-ia/benchmark" element={<ServicesIABenchmark />} />
-                    <Route path="/services-ia/comptes-rendus" element={<ServicesIAMeetings />} />
-                    <Route path="/services-ia/resume-documents" element={<ServicesIASummarizer />} />
-                    <Route path="/services-ia/assistant-email" element={<ServicesIAEmail />} />
-                    <Route path="/services-ia/devis" element={<ServicesIAQuote />} />
-                    <Route path="/services-ia/devis-automatique" element={<ServicesIAQuote />} />
-                    <Route path="/services-ia/factures" element={<ServicesIAInvoice />} />
-                    <Route path="/services-ia/verificateur-factures" element={<ServicesIAInvoice />} />
-                    <Route path="/services-ia/relances" element={<ServicesIAFollowup />} />
-                    <Route path="/services-ia/generateur-contenu" element={<ServicesIAContent />} />
-                    <Route path="/services-ia/generateur-leads" element={<ServicesIALeads />} />
-                    <Route path="/services-ia/prospection-email" element={<ServicesIAProspecting />} />
-                    <Route path="/services-ia/prepa-reunion" element={<ServicesIAMeetingPrep />} />
-                    <Route path="/services-ia/tarifs" element={<ServicesIAPricing />} />
-                    <Route path="/tarifs" element={<ServicesIAPricing />} />
-                    <Route path="/services-ia/:category" element={<ServicesIACategory />} />
+                    {/* Services IA (Fermé / Accès Restreint) */}
+                    <Route path="/services-ia" element={<ServicesIAClosed />} />
+                    <Route path="/services-ia/*" element={<ServicesIAClosed />} />
+                    <Route path="/diagnostic-ia" element={<ServicesIAClosed />} />
+                    <Route path="/tarifs" element={<ServicesIAClosed />} />
                     {/* BNE & Blog */}
                     <Route path="/sejours-bne" element={<SejoursBNE />} />
                     <Route path="/accompagnement-bne" element={<AccompagnementBNE />} />

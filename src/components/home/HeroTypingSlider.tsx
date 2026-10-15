@@ -46,8 +46,8 @@ const DEFAULT_NEWS: HeroNewsItem[] = [
     title: "Intelligence Artificielle & Alliances Transfrontalières",
     comment: "Déploiement de notre infrastructure d'intelligence décisionnelle pour connecter les décideurs d'Europe et d'Afrique.",
     image_url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
-    link_url: "/services-ia",
-    tag: "Stratégie & IA",
+    link_url: "/contact",
+    tag: "Stratégie & Alliances",
   }
 ];
 
