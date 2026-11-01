@@ -283,7 +283,7 @@ export default function ServicesIAContent() {
   };
 
   return (
-    <div className="ia-page min-h-screen pt-32 pb-20 bg-slate-50/50">
+    <div className="ia-page min-h-screen pt-20 pb-20 bg-slate-50/50">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="mb-12 flex flex-col md:flex-row md:justify-between md:items-stretch gap-6">
           <div className="pt-2 flex flex-col justify-between">

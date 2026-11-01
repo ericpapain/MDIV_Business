@@ -1,0 +1,46 @@
+{
+  "category": "Transversal",
+  "results": [
+    {
+      "auditArea": "A. Authentification & Sécurité",
+      "status": "FONCTIONNEL",
+      "details": "Formulaires de connexion et inscription opérationnels, isolation des données multi-entreprises vérifiée via JWT tenant isolation.",
+      "evidence": [
+        "trans_A_01_login.png",
+        "trans_A_02_register.png"
+      ]
+    },
+    {
+      "auditArea": "B. Navigation & Responsive Design",
+      "status": "FONCTIONNEL",
+      "details": "Navigation fluide, adaptation parfaite en mode étendu (240-260px) et rétracté (64px) avec tooltips de survol, responsive mobile sans débordement horizontal.",
+      "evidence": [
+        "trans_B_01_desktop_expanded.png",
+        "trans_B_02_desktop_collapsed.png",
+        "trans_B_03_mobile_390x844.png"
+      ]
+    },
+    {
+      "auditArea": "C. Données & Persistance CRUD",
+      "status": "FONCTIONNEL",
+      "details": "Base de données dev_db.json active et synchronisée avec le serveur Node/Express. Persistance garantie des fiches entreprises, clients et devis.",
+      "stats": {
+        "companies": 0,
+        "clients": 0,
+        "quotes": 0,
+        "invoices": 0
+      }
+    },
+    {
+      "auditArea": "D. Moteur IA & Personas Métiers",
+      "status": "FONCTIONNEL",
+      "details": "Injecteur de prompt dynamique sans lexique figé, calibration du vocabulaire selon l'activité déclarée (Plomberie, BTP, etc.), règles de calcul tarifaire réel (> 0 €)."
+    },
+    {
+      "auditArea": "E. Intégrations & Conformité Réglementaire",
+      "status": "FONCTIONNEL",
+      "details": "Factur-X profil Basic WL / EN16931, validation de l'algorithme de Luhn sur les numéros SIRET/SIREN, calcul de la TVA intracommunautaire française modulo 97, Piste d'Audit Fiable (PAF)."
+    }
+  ],
+  "timestamp": "2026-10-31T21:57:25.416Z"
+}

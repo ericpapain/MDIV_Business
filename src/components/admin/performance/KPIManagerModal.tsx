@@ -107,7 +107,7 @@ export function KPIManagerModal({
 
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-[11px] text-muted-foreground mb-1">Nom de l'indicateur</label>
+                <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Nom de l'indicateur</label>
                 <input
                   type="text"
                   required
@@ -120,7 +120,7 @@ export function KPIManagerModal({
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Catégorie</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Catégorie</label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value as KPICategory)}
@@ -140,7 +140,7 @@ export function KPIManagerModal({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Unité</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Unité</label>
                   <select
                     value={unit}
                     onChange={(e) => setUnit(e.target.value as KPIUnit)}
@@ -159,7 +159,7 @@ export function KPIManagerModal({
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Valeur Cible</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Valeur Cible</label>
                   <input
                     type="number"
                     value={targetValue}
@@ -168,7 +168,7 @@ export function KPIManagerModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Valeur Actuelle</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Valeur Actuelle</label>
                   <input
                     type="number"
                     value={currentValue}
@@ -179,7 +179,7 @@ export function KPIManagerModal({
               </div>
 
               <div>
-                <label className="block text-[11px] text-muted-foreground mb-1">Source des données</label>
+                <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Source des données</label>
                 <input
                   type="text"
                   value={source}

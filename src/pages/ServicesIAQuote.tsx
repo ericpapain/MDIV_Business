@@ -222,7 +222,14 @@ export default function ServicesIAQuote() {
         exampleQuotesText: exampleQuotesText.trim() || undefined,
       }, company?.id);
 
-      const generatedLines = res.suggestedLines.map(l => ({ ...l, id: Math.random().toString(36).substr(2, 9) }));
+      const generatedLines = (res.suggestedLines || []).map((l: any, idx: number) => ({
+        id: Math.random().toString(36).substr(2, 9),
+        description: l.description || `Prestation ${idx + 1}`,
+        quantity: Math.max(1, Number(l.quantity) || 1),
+        unitPriceHT: Number(l.unitPriceHT ?? l.unit_price_ht ?? l.unitPrice ?? l.price ?? l.prix ?? 0),
+        vatRate: Number(l.vatRate ?? l.vat_rate ?? l.tva ?? 20),
+        discountPercentage: Number(l.discountPercentage || 0),
+      }));
       const newSummary = res.executiveSummary || executiveSummary;
       const newTerms = res.paymentTerms || paymentTerms;
 
@@ -451,7 +458,7 @@ export default function ServicesIAQuote() {
   };
 
   return (
-    <div className="ia-page min-h-screen pt-32 pb-12 bg-slate-50/50">
+    <div className="ia-page min-h-screen pt-20 pb-12 bg-slate-50/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Barre d'Authentification / Entreprise */}

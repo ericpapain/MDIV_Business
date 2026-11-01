@@ -1,0 +1,41 @@
+{
+  "category": "Mon Quotidien",
+  "validatedModulesCount": 3,
+  "totalModulesCount": 3,
+  "timestamp": "2026-10-31T21:55:56.371Z",
+  "results": [
+    {
+      "moduleId": "mod_15_mails",
+      "name": "Gestionnaire d’e-mails pro & Réponse IA",
+      "status": "FONCTIONNEL",
+      "details": "Boîte de réception unifiée, classification d'urgence, formulation de réponses contextualisées selon le profil artisan et le ton professionnel adapté.",
+      "evidence": [
+        "mod15_mails_01_init.png",
+        "mod15_mails_02_filled.png",
+        "mod15_mails_03_response.png"
+      ]
+    },
+    {
+      "moduleId": "mod_16_docs",
+      "name": "Synthèse de documents volumineux / CCTP",
+      "status": "FONCTIONNEL",
+      "details": "Extraction structurée des clauses clés, délais, pénalités, points de vigilance juridique et résumé opérationnel prêt à l'emploi pour artisan et PME.",
+      "evidence": [
+        "mod16_docs_01_init.png",
+        "mod16_docs_02_filled.png",
+        "mod16_docs_03_summary.png"
+      ]
+    },
+    {
+      "moduleId": "mod_17_reunions",
+      "name": "Comptes-rendus & mémos vocaux",
+      "status": "FONCTIONNEL",
+      "details": "Transformation de notes brutes ou dictées vocales en compte-rendu professionnel avec ordre du jour, relevé de décisions, matrice de responsabilités (RACI) et plan d'action.",
+      "evidence": [
+        "mod17_reunions_01_init.png",
+        "mod17_reunions_02_filled.png",
+        "mod17_reunions_03_result.png"
+      ]
+    }
+  ]
+}

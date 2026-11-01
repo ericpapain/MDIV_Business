@@ -7,7 +7,8 @@ import { EnterpriseAuthBar } from '@/components/site/EnterpriseAuthBar';
 import { 
   ArrowLeft, ArrowRight, Mail, Edit3, History, Link as LinkIcon, 
   Sparkles, Loader2, CheckCircle2, Copy, Trash2, 
-  RefreshCcw, AlertTriangle, MessageSquare, Send, Save, Lock
+  RefreshCcw, AlertTriangle, MessageSquare, Send, Save, Lock,
+  Plus, Server, Globe, ShieldCheck, Inbox
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
@@ -24,8 +25,13 @@ import {
   fetchCompanyIntegrations, 
   connectProvider, 
   disconnectProvider, 
-  CompanyIntegrationsState 
+  CompanyIntegrationsState,
+  fetchMailboxes,
+  deleteMailbox,
+  UniversalMailbox
 } from '@/lib/integrationService';
+import { UniversalMailboxModal } from '@/components/email/UniversalMailboxModal';
+import { EmailThreadHistoryView } from '@/components/email/EmailThreadHistoryView';
 import { EmailActionModal } from '@/components/integrations/EmailActionModal';
 import { AuthRequiredModal } from '@/components/auth/AuthRequiredModal';
 import { useGuestQuota } from '@/hooks/useGuestQuota';
@@ -61,7 +67,13 @@ export default function ServicesIAEmail() {
     recordExecution 
   } = useGuestQuota('email');
 
-  const [activeTab, setActiveTab] = useState<'editor' | 'history' | 'integrations'>('editor');
+  const [activeTab, setActiveTab] = useState<'editor' | 'threads' | 'history' | 'integrations'>('editor');
+
+  // Boîtes de messagerie universelles (ZÉRO MOCK : uniquement les boîtes réelles configurées)
+  const [mailboxes, setMailboxes] = useState<UniversalMailbox[]>([]);
+  const [selectedMailboxId, setSelectedMailboxId] = useState<number | string | null>(null);
+  const [isLoadingMailboxes, setIsLoadingMailboxes] = useState(false);
+  const [isUniversalMailboxModalOpen, setIsUniversalMailboxModalOpen] = useState(false);
 
   // Editor State
   const [text, setText] = useState('');
@@ -258,15 +270,65 @@ export default function ServicesIAEmail() {
   const [history, setHistory] = useState<EmailHistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   
-  // Integrations State
+  // Integrations & Mailboxes State
   const [integrations, setIntegrations] = useState<CompanyIntegrationsState | null>(null);
   const [isLoadingIntegrations, setIsLoadingIntegrations] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
+  // Charger les boîtes de messagerie universelles au montage
+  useEffect(() => {
+    loadMailboxes();
+  }, [company?.id]);
+
   useEffect(() => {
     if (activeTab === 'history') loadHistory();
-    if (activeTab === 'integrations') loadIntegrations();
+    if (activeTab === 'integrations') {
+      loadIntegrations();
+      loadMailboxes();
+    }
+    if (activeTab === 'threads') {
+      loadMailboxes();
+    }
   }, [activeTab, company?.id]);
+
+  const loadMailboxes = async () => {
+    setIsLoadingMailboxes(true);
+    try {
+      const list = await fetchMailboxes(company?.id);
+      setMailboxes(list);
+      if (list.length > 0 && !selectedMailboxId) {
+        const active = list.find((m) => m.is_active) || list[0];
+        setSelectedMailboxId(active.id);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoadingMailboxes(false);
+    }
+  };
+
+  const handleDeleteMailbox = async (id: number | string, email: string) => {
+    if (!window.confirm(`Confirmez-vous la déconnexion de la boîte ${email} ?`)) return;
+    try {
+      await deleteMailbox(id, company?.id);
+      toast.success(`La boîte ${email} a été déconnectée avec succès.`);
+      await loadMailboxes();
+      if (String(selectedMailboxId) === String(id)) {
+        setSelectedMailboxId(null);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Erreur lors de la déconnexion.");
+    }
+  };
+
+  const handleSelectEmailFromThread = (msg: any) => {
+    const contactInfo = msg.sender_name || msg.sender_email;
+    setText(`Bonjour ${msg.sender_name || ''},\n\nMerci pour votre retour concernant « ${msg.subject || 'notre échange'} ».\n\n\nBien cordialement,\n`);
+    setEmailWorkMode('reply_inbound');
+    setObjective('Réponse stratégique');
+    setActiveTab('editor');
+    toast.info(`Message de ${contactInfo} sélectionné. Prêt pour la réponse IA !`);
+  };
 
   const loadHistory = async () => {
     setIsLoadingHistory(true);
@@ -314,7 +376,7 @@ export default function ServicesIAEmail() {
   };
 
   return (
-    <div className="ia-page min-h-screen pt-32 pb-20 bg-slate-50/50">
+    <div className="ia-page min-h-screen pt-20 pb-20 bg-slate-50/50">
       <div className="container mx-auto px-4 max-w-7xl">
         
         {/* Barre d'Authentification / Entreprise */}
@@ -427,6 +489,82 @@ export default function ServicesIAEmail() {
           </div>
         </div>
 
+        {/* Universal Mailbox Status Bar */}
+        {mailboxes.length > 0 ? (
+          <div className="mb-8 p-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl shadow-lg border border-indigo-500/30 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+                <Mail size={20} />
+              </div>
+              <div>
+                <div className="text-xs uppercase tracking-wider text-indigo-300 font-bold flex items-center gap-2">
+                  <span>Expéditeur actif (IMAP / SMTP)</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                </div>
+                <div className="text-sm md:text-base font-bold text-white flex items-center gap-2">
+                  <span>
+                    {mailboxes.find((m) => String(m.id) === String(selectedMailboxId))?.email || mailboxes[0]?.email}
+                  </span>
+                  <span className="text-xs font-normal text-slate-300">
+                    ({mailboxes.find((m) => String(m.id) === String(selectedMailboxId))?.display_name || 'Connecté'})
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {mailboxes.length > 1 && (
+                <select
+                  value={selectedMailboxId || ''}
+                  onChange={(e) => setSelectedMailboxId(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 text-white text-xs font-bold rounded-xl px-3 py-2 outline-none"
+                >
+                  {mailboxes.map((m) => (
+                    <option key={m.id} value={m.id}>{m.email} ({m.display_name})</option>
+                  ))}
+                </select>
+              )}
+              <button
+                type="button"
+                onClick={() => setActiveTab('threads')}
+                className="px-3.5 py-2 rounded-xl bg-indigo-600/40 hover:bg-indigo-600/70 border border-indigo-400/40 text-indigo-100 text-xs font-bold transition-all flex items-center gap-1.5"
+              >
+                <MessageSquare size={14} /> Voir tous les échanges
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsUniversalMailboxModalOpen(true)}
+                className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <Plus size={14} /> Connecter une autre boîte
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <AlertTriangle size={20} />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-amber-900 uppercase tracking-wide">
+                  Aucune boîte mail professionnelle connectée
+                </div>
+                <p className="text-xs text-amber-700 font-medium">
+                  Connectez votre adresse email (ITID France <code className="font-mono bg-amber-100 px-1 rounded">contact@itid-france.com</code>, Gmail, Outlook ou domaine personnalisé) pour envoyer avec votre propre adresse et charger l'historique complet des échanges.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsUniversalMailboxModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md shadow-amber-600/20 transition-all flex items-center gap-1.5"
+            >
+              <Plus size={14} /> Connecter une boîte email
+            </button>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="flex flex-wrap border-b border-slate-200 mb-8">
           <button 
@@ -438,12 +576,20 @@ export default function ServicesIAEmail() {
             <Edit3 size={18} /> Rédaction & Analyse
           </button>
           <button 
+            onClick={() => setActiveTab('threads')}
+            className={`flex items-center gap-2 px-6 py-4 font-bold border-b-2 transition-colors ${
+              activeTab === 'threads' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-700 hover:text-slate-900'
+            }`}
+          >
+            <MessageSquare size={18} /> 📥 Historique & Fils de discussion
+          </button>
+          <button 
             onClick={() => setActiveTab('history')}
             className={`flex items-center gap-2 px-6 py-4 font-bold border-b-2 transition-colors ${
               activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-700 hover:text-slate-900'
             }`}
           >
-            <History size={18} /> Historique & Modèles
+            <History size={18} /> Brouillons Sauvegardés
           </button>
           <button 
             onClick={() => setActiveTab('integrations')}
@@ -451,7 +597,7 @@ export default function ServicesIAEmail() {
               activeTab === 'integrations' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-700 hover:text-slate-900'
             }`}
           >
-            <LinkIcon size={18} /> Intégrations (Outlook, M365, Gmail)
+            <Server size={18} /> Hub Messagerie & Comptes ({mailboxes.length})
           </button>
         </div>
 
@@ -730,6 +876,20 @@ export default function ServicesIAEmail() {
           </div>
         )}
 
+        {/* TAB: THREADS & UNIVERSAL EMAIL HISTORY */}
+        {activeTab === 'threads' && (
+          <div className="ia-animate-in">
+            <EmailThreadHistoryView
+              mailboxes={mailboxes}
+              selectedMailboxId={selectedMailboxId || undefined}
+              onSelectMailbox={(id) => setSelectedMailboxId(id)}
+              onOpenAddMailbox={() => setIsUniversalMailboxModalOpen(true)}
+              companyId={company?.id}
+              onSelectEmailToReply={handleSelectEmailFromThread}
+            />
+          </div>
+        )}
+
         {/* TAB: HISTORY */}
         {activeTab === 'history' && (
           <div className="ia-animate-in">
@@ -774,39 +934,279 @@ export default function ServicesIAEmail() {
           </div>
         )}
 
-        {/* TAB: INTEGRATIONS */}
+        {/* TAB: INTEGRATIONS & UNIVERSAL MAILBOX HUB */}
         {activeTab === 'integrations' && (
-          <div className="ia-animate-in max-w-4xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl font-bold mb-2">Connectez vos services de messagerie</h2>
-              <p className="text-slate-600">Permettez à l'IA d'envoyer vos emails rédigés directement depuis votre boîte d'envoi ou de créer des brouillons.</p>
+          <div className="ia-animate-in max-w-6xl mx-auto space-y-10">
+            <div className="text-center max-w-3xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold uppercase tracking-wider mb-3">
+                <Server size={14} /> Hub de Messagerie Universelle & Multi-Fournisseurs
+              </div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                Connectez n'importe quelle adresse email
+              </h2>
+              <p className="text-slate-600 text-base">
+                Associez vos adresses professionnelles (ITID France <code className="font-mono text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">contact@itid-france.com</code>, Gmail, Outlook, OVH ou n'importe quel domaine d'entreprise) pour envoyer directement avec votre propre expéditeur et retrouver l'intégralité de vos fils de discussion.
+              </p>
             </div>
 
-            {isLoadingIntegrations ? (
-              <div className="flex justify-center py-10"><Loader2 className="animate-spin text-slate-400" size={32} /></div>
-            ) : (
+            {/* Boîtes Emails IMAP/SMTP Connectées */}
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 md:p-8">
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+                    <Mail className="text-blue-600" size={22} />
+                    <span>Boîtes Emails Connectées ({mailboxes.length})</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium mt-1">
+                    Comptes IMAP / SMTP enregistrés pour l'envoi direct et la synchronisation.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsUniversalMailboxModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Plus size={16} />
+                  <span>Connecter une nouvelle adresse</span>
+                </button>
+              </div>
+
+              {isLoadingMailboxes ? (
+                <div className="flex justify-center py-12"><Loader2 className="animate-spin text-blue-600" size={32} /></div>
+              ) : mailboxes.length === 0 ? (
+                <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                  <Mail className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <h4 className="text-base font-bold text-slate-700 mb-1">Aucune boîte de messagerie connectée</h4>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto mb-5">
+                    Zéro fausse donnée : connectez votre véritable adresse pour commencer à expédier et synchroniser vos échanges clients.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsUniversalMailboxModalOpen(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 shadow-sm"
+                  >
+                    <Plus size={14} /> Connecter mon adresse email maintenant
+                  </button>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {mailboxes.map((mb) => {
+                    const isSelected = String(selectedMailboxId) === String(mb.id);
+                    return (
+                      <div
+                        key={mb.id}
+                        className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                          isSelected
+                            ? 'bg-blue-50/40 border-blue-300 shadow-sm'
+                            : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                                mb.provider === 'itid_ovh' || mb.provider === 'ovh'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : mb.provider === 'gmail'
+                                  ? 'bg-red-100 text-red-800'
+                                  : mb.provider === 'outlook'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-indigo-100 text-indigo-800'
+                              }`}>
+                                {mb.provider === 'itid_ovh' || mb.provider === 'ovh' ? 'OVH' : mb.provider === 'gmail' ? 'GMAIL' : mb.provider === 'outlook' ? 'M365' : 'IMAP'}
+                              </div>
+                              <div className="overflow-hidden">
+                                <div className="text-sm font-bold text-slate-900 truncate flex items-center gap-2">
+                                  <span>{mb.email}</span>
+                                  {isSelected && (
+                                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white">Actif</span>
+                                  )}
+                                </div>
+                                <div className="text-xs text-slate-500 font-medium truncate">
+                                  {mb.display_name}
+                                </div>
+                              </div>
+                            </div>
+
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                              <CheckCircle2 size={12} /> Connecté
+                            </span>
+                          </div>
+
+                          <div className="bg-slate-50 rounded-xl p-3 text-xs font-mono text-slate-600 space-y-1 mb-4 border border-slate-100">
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">IMAP :</span>
+                              <span className="font-semibold text-slate-700">{mb.imap_host}:{mb.imap_port} (SSL)</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">SMTP :</span>
+                              <span className="font-semibold text-slate-700">{mb.smtp_host}:{mb.smtp_port} (SSL)</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedMailboxId(mb.id);
+                              setActiveTab('threads');
+                            }}
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700"
+                          >
+                            <MessageSquare size={13} /> Voir les messages
+                          </button>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedMailboxId(mb.id)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                                isSelected
+                                  ? 'bg-blue-600 text-white'
+                                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                              }`}
+                            >
+                              {isSelected ? 'Sélectionné' : 'Définir actif'}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMailbox(mb.id, mb.email)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                              title="Déconnecter cette boîte"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Presets 1-Clic & Compatibilité Totale */}
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <Sparkles size={18} className="text-blue-600" />
+                <span>Compatibilité & Configuration Rapide en 1 Clic</span>
+              </h3>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Preset ITID France */}
+                <button
+                  type="button"
+                  onClick={() => setIsUniversalMailboxModalOpen(true)}
+                  className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all text-left flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm mb-3 group-hover:scale-105 transition-transform">
+                      🇫🇷
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-900 mb-1">ITID France & OVH</h4>
+                    <p className="text-xs text-slate-500 font-medium mb-3">
+                      Préconfiguré pour <strong className="text-slate-700">contact@itid-france.com</strong> et serveurs OVH SSL.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-600 inline-flex items-center gap-1">
+                    Configurer en 1 clic →
+                  </span>
+                </button>
+
+                {/* Preset Gmail */}
+                <button
+                  type="button"
+                  onClick={() => setIsUniversalMailboxModalOpen(true)}
+                  className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-red-300 hover:shadow-md transition-all text-left flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm mb-3 group-hover:scale-105 transition-transform">
+                      G
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-900 mb-1">Google / Gmail</h4>
+                    <p className="text-xs text-slate-500 font-medium mb-3">
+                      Connexion sécurisée via Mot de passe d'application Google (guide pas-à-pas inclus).
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-red-600 inline-flex items-center gap-1">
+                    Configurer Gmail →
+                  </span>
+                </button>
+
+                {/* Preset Outlook */}
+                <button
+                  type="button"
+                  onClick={() => setIsUniversalMailboxModalOpen(true)}
+                  className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all text-left flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm mb-3 group-hover:scale-105 transition-transform">
+                      O
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-900 mb-1">Microsoft Outlook / 365</h4>
+                    <p className="text-xs text-slate-500 font-medium mb-3">
+                      Serveurs Office 365 et Outlook.com auto-détectés avec chiffrement TLS/SSL.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-blue-600 inline-flex items-center gap-1">
+                    Configurer Outlook →
+                  </span>
+                </button>
+
+                {/* Preset Custom Domain */}
+                <button
+                  type="button"
+                  onClick={() => setIsUniversalMailboxModalOpen(true)}
+                  className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all text-left flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm mb-3 group-hover:scale-105 transition-transform">
+                      <Globe size={18} />
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-900 mb-1">Domaine Personnalisé</h4>
+                    <p className="text-xs text-slate-500 font-medium mb-3">
+                      N'importe quel serveur IMAP/SMTP dédié (<code className="text-slate-600">@votredomaine.com</code>, Infomaniak, Ionos, etc.).
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-indigo-600 inline-flex items-center gap-1">
+                    Ajouter mon domaine →
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Connecteurs Cloud (Google OAuth / Microsoft OAuth) */}
+            <div className="pt-6 border-t border-slate-200">
+              <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <LinkIcon size={18} className="text-slate-600" />
+                <span>Connecteurs Cloud OAuth Alternatifs</span>
+              </h3>
+
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Outlook / M365 */}
-                <div className="ia-card p-8 bg-white border border-slate-200 flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4 text-blue-600 shadow-sm border border-blue-100">
-                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                <div className="ia-card p-6 bg-white border border-slate-200 flex flex-col items-center text-center">
+                  <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-3 text-blue-600 border border-blue-100">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
                       <path d="M22 6.5A1.5 1.5 0 0 0 20.5 5h-17A1.5 1.5 0 0 0 2 6.5v11A1.5 1.5 0 0 0 3.5 19h17a1.5 1.5 0 0 0 1.5-1.5v-11zm-1.8.5-7.7 5.7a1 1 0 0 1-1 0L3.8 7h16.4zm1.8 11a.5.5 0 0 1-.5.5h-17a.5.5 0 0 1-.5-.5V8.1l7.8 5.8a2 2 0 0 0 2.4 0l7.8-5.8v9.9z"/>
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold mb-2">Microsoft 365 / Outlook</h3>
-                  <p className="text-sm text-slate-500 mb-6 font-medium">Brouillons synchronisés, envois directs et carnet de contacts.</p>
+                  <h4 className="text-base font-bold mb-1">Microsoft 365 Cloud OAuth</h4>
+                  <p className="text-xs text-slate-500 mb-4 font-medium">Brouillons synchronisés et carnet de contacts Cloud.</p>
                   
                   {integrations?.microsoft.connected ? (
-                    <div className="w-full space-y-3">
-                      <div className="py-2.5 px-4 bg-emerald-50 text-emerald-700 font-bold text-sm rounded-xl border border-emerald-200 flex items-center justify-center gap-2">
-                        <CheckCircle2 size={18} /> Connecté : {integrations.microsoft.email || 'Compte Entreprise'}
+                    <div className="w-full space-y-2">
+                      <div className="py-2 px-3 bg-emerald-50 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200 flex items-center justify-center gap-2">
+                        <CheckCircle2 size={16} /> Relié : {integrations.microsoft.email || 'Compte Entreprise'}
                       </div>
                       <button 
                         type="button"
                         onClick={() => handleToggleConnect('microsoft')}
                         className="text-xs text-rose-600 hover:underline font-semibold"
                       >
-                        Déconnecter ce compte
+                        Déconnecter
                       </button>
                     </div>
                   ) : (
@@ -819,51 +1219,50 @@ export default function ServicesIAEmail() {
                         }
                         handleToggleConnect('microsoft');
                       }}
-                      className={`w-full py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition-colors shadow-md ${
-                        canUseOutlookSync ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20" : "bg-slate-300 text-slate-500 cursor-not-allowed border-none shadow-none"
+                      className={`w-full py-2.5 rounded-xl font-bold text-xs flex justify-center items-center gap-2 transition-colors ${
+                        canUseOutlookSync ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-slate-200 text-slate-500 cursor-not-allowed"
                       }`}
-                      title={!canUseOutlookSync ? "Plan Indépendant requis" : ""}
                     >
-                      {canUseOutlookSync ? <LinkIcon size={18} /> : <Lock size={18} />} Connecter Microsoft 365
+                      {canUseOutlookSync ? <LinkIcon size={16} /> : <Lock size={16} />} Relier via OAuth Microsoft
                     </button>
                   )}
                 </div>
 
                 {/* Google Workspace / Gmail */}
-                <div className="ia-card p-8 bg-white border border-slate-200 flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-4 text-red-500 shadow-sm border border-red-100">
-                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                <div className="ia-card p-6 bg-white border border-slate-200 flex flex-col items-center text-center">
+                  <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mb-3 text-red-500 border border-red-100">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
                       <path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/>
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold mb-2">Google Workspace / Gmail</h3>
-                  <p className="text-sm text-slate-500 mb-6 font-medium">Envois automatiques Gmail, brouillons synchronisés et Google Contacts.</p>
+                  <h4 className="text-base font-bold mb-1">Google Workspace Cloud OAuth</h4>
+                  <p className="text-xs text-slate-500 mb-4 font-medium">Envois automatiques Gmail et Google Contacts Cloud.</p>
                   
                   {integrations?.google.connected ? (
-                    <div className="w-full space-y-3">
-                      <div className="py-2.5 px-4 bg-emerald-50 text-emerald-700 font-bold text-sm rounded-xl border border-emerald-200 flex items-center justify-center gap-2">
-                        <CheckCircle2 size={18} /> Connecté : {integrations.google.email || 'Compte Google'}
+                    <div className="w-full space-y-2">
+                      <div className="py-2 px-3 bg-emerald-50 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200 flex items-center justify-center gap-2">
+                        <CheckCircle2 size={16} /> Relié : {integrations.google.email || 'Compte Google'}
                       </div>
                       <button 
                         type="button"
                         onClick={() => handleToggleConnect('google')}
                         className="text-xs text-rose-600 hover:underline font-semibold"
                       >
-                        Déconnecter ce compte
+                        Déconnecter
                       </button>
                     </div>
                   ) : (
                     <button 
                       type="button"
                       onClick={() => handleToggleConnect('google')}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition-colors shadow-md shadow-red-500/20"
+                      className="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl font-bold text-xs flex justify-center items-center gap-2 transition-colors"
                     >
-                      <LinkIcon size={18} /> Connecter Google Workspace
+                      <LinkIcon size={16} /> Relier via OAuth Google
                     </button>
                   )}
                 </div>
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>
@@ -908,6 +1307,14 @@ export default function ServicesIAEmail() {
           companyId={company?.id}
         />
       )}
+
+      {/* Modal Universel de Connexion de Boîte Email (IMAP / SMTP / Gmail / ITID / Outlook) */}
+      <UniversalMailboxModal
+        isOpen={isUniversalMailboxModalOpen}
+        onClose={() => setIsUniversalMailboxModalOpen(false)}
+        onMailboxSaved={loadMailboxes}
+        companyId={company?.id}
+      />
 
       {/* Modal Quota 3 Essais Atteints */}
       <AuthRequiredModal

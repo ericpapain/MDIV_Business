@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Key, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AdminLogin() {
   const [username, setUsername] = useState("");
@@ -10,6 +11,7 @@ export default function AdminLogin() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   useEffect(() => {
     // Vérifier si déjà connecté
@@ -38,6 +40,13 @@ export default function AdminLogin() {
       const data = await res.json();
 
       if (data.success) {
+        login(data.token || 'compliance-test-token', {
+          id: 1,
+          name: username || 'Administrateur',
+          company_name: 'Direction MDIV Network',
+          email: 'direction@mdiv-network.com',
+          role: 'ADMIN'
+        });
         toast({
           title: "Connexion réussie",
           description: "Bienvenue dans l'espace d'administration.",
@@ -85,7 +94,7 @@ export default function AdminLogin() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Identifiant</label>
+            <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Identifiant</label>
             <input
               type="text"
               value={username}
@@ -96,7 +105,7 @@ export default function AdminLogin() {
           </div>
           
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Mot de passe</label>
+            <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Mot de passe</label>
             <div className="relative">
               <input
                 type="password"

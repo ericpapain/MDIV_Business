@@ -1,0 +1,44 @@
+{
+  "category": "CATÉGORIE 1 — TROUVER DE NOUVEAUX CLIENTS",
+  "auditDate": "2026-10-31T21:37:09.036Z",
+  "totalModules": 4,
+  "validatedModules": 4,
+  "modules": [
+    {
+      "moduleId": 1,
+      "name": "Trouver de nouveaux clients (Leads B2B)",
+      "status": "VALIDÉ",
+      "interface": "OK - Interface moderne, filtres et tableau dynamiques",
+      "functioning": "OK - Appel API leads_search et enrichissement IA",
+      "businessRelevance": "OK - Cibles d'entreprises pertinentes pour le bâtiment et la plomberie",
+      "persistence": "OK - Export Excel / CRM disponible"
+    },
+    {
+      "moduleId": 2,
+      "name": "Messages de prospection ciblés",
+      "status": "VALIDÉ",
+      "interface": "OK - Formulaire guidé, sélection ton et objectif",
+      "functioning": "OK - Génération IA personnalisée avec objet accrocheur et signature",
+      "businessRelevance": "OK - Jargon et réactivité adaptés aux besoins des syndics/BTP",
+      "persistence": "OK - Sauvegarde dans l'historique et variantes V1/V2"
+    },
+    {
+      "moduleId": 3,
+      "name": "Prise de rendez-vous en ligne 24h/24",
+      "status": "VALIDÉ",
+      "interface": "OK - Dashboard, configuration créneaux, simulateur et page publique",
+      "functioning": "OK - Gestion des conflits, créneaux bloqués, congés et rappels",
+      "businessRelevance": "OK - Idéal pour éviter de décrocher sur chantier et caler des visites",
+      "persistence": "OK - Base SQL/locale synchronisée avec les rendez-vous pris"
+    },
+    {
+      "moduleId": 4,
+      "name": "Préparation d'un rendez-vous client",
+      "status": "VALIDÉ",
+      "interface": "OK - Sélection client 360°, date, contexte et objectifs",
+      "functioning": "OK - Génération multi-axes (questions, objections, argumentaire)",
+      "businessRelevance": "OK - Structuration professionnelle avant négociation ou visite technique",
+      "persistence": "OK - Possibilité de copie presse-papier et planification de relance"
+    }
+  ]
+}

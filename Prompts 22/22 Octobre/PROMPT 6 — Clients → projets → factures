@@ -1,0 +1,51 @@
+# RELATION CLIENT → PROJET → FACTURE
+**RÈGLE ABSOLUE — AUDIT AVANT DÉVELOPPEMENT : avant d'écrire ou modifier une seule ligne de code, vérifie systématiquement si la fonctionnalité demandée existe déjà dans l'application, même partiellement, sous un autre nom, dans un autre module ou avec une implémentation différente. Analyse le frontend, le backend, la base de données, les API, les services, les composants, les hooks, les routes et les tests concernés. Si une implémentation existe, réutilise-la et adapte-la au besoin au lieu d'en créer une nouvelle. Si elle existe partiellement, complète uniquement ce qui manque. Si elle n'existe pas, alors seulement, propose puis implémente une nouvelle solution. L'objectif est d'éviter absolument les doublons, les fonctionnalités parallèles, les modèles de données redondants et les régressions. a la fin de chaque implementation faire un rapport de ce qui a ete fait et verifier si cela fonction dans le fichier Prompt _ numero du prompt.md**
+Implémente ou adapte les relations métier suivantes.
+
+## RÈGLE MÉTIER
+
+Toute facture créée doit obligatoirement être associée à :
+
+1. une entreprise ;
+2. un client ;
+3. un projet.
+
+Le client doit lui-même appartenir à l'entreprise.
+
+Le projet doit être associé au client.
+
+Architecture :
+
+Entreprise
+→ Client
+→ Projet
+→ Facture
+
+## CRÉATION
+
+Lors de la création d'une facture :
+
+- choisir un client ;
+- afficher ses projets ;
+- sélectionner un projet ;
+- créer la facture.
+
+Empêcher la création d'une facture sans client ou projet si cette règle est compatible avec les règles comptables actuelles du produit.
+
+## SÉCURITÉ
+
+Un utilisateur ne doit pouvoir accéder qu'aux clients/projets autorisés dans son entreprise et selon ses permissions.
+
+## TESTS
+
+Tester :
+
+- création client ;
+- création projet ;
+- création facture ;
+- facture sans client ;
+- facture sans projet ;
+- client d'une autre entreprise ;
+- projet d'un autre client.
+
+Tests depuis la racine.

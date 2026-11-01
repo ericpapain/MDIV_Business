@@ -13,7 +13,9 @@ import {
   fetchCompanyIntegrations,
   connectProvider,
   IntegrationProvider,
-  CompanyIntegrationsState
+  CompanyIntegrationsState,
+  fetchMailboxes,
+  UniversalMailbox
 } from '@/lib/integrationService';
 
 interface EmailActionModalProps {
@@ -36,6 +38,8 @@ export const EmailActionModal: React.FC<EmailActionModalProps> = ({
   companyId
 }) => {
   const [integrations, setIntegrations] = useState<CompanyIntegrationsState | null>(null);
+  const [mailboxes, setMailboxes] = useState<UniversalMailbox[]>([]);
+  const [selectedMailboxId, setSelectedMailboxId] = useState<number | string | null>(null);
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
   const [selectedProvider, setSelectedProvider] = useState<IntegrationProvider>('google');
   
@@ -77,9 +81,16 @@ export const EmailActionModal: React.FC<EmailActionModalProps> = ({
   const loadStatus = async () => {
     setIsLoadingStatus(true);
     try {
-      const state = await fetchCompanyIntegrations(companyId);
+      const [state, mbs] = await Promise.all([
+        fetchCompanyIntegrations(companyId),
+        fetchMailboxes(companyId)
+      ]);
       setIntegrations(state);
-      if (state.google.connected) {
+      setMailboxes(mbs);
+      if (mbs.length > 0) {
+        const active = mbs.find(m => m.is_active) || mbs[0];
+        setSelectedMailboxId(active.id);
+      } else if (state.google.connected) {
         setSelectedProvider('google');
       } else if (state.microsoft.connected) {
         setSelectedProvider('microsoft');
@@ -110,6 +121,7 @@ export const EmailActionModal: React.FC<EmailActionModalProps> = ({
     try {
       const res = await sendEmailViaIntegration({
         provider: selectedProvider,
+        mailboxId: selectedMailboxId || undefined,
         to: recipient.trim(),
         subject: subject.trim(),
         body: body.trim(),
@@ -205,55 +217,101 @@ export const EmailActionModal: React.FC<EmailActionModalProps> = ({
           </div>
         </div>
 
-        {/* Choix Fournisseur (Google vs Microsoft) */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <button
-            type="button"
-            onClick={() => setSelectedProvider('google')}
-            className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
-              selectedProvider === 'google'
-                ? 'bg-red-500/10 border-red-500/40 text-white shadow-md'
-                : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
-            }`}
-          >
-            <div className="w-9 h-9 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                <path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/>
-              </svg>
+        {/* Choix de la boîte expéditrice réelle */}
+        {mailboxes.length > 0 ? (
+          <div className="mb-6 bg-white/5 border border-white/10 rounded-2xl p-4">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gold mb-2">
+              Adresse Expéditrice Réelle (Votre compte IMAP / SMTP)
+            </label>
+            <div className="space-y-2">
+              {mailboxes.map((mb) => {
+                const isSelected = String(selectedMailboxId) === String(mb.id);
+                return (
+                  <button
+                    key={mb.id}
+                    type="button"
+                    onClick={() => setSelectedMailboxId(mb.id)}
+                    className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition-all ${
+                      isSelected
+                        ? 'bg-gold/15 border-gold text-white shadow-md'
+                        : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
+                        isSelected ? 'bg-gold text-[#0b0d14]' : 'bg-white/10 text-gray-300'
+                      }`}>
+                        {(mb.provider === 'itid_ovh' || mb.provider === 'ovh') ? 'ITID' : mb.provider === 'gmail' ? 'G' : mb.provider === 'outlook' ? 'O' : 'IMAP'}
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold flex items-center gap-2">
+                          <span>{mb.email}</span>
+                          {mb.is_active && (
+                            <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded font-medium">Actif</span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-gray-400">
+                          {mb.display_name} · SMTP: {mb.smtp_host}
+                        </div>
+                      </div>
+                    </div>
+                    {isSelected && <CheckCircle2 className="w-5 h-5 text-gold shrink-0" />}
+                  </button>
+                );
+              })}
             </div>
-            <div className="overflow-hidden">
-              <div className="text-xs font-bold truncate">Google Workspace / Gmail</div>
-              <div className="text-[11px] text-gray-400 truncate">
-                {integrations?.google.connected ? (integrations.google.email || 'Connecté') : 'Non relié'}
+          </div>
+        ) : (
+          /* Choix Fournisseur (Google vs Microsoft) si aucune boîte IMAP/SMTP configurée */
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <button
+              type="button"
+              onClick={() => setSelectedProvider('google')}
+              className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
+                selectedProvider === 'google'
+                  ? 'bg-red-500/10 border-red-500/40 text-white shadow-md'
+                  : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+              }`}
+            >
+              <div className="w-9 h-9 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/>
+                </svg>
               </div>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setSelectedProvider('microsoft')}
-            className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
-              selectedProvider === 'microsoft'
-                ? 'bg-blue-500/10 border-blue-500/40 text-white shadow-md'
-                : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
-            }`}
-          >
-            <div className="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                <path d="M22 6.5A1.5 1.5 0 0 0 20.5 5h-17A1.5 1.5 0 0 0 2 6.5v11A1.5 1.5 0 0 0 3.5 19h17a1.5 1.5 0 0 0 1.5-1.5v-11zm-1.8.5-7.7 5.7a1 1 0 0 1-1 0L3.8 7h16.4zm1.8 11a.5.5 0 0 1-.5.5h-17a.5.5 0 0 1-.5-.5V8.1l7.8 5.8a2 2 0 0 0 2.4 0l7.8-5.8v9.9z"/>
-              </svg>
-            </div>
-            <div className="overflow-hidden">
-              <div className="text-xs font-bold truncate">Microsoft 365 / Outlook</div>
-              <div className="text-[11px] text-gray-400 truncate">
-                {integrations?.microsoft.connected ? (integrations.microsoft.email || 'Connecté') : 'Non relié'}
+              <div className="overflow-hidden">
+                <div className="text-xs font-bold truncate">Google Workspace / Gmail</div>
+                <div className="text-[11px] text-gray-400 truncate">
+                  {integrations?.google.connected ? (integrations.google.email || 'Connecté') : 'Non relié'}
+                </div>
               </div>
-            </div>
-          </button>
-        </div>
+            </button>
 
-        {/* Si non connecté, inviter à connecter */}
-        {currentAccount && !currentAccount.connected && (
+            <button
+              type="button"
+              onClick={() => setSelectedProvider('microsoft')}
+              className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
+                selectedProvider === 'microsoft'
+                  ? 'bg-blue-500/10 border-blue-500/40 text-white shadow-md'
+                  : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+              }`}
+            >
+              <div className="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M22 6.5A1.5 1.5 0 0 0 20.5 5h-17A1.5 1.5 0 0 0 2 6.5v11A1.5 1.5 0 0 0 3.5 19h17a1.5 1.5 0 0 0 1.5-1.5v-11zm-1.8.5-7.7 5.7a1 1 0 0 1-1 0L3.8 7h16.4zm1.8 11a.5.5 0 0 1-.5.5h-17a.5.5 0 0 1-.5-.5V8.1l7.8 5.8a2 2 0 0 0 2.4 0l7.8-5.8v9.9z"/>
+                </svg>
+              </div>
+              <div className="overflow-hidden">
+                <div className="text-xs font-bold truncate">Microsoft 365 / Outlook</div>
+                <div className="text-[11px] text-gray-400 truncate">
+                  {integrations?.microsoft.connected ? (integrations.microsoft.email || 'Connecté') : 'Non relié'}
+                </div>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Si non connecté et pas de boîte configurée, inviter à connecter */}
+        {mailboxes.length === 0 && currentAccount && !currentAccount.connected && (
           <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3 text-xs text-amber-200">
               <AlertCircle size={20} className="shrink-0 text-amber-400" />
@@ -272,7 +330,7 @@ export const EmailActionModal: React.FC<EmailActionModalProps> = ({
         {/* Champs du message */}
         <div className="space-y-4 mb-6">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-200 mb-1">
               Destinataire (Email) *
             </label>
             <input
@@ -286,7 +344,7 @@ export const EmailActionModal: React.FC<EmailActionModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-200 mb-1">
               Objet du message
             </label>
             <input
@@ -298,7 +356,7 @@ export const EmailActionModal: React.FC<EmailActionModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-200 mb-1">
               Corps du message
             </label>
             <textarea

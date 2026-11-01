@@ -133,7 +133,7 @@ export const ForgotPassword = () => {
 
           <div className="mt-6 pt-5 border-t border-slate-100 text-center">
             <Link 
-              to="/login" 
+              to="/services-ia/diagnostic/login" 
               className="text-xs text-slate-500 hover:text-slate-800 transition-colors inline-flex items-center gap-1.5 font-medium"
             >
               <ArrowLeft size={14} />

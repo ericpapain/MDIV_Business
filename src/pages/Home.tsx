@@ -113,7 +113,9 @@ function AgendaBlock() {
             const day = d.getDate();
             const month = isEn ? MONTHS_EN[d.getMonth()] : MONTHS_FR[d.getMonth()];
             const displayTitle = isEn && event.title_en ? event.title_en : event.title;
-            const bookUrl = event.billetterie_url || "/contact";
+            const bookUrl = (event.billetterie_url && event.billetterie_url.startsWith("http"))
+              ? event.billetterie_url
+              : (event.id ? `/evenements/${event.id}/inscription` : "/evenements");
             const isExternal = event.billetterie_url && event.billetterie_url.startsWith("http");
 
             return (

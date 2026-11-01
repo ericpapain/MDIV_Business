@@ -1,0 +1,16 @@
+{
+  "category": "Trouver de nouveaux clients",
+  "timestamp": "2026-10-31T20:43:11.425Z",
+  "modules": [
+    "Module 1 : Leads B2B",
+    "Module 2 : Pitch Prospection",
+    "Module 3 : Prise de RDV 24/7",
+    "Module 4 : Préparation RDV"
+  ],
+  "errors": [
+    "Module 2: locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Générer la proposition\"), button:has-text(\"Générer\")').first()\u001b[22m\n\u001b[2m    - locator resolved to <button disabled class=\"w-full py-3.5 mt-4 rounded-xl font-bold flex flex-col items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    51 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+    "[Console Error] Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "[Console Error] Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "status": "AVEC_ANOMALIES"
+}

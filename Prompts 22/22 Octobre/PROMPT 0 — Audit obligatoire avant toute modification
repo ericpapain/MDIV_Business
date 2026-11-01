@@ -1,0 +1,152 @@
+# AUDIT PRÉALABLE OBLIGATOIRE — NE MODIFIE RIEN
+**RÈGLE ABSOLUE — AUDIT AVANT DÉVELOPPEMENT : avant d'écrire ou modifier une seule ligne de code, vérifie systématiquement si la fonctionnalité demandée existe déjà dans l'application, même partiellement, sous un autre nom, dans un autre module ou avec une implémentation différente. Analyse le frontend, le backend, la base de données, les API, les services, les composants, les hooks, les routes et les tests concernés. Si une implémentation existe, réutilise-la et adapte-la au besoin au lieu d'en créer une nouvelle. Si elle existe partiellement, complète uniquement ce qui manque. Si elle n'existe pas, alors seulement, propose puis implémente une nouvelle solution. L'objectif est d'éviter absolument les doublons, les fonctionnalités parallèles, les modèles de données redondants et les régressions. a la fin de chaque implementation faire un rapport de ce qui a ete fait et verifier si cela fonction dans le fichier Prompt _ numero du prompt.md**
+Avant toute nouvelle implémentation, réalise un audit complet de l'application existante.
+
+## RÈGLE ABSOLUE
+
+Pour cette étape :
+
+- ne modifie aucun fichier ;
+- ne crée aucun fichier ;
+- ne supprime aucun fichier ;
+- ne lance aucune migration ;
+- ne modifie aucune donnée ;
+- ne modifie aucune dépendance ;
+- ne corrige rien.
+
+Je veux uniquement comprendre l'existant.
+
+## OBJECTIF
+
+Le projet doit évoluer vers une plateforme permettant à une entreprise de connecter ses différents services dans une interface personnalisée :
+
+- facturation ;
+- achats ;
+- ventes ;
+- clients ;
+- projets ;
+- emails ;
+- calendrier ;
+- rappels ;
+- documents ;
+- banque ;
+- pré-comptabilité ;
+- IA ;
+- réunions ;
+- utilisateurs ;
+- rôles ;
+- permissions ;
+- base de connaissances.
+
+Mais aucune de ces évolutions ne doit être développée maintenant.
+
+## AUDITE
+
+Analyse :
+
+1. Architecture frontend.
+2. Architecture backend.
+3. Base de données.
+4. Authentification.
+5. Utilisateurs.
+6. Entreprises.
+7. Rôles.
+8. Permissions.
+9. Abonnements.
+10. Facturation.
+11. Clients.
+12. Projets.
+13. Factures.
+14. Devis.
+15. Emails.
+16. Calendrier.
+17. Notifications.
+18. Documents.
+19. Banque.
+20. IA.
+21. Réunions.
+22. PDF.
+23. Branding.
+24. API externes.
+25. Services déjà intégrés.
+
+## POUR CHAQUE MODULE
+
+Indique :
+
+- ce qui existe ;
+- ce qui est partiel ;
+- ce qui est absent ;
+- ce qui est mocké ;
+- les fichiers concernés ;
+- les tables concernées ;
+- les routes API ;
+- les composants frontend ;
+- les dépendances ;
+- les risques d'intégration.
+
+## IMPORTANT
+
+Recherche également les fonctionnalités déjà présentes afin de ne jamais les recréer.
+
+Je veux notamment savoir si l'application possède déjà :
+
+- onboarding ;
+- sélection du secteur ;
+- sélection du nombre d'employés ;
+- sélection des services ;
+- personnalisation de l'interface ;
+- gestion des utilisateurs ;
+- rôles ;
+- permissions ;
+- comptes administrateurs ;
+- abonnement ;
+- gestion des plans ;
+- facturation ;
+- clients ;
+- projets ;
+- factures ;
+- calendrier ;
+- rappels ;
+- emails ;
+- Gmail ;
+- Outlook ;
+- Microsoft 365 ;
+- OCR ;
+- IA ;
+- documents ;
+- recherche ;
+- réunions ;
+- PDF.
+
+## TESTS
+
+Exécute les tests existants depuis la racine du projet.
+
+Identifie également :
+
+- tests manquants ;
+- erreurs ;
+- warnings importants ;
+- problèmes de build ;
+- problèmes TypeScript ;
+- problèmes de lint.
+
+## RAPPORT FINAL
+
+Produis un rapport structuré :
+
+### A. Architecture actuelle
+### B. Fonctionnalités existantes
+### C. Fonctionnalités partielles
+### D. Fonctionnalités absentes
+### E. Fonctionnalités mockées
+### F. Base de données
+### G. Authentification
+### H. APIs externes
+### I. Problèmes techniques
+### J. Risques
+### K. Architecture recommandée
+### L. Ordre recommandé des prochaines implémentations
+
+NE MODIFIE RIEN.

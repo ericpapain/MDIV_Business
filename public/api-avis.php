@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 $host = "zwpvaah279.mysql.db";
 $dbname = "zwpvaah279";
 $username = "zwpvaah279";
-$password = "Champion2018";
+$password = "France2026";
 
 try {
     // Connexion à la base de données

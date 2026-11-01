@@ -98,7 +98,7 @@ export default function AdminAIGovernance() {
                 <div className="w-full lg:w-3/4 grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Niveau d'intelligence */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">Niveau (Nb Modèles)</label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 uppercase mb-2">Niveau (Nb Modèles)</label>
                     <select className="w-full text-sm border-slate-200 rounded-lg p-2.5 bg-slate-50">
                       <option value="Standard">Standard (1 modèle)</option>
                       <option value="Advanced">Advanced (2 modèles)</option>
@@ -109,7 +109,7 @@ export default function AdminAIGovernance() {
 
                   {/* Mode d'Exécution */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">Mode d'Exécution</label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 uppercase mb-2">Mode d'Exécution</label>
                     <select className="w-full text-sm border-slate-200 rounded-lg p-2.5 bg-slate-50">
                       <option value="Single">Single (Rapide)</option>
                       <option value="Challenge">Multi-Model Challenge (Scoring)</option>
@@ -119,7 +119,7 @@ export default function AdminAIGovernance() {
 
                   {/* Poids de Scoring */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">Pondération du Scoring</label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 uppercase mb-2">Pondération du Scoring</label>
                     <div className="flex gap-2">
                       <input type="text" defaultValue="30/30/20/20" className="w-full text-sm border-slate-200 rounded-lg p-2.5 bg-slate-50 text-center" title="Confiance / Raisonnement / Exhaustivité / Qualité" />
                     </div>

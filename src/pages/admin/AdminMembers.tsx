@@ -116,16 +116,16 @@ export default function AdminMembers() {
           <h2 className="text-xl font-display mb-6">{editingId ? "Modifier le Membre" : "Nouveau Membre"}</h2>
           <form onSubmit={e => { e.preventDefault(); submitMember.mutate(); }} className="space-y-4">
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Nom</label>
+              <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Nom</label>
               <input required value={name} onChange={e => setName(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Rôle / Description</label>
+              <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Rôle / Description</label>
               <input required value={role} onChange={e => setRole(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
             </div>
             <ImageUpload value={imageUrl} onChange={setImageUrl} label="Photo du Membre (Optionnel)" />
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Pays / Drapeau</label>
+              <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Pays / Drapeau</label>
               <select value={countryCode} onChange={e => {
                 const code = e.target.value;
                 setCountryCode(code);

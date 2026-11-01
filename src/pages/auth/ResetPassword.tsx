@@ -101,7 +101,7 @@ export const ResetPassword = () => {
               <p className="text-sm text-slate-500 mb-6">
                 {isEn ? 'You can now log in with your new password.' : 'Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.'}
               </p>
-              <Button onClick={() => navigate('/login')} className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl">
+              <Button onClick={() => navigate('/services-ia/diagnostic/login')} className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl">
                 {isEn ? 'Go to Login' : 'Aller à la connexion'} <ArrowRight size={16} className="ml-2" />
               </Button>
             </div>

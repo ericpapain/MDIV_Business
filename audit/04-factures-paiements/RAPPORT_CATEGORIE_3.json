@@ -1,0 +1,86 @@
+{
+  "category": "Factures & Paiements",
+  "validatedModulesCount": 7,
+  "totalModulesCount": 7,
+  "timestamp": "2026-10-31T21:55:00.467Z",
+  "results": [
+    {
+      "moduleId": "mod_08_devis",
+      "name": "Devis Factur-X & Chiffrage IA",
+      "status": "FONCTIONNEL",
+      "details": "Formulaire de devis interactif, intégration chiffrage IA avec prix réalistes du marché (> 0 €), calcul TVA et TTC, mentions légales et export Factur-X.",
+      "evidence": [
+        "mod08_devis_01_init.png",
+        "mod08_devis_02_filled.png",
+        "mod08_devis_03_lignes_chiffrees.png"
+      ],
+      "pricesSample": [
+        "1",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "moduleId": "mod_09_facturation",
+      "name": "Facturation électronique PPF 2026",
+      "status": "FONCTIONNEL",
+      "details": "Gestionnaire de factures avec cycle de vie PPF (Déposée, Reçue, Approuvée, Encaissée), numérotation chronologique, contrôles TVA et mentions légales obligatoires.",
+      "evidence": [
+        "mod09_facturation_01_dashboard.png",
+        "mod09_facturation_02_editor.png"
+      ]
+    },
+    {
+      "moduleId": "mod_10_paiements",
+      "name": "Suivi des paiements & encaissements",
+      "status": "FONCTIONNEL",
+      "details": "Tableau de bord de trésorerie, suivi des encaissements en temps réel, ventilation des règlements par moyen de paiement et réconciliation bancaire.",
+      "evidence": [
+        "mod10_paiements_01_dashboard.png"
+      ],
+      "kpiSummary": [
+        "AGRÉGATION BANCAIRE & RAPPROCHEMENT",
+        "Rapprochement Bancaire Automatisé par IA",
+        "L'IA fait correspondre automatiquement chaque ligne de relevé bancaire avec les factures de vente ou reçus d'achat enregistrés. Validez en 1 clic pour lettrer vos comptes.",
+        "Actualiser le flux bancaire"
+      ]
+    },
+    {
+      "moduleId": "mod_11_relance",
+      "name": "Relances automatiques des impayés",
+      "status": "FONCTIONNEL",
+      "details": "Gestion multi-niveaux des relances clients (Amiable J+7, Ferme J+15, Mise en demeure J+30), application de l'indemnité légale de 40 € B2B et génération automatique des courriers/emails personnalisés au persona métier.",
+      "evidence": [
+        "mod11_relance_01_liste.png"
+      ]
+    },
+    {
+      "moduleId": "mod_12_recouvrement",
+      "name": "Recouvrement & litiges",
+      "status": "FONCTIONNEL",
+      "details": "Constitution automatique des dossiers contentieux, formalisation de l'injonction de payer et suivi des procédures juridiques pour créances impayées.",
+      "evidence": [
+        "mod12_recouvrement_01_dossiers.png"
+      ]
+    },
+    {
+      "moduleId": "mod_13_efacture",
+      "name": "Hub Facture électronique 2026 (EN16931 / Luhn / PAF)",
+      "status": "FONCTIONNEL",
+      "details": "Validation de l'intégrité des numéros SIRET/SIREN via algorithme de Luhn, génération du profil Factur-X XML hybride selon la norme européenne EN16931 et traçabilité pour la Piste d'Audit Fiable (PAF).",
+      "evidence": [
+        "mod13_efacture_01_hub.png"
+      ]
+    },
+    {
+      "moduleId": "mod_14_achats",
+      "name": "Achats, Dépenses & Scan OCR",
+      "status": "FONCTIONNEL",
+      "details": "Module de saisie et de numérisation des dépenses fournisseurs avec IA OCR Vision, détection des montants HT/TVA/TTC, catégorie comptable automatique et prévention des doublons de facturation.",
+      "evidence": [
+        "mod14_achats_01_tableau.png",
+        "mod14_achats_02_modal_scan.png"
+      ]
+    }
+  ]
+}

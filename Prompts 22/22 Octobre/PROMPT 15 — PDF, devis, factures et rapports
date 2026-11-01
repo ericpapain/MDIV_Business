@@ -1,0 +1,62 @@
+# GÉNÉRATION PDF
+**RÈGLE ABSOLUE — AUDIT AVANT DÉVELOPPEMENT : avant d'écrire ou modifier une seule ligne de code, vérifie systématiquement si la fonctionnalité demandée existe déjà dans l'application, même partiellement, sous un autre nom, dans un autre module ou avec une implémentation différente. Analyse le frontend, le backend, la base de données, les API, les services, les composants, les hooks, les routes et les tests concernés. Si une implémentation existe, réutilise-la et adapte-la au besoin au lieu d'en créer une nouvelle. Si elle existe partiellement, complète uniquement ce qui manque. Si elle n'existe pas, alors seulement, propose puis implémente une nouvelle solution. L'objectif est d'éviter absolument les doublons, les fonctionnalités parallèles, les modèles de données redondants et les régressions. a la fin de chaque implementation faire un rapport de ce qui a ete fait et verifier si cela fonction dans le fichier Prompt _ numero du prompt.md**
+Audit d'abord la génération PDF existante.
+
+NE réécris pas ce qui fonctionne déjà.
+
+## OBJECTIF
+
+Standardiser la génération des :
+
+- devis ;
+- factures ;
+- rapports ;
+- documents.
+
+## IDENTITÉ
+
+Les documents doivent utiliser :
+
+- logo de l'entreprise connectée ;
+- nom entreprise ;
+- couleurs ;
+- coordonnées ;
+- signature ;
+- informations légales.
+
+Jamais le branding générique MDiv/IT4WORK à la place du client.
+
+## BIBLIOTHÈQUES
+
+Avant de modifier le système :
+
+- rechercher les bibliothèques actuellement utilisées ;
+- vérifier maintenance ;
+- compatibilité ;
+- performance ;
+- qualité PDF ;
+- gestion des polices ;
+- pagination ;
+- images.
+
+Si une bibliothèque existante est adaptée, la conserver.
+
+## IMPORTANT
+
+Ne copie pas aveuglément du code trouvé sur Internet.
+
+Utilise uniquement des approches éprouvées et adaptées à notre stack.
+
+## TESTS
+
+Générer de vrais documents et vérifier :
+
+- logo ;
+- couleurs ;
+- données ;
+- pagination ;
+- totaux ;
+- téléchargement ;
+- impression.
+
+Tests depuis la racine.

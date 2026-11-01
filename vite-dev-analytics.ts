@@ -203,110 +203,115 @@ export async function handleDevAnalyticsRequest(req: IncomingMessage, res: Serve
   const db = loadDevDb();
   const visits = seedDevAnalytics(db);
 
-  // 1. ACTION : TRACK
-  if (action === 'track' && req.method === 'POST') {
+async function readAnalyticsJson(req: IncomingMessage): Promise<any> {
+  return new Promise((resolve) => {
     let bodyStr = '';
     req.on('data', chunk => { bodyStr += chunk; });
     req.on('end', () => {
-      let body: any = {};
-      try { body = JSON.parse(bodyStr); } catch {}
-
-      const sessionId = body.sessionId || `sess_${Math.random().toString(36).substring(2, 10)}`;
-      const visitorId = body.visitorId || `vis_${Math.floor(100 + Math.random() * 500)}`;
-      const pagePath = body.pagePath || '/';
-      const pageTitle = body.pageTitle || '';
-      const referrer = body.referrer || '';
-      const conversionEvent = body.conversionEvent || null;
-
-      // Détecter la source
-      let source = 'Accès direct';
-      if (referrer.includes('google')) source = 'Google';
-      else if (referrer.includes('linkedin')) source = 'LinkedIn';
-      else if (referrer.includes('bing')) source = 'Bing';
-      else if (referrer.includes('facebook')) source = 'Facebook';
-      else if (referrer.includes('instagram')) source = 'Instagram';
-      else if (referrer) source = 'Référents externes';
-
-      const userAgent = req.headers['user-agent'] || '';
-      let browser = 'Chrome';
-      if (userAgent.includes('Edg')) browser = 'Edge';
-      else if (userAgent.includes('Firefox')) browser = 'Firefox';
-      else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) browser = 'Safari';
-
-      let os = 'Windows 11/10';
-      if (userAgent.includes('Macintosh')) os = 'macOS';
-      else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS';
-      else if (userAgent.includes('Android')) os = 'Android';
-      else if (userAgent.includes('Linux')) os = 'Linux';
-
-      let dev = 'Desktop';
-      if (/Mobile|Android|iPhone/i.test(userAgent)) dev = 'Mobile';
-      else if (/Tablet|iPad/i.test(userAgent)) dev = 'Tablette';
-
-      const newVisit: AnalyticsVisit = {
-        id: Date.now(),
-        session_id: sessionId,
-        visitor_id: visitorId,
-        ip_address: '82.124.64.' + Math.floor(10 + Math.random() * 200),
-        country: 'France',
-        country_code: 'FR',
-        city: 'Paris',
-        page_path: pagePath,
-        page_title: pageTitle,
-        referrer,
-        referrer_source: source,
-        user_agent: userAgent,
-        browser,
-        os,
-        device_type: dev,
-        duration_seconds: 5,
-        is_exit: 0,
-        is_bounce: 0,
-        conversion_event: conversionEvent,
-        created_at: new Date().toISOString(),
-        last_activity_at: new Date().toISOString()
-      };
-
-      visits.unshift(newVisit);
-      db.analytics_visits = visits.slice(0, 500); // Garder 500 max
-      saveDevDb(db);
-
-      res.setHeader('Content-Type', 'application/json');
-      return res.end(JSON.stringify({
-        success: true,
-        visitId: newVisit.id,
-        sessionId,
-        visitorId
-      }));
+      try {
+        resolve(bodyStr ? JSON.parse(bodyStr) : {});
+      } catch {
+        resolve({});
+      }
     });
-    return;
+    req.on('error', () => resolve({}));
+  });
+}
+
+  // 1. ACTION : TRACK
+  if (action === 'track' && req.method === 'POST') {
+    const body = await readAnalyticsJson(req);
+
+    const sessionId = body.sessionId || `sess_${Math.random().toString(36).substring(2, 10)}`;
+    const visitorId = body.visitorId || `vis_${Math.floor(100 + Math.random() * 500)}`;
+    const pagePath = body.pagePath || '/';
+    const pageTitle = body.pageTitle || '';
+    const referrer = body.referrer || '';
+    const conversionEvent = body.conversionEvent || null;
+
+    // Détecter la source
+    let source = 'Accès direct';
+    if (referrer.includes('google')) source = 'Google';
+    else if (referrer.includes('linkedin')) source = 'LinkedIn';
+    else if (referrer.includes('bing')) source = 'Bing';
+    else if (referrer.includes('facebook')) source = 'Facebook';
+    else if (referrer.includes('instagram')) source = 'Instagram';
+    else if (referrer) source = 'Référents externes';
+
+    const userAgent = req.headers['user-agent'] || '';
+    let browser = 'Chrome';
+    if (userAgent.includes('Edg')) browser = 'Edge';
+    else if (userAgent.includes('Firefox')) browser = 'Firefox';
+    else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) browser = 'Safari';
+
+    let os = 'Windows 11/10';
+    if (userAgent.includes('Macintosh')) os = 'macOS';
+    else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS';
+    else if (userAgent.includes('Android')) os = 'Android';
+    else if (userAgent.includes('Linux')) os = 'Linux';
+
+    let dev = 'Desktop';
+    if (/Mobile|Android|iPhone/i.test(userAgent)) dev = 'Mobile';
+    else if (/Tablet|iPad/i.test(userAgent)) dev = 'Tablette';
+
+    const newVisit: AnalyticsVisit = {
+      id: Date.now(),
+      session_id: sessionId,
+      visitor_id: visitorId,
+      ip_address: '82.124.64.' + Math.floor(10 + Math.random() * 200),
+      country: 'France',
+      country_code: 'FR',
+      city: 'Paris',
+      page_path: pagePath,
+      page_title: pageTitle,
+      referrer,
+      referrer_source: source,
+      user_agent: userAgent,
+      browser,
+      os,
+      device_type: dev,
+      duration_seconds: 5,
+      is_exit: 0,
+      is_bounce: 0,
+      conversion_event: conversionEvent,
+      created_at: new Date().toISOString(),
+      last_activity_at: new Date().toISOString()
+    };
+
+    visits.unshift(newVisit);
+    db.analytics_visits = visits.slice(0, 500); // Garder 500 max
+    saveDevDb(db);
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      success: true,
+      visitId: newVisit.id,
+      sessionId,
+      visitorId
+    }));
+    return true;
   }
 
   // 2. ACTION : PING
   if (action === 'ping' && req.method === 'POST') {
-    let bodyStr = '';
-    req.on('data', chunk => { bodyStr += chunk; });
-    req.on('end', () => {
-      let body: any = {};
-      try { body = JSON.parse(bodyStr); } catch {}
-      const visitId = body.visitId;
-      const dur = parseInt(body.durationSeconds) || 15;
-      const isExit = body.isExit ? 1 : 0;
-      const conv = body.conversionEvent || null;
+    const body = await readAnalyticsJson(req);
+    const visitId = body.visitId;
+    const dur = parseInt(body.durationSeconds) || 15;
+    const isExit = body.isExit ? 1 : 0;
+    const conv = body.conversionEvent || null;
 
-      const target = visits.find(v => v.id == visitId);
-      if (target) {
-        target.duration_seconds += dur;
-        target.is_exit = isExit;
-        if (conv) target.conversion_event = conv;
-        target.last_activity_at = new Date().toISOString();
-        saveDevDb(db);
-      }
+    const target = visits.find(v => v.id == visitId);
+    if (target) {
+      target.duration_seconds += dur;
+      target.is_exit = isExit;
+      if (conv) target.conversion_event = conv;
+      target.last_activity_at = new Date().toISOString();
+      saveDevDb(db);
+    }
 
-      res.setHeader('Content-Type', 'application/json');
-      return res.end(JSON.stringify({ success: true }));
-    });
-    return;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ success: true }));
+    return true;
   }
 
   // 3. ACTION : REALTIME
@@ -337,12 +342,13 @@ export async function handleDevAnalyticsRequest(req: IncomingMessage, res: Serve
     });
 
     res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({
+    res.end(JSON.stringify({
       success: true,
       activeCount,
       activePages,
       recentFeed
     }));
+    return true;
   }
 
   // 4. ACTION : DASHBOARD
@@ -687,7 +693,7 @@ export async function handleDevAnalyticsRequest(req: IncomingMessage, res: Serve
     const historyRows = filteredHistory.slice(offset, offset + limit);
 
     res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({
+    res.end(JSON.stringify({
       success: true,
       period,
       kpis,
@@ -707,6 +713,7 @@ export async function handleDevAnalyticsRequest(req: IncomingMessage, res: Serve
       browsers,
       os
     }));
+    return true;
   }
 
   // 5. ACTION : EXPORT CSV
@@ -736,10 +743,12 @@ export async function handleDevAnalyticsRequest(req: IncomingMessage, res: Serve
 
     res.setHeader('Content-Type', 'text/csv; charset=UTF-8');
     res.setHeader('Content-Disposition', `attachment; filename="mdiv_analytics_${period}_${Date.now()}.csv"`);
-    return res.end(lines.join('\r\n'));
+    res.end(lines.join('\r\n'));
+    return true;
   }
 
   res.statusCode = 400;
   res.setHeader('Content-Type', 'application/json');
-  return res.end(JSON.stringify({ success: false, error: 'Action inconnue' }));
+  res.end(JSON.stringify({ success: false, error: 'Action inconnue' }));
+  return true;
 }

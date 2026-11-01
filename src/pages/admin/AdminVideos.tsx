@@ -88,15 +88,15 @@ export default function AdminVideos() {
             <h2 className="font-display text-xl mb-4">Ajouter une vidéo</h2>
             <form onSubmit={(e) => { e.preventDefault(); addVideo.mutate(); }} className="space-y-4">
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Titre de la vidéo</label>
+                <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Titre de la vidéo</label>
                 <input required value={title} onChange={e => setTitle(e.target.value)} type="text" placeholder="Ex: Aftermovie Fondateur 2026" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Lien YouTube</label>
+                <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Lien YouTube</label>
                 <input required value={url} onChange={e => setUrl(e.target.value)} type="url" placeholder="https://www.youtube.com/watch?v=..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Associer à</label>
+                <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Associer à</label>
                 <select value={category} onChange={e => setCategory(e.target.value)} className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm outline-none">
                   <option value="general">Général (non associé)</option>
                   {allEvents.map(ev => (

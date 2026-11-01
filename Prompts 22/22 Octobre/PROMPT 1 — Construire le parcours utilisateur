@@ -1,0 +1,122 @@
+# CONSTRUIRE LE VÉRITABLE PARCOURS UTILISATEUR
+**RÈGLE ABSOLUE — AUDIT AVANT DÉVELOPPEMENT : avant d'écrire ou modifier une seule ligne de code, vérifie systématiquement si la fonctionnalité demandée existe déjà dans l'application, même partiellement, sous un autre nom, dans un autre module ou avec une implémentation différente. Analyse le frontend, le backend, la base de données, les API, les services, les composants, les hooks, les routes et les tests concernés. Si une implémentation existe, réutilise-la et adapte-la au besoin au lieu d'en créer une nouvelle. Si elle existe partiellement, complète uniquement ce qui manque. Si elle n'existe pas, alors seulement, propose puis implémente une nouvelle solution. L'objectif est d'éviter absolument les doublons, les fonctionnalités parallèles, les modèles de données redondants et les régressions. a la fin de chaque implementation faire un rapport de ce qui a ete fait et verifier si cela fonction dans le fichier Prompt _ numero du prompt.md**
+À partir de l'architecture existante et de l'audit précédent, implémente uniquement le nouveau parcours utilisateur et l'onboarding.
+
+## OBJECTIF
+
+Lorsqu'un utilisateur arrive sur l'application, il ne doit pas être confronté immédiatement à une interface contenant toutes les fonctionnalités.
+
+Il doit d'abord répondre à un questionnaire intelligent permettant de comprendre :
+
+- son activité ;
+- son métier ;
+- la taille de son entreprise ;
+- son nombre d'employés ;
+- son rôle ;
+- ses besoins ;
+- les services qu'il souhaite utiliser ;
+- son objectif principal ;
+- éventuellement sa couleur d'interface préférée.
+
+## EXEMPLE
+
+Sophie est plombière.
+
+Elle indique :
+
+- métier : plomberie ;
+- entreprise : TPE ;
+- nombre d'employés : 1 ;
+- rôle : administratrice ;
+- besoin principal : facturation.
+
+Après son inscription, son interface doit afficher prioritairement les fonctionnalités liées à :
+
+- clients ;
+- devis ;
+- factures ;
+- paiements ;
+- rappels.
+
+Les autres fonctionnalités existent mais ne doivent pas surcharger son interface.
+
+Plus tard, Sophie veut gérer automatiquement ses emails.
+
+Elle doit pouvoir ajouter facilement :
+
+"Gestion des emails"
+
+depuis son interface.
+
+## ONBOARDING
+
+Créer un parcours ergonomique comprenant :
+
+1. Présentation.
+2. Questions métier.
+3. Taille de l'entreprise.
+4. Nombre d'employés.
+5. Rôle.
+6. Besoins.
+7. Services souhaités.
+8. Préférences d'interface.
+9. Récapitulatif.
+10. Création du compte.
+11. Création de l'espace entreprise.
+12. Affichage du dashboard personnalisé.
+
+## IMPORTANT
+
+Le questionnaire doit être dynamique.
+
+Certaines questions doivent apparaître uniquement lorsqu'elles sont pertinentes.
+
+Par exemple, les questions concernant les employés et les rôles doivent dépendre de la taille de l'entreprise.
+
+## PERSONNALISATION
+
+Le système doit déterminer les modules recommandés à partir des réponses.
+
+Il doit distinguer :
+
+- services essentiels ;
+- services recommandés ;
+- services disponibles ;
+- services masqués.
+
+## AJOUT DE SERVICES
+
+Créer une expérience ergonomique permettant à l'utilisateur d'ajouter ultérieurement un service.
+
+Prévoir par exemple une zone :
+
+"Ajouter un service"
+
+avec des cartes ou modules.
+
+Lorsqu'un service est activé :
+
+- il apparaît dans le menu ;
+- il devient accessible ;
+- sa configuration est disponible.
+
+Lorsqu'il est désactivé :
+
+- il est masqué du menu ;
+- les données ne sont pas supprimées.
+
+## TESTS
+
+Créer les tests nécessaires.
+
+Tester au minimum :
+
+1. utilisateur individuel ;
+2. TPE ;
+3. PME ;
+4. utilisateur ayant uniquement la facturation ;
+5. utilisateur ajoutant un nouveau service après inscription.
+
+Exécuter les tests depuis la racine du projet.
+
+Ne modifie pas les autres modules hors nécessité d'intégration.

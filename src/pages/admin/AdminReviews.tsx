@@ -113,19 +113,19 @@ export default function AdminReviews() {
           <h2 className="text-xl font-display mb-6">{editingId ? "Modifier l'Avis" : "Nouvel Avis"}</h2>
           <form onSubmit={e => { e.preventDefault(); submitReview.mutate(); }} className="space-y-4">
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Nom de l'auteur</label>
+              <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Nom de l'auteur</label>
               <input required value={name} onChange={e => setName(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Rôle / Société</label>
+              <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Rôle / Société</label>
               <input required value={role} onChange={e => setRole(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Citation / Avis</label>
+              <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Citation / Avis</label>
               <textarea required value={quote} onChange={e => setQuote(e.target.value)} rows={4} className="w-full px-3.5 py-2.5 bg-muted/30 border border-border rounded-xl text-sm resize-y min-h-[90px]" />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Pays (ex: France, Suisse)</label>
+              <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Pays (ex: France, Suisse)</label>
               <input value={country} onChange={e => setCountry(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
             </div>
             

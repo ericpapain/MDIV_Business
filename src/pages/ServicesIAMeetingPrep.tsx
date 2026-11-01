@@ -194,7 +194,7 @@ export default function ServicesIAMeetingPrep() {
   const selectedClient = clients.find(c => c.id === selectedClientId);
 
   return (
-    <div className="ia-page min-h-screen pt-32 pb-20 bg-slate-50/50">
+    <div className="ia-page min-h-screen pt-20 pb-20 bg-slate-50/50">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header avec Vidéo et Étapes */}
         <div className="mb-12 flex flex-col md:flex-row md:justify-between md:items-stretch gap-6">

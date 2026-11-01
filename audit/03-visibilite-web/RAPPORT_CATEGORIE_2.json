@@ -1,0 +1,35 @@
+{
+  "category": "CATÉGORIE 2 — ME FAIRE CONNAÎTRE",
+  "auditDate": "2026-10-31T21:44:41.627Z",
+  "totalModules": 3,
+  "validatedModules": 3,
+  "modules": [
+    {
+      "moduleId": 5,
+      "name": "Visibilité web & Posts chantiers",
+      "status": "VALIDÉ",
+      "interface": "OK - Studio de création avec sélection multi-réseaux et aperçu dédié",
+      "functioning": "OK - Génération IA personnalisée avec visuels suggérés et hashtags métier",
+      "businessRelevance": "OK - Valorisation terrain parfaite pour artisans (avant/après, économies)",
+      "persistence": "OK - Historique des déclinaisons et export"
+    },
+    {
+      "moduleId": 6,
+      "name": "Vitrine web & Référencement local (SEO)",
+      "status": "VALIDÉ",
+      "interface": "OK - Générateur d'articles et pages vitrines avec balisage SEO",
+      "functioning": "OK - Structure H1 / H2, mots-clés locaux, appel à l'action devis",
+      "businessRelevance": "OK - Contenu éducatif rassurant pour attirer des clients en recherche locale",
+      "persistence": "OK - Export disponible pour intégration CMS / WordPress"
+    },
+    {
+      "moduleId": 7,
+      "name": "Réponses aux avis Google & e-réputation",
+      "status": "VALIDÉ",
+      "interface": "OK - Interface dédiée à la réputation et aux publications locales",
+      "functioning": "OK - Réponse chaleureuse, respect de la déontologie et de la signature",
+      "businessRelevance": "OK - Valorise le professionnalisme de l'artisan sur Google Maps / Fiche entreprise",
+      "persistence": "OK - Historique conservé en base"
+    }
+  ]
+}

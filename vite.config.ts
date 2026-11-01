@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { devApiPlugin } from "./vite-dev-api";
 
-// https://vitejs.dev/config/
+// Reload Vite dev server config
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",

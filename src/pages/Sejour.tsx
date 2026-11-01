@@ -86,7 +86,7 @@ export default function Sejour() {
                         <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
                       </a>
                     ) : (
-                      <Link to="/contact" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
+                      <Link to={e.id ? `/evenements/${e.id}/inscription` : "/evenements"} className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
                         <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
                       </Link>
                     )}

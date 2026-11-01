@@ -35,10 +35,31 @@ export function SiteLayout() {
     }
   }, [pathname, hash]);
   
+  // Les pages immersives et le dashboard SaaS bénéficient d'un layout 100vh sans header/footer externe
+  if (
+    pathname === '/login' || 
+    pathname === '/register' || 
+    pathname === '/services-ia/diagnostic/login' ||
+    pathname === '/services-ia/diagnostic/register' ||
+    pathname === '/services-ia/diagnostic' || 
+    pathname === '/diagnostic-ia' ||
+    pathname.startsWith('/services-ia/dashboard') ||
+    pathname.startsWith('/services-ia/espace') ||
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/rdv') ||
+    pathname.startsWith('/reserver')
+  ) {
+    return (
+      <main className="w-full min-h-screen overflow-x-hidden">
+        <Outlet />
+      </main>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen flex flex-col w-full max-w-full overflow-x-clip">
       <SiteHeader />
-      <main className="flex-1 w-full max-w-full overflow-x-hidden">
+      <main className="flex-1 w-full max-w-full overflow-x-clip">
         <Outlet />
       </main>
       <SiteFooter />

@@ -41,6 +41,13 @@
     --input: 218 20% 85%;
     --ring: 42 55% 45%;
 
+    /* Form & Contrast semantic tokens (Light Mode) */
+    --form-label: 218 30% 18%;
+    --form-checkbox-label: 218 30% 20%;
+    --form-placeholder: 218 15% 45%;
+    --form-description: 218 20% 35%;
+    --form-help: 218 20% 30%;
+
     /* Radius standard SaaS 2026 (12px) */
     --radius: 0.75rem;
 
@@ -83,7 +90,15 @@
     --secondary-foreground: 45 35% 94%;
 
     --muted: 218 30% 18%;
-    --muted-foreground: 45 12% 65%;
+    /* Muted foreground boosted to 78% lightness to guarantee WCAG AA ratio >= 8.5:1 on dark backgrounds */
+    --muted-foreground: 218 20% 78%;
+
+    /* Form & Contrast semantic tokens (Dark Mode) - WCAG AA compliant >= 4.5:1 */
+    --form-label: 45 35% 94%;
+    --form-checkbox-label: 218 25% 92%;
+    --form-placeholder: 218 20% 72%;
+    --form-description: 218 20% 82%;
+    --form-help: 218 20% 80%;
 
     /* Accent = Bleu nuit plus clair */
     --accent: 218 50% 22%;
@@ -143,6 +158,40 @@
     overflow-x: hidden;
     max-width: 100vw;
     width: 100%;
+  }
+
+  /* Universal Visibility for Time & Date Inputs site-wide */
+  input[type="time"]:not([class*="text-white"]),
+  input[type="date"]:not([class*="text-white"]),
+  input[type="datetime-local"]:not([class*="text-white"]) {
+    color: #000000 !important;
+    color-scheme: light !important;
+    font-weight: 700;
+  }
+
+  input[type="time"]:not([class*="text-white"])::-webkit-calendar-picker-indicator,
+  input[type="date"]:not([class*="text-white"])::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: none;
+    opacity: 0.85;
+  }
+
+  input[type="time"]:not([class*="text-white"])::-webkit-datetime-edit,
+  input[type="time"]:not([class*="text-white"])::-webkit-datetime-edit-fields-wrapper,
+  input[type="time"]:not([class*="text-white"])::-webkit-datetime-edit-text,
+  input[type="time"]:not([class*="text-white"])::-webkit-datetime-edit-hour-field,
+  input[type="time"]:not([class*="text-white"])::-webkit-datetime-edit-minute-field,
+  input[type="time"]:not([class*="text-white"])::-webkit-datetime-edit-ampm-field {
+    color: #000000 !important;
+  }
+
+  input[type="date"]:not([class*="text-white"])::-webkit-datetime-edit,
+  input[type="date"]:not([class*="text-white"])::-webkit-datetime-edit-fields-wrapper,
+  input[type="date"]:not([class*="text-white"])::-webkit-datetime-edit-text,
+  input[type="date"]:not([class*="text-white"])::-webkit-datetime-edit-year-field,
+  input[type="date"]:not([class*="text-white"])::-webkit-datetime-edit-month-field,
+  input[type="date"]:not([class*="text-white"])::-webkit-datetime-edit-day-field {
+    color: #000000 !important;
   }
 
   body {
@@ -273,15 +322,15 @@
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
   }
 
-  /* Placeholders haute lisibilité */
+  /* Placeholders haute lisibilité WCAG AA (>= 4.5:1) */
   input::placeholder, textarea::placeholder {
-    color: #94a3b8;
-    opacity: 0.95;
+    color: hsl(var(--form-placeholder)) !important;
+    opacity: 1 !important;
     font-weight: 400;
   }
   .dark input::placeholder, .dark textarea::placeholder {
-    color: #64748b;
-    opacity: 0.95;
+    color: hsl(var(--form-placeholder)) !important;
+    opacity: 1 !important;
   }
 
   /* Labels semi-gras au-dessus des champs */
@@ -290,11 +339,40 @@
     font-size: 0.875rem;
     margin-bottom: 0.5rem;
     display: inline-block;
-    color: #1e293b;
+    color: hsl(var(--form-label));
     letter-spacing: -0.01em;
   }
   .dark label {
-    color: #e2e8f0;
+    color: hsl(var(--form-label));
+  }
+
+  /* Universal High Contrast for Checkboxes, Radios, and Consent Labels (WCAG AA Compliance) */
+  label:has(input[type="checkbox"]),
+  label:has(input[type="radio"]),
+  .checkbox-label,
+  .radio-label {
+    color: hsl(var(--form-checkbox-label)) !important;
+    font-weight: 500;
+    margin-bottom: 0;
+  }
+
+  /* Force high contrast on text elements inside checkbox/radio labels (e.g. RGPD consent, terms) */
+  label:has(input[type="checkbox"]) span,
+  label:has(input[type="checkbox"]) p,
+  label:has(input[type="checkbox"]) div,
+  label:has(input[type="radio"]) span,
+  label:has(input[type="radio"]) p,
+  label:has(input[type="radio"]) div {
+    color: hsl(var(--form-checkbox-label)) !important;
+  }
+
+  /* Checkbox input visual contrast enhancement */
+  input[type="checkbox"], input[type="radio"] {
+    accent-color: hsl(var(--primary));
+    cursor: pointer;
+  }
+  .dark input[type="checkbox"], .dark input[type="radio"] {
+    border-color: rgba(217, 217, 217, 0.4);
   }
 
   /* Selects modernisés */
@@ -890,35 +968,87 @@ input.py-1, input.py-2, input.h-auto, input.h-8, input.h-9, input.h-10 {
    SECTION HAUTE LISIBILITÉ & HYPER-CONTRASTE (TOUTES APPLICATIONS & FORMULAIRES)
    ============================================================================== */
 
-/* 1. Labels de formulaires universels - Contraste maximal #0f172a et typographie ultra-nette */
-label,
-label.text-slate-400,
-label.text-slate-500,
-label.text-slate-600,
-label.text-slate-700,
-label.text-slate-800,
-label.text-slate-900,
-label.text-gray-400,
-label.text-gray-500,
-label.text-gray-600,
-label.text-gray-700,
-label.text-gray-800,
-label.text-gray-900,
-label[class*="text-slate-"],
-label[class*="text-gray-"],
-label[class*="text-"],
-.ia-page label,
-.ia-page label[class*="text-"],
-form label,
-.ia-card label,
-.bg-white label {
+/* 1. Labels de formulaires universels - En mode clair uniquement: Contraste maximal #0f172a et typographie nette */
+:root:not(.dark) label:not(.text-white):not(.\!text-white):not([class*="text-white"]):not(.bg-slate-900):not(.bg-slate-800):not(.bg-slate-950):not(.bg-black):not(.bg-blue-600):not(.bg-indigo-600):not([class*="bg-slate-"]):not([class*="bg-black"]),
+:root:not(.dark) label.text-slate-400,
+:root:not(.dark) label.text-slate-500,
+:root:not(.dark) label.text-slate-600,
+:root:not(.dark) label.text-slate-700,
+:root:not(.dark) label.text-slate-800,
+:root:not(.dark) label.text-slate-900,
+:root:not(.dark) label.text-gray-400,
+:root:not(.dark) label.text-gray-500,
+:root:not(.dark) label.text-gray-600,
+:root:not(.dark) label.text-gray-700,
+:root:not(.dark) label.text-gray-800,
+:root:not(.dark) label.text-gray-900,
+:root:not(.dark) label[class*="text-slate-"]:not(.text-white):not(.\!text-white):not([class*="text-white"]):not([class*="bg-slate-"]):not([class*="bg-black"]),
+:root:not(.dark) label[class*="text-gray-"]:not(.text-white):not(.\!text-white):not([class*="text-white"]):not([class*="bg-slate-"]):not([class*="bg-black"]),
+:root:not(.dark) label[class*="text-"]:not(.text-white):not(.\!text-white):not([class*="text-white"]):not([class*="bg-slate-"]):not([class*="bg-black"]):not([class*="bg-blue-"]):not([class*="bg-indigo-"]),
+:root:not(.dark) .ia-page label:not(.text-white):not(.\!text-white):not([class*="text-white"]):not(.bg-slate-900):not(.bg-slate-800):not([class*="bg-slate-"]):not([class*="bg-black"]),
+:root:not(.dark) .ia-page label[class*="text-"]:not(.text-white):not(.\!text-white):not([class*="text-white"]):not([class*="bg-slate-"]):not([class*="bg-black"]),
+:root:not(.dark) form label:not(.text-white):not(.\!text-white):not([class*="text-white"]):not(.bg-slate-900):not(.bg-slate-800):not([class*="bg-slate-"]):not([class*="bg-black"]),
+:root:not(.dark) .ia-card label:not(.text-white):not(.\!text-white):not([class*="text-white"]):not(.bg-slate-900):not(.bg-slate-800):not([class*="bg-slate-"]):not([class*="bg-black"]),
+:root:not(.dark) .bg-white label:not(.text-white):not(.\!text-white):not([class*="text-white"]):not(.bg-slate-900):not(.bg-slate-800):not([class*="bg-slate-"]):not([class*="bg-black"]) {
   color: #0f172a !important;
   font-weight: 700 !important;
   letter-spacing: -0.01em !important;
   -webkit-font-smoothing: antialiased !important;
 }
 
-label.text-\\[\\#CDA751\\] {
+/* 2. En mode sombre: TOUS les labels deviennent éclatants et conformes WCAG AA (>= 4.5:1) */
+.dark label:not(.text-gold):not([class*="text-gold"]):not([class*="text-amber-"]):not([class*="text-blue-"]):not([class*="text-emerald-"]),
+.dark .ia-page label,
+.dark .ia-card label,
+.dark form label {
+  color: #f1f5f9 !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* 3. Cases à cocher & textes RGPD en mode sombre - Haute lisibilité garantie */
+.dark label:has(input[type="checkbox"]),
+.dark label:has(input[type="radio"]),
+.dark .checkbox-label,
+.dark .radio-label,
+.dark label:has(input[type="checkbox"]) span,
+.dark label:has(input[type="checkbox"]) p,
+.dark label:has(input[type="checkbox"]) div,
+.dark label:has(input[type="radio"]) span,
+.dark label:has(input[type="radio"]) p,
+.dark label:has(input[type="radio"]) div {
+  color: #f1f5f9 !important;
+  font-weight: 500 !important;
+}
+
+label.text-white,
+label.\!text-white,
+label[class*="text-white"],
+.bg-white label.text-white,
+.bg-white label.\!text-white,
+form label.text-white,
+form label.\!text-white,
+.ia-page label.text-white,
+.ia-card label.text-white,
+label.bg-slate-900,
+label.bg-slate-800,
+label.bg-slate-950,
+label.bg-black,
+label.bg-blue-600,
+label.bg-indigo-600,
+label[class*="bg-slate-9"],
+label[class*="bg-slate-8"],
+label[class*="bg-black"] {
+  color: #ffffff !important;
+}
+
+label.inline-flex,
+label.flex {
+  display: inline-flex !important;
+  margin-bottom: 0 !important;
+}
+
+label[class*="text-[#CDA751]"] {
   color: #CDA751 !important;
 }
 
@@ -931,9 +1061,9 @@ label.text-\\[\\#CDA751\\] {
   color: #f8fafc !important;
 }
 
-label.text-\\[\\#CDA751\\],
-.dark label.text-\\[\\#CDA751\\],
-.bg-slate-900 label.text-\\[\\#CDA751\\] {
+label[class*="text-[#CDA751]"],
+.dark label[class*="text-[#CDA751]"],
+.bg-slate-900 label[class*="text-[#CDA751]"] {
   color: #CDA751 !important;
 }
 
@@ -1037,10 +1167,65 @@ table th {
   -webkit-overflow-scrolling: touch;
 }
 
-img, video, canvas, svg {
-  max-width: 100%;
+.overflow-x-clip {
+  overflow-x: clip !important;
 }
 
+/* Custom scrollbar esthétique et discret pour les zones de texte et d'emails */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
 
+/* Scrollbar fluide, élégante et visible pour le panneau des outils dans le menu latéral */
+.custom-sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.28) rgba(255, 255, 255, 0.05);
+  scroll-behavior: smooth;
+}
+.custom-sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-sidebar-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+}
+.custom-sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.28);
+  border-radius: 9999px;
+}
+.custom-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.55);
+}
 
+/* Intégration transparente et aérée des outils embarqués dans l'espace dashboard */
+.dashboard-embedded-view .ia-page {
+  min-height: auto !important;
+  padding-top: 0.5rem !important;
+  padding-bottom: 2rem !important;
+  background-color: transparent !important;
+}
+.dashboard-embedded-view .max-w-7xl,
+.dashboard-embedded-view .max-w-6xl,
+.dashboard-embedded-view .max-w-5xl,
+.dashboard-embedded-view .max-w-4xl,
+.dashboard-embedded-view .max-w-\[1500px\] {
+  max-width: 100% !important;
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
+}
 
