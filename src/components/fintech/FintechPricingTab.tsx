@@ -246,7 +246,7 @@ export const FintechPricingTab: React.FC = () => {
             <div className="p-3 bg-white rounded-xl shadow-lg">
               <img 
                 src="/IT4ALL.jpeg" 
-                alt="Logo IT4ALL" 
+                alt="Logo IT4WORK" 
                 className="h-12 w-auto object-contain" 
               />
             </div>

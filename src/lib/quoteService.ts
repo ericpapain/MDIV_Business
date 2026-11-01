@@ -8,6 +8,13 @@ export interface Client {
   name: string;
   email: string;
   company: string;
+  siren?: string;
+  siret?: string;
+  vat_number?: string;
+  country_code?: string;
+  postal_code?: string;
+  city?: string;
+  ppf_routing_id?: string;
   phone?: string;
   address?: string;
   notes?: string;

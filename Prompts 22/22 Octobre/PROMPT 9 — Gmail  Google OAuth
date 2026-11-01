@@ -1,0 +1,71 @@
+# GOOGLE AUTHENTICATION + GMAIL
+**RÈGLE ABSOLUE — AUDIT AVANT DÉVELOPPEMENT : avant d'écrire ou modifier une seule ligne de code, vérifie systématiquement si la fonctionnalité demandée existe déjà dans l'application, même partiellement, sous un autre nom, dans un autre module ou avec une implémentation différente. Analyse le frontend, le backend, la base de données, les API, les services, les composants, les hooks, les routes et les tests concernés. Si une implémentation existe, réutilise-la et adapte-la au besoin au lieu d'en créer une nouvelle. Si elle existe partiellement, complète uniquement ce qui manque. Si elle n'existe pas, alors seulement, propose puis implémente une nouvelle solution. L'objectif est d'éviter absolument les doublons, les fonctionnalités parallèles, les modèles de données redondants et les régressions. a la fin de chaque implementation faire un rapport de ce qui a ete fait et verifier si cela fonction dans le fichier Prompt _ numero du prompt.md**
+Implémente maintenant l'intégration Google en deux parties distinctes.
+
+## PARTIE A — CONNEXION À L'APPLICATION
+
+Permettre :
+
+"Continuer avec Google"
+
+Le système doit :
+
+- utiliser OAuth sécurisé ;
+- identifier l'utilisateur ;
+- créer ou retrouver son compte ;
+- associer le compte Google ;
+- créer la session applicative.
+
+## PARTIE B — CONNEXION DE GMAIL
+
+Permettre à l'utilisateur connecté d'ajouter sa boîte Gmail.
+
+Le consentement Gmail doit être séparé du simple login Google lorsque nécessaire.
+
+## GMAIL
+
+Permettre progressivement :
+
+- lecture ;
+- recherche ;
+- affichage ;
+- pièces jointes ;
+- envoi ;
+- réponse.
+
+Commencer par la lecture si cela simplifie la validation.
+
+## SÉCURITÉ
+
+- tokens côté serveur ;
+- refresh token sécurisé ;
+- jamais exposer les secrets au frontend ;
+- scopes minimaux nécessaires ;
+- gestion révocation ;
+- gestion expiration.
+
+## CONFIGURATION
+
+Avant de coder, identifie précisément les éléments qui doivent être configurés dans Google Cloud Console.
+
+Indique-moi :
+
+- API à activer ;
+- OAuth client ;
+- redirect URI ;
+- consent screen ;
+- scopes.
+
+Puis implémente le code.
+
+## TESTS
+
+Tester le parcours réel depuis :
+
+inscription/login
+→ Google
+→ retour application
+→ connexion Gmail
+→ lecture email.
+
+Tests depuis la racine.

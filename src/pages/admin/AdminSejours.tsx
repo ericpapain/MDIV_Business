@@ -194,22 +194,22 @@ export default function AdminSejours() {
             <form onSubmit={(e) => { e.preventDefault(); submitSejour.mutate(); }} className="space-y-4">
               {/* Titre FR */}
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Titre (FR)</label>
+                <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Titre (FR)</label>
                 <input required value={title} onChange={e => setTitle(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
               {/* Titre EN */}
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Titre (EN) <span className="text-gold/50">optionnel</span></label>
+                <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Titre (EN) <span className="text-gold/50">optionnel</span></label>
                 <input value={titleEn} onChange={e => setTitleEn(e.target.value)} type="text" placeholder="English title..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
               {/* Date */}
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Date & Heure</label>
+                <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Date & Heure</label>
                 <input required value={date} onChange={e => setDate(e.target.value)} type="datetime-local" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
               {/* Lieu */}
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Lieu (Ville, Pays ou Adresse)</label>
+                <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Lieu (Ville, Pays ou Adresse)</label>
                 <input required value={location} onChange={e => setLocation(e.target.value)} type="text" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
               {/* Image */}
@@ -224,12 +224,12 @@ export default function AdminSejours() {
               </div>
               {/* Description FR */}
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Description (FR)</label>
+                <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Description (FR)</label>
                 <textarea required value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full px-3.5 py-2.5 bg-muted/30 border border-border rounded-xl text-sm resize-y min-h-[80px]" />
               </div>
               {/* Description EN */}
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Description (EN) <span className="text-gold/50">optionnel</span></label>
+                <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Description (EN) <span className="text-gold/50">optionnel</span></label>
                 <textarea value={descriptionEn} onChange={e => setDescriptionEn(e.target.value)} rows={3} placeholder="English description..." className="w-full px-3.5 py-2.5 bg-muted/30 border border-border rounded-xl text-sm resize-y min-h-[80px]" />
               </div>
 

@@ -1,6 +1,7 @@
 // src/lib/invoiceService.ts
 
 import { getApiUrl, createApiUrl } from './apiConfig';
+import { downloadInvoicePDF, InvoiceExportData } from './pdfExportService';
 
 export interface InvoiceKPIs {
   totalIssued: number;
@@ -14,13 +15,21 @@ export interface Invoice {
   invoiceNumber: string;
   clientName: string;
   clientId?: string | number | null;
+  projectId?: string | number | null;
+  projectName?: string;
   date: string;
   dueDate: string;
+  operation_nature?: 'services' | 'goods' | 'mixed';
+  vat_payment_on_debit?: boolean | number;
   amountHT?: number;
   amountTTC: number;
+  currency?: string;
   downpayment?: number;
   lines?: any[];
-  status: 'paid' | 'pending' | 'overdue';
+  status: 'paid' | 'pending' | 'overdue' | 'cancelled';
+  ppf_status?: 'DEPOSEE' | 'ACHEMINEE' | 'REJETEE' | 'REFUSEE' | 'MISE_A_DISPOSITION' | 'PRISE_EN_CHARGE' | 'APPROUVEE' | 'PAIEMENT_TRANSMIS' | 'PAYEE';
+  ppf_deposit_id?: string;
+  sha256_hash?: string;
 }
 
 export interface InvoiceAICheckResult {
@@ -91,11 +100,21 @@ export async function fetchInvoiceKPIs(companyId?: number): Promise<InvoiceKPIs>
   const url = createApiUrl('invoices_kpis.php');
   url.searchParams.append('company_id', companyId.toString());
 
-  const response = await fetch(url.toString());
-  if (!response.ok) {
+  try {
+    const response = await fetch(url.toString());
+    if (!response.ok) {
+      return { totalIssued: 0, totalPaid: 0, totalPending: 0, totalOverdue: 0 };
+    }
+    const raw = await response.json();
+    return {
+      totalIssued: Number(raw?.totalIssued ?? raw?.totalRevenueTTC ?? raw?.total_issued ?? 0) || 0,
+      totalPaid: Number(raw?.totalPaid ?? raw?.paidAmount ?? raw?.total_paid ?? 0) || 0,
+      totalPending: Number(raw?.totalPending ?? raw?.pendingAmount ?? raw?.total_pending ?? 0) || 0,
+      totalOverdue: Number(raw?.totalOverdue ?? raw?.overdueAmount ?? raw?.total_overdue ?? 0) || 0,
+    };
+  } catch {
     return { totalIssued: 0, totalPaid: 0, totalPending: 0, totalOverdue: 0 };
   }
-  return response.json();
 }
 
 /**
@@ -108,12 +127,22 @@ export async function fetchInvoicesList(companyId?: number): Promise<Invoice[]> 
   const url = createApiUrl('invoices.php');
   url.searchParams.append('company_id', companyId.toString());
 
-  const response = await fetch(url.toString());
-  if (!response.ok) {
-    return []; 
+  try {
+    const response = await fetch(url.toString());
+    if (!response.ok) {
+      return [];
+    }
+    const data = await response.json();
+    if (!Array.isArray(data)) return [];
+    return data.map((inv: any) => ({
+      ...inv,
+      amountTTC: Number(inv?.amountTTC ?? inv?.totalTTC ?? inv?.amount_ttc ?? 0) || 0,
+      amountHT: Number(inv?.amountHT ?? inv?.totalHT ?? inv?.amount_ht ?? 0) || 0,
+      dueDate: inv?.dueDate || inv?.due_date || inv?.date || '',
+    }));
+  } catch {
+    return [];
   }
-  const data = await response.json();
-  return Array.isArray(data) ? data : [];
 }
 
 /**
@@ -150,8 +179,6 @@ export async function checkInvoiceWithAI(invoiceData: any, companyId?: number): 
 
   return response.json();
 }
-
-import { downloadInvoicePDF, InvoiceExportData } from './pdfExportService';
 
 /**
  * Exporte la facture en vrai fichier binaire PDF haute fidélité.
@@ -200,4 +227,3 @@ export async function extractInvoiceLinesFromOCR(ocrText: string, companyId?: nu
   }
   return response.json();
 }
-

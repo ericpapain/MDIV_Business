@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import ServiceHeroImage from '@/components/ia/ServiceHeroImage';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { EnterpriseAuthBar } from '@/components/site/EnterpriseAuthBar';
@@ -22,10 +22,17 @@ import {
 import { fetchIntegrationsStatus } from '@/lib/emailAssistantService';
 import { hasFeatureAccess } from '@/lib/planLimitsService';
 
-export default function ServicesIAFollowup() {
+export interface ServicesIAFollowupProps {
+  initialFilter?: 'all' | 'litiges';
+}
+
+export default function ServicesIAFollowup({ initialFilter = 'all' }: ServicesIAFollowupProps = {}) {
   const { language } = useLanguage();
   const { company } = useAuth();
+  const [searchParams] = useSearchParams();
   const isEn = language === "en";
+
+  const isLitigeMode = initialFilter === 'litiges' || searchParams.get('view') === 'impayes' || searchParams.get('filter') === 'litiges';
 
   const { allowed: canUseFollowup } = hasFeatureAccess('sales_auto_reminders');
 
@@ -41,8 +48,8 @@ export default function ServicesIAFollowup() {
 
   // État de l'action en cours
   const [selectedTarget, setSelectedTarget] = useState<FollowupTarget | null>(null);
-  const [tone, setTone] = useState<FollowupGenerateRequest['tone']>('Courtois');
-  const [urgency, setUrgency] = useState<FollowupGenerateRequest['urgencyLevel']>('medium');
+  const [tone, setTone] = useState<FollowupGenerateRequest['tone']>(isLitigeMode ? 'Ferme' : 'Courtois');
+  const [urgency, setUrgency] = useState<FollowupGenerateRequest['urgencyLevel']>(isLitigeMode ? 'high' : 'medium');
   
   const [generatedSubject, setGeneratedSubject] = useState('');
   const [generatedBody, setGeneratedBody] = useState('');
@@ -160,7 +167,7 @@ export default function ServicesIAFollowup() {
   };
 
   return (
-    <div className="ia-page min-h-screen pt-32 pb-20 bg-slate-50/50">
+    <div className="ia-page min-h-screen pt-20 pb-20 bg-slate-50/50">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header avec Vidéo et Étapes */}
         <div className="mb-12 flex flex-col md:flex-row md:justify-between md:items-stretch gap-6">
@@ -177,10 +184,13 @@ export default function ServicesIAFollowup() {
               <Send size={16} /> Suite Commerciale
             </div>
             <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Relances Intelligentes
+              {isLitigeMode ? "Recouvrement & Litiges" : "Relances Intelligentes"}
             </h1>
             <p className="text-slate-600 font-medium text-lg max-w-2xl mb-8">
-              L'IA identifie les relances à effectuer (factures, devis) et rédige l'email parfait avec le ton adéquat.
+              {isLitigeMode 
+                ? "Traitez les impayés critiques, éditez des courriers de mise en demeure conformes et proposez des règlements échelonnés."
+                : "L'IA identifie les relances à effectuer (factures, devis) et rédige l'email parfait avec le ton adéquat."
+              }
             </p>
 
             {/* Séparateur créatif */}
@@ -344,7 +354,7 @@ export default function ServicesIAFollowup() {
                   <div className="p-6">
                     <div className="grid grid-cols-2 gap-4 mb-6">
                       <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ton du message</label>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Ton du message</label>
                         <select 
                           value={tone} 
                           onChange={(e: any) => setTone(e.target.value)}
@@ -359,7 +369,7 @@ export default function ServicesIAFollowup() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Niveau d'urgence</label>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Niveau d'urgence</label>
                         <select 
                           value={urgency} 
                           onChange={(e: any) => setUrgency(e.target.value)}

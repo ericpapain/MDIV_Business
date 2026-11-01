@@ -148,7 +148,7 @@ export default function ServicesIASummarizer() {
   };
 
   return (
-    <div className="ia-page min-h-screen pt-32 pb-20 bg-slate-50/50">
+    <div className="ia-page min-h-screen pt-20 pb-20 bg-slate-50/50">
       <div className="container mx-auto px-4 max-w-7xl">
         
         {/* Barre d'Authentification / Entreprise */}

@@ -216,7 +216,7 @@ export const CalendarScheduleModal: React.FC<CalendarScheduleModalProps> = ({
 
             {/* Titre */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-200 mb-1">
                 Titre du Rendez-vous *
               </label>
               <input
@@ -231,7 +231,7 @@ export const CalendarScheduleModal: React.FC<CalendarScheduleModalProps> = ({
             {/* Date, Heure, Durée */}
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-200 mb-1">
                   Date
                 </label>
                 <input
@@ -244,7 +244,7 @@ export const CalendarScheduleModal: React.FC<CalendarScheduleModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-200 mb-1">
                   Heure début
                 </label>
                 <input
@@ -257,7 +257,7 @@ export const CalendarScheduleModal: React.FC<CalendarScheduleModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-200 mb-1">
                   Durée
                 </label>
                 <select
@@ -276,7 +276,7 @@ export const CalendarScheduleModal: React.FC<CalendarScheduleModalProps> = ({
 
             {/* Description / Contexte */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-200 mb-1">
                 Ordre du jour / Notes préparatoires
               </label>
               <textarea

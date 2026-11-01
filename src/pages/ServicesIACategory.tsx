@@ -14,7 +14,7 @@ export default function ServicesIACategory() {
 
   if (!cat) {
     return (
-      <div className="ia-page min-h-screen pt-32 pb-20">
+      <div className="ia-page min-h-screen pt-20 pb-20">
         <div className="container max-w-3xl mx-auto text-center">
           <h1 className="text-3xl font-bold mb-4">{isEn ? "Category not found" : "Catégorie introuvable"}</h1>
           <Link to="/services-ia" className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-[hsl(221,83%,53%)] font-semibold rounded-full shadow-sm hover:shadow-md border border-slate-200 hover:-translate-x-1 transition-all text-sm group">
@@ -34,7 +34,7 @@ export default function ServicesIACategory() {
   return (
     <div className="ia-page min-h-screen">
       {/* HERO */}
-      <section className="relative pt-32 pb-16 overflow-hidden">
+      <section className="relative pt-20 pb-16 overflow-hidden">
         <div className="absolute inset-0 ia-gradient-hero-subtle" />
         <div className="container relative z-10 max-w-5xl mx-auto">
           <Link to="/services-ia" className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground/80 backdrop-blur-md text-[hsl(221,83%,53%)] font-semibold rounded-full shadow-sm hover:shadow-md border border-slate-200 hover:bg-white hover:-translate-x-1 transition-all mb-8 text-sm group">

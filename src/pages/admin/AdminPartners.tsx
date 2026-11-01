@@ -157,21 +157,21 @@ export default function AdminPartners() {
           <h2 className="text-xl font-display mb-6">{editingId ? "Modifier le Partenaire" : "Nouveau Partenaire"}</h2>
           <form onSubmit={e => { e.preventDefault(); submitPartner.mutate(); }} className="space-y-4">
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Nom de l'entreprise *</label>
+              <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Nom de l'entreprise *</label>
               <input required value={name} onChange={e => setName(e.target.value)} type="text" placeholder="Tech Africa" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Secteur d'activité</label>
+                <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Secteur d'activité</label>
                 <input value={sector} onChange={e => setSector(e.target.value)} type="text" placeholder="Transformation Digitale" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Catégorie</label>
+                <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Catégorie</label>
                 <input value={category} onChange={e => setCategory(e.target.value)} type="text" placeholder="Tech, Finance..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
               </div>
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Pays / Drapeau</label>
+              <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Pays / Drapeau</label>
               <select value={country} onChange={e => {
                 const code = e.target.value;
                 setCountry(code);
@@ -193,7 +193,7 @@ export default function AdminPartners() {
               </select>
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1 block">Site Internet</label>
+              <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Site Internet</label>
               <input value={website} onChange={e => setWebsite(e.target.value)} type="text" placeholder="https://..." className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" />
             </div>
             <ImageUpload value={logoUrl} onChange={setLogoUrl} label="Logo de l'entreprise" />

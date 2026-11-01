@@ -1,0 +1,65 @@
+# INTERFACE PERSONNALISABLE
+**RÈGLE ABSOLUE — AUDIT AVANT DÉVELOPPEMENT : avant d'écrire ou modifier une seule ligne de code, vérifie systématiquement si la fonctionnalité demandée existe déjà dans l'application, même partiellement, sous un autre nom, dans un autre module ou avec une implémentation différente. Analyse le frontend, le backend, la base de données, les API, les services, les composants, les hooks, les routes et les tests concernés. Si une implémentation existe, réutilise-la et adapte-la au besoin au lieu d'en créer une nouvelle. Si elle existe partiellement, complète uniquement ce qui manque. Si elle n'existe pas, alors seulement, propose puis implémente une nouvelle solution. L'objectif est d'éviter absolument les doublons, les fonctionnalités parallèles, les modèles de données redondants et les régressions. a la fin de chaque implementation faire un rapport de ce qui a ete fait et verifier si cela fonction dans le fichier Prompt _ numero du prompt.md**
+Implémente maintenant le système permettant à chaque utilisateur de personnaliser son interface.
+
+## OBJECTIF
+
+L'application ne doit pas afficher toutes les fonctionnalités à tous les utilisateurs.
+
+Chaque utilisateur doit voir les fonctionnalités correspondant :
+
+- à son rôle ;
+- à ses permissions ;
+- aux services activés par l'entreprise ;
+- à ses préférences personnelles.
+
+## AJOUT / MASQUAGE
+
+Créer une interface ergonomique :
+
+"Personnaliser mon espace"
+
+L'utilisateur peut :
+
+- afficher un module ;
+- masquer un module ;
+- réorganiser éventuellement les modules.
+
+Lorsqu'un module est désactivé :
+
+- il est masqué du menu principal ;
+- il reste disponible dans "Ajouter un service" ;
+- ses données ne sont pas supprimées.
+
+## RÈGLE
+
+Une préférence utilisateur ne doit jamais donner une permission supplémentaire.
+
+Exemple :
+
+Si l'utilisateur n'a pas accès à la facturation :
+
+il ne peut pas afficher la facturation simplement via ses préférences.
+
+## PRIORITÉ D'AFFICHAGE
+
+Calculer :
+
+1. abonnement ;
+2. permissions ;
+3. services entreprise ;
+4. préférences utilisateur.
+
+## TESTS
+
+Tester différents profils :
+
+- admin ;
+- RH ;
+- SAV ;
+- commercial ;
+- utilisateur simple.
+
+Tester également l'activation/désactivation des modules.
+
+Tests depuis la racine.

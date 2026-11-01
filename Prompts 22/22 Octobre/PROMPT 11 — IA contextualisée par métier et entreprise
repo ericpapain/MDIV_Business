@@ -1,0 +1,78 @@
+# IA CONTEXTUALISÉE
+**RÈGLE ABSOLUE — AUDIT AVANT DÉVELOPPEMENT : avant d'écrire ou modifier une seule ligne de code, vérifie systématiquement si la fonctionnalité demandée existe déjà dans l'application, même partiellement, sous un autre nom, dans un autre module ou avec une implémentation différente. Analyse le frontend, le backend, la base de données, les API, les services, les composants, les hooks, les routes et les tests concernés. Si une implémentation existe, réutilise-la et adapte-la au besoin au lieu d'en créer une nouvelle. Si elle existe partiellement, complète uniquement ce qui manque. Si elle n'existe pas, alors seulement, propose puis implémente une nouvelle solution. L'objectif est d'éviter absolument les doublons, les fonctionnalités parallèles, les modèles de données redondants et les régressions. a la fin de chaque implementation faire un rapport de ce qui a ete fait et verifier si cela fonction dans le fichier Prompt _ numero du prompt.md**
+Implémente l'architecture permettant à l'IA d'adapter ses réponses à chaque entreprise.
+
+## CONTEXTE
+
+L'IA doit comprendre :
+
+- secteur ;
+- métier ;
+- taille ;
+- objectifs ;
+- services utilisés ;
+- utilisateurs ;
+- rôles ;
+- processus ;
+- données de l'entreprise.
+
+## EXEMPLES
+
+Plombier :
+
+- devis ;
+- factures ;
+- relances ;
+- clients ;
+- interventions.
+
+Restaurant :
+
+- fournisseurs ;
+- stocks ;
+- réservations ;
+- clients ;
+- factures.
+
+Consultant :
+
+- missions ;
+- clients ;
+- facturation ;
+- rendez-vous ;
+- emails.
+
+## PROMPT MASTER
+
+Créer un système de prompt maître permettant d'injecter :
+
+- contexte entreprise ;
+- contexte utilisateur ;
+- rôle ;
+- permissions ;
+- service utilisé ;
+- historique pertinent.
+
+## EMAIL
+
+Pour les emails, l'IA doit pouvoir proposer un brouillon :
+
+Utilisateur reçoit :
+
+"Pouvez-vous me transmettre votre devis ?"
+
+L'IA propose une réponse.
+
+L'utilisateur :
+
+- valide ;
+- modifie ;
+- envoie.
+
+L'IA ne doit jamais envoyer automatiquement un email sensible sans règle/validation appropriée.
+
+## IMPORTANT
+
+Ne donne jamais à l'IA des données auxquelles l'utilisateur n'a pas accès.
+
+Tests depuis la racine.

@@ -5,12 +5,14 @@ import { useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { ProgramPanel } from "@/components/site/ProgramPanel";
 import { SimpleCountdown } from "@/components/event/SimpleCountdown";
+import { PublicEventRegistrationModal } from "@/components/events/PublicEventRegistrationModal";
 
 export default function Events() {
   const { t, language } = useLanguage();
   const isEn = language === "en";
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [programEvent, setProgramEvent] = useState<any>(null);
+  const [registrationEventId, setRegistrationEventId] = useState<number | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["public-events", "Événement"],
@@ -76,13 +78,21 @@ export default function Events() {
                       <SimpleCountdown targetDateStr={e.date} />
 
                       <div className="mt-auto pt-5 flex flex-col gap-3">
-                        {/* Bouton Réserver */}
-                        {e.billetterie_url ? (
+                        {/* Bouton Réserver - MDIV EVENT ENGINE */}
+                        {e.features_config?.online_registration?.enabled !== false ? (
+                          <button 
+                            type="button"
+                            onClick={() => setRegistrationEventId(e.id)} 
+                            className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit cursor-pointer transition-transform hover:scale-[1.02]"
+                          >
+                            <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                          </button>
+                        ) : e.billetterie_url ? (
                           <a href={e.billetterie_url} target="_blank" rel="noopener noreferrer" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
                             <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
                           </a>
                         ) : (
-                          <Link to="/contact" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
+                          <Link to={e.id ? `/evenements/${e.id}/inscription` : "/evenements"} className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
                             <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
                           </Link>
                         )}
@@ -138,6 +148,14 @@ export default function Events() {
             </div>
           </div>
         </>
+      )}
+
+      {registrationEventId && (
+        <PublicEventRegistrationModal
+          eventId={registrationEventId}
+          isOpen={true}
+          onClose={() => setRegistrationEventId(null)}
+        />
       )}
 
       {selectedImage && (

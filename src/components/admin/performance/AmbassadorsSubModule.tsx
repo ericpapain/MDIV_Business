@@ -68,7 +68,7 @@ export function AmbassadorsSubModule({
         {showConfig && (
           <div className="pt-3 border-t border-border/50 grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
             <div>
-              <label className="text-[11px] text-muted-foreground block mb-1">Leads (%)</label>
+              <label className="text-[11px] text-slate-700 dark:text-slate-200 font-medium block mb-1">Leads (%)</label>
               <input
                 type="number"
                 value={weights.leads}
@@ -77,7 +77,7 @@ export function AmbassadorsSubModule({
               />
             </div>
             <div>
-              <label className="text-[11px] text-muted-foreground block mb-1">Conversions (%)</label>
+              <label className="text-[11px] text-slate-700 dark:text-slate-200 font-medium block mb-1">Conversions (%)</label>
               <input
                 type="number"
                 value={weights.conversions}
@@ -86,7 +86,7 @@ export function AmbassadorsSubModule({
               />
             </div>
             <div>
-              <label className="text-[11px] text-muted-foreground block mb-1">Engagement (%)</label>
+              <label className="text-[11px] text-slate-700 dark:text-slate-200 font-medium block mb-1">Engagement (%)</label>
               <input
                 type="number"
                 value={weights.engagement}
@@ -95,7 +95,7 @@ export function AmbassadorsSubModule({
               />
             </div>
             <div>
-              <label className="text-[11px] text-muted-foreground block mb-1">Activité (%)</label>
+              <label className="text-[11px] text-slate-700 dark:text-slate-200 font-medium block mb-1">Activité (%)</label>
               <input
                 type="number"
                 value={weights.activity}
@@ -104,7 +104,7 @@ export function AmbassadorsSubModule({
               />
             </div>
             <div>
-              <label className="text-[11px] text-muted-foreground block mb-1">CA Apporté (%)</label>
+              <label className="text-[11px] text-slate-700 dark:text-slate-200 font-medium block mb-1">CA Apporté (%)</label>
               <input
                 type="number"
                 value={weights.revenue}

@@ -47,3 +47,6 @@ litterature.md
 offre pelico.md
 vite.config.ts.timestamp-*
 scratch/
+# Messagerie : secrets et données locales (ne jamais committer)
+.mail_dev_key
+dev_mail_store.json

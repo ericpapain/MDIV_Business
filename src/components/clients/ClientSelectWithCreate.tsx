@@ -15,9 +15,12 @@ import {
   X, 
   Loader2, 
   Sparkles,
-  UserCheck
+  UserCheck,
+  ShieldCheck,
+  AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { isValidSiret, computeFrenchVat } from '@/lib/validationLuhn';
 
 interface ClientSelectWithCreateProps {
   selectedClientId?: string | number | null;
@@ -56,6 +59,13 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
   const [newEmail, setNewEmail] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newAddress, setNewAddress] = useState('');
+  const [newPostalCode, setNewPostalCode] = useState('');
+  const [newCity, setNewCity] = useState('');
+  const [newCountryCode, setNewCountryCode] = useState('FR');
+  const [newSiret, setNewSiret] = useState('');
+  const [newVatNumber, setNewVatNumber] = useState('');
+  const [siretStatus, setSiretStatus] = useState<'idle' | 'valid' | 'invalid'>('idle');
+  const [siretMsg, setSiretMsg] = useState('');
   const [newNotes, setNewNotes] = useState('');
 
   // Fetch clients on mount and when company changes
@@ -113,11 +123,40 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
     setIsCreateModalOpen(true);
   };
 
+  const handleSiretChange = (val: string) => {
+    const raw = val.replace(/\s+/g, '');
+    setNewSiret(raw);
+    if (raw.length === 14) {
+      if (isValidSiret(raw)) {
+        setSiretStatus('valid');
+        setSiretMsg('SIRET vérifié et conforme à l\'algorithme de Luhn');
+        if (!newVatNumber) {
+          const autoVat = computeFrenchVat(raw);
+          setNewVatNumber(autoVat);
+        }
+      } else {
+        setSiretStatus('invalid');
+        setSiretMsg('SIRET non conforme (clé de contrôle de Luhn invalide)');
+      }
+    } else if (raw.length > 0) {
+      setSiretStatus('invalid');
+      setSiretMsg(`${raw.length}/14 chiffres requis`);
+    } else {
+      setSiretStatus('idle');
+      setSiretMsg('');
+    }
+  };
+
   const handleClientSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
     if (!newName.trim()) {
       toast.error("Veuillez saisir le nom du contact.");
+      return;
+    }
+
+    if (newSiret.trim() && !isValidSiret(newSiret.trim())) {
+      toast.error("Le numéro SIRET fourni est invalide (échec contrôle de Luhn). Corrigez-le avant de continuer.");
       return;
     }
 
@@ -129,6 +168,10 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
 
     setIsSubmitting(true);
     try {
+      const cleanSiret = newSiret.trim();
+      const cleanSiren = cleanSiret.length >= 9 ? cleanSiret.slice(0, 9) : undefined;
+      const cleanVat = newVatNumber.trim() || (cleanSiret.length === 14 ? computeFrenchVat(cleanSiret) : undefined);
+
       const newClient = await createClient(
         {
           name: newName.trim(),
@@ -136,6 +179,12 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
           email: newEmail.trim(),
           phone: newPhone.trim(),
           address: newAddress.trim(),
+          postal_code: newPostalCode.trim() || undefined,
+          city: newCity.trim() || undefined,
+          country_code: newCountryCode.trim() || 'FR',
+          siret: cleanSiret || undefined,
+          siren: cleanSiren,
+          vat_number: cleanVat,
           notes: newNotes.trim()
         },
         company?.id,
@@ -154,6 +203,13 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
       setNewEmail('');
       setNewPhone('');
       setNewAddress('');
+      setNewPostalCode('');
+      setNewCity('');
+      setNewCountryCode('FR');
+      setNewSiret('');
+      setNewVatNumber('');
+      setSiretStatus('idle');
+      setSiretMsg('');
       setNewNotes('');
       setIsCreateModalOpen(false);
     } catch (err: any) {
@@ -174,7 +230,7 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
     <div className={`relative ${isDropdownOpen ? 'z-[9999]' : 'z-20'} ${className}`}>
       {/* Label and "+ Nouveau client" button */}
       <div className="flex items-center justify-between mb-2">
-        <label className={`text-[11px] uppercase font-bold flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-500'}`}>
+        <label className={`text-[11px] uppercase font-bold flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-700'}`}>
           <Building2 size={14} className={theme === 'dark' ? 'text-indigo-400' : 'text-slate-400'} />
           {label} {required && <span className={theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}>*</span>}
         </label>
@@ -450,17 +506,114 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
 
               <div>
                 <label className="block text-xs font-bold text-slate-800 mb-1">
-                  Adresse postale
+                  Adresse postale (Rue / Voie)
                 </label>
                 <div className="relative">
                   <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={newAddress}
+                    onChange={(e) => setNewAddress(e.target.value)}
+                    placeholder="12 Avenue Montaigne"
+                    className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Code Postal
+                  </label>
+                  <input
+                    type="text"
+                    value={newPostalCode}
+                    onChange={(e) => setNewPostalCode(e.target.value)}
+                    placeholder="75008"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Ville
+                  </label>
+                  <input
+                    type="text"
+                    value={newCity}
+                    onChange={(e) => setNewCity(e.target.value)}
+                    placeholder="Paris"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Pays ISO
+                  </label>
+                  <select
+                    value={newCountryCode}
+                    onChange={(e) => setNewCountryCode(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                  >
+                    <option value="FR">France (FR)</option>
+                    <option value="BE">Belgique (BE)</option>
+                    <option value="CH">Suisse (CH)</option>
+                    <option value="LU">Luxembourg (LU)</option>
+                    <option value="DE">Allemagne (DE)</option>
+                    <option value="IT">Italie (IT)</option>
+                    <option value="ES">Espagne (ES)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Bloc Mentions Légales Facturation Électronique 2026 (PPF / Factur-X) */}
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                    <ShieldCheck size={14} className="text-blue-600" />
+                    <span>Conformité Facturation 2026 (PPF / EN 16931)</span>
+                  </div>
+                  {siretStatus === 'valid' && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 flex items-center gap-1">
+                      <Check size={11} /> Clé Luhn validée
+                    </span>
+                  )}
+                  {siretStatus === 'invalid' && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 flex items-center gap-1">
+                      <AlertCircle size={11} /> {siretMsg}
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Numéro SIRET (14 chiffres)
+                    </label>
                     <input
                       type="text"
-                      value={newAddress}
-                      onChange={(e) => setNewAddress(e.target.value)}
-                      placeholder="12 Avenue Montaigne, 75008 Paris"
-                      className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                      maxLength={14}
+                      value={newSiret}
+                      onChange={(e) => handleSiretChange(e.target.value)}
+                      placeholder="ex: 54205118000017"
+                      className={`w-full px-3 py-2 bg-white border rounded-xl text-xs font-mono font-medium outline-none transition-colors ${
+                        siretStatus === 'valid' ? 'border-emerald-500 focus:ring-emerald-500' :
+                        siretStatus === 'invalid' ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-200 focus:border-blue-600'
+                      }`}
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      N° TVA Intracommunautaire
+                    </label>
+                    <input
+                      type="text"
+                      value={newVatNumber}
+                      onChange={(e) => setNewVatNumber(e.target.value.toUpperCase())}
+                      placeholder="ex: FR59542051180"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -473,6 +626,7 @@ export const ClientSelectWithCreate: React.FC<ClientSelectWithCreateProps> = ({
                   value={newNotes}
                   onChange={(e) => setNewNotes(e.target.value)}
                   placeholder="Notes sur les besoins ou particularités du client..."
+                  className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                 />
               </div>
 

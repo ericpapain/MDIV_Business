@@ -61,6 +61,7 @@ export function SiteFooter() {
             <a href="#">{t("footer.privacy")}</a>
             <a href="#">{t("footer.terms")}</a>
             <Link to="/charte" className="text-gold hover:text-gold-light transition-colors">La Charte BNE</Link>
+            <Link to="/admin" className="text-muted-foreground/60 hover:text-gold transition-colors">Admin</Link>
           </div>
         </div>
       </div>

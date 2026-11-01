@@ -43,8 +43,13 @@ import { useGuestQuota } from '@/hooks/useGuestQuota';
 import { classifyDocumentContent, ClassificationResult } from '@/lib/documentClassifierService';
 import { DocumentMismatchModal } from '@/components/common/DocumentMismatchModal';
 import { hasFeatureAccess } from '@/lib/planLimitsService';
+import { isValidSiret, computeFrenchVat } from '@/lib/validationLuhn';
 
-export default function ServicesIAInvoice() {
+export interface ServicesIAInvoiceProps {
+  initialTab?: 'dashboard' | 'editor' | 'expenses' | 'payments' | 'banking' | 'accounting' | 'pricing';
+}
+
+export default function ServicesIAInvoice({ initialTab: propInitialTab }: ServicesIAInvoiceProps = {}) {
   const { language } = useLanguage();
   const { company, token, isAuthenticated } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -65,7 +70,7 @@ export default function ServicesIAInvoice() {
     recordExecution 
   } = useGuestQuota('invoice');
 
-  const getInitialTab = (): 'dashboard' | 'editor' | 'expenses' | 'payments' | 'banking' | 'accounting' | 'pricing' => {
+  const resolveCurrentTab = (): 'dashboard' | 'editor' | 'expenses' | 'payments' | 'banking' | 'accounting' | 'pricing' => {
     const tab = searchParams.get('tab');
     if (tab === 'pricing' || tab === 'tarifs' || tab === 'tarification') return 'pricing';
     if (tab === 'editor' || tab === 'ventes') return 'editor';
@@ -73,20 +78,41 @@ export default function ServicesIAInvoice() {
     if (tab === 'payments' || tab === 'transactions') return 'payments';
     if (tab === 'banking' || tab === 'tresorerie') return 'banking';
     if (tab === 'accounting' || tab === 'comptabilite') return 'accounting';
+    if (tab === 'dashboard' || tab === 'accueil') return 'dashboard';
+
+    if (propInitialTab) return propInitialTab;
+
+    // Aiguillage automatique basé sur le paramètre ?view= du Dashboard
+    const view = searchParams.get('view');
+    if (view === 'paiements') return 'banking';
+    if (view === 'expenses' || view === 'achats') return 'expenses';
+    if (view === 'facturation') return 'editor';
+    if (view === 'efacture') return 'pricing';
+    if (view === 'rentabilite' || view === 'factures') return 'dashboard';
+
     return 'dashboard';
   };
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'editor' | 'expenses' | 'payments' | 'banking' | 'accounting' | 'pricing'>(getInitialTab);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'editor' | 'expenses' | 'payments' | 'banking' | 'accounting' | 'pricing'>(resolveCurrentTab);
 
   useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab === 'pricing' || tab === 'tarifs' || tab === 'tarification') setActiveTab('pricing');
-    else if (tab === 'editor' || tab === 'ventes') setActiveTab('editor');
-    else if (tab === 'expenses' || tab === 'achats') setActiveTab('expenses');
-    else if (tab === 'payments' || tab === 'transactions') setActiveTab('payments');
-    else if (tab === 'banking' || tab === 'tresorerie') setActiveTab('banking');
-    else if (tab === 'accounting' || tab === 'comptabilite') setActiveTab('accounting');
-  }, [searchParams]);
+    setActiveTab(resolveCurrentTab());
+  }, [searchParams, propInitialTab]);
+
+  const handleTabChange = (newTab: 'dashboard' | 'editor' | 'expenses' | 'payments' | 'banking' | 'accounting' | 'pricing') => {
+    setActiveTab(newTab);
+    const viewMap: Record<string, string> = {
+      dashboard: 'factures',
+      editor: 'facturation',
+      expenses: 'expenses',
+      banking: 'paiements',
+      payments: 'paiements',
+      accounting: 'factures',
+      pricing: 'efacture',
+    };
+    const correspondingView = viewMap[newTab] || 'facturation';
+    setSearchParams({ view: correspondingView, tab: newTab });
+  };
 
   // Factur-X State
   const [facturXResult, setFacturXResult] = useState<FacturXGenerationResult | null>(null);
@@ -95,11 +121,11 @@ export default function ServicesIAInvoice() {
   const [downpaymentPercent, setDownpaymentPercent] = useState<number>(30);
   const [situationProgress, setSituationProgress] = useState<number>(50);
 
-  // Anti-Fraud IBAN State
-  const [testIban, setTestIban] = useState<string>('FR7630006000011234567890189');
-  const [ibanSupplierName, setIbanSupplierName] = useState<string>('Fournisseur Partenaire SAS');
-  const [ibanSiret, setIbanSiret] = useState<string>('55204487000120');
-  const [ibanAmount, setIbanAmount] = useState<number>(1420.00);
+  // Anti-Fraud IBAN State (Initialisé à vide - Zéro donnée mockée)
+  const [testIban, setTestIban] = useState<string>('');
+  const [ibanSupplierName, setIbanSupplierName] = useState<string>('');
+  const [ibanSiret, setIbanSiret] = useState<string>('');
+  const [ibanAmount, setIbanAmount] = useState<number>(0);
   const [ibanCheckResult, setIbanCheckResult] = useState<IbanSecurityCheckResult | null>(null);
   const [isCheckingIban, setIsCheckingIban] = useState(false);
 
@@ -186,6 +212,8 @@ export default function ServicesIAInvoice() {
   const [issueDate, setIssueDate] = useState(new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState('');
   const [downpayment, setDownpayment] = useState(0);
+  const [operationNature, setOperationNature] = useState<'services' | 'goods' | 'mixed'>('services');
+  const [vatPaymentOnDebit, setVatPaymentOnDebit] = useState<boolean>(false);
 
   // Sauvegarde & Authentification
   const [isSavingInvoice, setIsSavingInvoice] = useState(false);
@@ -413,6 +441,8 @@ export default function ServicesIAInvoice() {
         clientName: selectedClient ? (selectedClient.company || selectedClient.name) : 'Client Partenaire',
         date: issueDate,
         dueDate: dueDate || issueDate,
+        operation_nature: operationNature,
+        vat_payment_on_debit: vatPaymentOnDebit,
         amountHT: totals.totalHT,
         amountTTC: finalToPay,
         downpayment,
@@ -483,24 +513,60 @@ export default function ServicesIAInvoice() {
   const handleGenerateFacturX = async () => {
     if (!checkCanExecute()) return;
 
+    const selectedClient = clients.find(c => String(c.id) === String(selectedClientId));
+    if (!selectedClient) {
+      toast.error("Veuillez sélectionner un client associé pour générer la facture électronique.");
+      return;
+    }
+
+    const cleanSiret = (selectedClient.siret || '').replace(/\s+/g, '');
+    if (!cleanSiret) {
+      toast.error(`Le client "${selectedClient.company || selectedClient.name}" ne dispose pas d'un numéro SIRET. Le SIRET est obligatoire pour la réforme 2026.`);
+      return;
+    }
+
+    if (!isValidSiret(cleanSiret)) {
+      toast.error(`Le SIRET "${cleanSiret}" du client est non conforme à l'algorithme officiel de Luhn.`);
+      return;
+    }
+
+    const buyerVat = selectedClient.vat_number?.trim() || computeFrenchVat(cleanSiret);
+
     setIsGeneratingFacturX(true);
     try {
-      const selectedClient = clients.find(c => String(c.id) === String(selectedClientId));
       const res = await generateFacturX({
         invoiceNumber,
-        clientName: selectedClient ? (selectedClient.company || selectedClient.name) : 'Client B2B',
-        buyerSiret: selectedClient?.siret || '80123456700019',
-        buyerVat: 'FR44801234567',
+        companyId: company?.id,
+        sellerName: company?.company_name || 'MDIV Business Solutions',
+        sellerSiret: company?.siret || company?.siren || '',
+        sellerVat: company?.vat_number || (company?.siren ? computeFrenchVat(company.siren) : ''),
+        sellerAddress: company?.address || '',
+        sellerCity: company?.city || '',
+        sellerPostalCode: company?.postal_code || '',
+        clientName: selectedClient.company || selectedClient.name,
+        buyerSiret: cleanSiret,
+        buyerVat: buyerVat,
+        buyerCountry: selectedClient.country_code || 'FR',
+        buyerCity: selectedClient.city || '',
+        buyerPostalCode: selectedClient.postal_code || '',
+        buyerAddress: selectedClient.address || '',
         date: issueDate,
         dueDate: dueDate || issueDate,
+        operationNature,
+        vatPaymentOnDebit,
         totalHT: totals.totalHT,
         totalVAT: totals.totalVAT,
         totalTTC: finalToPay,
-        lines: lines.map(l => ({
+        currency: 'EUR',
+        lines: lines.map((l, idx) => ({
+          lineNumber: idx + 1,
           description: l.description,
           quantity: l.quantity,
+          unitCode: (l as any).unitCode || 'H87',
           unitPriceHT: l.unitPriceHT,
-          vatRate: l.vatRate
+          vatRate: l.vatRate,
+          vatCategoryCode: l.vatRate === 0 ? 'E' : 'S',
+          vatExemptionReason: l.vatRate === 0 ? ((l as any).vatExemptionReason || 'Franchise en base de TVA, art. 293 B du CGI') : undefined
         })),
         pdp_status: 'DEPOSITED'
       });
@@ -515,13 +581,17 @@ export default function ServicesIAInvoice() {
   };
 
   const handleVerifyIban = async () => {
+    if (!testIban.trim()) {
+      toast.error("Veuillez saisir un numéro IBAN à contrôler.");
+      return;
+    }
     setIsCheckingIban(true);
     try {
       const res = await verifySupplierIban({
-        iban: testIban,
-        supplierName: ibanSupplierName,
-        supplierSiret: ibanSiret,
-        amountTTC: ibanAmount,
+        iban: testIban.trim(),
+        supplierName: ibanSupplierName.trim() || undefined,
+        supplierSiret: ibanSiret.trim() || undefined,
+        amountTTC: ibanAmount || undefined,
         companyId: company?.id
       });
       setIbanCheckResult(res);
@@ -542,13 +612,25 @@ export default function ServicesIAInvoice() {
       toast.error("Veuillez sélectionner au moins une facture fournisseur à payer.");
       return;
     }
+    const debtorIban = (company?.iban || '').replace(/\s+/g, '');
+    if (!debtorIban) {
+      toast.error("Veuillez configurer l'IBAN de votre entreprise dans vos paramètres avant d'émettre un virement SEPA.");
+      return;
+    }
+
+    const toPay = expenses.filter(e => selectedExpenseIds.includes(e.id));
+    const missingIbanExp = toPay.find(e => !e.iban || !e.iban.trim());
+    if (missingIbanExp) {
+      toast.error(`L'IBAN du fournisseur "${missingIbanExp.merchant || missingIbanExp.supplier || 'Fournisseur'}" est manquant.`);
+      return;
+    }
+
     setIsPayingSepa(true);
     try {
-      const toPay = expenses.filter(e => selectedExpenseIds.includes(e.id));
       const transfers = toPay.map(e => ({
         expenseId: e.id,
         creditorName: e.merchant || e.supplier || 'Fournisseur',
-        creditorIban: e.iban || 'FR7630006000011234567890189',
+        creditorIban: e.iban!.replace(/\s+/g, ''),
         amount: Number(e.amount_ttc || e.total_ttc || 0),
         invoiceReference: e.invoice_number || e.id
       }));
@@ -556,8 +638,8 @@ export default function ServicesIAInvoice() {
       const res = await executeSepaPayment({
         companyId: company?.id,
         debtorName: company?.company_name || 'MDIV Business Solutions',
-        debtorIban: 'FR7630006000011234567890189',
-        debtorBic: 'AGRIFRPP882',
+        debtorIban,
+        debtorBic: company?.bic || '',
         transfers
       });
       setSepaOrderSuccess(res);
@@ -586,153 +668,76 @@ export default function ServicesIAInvoice() {
 
   return (
     <>
-      <div className="ia-page min-h-screen pt-32 pb-8 bg-slate-100/80">
-      <div className="max-w-[1500px] mx-auto px-2 sm:px-4 min-h-[calc(100vh-10.5rem)] lg:h-[calc(100vh-10.5rem)]">
+      <div className="ia-page min-h-screen pt-20 pb-8 bg-slate-100/80">
+      <div className="max-w-[1500px] mx-auto px-2 sm:px-4 min-h-[calc(100vh-7.5rem)] lg:h-[calc(100vh-7.5rem)]">
         
-        <div className="flex flex-col lg:flex-row w-full h-full bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-200">
+        <div className="flex flex-col w-full h-full bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-200">
           
-          {/* Barre de Navigation Mobile Horizontale */}
-          <div className="flex lg:hidden overflow-x-auto no-scrollbar gap-1.5 p-2.5 bg-slate-50 border-b border-slate-200 whitespace-nowrap">
+          {/* Barre de Navigation Horizontale (Mobile & Desktop) */}
+          <div className="flex overflow-x-auto no-scrollbar gap-1.5 p-2.5 bg-slate-50 border-b border-slate-200 whitespace-nowrap shrink-0">
             <button
-              onClick={() => setActiveTab('dashboard')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
-                activeTab === 'dashboard' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              type="button"
+              onClick={() => handleTabChange('dashboard')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer ${
+                activeTab === 'dashboard' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
               }`}
             >
-              <LayoutDashboard size={14} /> Accueil
+              <LayoutDashboard size={14} /> Accueil & KPIs
             </button>
             <button
-              onClick={() => setActiveTab('editor')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
-                activeTab === 'editor' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              type="button"
+              onClick={() => handleTabChange('editor')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer ${
+                activeTab === 'editor' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
               }`}
             >
-              <ArrowUpRight size={14} /> Ventes
+              <ArrowUpRight size={14} /> Éditeur Facture
             </button>
             <button
-              onClick={() => setActiveTab('expenses')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
-                activeTab === 'expenses' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              type="button"
+              onClick={() => handleTabChange('expenses')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer ${
+                activeTab === 'expenses' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
               }`}
             >
-              <ArrowDownRight size={14} /> Achats
+              <ArrowDownRight size={14} /> Achats & Reçus
             </button>
             <button
-              onClick={() => setActiveTab('banking')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
-                activeTab === 'banking' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              type="button"
+              onClick={() => handleTabChange('banking')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer ${
+                activeTab === 'banking' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
               }`}
             >
               <Landmark size={14} /> Trésorerie
             </button>
             <button
-              onClick={() => setActiveTab('payments')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
-                activeTab === 'payments' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              type="button"
+              onClick={() => handleTabChange('payments')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer ${
+                activeTab === 'payments' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
               }`}
             >
-              <RefreshCw size={14} /> Transactions
+              <RefreshCw size={14} /> Virements SEPA
             </button>
             <button
-              onClick={() => setActiveTab('accounting')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
-                activeTab === 'accounting' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200'
+              type="button"
+              onClick={() => handleTabChange('accounting')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer ${
+                activeTab === 'accounting' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
               }`}
             >
-              <BookOpen size={14} /> Comptabilité
+              <BookOpen size={14} /> Comptabilité FEC
             </button>
             <button
-              onClick={() => setActiveTab('pricing')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors ${
-                activeTab === 'pricing' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-blue-700 border border-blue-200'
+              type="button"
+              onClick={() => handleTabChange('pricing')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer ${
+                activeTab === 'pricing' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-50'
               }`}
             >
-              <TagIcon size={14} /> Tarifs 2026
+              <TagIcon size={14} /> Conformité 2026
             </button>
-          </div>
-
-          {/* Sidebar Desktop */}
-          <div className="hidden lg:flex w-64 bg-slate-50/50 border-r border-slate-200 flex-col shrink-0">
-            <div className="p-5">
-              <div onClick={() => setIsProfileModalOpen(true)} className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50 transition-colors">
-                 <div className="flex items-center gap-2">
-                   <div className="w-8 h-8 rounded-lg bg-amber-400 text-amber-900 flex items-center justify-center font-bold text-sm">
-                     {company?.name ? company.name.charAt(0).toUpperCase() : 'M'}
-                   </div>
-                   <div className="flex flex-col overflow-hidden">
-                     <span className="text-sm font-bold text-slate-900 truncate max-w-[110px]">{company?.name || 'Mon Entreprise'}</span>
-                     <span className="text-[10px] text-slate-500 truncate max-w-[110px]">{company?.email || 'contact@entreprise.com'}</span>
-                   </div>
-                 </div>
-                 <ChevronDown size={14} className="text-slate-400" />
-              </div>
-            </div>
-            
-            <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-               <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'dashboard' ? 'bg-white shadow-sm border border-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100'}`}>
-                  <div className="flex items-center gap-3"><LayoutDashboard size={18} className={activeTab === 'dashboard' ? 'text-slate-900' : 'text-slate-400'} /> Accueil</div>
-               </button>
-               
-               <div className="pt-2 pb-1">
-                  <button onClick={() => setActiveTab('editor')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'editor' ? 'text-blue-700' : 'text-slate-600 hover:bg-slate-100'}`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`p-1 rounded-md ${activeTab === 'editor' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}><ArrowUpRight size={14} strokeWidth={3} /></div>
-                      Ventes
-                    </div>
-                    <ChevronDown size={14} className={activeTab === 'editor' ? 'text-blue-600' : 'text-slate-400'} />
-                  </button>
-                  {activeTab === 'editor' && (
-                    <div className="ml-5 mt-1 border-l-2 border-slate-200 pl-3 py-1 space-y-1">
-                       <div className="px-3 py-2 bg-slate-200/60 rounded-lg text-sm font-bold text-slate-900">Factures</div>
-                    </div>
-                  )}
-               </div>
-
-               <div className="pt-1 pb-1">
-                  <button onClick={() => setActiveTab('expenses')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'expenses' ? 'text-blue-700' : 'text-slate-600 hover:bg-slate-100'}`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`p-1 rounded-md ${activeTab === 'expenses' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}><ArrowDownRight size={14} strokeWidth={3} /></div>
-                      Achats
-                    </div>
-                    <ChevronDown size={14} className={activeTab === 'expenses' ? 'text-blue-600' : 'text-slate-400'} />
-                  </button>
-                  {activeTab === 'expenses' && (
-                    <div className="ml-5 mt-1 border-l-2 border-slate-200 pl-3 py-1 space-y-1">
-                       <div className="px-3 py-2 bg-slate-200/60 rounded-lg text-sm font-bold text-slate-900">Dépenses fournisseurs</div>
-                    </div>
-                  )}
-               </div>
-
-               <button onClick={() => setActiveTab('banking')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'banking' ? 'bg-white shadow-sm border border-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100'}`}>
-                  <div className="flex items-center gap-3"><Landmark size={18} className={activeTab === 'banking' ? 'text-slate-900' : 'text-slate-400'} /> Suivi de trésorerie</div>
-                  <ChevronDown size={14} className="text-slate-400 opacity-50" />
-               </button>
-               
-               <button onClick={() => setActiveTab('payments')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'payments' ? 'bg-white shadow-sm border border-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100'}`}>
-                  <div className="flex items-center gap-3"><RefreshCw size={18} className={activeTab === 'payments' ? 'text-slate-900' : 'text-slate-400'} /> Transactions</div>
-               </button>
-
-               <button onClick={() => setActiveTab('accounting')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'accounting' ? 'bg-white shadow-sm border border-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100'}`}>
-                  <div className="flex items-center gap-3"><BookOpen size={18} className={activeTab === 'accounting' ? 'text-slate-900' : 'text-slate-400'} /> Comptabilité</div>
-                  <ChevronDown size={14} className="text-slate-400 opacity-50" />
-               </button>
-
-                <button onClick={() => setActiveTab('pricing')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${activeTab === 'pricing' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-slate-600 hover:bg-slate-100'}`}>
-                   <div className="flex items-center gap-3"><TagIcon size={18} className={activeTab === 'pricing' ? 'text-white' : 'text-slate-400'} /> Grille Tarifaire & Modules</div>
-                   <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold ${activeTab === 'pricing' ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-600'}`}>2026</span>
-                </button>
-
-               
-               <button onClick={() => {}} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors text-slate-600 hover:bg-slate-100`}>
-                  <div className="flex items-center gap-3"><FolderGit2 size={18} className="text-slate-400" /> Documents</div>
-               </button>
-            </nav>
-            
-            <div className="p-4 mt-auto border-t border-slate-200">
-              <Link to="/services-ia" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors">
-                <ArrowLeft size={18} /> Quitter
-              </Link>
-            </div>
           </div>
 
           {/* Main Content Area */}
@@ -754,19 +759,19 @@ export default function ServicesIAInvoice() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <div className="ia-card bg-white p-6 border border-slate-200 flex flex-col justify-center">
                     <div className="text-sm font-bold text-slate-500 mb-1 flex items-center gap-2"><CreditCard size={16} className="text-blue-500"/> CA Émis (Année)</div>
-                    <div className="text-2xl font-bold text-slate-900">{kpis?.totalIssued.toLocaleString()} €</div>
+                    <div className="text-2xl font-bold text-slate-900">{(Number(kpis?.totalIssued) || 0).toLocaleString('fr-FR')} €</div>
                   </div>
                   <div className="ia-card bg-white p-6 border border-slate-200 flex flex-col justify-center">
                     <div className="text-sm font-bold text-emerald-600 mb-1 flex items-center gap-2"><CheckCircle2 size={16} /> Encaissé</div>
-                    <div className="text-2xl font-bold text-slate-900">{kpis?.totalPaid.toLocaleString()} €</div>
+                    <div className="text-2xl font-bold text-slate-900">{(Number(kpis?.totalPaid) || 0).toLocaleString('fr-FR')} €</div>
                   </div>
                   <div className="ia-card bg-white p-6 border border-slate-200 flex flex-col justify-center">
                     <div className="text-sm font-bold text-amber-600 mb-1 flex items-center gap-2"><Clock size={16} /> En attente</div>
-                    <div className="text-2xl font-bold text-slate-900">{kpis?.totalPending.toLocaleString()} €</div>
+                    <div className="text-2xl font-bold text-slate-900">{(Number(kpis?.totalPending) || 0).toLocaleString('fr-FR')} €</div>
                   </div>
                   <div className="ia-card bg-white p-6 border border-red-200 bg-red-50/30 flex flex-col justify-center">
                     <div className="text-sm font-bold text-red-600 mb-1 flex items-center gap-2"><FileWarning size={16} /> En retard</div>
-                    <div className="text-2xl font-bold text-red-700">{kpis?.totalOverdue.toLocaleString()} €</div>
+                    <div className="text-2xl font-bold text-red-700">{(Number(kpis?.totalOverdue) || 0).toLocaleString('fr-FR')} €</div>
                   </div>
                 </div>
 
@@ -777,9 +782,9 @@ export default function ServicesIAInvoice() {
                        type="button"
                        onClick={() => {
                          handleCancelEdit();
-                         setActiveTab('editor');
+                         handleTabChange('editor');
                        }}
-                       className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                       className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                      >
                        <Plus size={14} /> Nouvelle Facture
                      </button>
@@ -793,9 +798,9 @@ export default function ServicesIAInvoice() {
                          type="button"
                          onClick={() => {
                            handleCancelEdit();
-                           setActiveTab('editor');
+                           handleTabChange('editor');
                          }}
-                         className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center gap-2 shadow-md shadow-blue-500/20"
+                         className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center gap-2 shadow-md shadow-blue-500/20 cursor-pointer"
                        >
                          <Plus size={14} /> Créer une facture maintenant
                        </button>
@@ -819,7 +824,7 @@ export default function ServicesIAInvoice() {
                                <td className="px-6 py-4 font-bold text-slate-900">{inv.invoiceNumber}</td>
                                <td className="px-6 py-4">{inv.clientName}</td>
                                <td className="px-6 py-4">{inv.date}</td>
-                               <td className="px-6 py-4 font-bold">{inv.amountTTC.toLocaleString()} €</td>
+                               <td className="px-6 py-4 font-bold">{(Number(inv.amountTTC) || 0).toLocaleString('fr-FR')} €</td>
                                <td className="px-6 py-4">
                                  {inv.status === 'paid' && <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase">Payée</span>}
                                  {inv.status === 'pending' && <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold uppercase">En attente</span>}
@@ -964,7 +969,7 @@ export default function ServicesIAInvoice() {
               <div className="ia-card bg-white p-6 border border-slate-200 relative z-30 overflow-visible">
                 {/* Type de Facture Kolecto */}
                 <div className="mb-5 pb-5 border-b border-slate-100">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">
                     Modèle & Type de Facture
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -1053,6 +1058,41 @@ export default function ServicesIAInvoice() {
                    </div>
                 </div>
 
+                {/* Mentions Réglementaires Facturation Électronique 2026 (PPF & PDP) */}
+                <div className="grid md:grid-cols-2 gap-4 p-4 mb-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                      <ShieldCheck size={14} className="text-blue-600" />
+                      Nature de l'opération (Norme PPF 2026)
+                    </label>
+                    <select
+                      value={operationNature}
+                      onChange={(e) => setOperationNature(e.target.value as any)}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 outline-none focus:border-blue-600"
+                    >
+                      <option value="services">Prestation de services</option>
+                      <option value="goods">Livraison de biens</option>
+                      <option value="mixed">Opération mixte (Biens et Services)</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col justify-center">
+                    <label className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                      <CheckCircle2 size={14} className="text-emerald-600" />
+                      Régime de taxe sur les débits (CGI)
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 bg-white p-2 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={vatPaymentOnDebit}
+                        onChange={(e) => setVatPaymentOnDebit(e.target.checked)}
+                        className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                      />
+                      <span>Option pour le paiement de la taxe d'après les débits</span>
+                    </label>
+                  </div>
+                </div>
+
                 <div className="border-t border-slate-100 pt-4">
                   <ClientSelectWithCreate
                     selectedClientId={selectedClientId}
@@ -1132,10 +1172,28 @@ export default function ServicesIAInvoice() {
                              <option value={20}>20%</option>
                              <option value={10}>10%</option>
                              <option value={5.5}>5.5%</option>
-                             <option value={0}>0%</option>
+                             <option value={0}>0% (Exonération)</option>
                            </select>
                         </div>
                       </div>
+
+                      {line.vatRate === 0 && (
+                        <div className="mt-3 p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-xs space-y-1">
+                          <label className="block font-bold text-amber-900">
+                            Motif légal d'exonération de TVA (Obligatoire Norme EN 16931) :
+                          </label>
+                          <select
+                            value={(line as any).vatExemptionReason || 'Franchise en base de TVA, art. 293 B du CGI'}
+                            onChange={(e) => updateLine(line.id, 'vatExemptionReason' as any, e.target.value)}
+                            className="w-full bg-white border border-amber-300 rounded-lg px-2.5 py-1.5 text-xs font-medium text-amber-950 outline-none"
+                          >
+                            <option value="Franchise en base de TVA, art. 293 B du CGI">Franchise en base de TVA, art. 293 B du CGI (Micro-entreprise)</option>
+                            <option value="Exonération de TVA, art. 262 ter I du CGI">Exonération de TVA, art. 262 ter I du CGI (Livraison intracommunautaire UE)</option>
+                            <option value="Autoliquidation de la TVA, art. 283-2 du CGI">Autoliquidation de la TVA, art. 283-2 du CGI (Sous-traitance BTP / Prestation UE)</option>
+                            <option value="Exonération de TVA, art. 259 B du CGI">Exonération de TVA, art. 259 B du CGI (Prestation de services hors UE)</option>
+                          </select>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1478,7 +1536,7 @@ export default function ServicesIAInvoice() {
 
               <div className="grid md:grid-cols-4 gap-3 mb-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Fournisseur</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Fournisseur</label>
                   <input
                     type="text"
                     value={ibanSupplierName}
@@ -1488,7 +1546,7 @@ export default function ServicesIAInvoice() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">SIRET</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">SIRET</label>
                   <input
                     type="text"
                     value={ibanSiret}
@@ -1498,7 +1556,7 @@ export default function ServicesIAInvoice() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">IBAN à auditer</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">IBAN à auditer</label>
                   <input
                     type="text"
                     value={testIban}
@@ -1508,7 +1566,7 @@ export default function ServicesIAInvoice() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Montant TTC (€)</label>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Montant TTC (€)</label>
                   <div className="flex gap-2">
                     <input
                       type="number"
@@ -1676,7 +1734,7 @@ export default function ServicesIAInvoice() {
               <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-xs uppercase tracking-wider">
+                    <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs uppercase tracking-wider">
                       <tr>
                         <th className="py-4 px-4 w-10 text-center">
                           <input

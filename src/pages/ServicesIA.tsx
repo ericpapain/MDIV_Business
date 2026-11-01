@@ -1,646 +1,1235 @@
-import { useState, useRef, useEffect } from "react";
-import { Link, useSearchParams, useLocation } from "react-router-dom";
-import { useLanguage } from "@/i18n/LanguageContext";
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { UserProfileModal } from "@/components/auth/UserProfileModal";
-import { EnterpriseAuthBar } from "@/components/site/EnterpriseAuthBar";
-import { iaCategories, iaJourney } from "@/data/servicesIAData";
-import { ArrowRight, Sparkles, Zap, ChevronRight, Star, LayoutGrid, CreditCard, Route, ArrowDown, Search, Target, Users, Rocket, Quote, Cpu, ChevronDown, Settings, FileText, Building2, LogOut, LogIn } from "lucide-react";
-import { motion } from "framer-motion";
-import Countdown from "@/components/ui/Countdown";
-import { FintechPricingTab } from "@/components/fintech/FintechPricingTab";
-
-const AnimatedJourneyWidget = () => {
-  const { language } = useLanguage();
-  const isEn = language === "en";
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentStepIndex((prev) => (prev + 1) % iaJourney.length);
-    }, 4500);
-    return () => clearInterval(timer);
-  }, []);
-
-
-
-  const iconMap: Record<string, any> = { Search, Target, Zap, Users, Rocket };
-  const stepColors = [
-    "hsl(42, 65%, 45%)", // Or foncé
-    "hsl(42, 65%, 45%)",
-    "hsl(42, 65%, 45%)",
-    "hsl(42, 65%, 45%)",
-    "hsl(42, 65%, 45%)"
-  ];
-  const interiorColors = [
-    "hsl(42, 55%, 56%)",   // Gold
-    "hsl(221, 83%, 53%)",  // Blue
-    "hsl(280, 70%, 60%)",  // Purple
-    "hsl(150, 60%, 45%)",  // Green
-    "hsl(350, 70%, 60%)"   // Rose
-  ];
-  const currentColor = stepColors[currentStepIndex];
-
-  return (
-    <div className="w-full">
-      {/* Mobile Journey View: Fluid vertical step cards */}
-      <div className="lg:hidden w-full space-y-3 py-2">
-        <h3 className="text-xl font-bold text-center mb-4 gold-text" style={{ fontFamily: "'Inter', sans-serif" }}>
-          {isEn ? "Your Modular Journey" : "Votre Parcours Modulaire"}
-        </h3>
-        <div className="space-y-2">
-          {iaJourney.map((step, idx) => {
-            const isCurrent = idx === currentStepIndex;
-            return (
-              <div
-                key={step.id}
-                onClick={() => setCurrentStepIndex(idx)}
-                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors bg-slate-900 ${
-                  isCurrent ? 'border-gold/70' : 'border-slate-800'
-                }`}
-              >
-                <div className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-xs font-bold border ${
-                  isCurrent ? 'border-gold text-gold' : 'border-slate-600 text-slate-400'
-                }`}>
-                  {idx + 1}
-                </div>
-                <div className="flex-1 min-w-0 break-words">
-                  <div className="font-semibold text-sm text-white leading-snug">
-                    {isEn ? step.stepEn : step.step}
-                  </div>
-                  <div className="mt-1 text-xs text-slate-400 leading-relaxed">
-                    {isEn ? step.descEn : step.desc}
-                  </div>
-                  {isCurrent && (
-                    <div className="mt-2 text-xs text-gold leading-snug">
-                      {isEn ? step.roiEn : step.roi}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Desktop S-Curve Snake Journey */}
-      <div className="hidden lg:block relative w-full h-[450px] lg:h-[500px] group bg-transparent">
-        <div className="relative z-10 p-2 md:p-4 flex flex-col h-full w-full">
-          <h3 className="text-xl md:text-2xl font-bold text-center mb-6" style={{ color: "hsl(42 55% 56%)", fontFamily: "'Inter', sans-serif" }}>
-            {isEn ? "Your Modular Journey" : "Votre Parcours Modulaire"}
-          </h3>
-          
-          <div className="absolute inset-0 top-16 pointer-events-none">
-            {/* SVG S-Curve (Snaking 3 times) */}
-            <svg className="w-full h-full text-slate-500/30" viewBox="0 0 500 500" preserveAspectRatio="none">
-               {/* Base path */}
-               <path d="M 125 75 L 375 75 A 50 50 0 0 1 375 175 L 125 175 A 50 50 0 0 0 125 275 L 375 275 A 50 50 0 0 1 375 375 L 125 375" fill="none" stroke="currentColor" strokeWidth="4" strokeDasharray="8,8" />
-               {/* Animated active path */}
-               <path 
-                 d="M 125 75 L 375 75 A 50 50 0 0 1 375 175 L 125 175 A 50 50 0 0 0 125 275 L 375 275 A 50 50 0 0 1 375 375 L 125 375" 
-                 fill="none" 
-                 stroke={currentColor}
-                 strokeWidth="4"
-                 strokeLinecap="round"
-                 className="transition-all duration-1000 ease-out"
-                 strokeDasharray="1471"
-                 strokeDashoffset={1471 - [0, 250, 657, 1064, 1471][currentStepIndex]}
-               />
-            </svg>
-
-            {/* Nodes placed over the path */}
-            {iaJourney.map((step, idx) => {
-              const Icon = iconMap[step.icon];
-              const nodesPos = [
-                { left: "25%", top: "15%", align: "left" },
-                { left: "75%", top: "15%", align: "right" },
-                { left: "25%", top: "35%", align: "left" },
-                { left: "75%", top: "55%", align: "right" },
-                { left: "25%", top: "75%", align: "left" },
-              ];
-              const pos = nodesPos[idx];
-              const isActive = idx <= currentStepIndex;
-              const isCurrent = idx === currentStepIndex;
-              const nodeColor = isActive ? stepColors[idx] : "transparent";
-              const interiorColor = isActive ? interiorColors[idx] : "transparent";
-              
-              return (
-                <div 
-                  key={step.id} 
-                  className="absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 transition-all duration-500"
-                  style={{ left: pos.left, top: pos.top }}
-                >
-                  {/* Node Icon - Creative dark/glow design */}
-                  <div 
-                    className={`relative w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center border-[3px] transition-all duration-500 ${
-                      isActive ? 'text-white scale-110' : 'bg-slate-900/80 border-white/10 text-white/30 scale-100 backdrop-blur-md'
-                    }`}
-                    style={{
-                      backgroundColor: isActive ? interiorColor : undefined,
-                      borderColor: isActive ? nodeColor : undefined,
-                      boxShadow: isActive ? `0 0 25px ${interiorColor}80, inset 0 0 10px ${interiorColor}40` : 'none'
-                    }}
-                  >
-                    {Icon && <Icon size={24} className={isCurrent ? "animate-pulse" : ""} style={{ color: isActive ? "white" : undefined }} />}
-                    {isCurrent && (
-                      <div 
-                        className="absolute inset-0 rounded-full animate-ping opacity-30"
-                        style={{ backgroundColor: interiorColor }}
-                      />
-                    )}
-                  </div>
-                  
-                  {/* Tooltip / Text for the step - Placed strictly OUTSIDE the snake loops to never overlap */}
-                  <div className={`absolute w-36 md:w-48 transition-all duration-500 ${pos.align === 'left' ? 'right-full mr-4 md:mr-6 text-right' : 'left-full ml-4 md:ml-6 text-left'} ${isActive ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-2'}`}>
-                    <div className="font-bold text-sm md:text-base leading-tight ia-gradient-text drop-shadow-sm">
-                      {isEn ? step.stepEn : step.step}
-                    </div>
-                    {isCurrent && (
-                      <div className={`mt-2 text-[10px] md:text-xs font-semibold px-3 py-1.5 rounded-md border animate-fade-up shadow-xl inline-block text-white ${pos.align === 'left' ? 'ml-auto' : 'mr-auto'}`} style={{ backgroundColor: interiorColor, borderColor: nodeColor, boxShadow: `0 0 15px ${interiorColor}60` }}>
-                        ROI: {isEn ? step.roiEn : step.roi}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { HeroAppShowcase } from "@/components/services-ia/HeroAppShowcase";
+import { AnimatedStepsSection } from "@/components/services-ia/AnimatedStepsSection";
+import {
+  Check, ArrowRight, ShieldCheck, PhoneCall, Receipt, Users, Megaphone,
+  Calendar, FileText, ChevronDown, ChevronUp, Clock, HelpCircle, X, Sparkles,
+  Wrench, Utensils, Scissors, Car, Store, Briefcase, Camera, Mail
+} from "lucide-react";
+import { toast } from "sonner";
 
 export default function ServicesIA() {
-  const { t, language } = useLanguage();
-  const { company, isAuthenticated, logout } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
-  const isEn = language === "en";
+  const { isAuthenticated, company } = useAuth();
+  const navigate = useNavigate();
 
-  const getInitialTab = () => {
-    const tabParam = searchParams.get('tab') || searchParams.get('section');
-    if (tabParam === 'tarification' || tabParam === 'tarifs' || tabParam === 'pricing' || location.hash === '#tarification' || location.hash === '#tarifs') return 'tarification';
-    if (tabParam === 'parcours' || location.hash === '#parcours') return 'parcours';
-    return 'solutions';
-  };
+  // Onglet sélectionné pour "Tout ce qu'il faut, rangé en 4 coins"
+  const [activeTab, setActiveTab] = useState<number>(0);
+  const toolsSectionRef = useRef<HTMLElement>(null);
+  const [isToolsInView, setIsToolsInView] = useState(false);
+  const [isTabsPaused, setIsTabsPaused] = useState(false);
+  const [tabProgress, setTabProgress] = useState(0);
 
-  const [activeTab, setActiveTab] = useState<string>(getInitialTab);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [modalState, setModalState] = useState<{ isOpen: boolean; tab: 'profile' | 'reports' }>({
-    isOpen: false,
-    tab: 'profile'
-  });
-
-  const tabsRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
+  // Observer de visibilité pour la section des 4 coins
   useEffect(() => {
-    const tabParam = searchParams.get('tab') || searchParams.get('section');
-    if (tabParam === 'tarification' || tabParam === 'tarifs' || tabParam === 'pricing' || location.hash === '#tarification' || location.hash === '#tarifs') {
-      setActiveTab('tarification');
-      setTimeout(() => {
-        tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
-    } else if (tabParam === 'parcours' || location.hash === '#parcours') {
-      setActiveTab('parcours');
-    }
-  }, [searchParams, location.hash]);
+    const el = toolsSectionRef.current;
+    if (!el) return;
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setUserDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        setIsToolsInView(entry.isIntersecting);
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
-  const scrollToTabs = (tab?: string) => {
-    if (tab) {
-      setActiveTab(tab);
-      if (tab === 'tarification') {
-        setSearchParams({ tab: 'tarification' });
-      } else {
-        setSearchParams({});
-      }
-    }
-    setTimeout(() => {
-      tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 80);
+  // Défilement automatique séquentiel des 4 coins (Factures -> Clients -> Notoriété -> Quotidien)
+  useEffect(() => {
+    if (!isToolsInView || isTabsPaused) return;
+
+    const DURATION = 4500; // 4.5 secondes par onglet
+    const INTERVAL = 50; // Mise à jour fluide toutes les 50ms
+    const stepIncrement = (INTERVAL / DURATION) * 100;
+
+    const timer = setInterval(() => {
+      setTabProgress((prev) => {
+        if (prev >= 100) {
+          setActiveTab((curr) => (curr + 1) % 4);
+          return 0;
+        }
+        return prev + stepIncrement;
+      });
+    }, INTERVAL);
+
+    return () => clearInterval(timer);
+  }, [isToolsInView, isTabsPaused, activeTab]);
+
+  const handleTabChange = (tabId: number) => {
+    setActiveTab(tabId);
+    setTabProgress(0);
   };
 
-  const tabs = [
-    {
-      id: 'solutions',
-      label: isEn ? "AI Solutions" : "Solutions IA",
-      icon: LayoutGrid,
-      desc: isEn ? "8 categories of tools" : "8 catégories d'outils",
-    },
-    {
-      id: 'tarification',
-      label: isEn ? "Pricing" : "Tarification",
-      icon: CreditCard,
-      desc: isEn ? "Simple & transparent" : "Simple & transparente",
-    },
-    {
-      id: 'parcours',
-      label: isEn ? "Journey & Story" : "Parcours & Approche",
-      icon: Route,
-      desc: isEn ? "Our vision on AI" : "Notre vision de l'IA",
-    },
-  ];
+  // État de saisie automatique du titre H1 Hero (2 apparitions puis stabilité définitive)
+  const [heroCycle, setHeroCycle] = useState(0);
+  const [isHeroStabilized, setIsHeroStabilized] = useState(false);
+  const [typedLine1, setTypedLine1] = useState("");
+  const [typedLine2, setTypedLine2] = useState("");
+
+  const FULL_LINE_1 = "Moins de tâches administratives.";
+  const FULL_LINE_2 = "Plus de clients.";
+
+  // Saisie animée du titre Hero : 2 passages complets puis stabilité définitive
+  useEffect(() => {
+    if (isHeroStabilized) return;
+
+    // Phase 1 : Frappe de la première ligne
+    if (typedLine1.length < FULL_LINE_1.length) {
+      const timer = setTimeout(() => {
+        setTypedLine1(FULL_LINE_1.slice(0, typedLine1.length + 1));
+      }, 40);
+      return () => clearTimeout(timer);
+    }
+
+    // Phase 2 : Frappe de la deuxième ligne une fois la première complétée
+    if (typedLine2.length < FULL_LINE_2.length) {
+      const timer = setTimeout(() => {
+        setTypedLine2(FULL_LINE_2.slice(0, typedLine2.length + 1));
+      }, 35);
+      return () => clearTimeout(timer);
+    }
+
+    // Phase 3 : Les deux lignes sont complètes pour ce passage
+    const pauseTimer = setTimeout(() => {
+      const nextCycle = heroCycle + 1;
+      if (nextCycle >= 2) {
+        // Après 2 apparitions complètes, stabilité définitive
+        setIsHeroStabilized(true);
+      } else {
+        // Redémarrage pour la 2ème apparition
+        setHeroCycle(nextCycle);
+        setTypedLine1("");
+        setTypedLine2("");
+      }
+    }, 2200);
+
+    return () => clearTimeout(pauseTimer);
+  }, [isHeroStabilized, typedLine1, typedLine2, heroCycle]);
+
+  // État des accordéons FAQ
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  // Modale de rappel conseiller
+  const [isCallbackOpen, setIsCallbackOpen] = useState(false);
+  const [callbackName, setCallbackName] = useState("");
+  const [callbackPhone, setCallbackPhone] = useState("");
+  const [callbackTime, setCallbackTime] = useState("Dès que possible");
+  const [isSubmittingCallback, setIsSubmittingCallback] = useState(false);
+
+  // Modale des tarifs complets
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+
+  // Profil existant si déjà complété
+  const savedProfile = (() => {
+    try {
+      const raw = localStorage.getItem('mdiv_ia_user_profile');
+      if (raw) return JSON.parse(raw);
+    } catch { }
+    return null;
+  })();
+
+  const handleCallbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!callbackName.trim()) {
+      toast.error("Veuillez renseigner votre nom ou votre entreprise.");
+      return;
+    }
+    if (!callbackPhone.trim()) {
+      toast.error("Veuillez renseigner votre numéro de téléphone.");
+      return;
+    }
+
+    setIsSubmittingCallback(true);
+
+    try {
+      // Envoi du mail de rappel à contact@mdiv-network.com via Web3Forms
+      const formPayload = new FormData();
+      formPayload.append("access_key", "19268cb5-9f71-4363-9602-b6ad76d8d85b");
+      formPayload.append("to_email", "contact@mdiv-network.com");
+      formPayload.append("subject", callbackName.trim()); // Motif : le nom
+      formPayload.append("from_name", callbackName.trim());
+      formPayload.append("Nom", callbackName.trim());
+      formPayload.append("Téléphone", callbackPhone.trim());
+      formPayload.append("Créneau", callbackTime);
+      formPayload.append("Message", "je souhaite etre rappellé pour les service IA"); // Message requis
+
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formPayload,
+      });
+
+      const result = await response.json().catch(() => ({ success: true }));
+
+      if (response.ok && result.success !== false) {
+        toast.success(`Votre demande a été transmise à Eric Papain Mezatio (contact@mdiv-network.com). Vous serez rappelé au ${callbackPhone}.`);
+        setIsCallbackOpen(false);
+        setCallbackName("");
+        setCallbackPhone("");
+      } else {
+        toast.success(`Demande enregistrée. Eric Papain Mezatio vous rappellera au ${callbackPhone}.`);
+        setIsCallbackOpen(false);
+        setCallbackName("");
+        setCallbackPhone("");
+      }
+    } catch {
+      toast.success(`Demande enregistrée. Eric Papain Mezatio vous rappellera au ${callbackPhone}.`);
+      setIsCallbackOpen(false);
+      setCallbackName("");
+      setCallbackPhone("");
+    } finally {
+      setIsSubmittingCallback(false);
+    }
+  };
 
   return (
-    <div className="ia-page min-h-screen">
-      {/* HERO — asymmetric layout */}
-      <section className="relative pt-12 pb-8 lg:pt-16 lg:pb-10 overflow-hidden">
-        <div className="absolute inset-0 ia-gradient-hero-subtle" />
-        {/* Decorative shapes — unique to M.DIV */}
-        <div className="absolute top-12 right-[10%] w-72 h-72 rounded-full opacity-[0.07] blur-[80px]" style={{ background: "radial-gradient(circle, hsl(42 55% 56%), transparent 70%)" }} />
-        <div className="absolute -bottom-20 left-[5%] w-96 h-96 rounded-full opacity-[0.05] blur-[100px]" style={{ background: "radial-gradient(circle, hsl(221 83% 53%), transparent 70%)" }} />
-        {/* Subtle gold line at top */}
-        <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, transparent 10%, hsl(42 55% 56% / 0.4) 50%, transparent 90%)" }} />
+    <div className="min-h-screen bg-[#F6F3EE] text-[#14213D] font-sans">
 
-        <div className="w-full max-w-[1400px] mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-[40%_60%] gap-10 lg:gap-16 items-center">
-            {/* Left: Text */}
-            <div className="relative z-20">
-              <div className="hidden items-center gap-2 px-4 py-2 rounded-lg mb-5 text-xs font-semibold uppercase tracking-wider" style={{ background: "hsl(42 55% 56% / 0.1)", color: "hsl(42 55% 56%)", border: "1px solid hsl(42 55% 56% / 0.25)", display: "inline-flex" }}>
-                <Sparkles size={13} /> M.DIV · AI Platform
-              </div>
+      {/* ========================================================================= */}
+      {/* 1. HEADER SERVICES IA                                                     */}
+      {/* ========================================================================= */}
+      <header className="bg-white/95 backdrop-blur-md border-b border-[#E3DED4] sticky top-0 z-40 shadow-xs transition-all">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-4">
 
-              <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold tracking-tight leading-[1.15] mb-5" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {isEn ? (
-                  <>Intelligent tools,<br /><span className="ia-gradient-text">tailored</span> to your business</>
-                ) : (
-                  <>Des outils intelligents,<br /><span className="ia-gradient-text">taillés</span> pour votre activité</>
-                )}
-              </h1>
+          {/* Logo IT4WORK */}
+          <Link to="/services-ia" className="flex items-center gap-2.5 text-[#14213D] text-decoration-none group" title="IT4WORK Innovation">
+            <img
+              src="/IT4ALL.jpeg"
+              alt="IT4WORK Innovation"
+              className="h-14 sm:h-18 md:h-20 w-auto rounded-lg object-contain mix-blend-multiply group-hover:scale-105 transition-transform"
+            />
+          </Link>
 
-              <p className="text-base md:text-lg max-w-lg mb-7 leading-relaxed" style={{ color: "#334155" }}>
-                {isEn
-                  ? "Save time, automate your tasks and grow your business with AI solutions accessible to SMBs, startups and entrepreneurs."
-                  : "Gagnez du temps, automatisez vos tâches et développez votre activité grâce à des solutions IA accessibles aux PME, TPE, startups et entreprises."}
-              </p>
+          {/* Navigation interne */}
+          <nav aria-label="Menu principal" className="hidden lg:flex items-center gap-6 text-base font-semibold text-[#14213D]">
+            <a href="#comment" className="hover:text-[#1C3A6B] transition-colors">Comment ça marche</a>
+            <a href="#outils" className="hover:text-[#1C3A6B] transition-colors">Les outils</a>
+            <a href="#pourqui" className="hover:text-[#1C3A6B] transition-colors">Pour qui ?</a>
+            <a href="#tarifs" className="hover:text-[#1C3A6B] transition-colors">Tarifs</a>
+            <a href="#questions" className="hover:text-[#1C3A6B] transition-colors">Vos questions</a>
+          </nav>
 
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button onClick={() => scrollToTabs('solutions')} className="ia-btn-primary text-sm px-6 py-3 group">
-                  {isEn ? "Discover the apps" : "Découvrir les applications"}
-                  <ArrowDown size={14} className="group-hover:translate-y-1 transition-transform" />
-                </button>
-                <Link to="/services-ia/diagnostic" className="ia-btn-secondary text-sm px-6 py-3">
-                  {isEn ? "Free AI diagnostic" : "Diagnostic gratuit"}
-                  <Zap size={14} />
-                </Link>
-              </div>
-            </div>
+          {/* Boutons d'action */}
+          <div className="flex items-center gap-3">
+            {isAuthenticated ? (
+              <Link
+                to="/services-ia/dashboard"
+                className="text-[#1C3A6B] font-bold text-sm px-3.5 py-2 hover:underline"
+              >
+                Mon espace
+              </Link>
+            ) : (
+              <Link
+                to="/services-ia/diagnostic/login"
+                className="text-[#1C3A6B] font-bold text-sm px-3.5 py-2 hover:underline"
+              >
+                Connectez-vous
+              </Link>
+            )}
 
-            {/* Right: Interactive Journey Animation */}
-            <div className="hidden lg:flex items-center justify-center w-full min-w-[350px] relative z-20">
-              <AnimatedJourneyWidget />
+            <Link
+              to="/services-ia/diagnostic"
+              className="bg-[#1C3A6B] hover:bg-[#142B52] text-white font-bold text-sm px-4 sm:px-5 py-2.5 rounded-xl transition-all shadow-sm text-decoration-none"
+            >
+              Faire mon diagnostic gratuit
+            </Link>
+          </div>
+
+        </div>
+      </header>
+
+      {/* ========================================================================= */}
+      {/* 2. HERO PRINCIPAL                                                         */}
+      {/* ========================================================================= */}
+      <section id="top" className="max-w-[1340px] mx-auto px-4 sm:px-6 py-10 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+
+        {/* Colonne gauche : promesse & CTA */}
+        <div className="lg:col-span-6 xl:col-span-6 flex flex-col items-start">
+
+          <span className="inline-block bg-[#FBEBD9] text-[#8A4510] font-bold text-xs sm:text-sm px-3.5 py-1.5 rounded-full mb-4">
+            Pour les artisans et les indépendants
+          </span>
+
+          <h1 className="text-4xl sm:text-5xl lg:text-[52px] font-extrabold text-[#14213D] leading-[1.1] tracking-tight mb-5 min-h-[5.5rem] sm:min-h-[7rem] lg:min-h-[7.5rem]">
+            {isHeroStabilized ? (
+              <>
+                Moins de tâches administratives.<br />
+                Plus de clients.
+              </>
+            ) : (
+              <>
+                <span className="block">
+                  {typedLine1}
+                  {typedLine1.length < FULL_LINE_1.length && (
+                    <span className="inline-block w-1 h-8 sm:h-10 lg:h-12 bg-[#1C3A6B] ml-1 animate-pulse align-middle" />
+                  )}
+                </span>
+                <span className="block text-[#1C3A6B]">
+                  {typedLine2}
+                  {typedLine1.length === FULL_LINE_1.length && !isHeroStabilized && (
+                    <span className="inline-block w-1 h-8 sm:h-10 lg:h-12 bg-[#1C3A6B] ml-1 animate-pulse align-middle" />
+                  )}
+                </span>
+              </>
+            )}
+          </h1>
+
+          <p className="text-base sm:text-lg text-[#3A4152] leading-relaxed max-w-xl mb-7">
+            Devis, factures, relances, nouveaux clients : un seul espace simple pour gérer votre entreprise, même depuis le chantier. Pas besoin d'être doué en informatique.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-4 mb-5">
+            <Link
+              to="/services-ia/diagnostic"
+              className="inline-flex items-center gap-2.5 bg-[#1C3A6B] hover:bg-[#142B52] text-white font-extrabold text-base sm:text-lg px-7 py-3.5 rounded-xl shadow-md transition-all text-decoration-none group"
+            >
+              <span>Faire mon diagnostic gratuit</span>
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+
+            <a
+              href="#comment"
+              className="font-bold text-sm sm:text-base text-[#1C3A6B] hover:underline px-3 py-2"
+            >
+              Voir comment ça marche
+            </a>
+          </div>
+
+          {/* 3 Garanties immédiates */}
+          <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-[#5A5F6B] font-semibold">
+            <span className="inline-flex items-center gap-1.5">
+              <Check size={16} className="text-[#2E6B45]" strokeWidth={3} />
+              3 minutes
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Check size={16} className="text-[#2E6B45]" strokeWidth={3} />
+              Gratuit
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Check size={16} className="text-[#2E6B45]" strokeWidth={3} />
+              Sans carte bancaire
+            </span>
+          </div>
+
+        </div>
+
+        {/* Colonne droite : Showcase défilant de toutes les applications agrandi */}
+        <div className="lg:col-span-6 xl:col-span-6 w-full">
+          <HeroAppShowcase />
+        </div>
+
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 3. BANDEAU DES 4 ENGAGEMENTS                                              */}
+      {/* ========================================================================= */}
+      <section aria-label="Nos engagements" className="bg-white border-y border-[#E3DED4] py-7">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div className="flex items-start gap-3.5">
+            <Receipt className="text-[#1C3A6B] shrink-0 mt-0.5" size={26} />
+            <div>
+              <div className="font-bold text-sm text-[#14213D]">Prêt pour la facture électronique</div>
+              <div className="text-xs text-[#5A5F6B] mt-0.5">Format Factur-X & portail légal PPF</div>
             </div>
           </div>
 
-          {/* Mobile Interactive Journey Animation */}
-          <div className="flex lg:hidden justify-center mt-10">
-            <AnimatedJourneyWidget />
+          <div className="flex items-start gap-3.5">
+            <ShieldCheck className="text-[#1C3A6B] shrink-0 mt-0.5" size={26} />
+            <div>
+              <div className="font-bold text-sm text-[#14213D]">Vos documents restent à vous</div>
+              <div className="text-xs text-[#5A5F6B] mt-0.5">Visibles par vous seul, hébergés en France/UE</div>
+            </div>
           </div>
+
+          <div className="flex items-start gap-3.5">
+            <PhoneCall className="text-[#1C3A6B] shrink-0 mt-0.5" size={26} />
+            <div>
+              <div className="font-bold text-sm text-[#14213D]">Un vrai conseiller au bout du fil</div>
+              <div className="text-xs text-[#5A5F6B] mt-0.5">Du lundi au vendredi, par téléphone et visio</div>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3.5">
+            <Clock className="text-[#1C3A6B] shrink-0 mt-0.5" size={26} />
+            <div>
+              <div className="font-bold text-sm text-[#14213D]">Sans engagement</div>
+              <div className="text-xs text-[#5A5F6B] mt-0.5">Vous arrêtez quand vous voulez</div>
+            </div>
+          </div>
+
         </div>
       </section>
 
-      {/* ── TAB NAVIGATION — big & prominent ── */}
-      <div ref={tabsRef} className="scroll-mt-24">
-        <section className="container max-w-5xl mx-auto pt-6 pb-4">
-          {/* Decorative gold hairline */}
-          <div className="h-px mb-8" style={{ background: "linear-gradient(90deg, transparent, hsl(42 55% 56% / 0.35), transparent)" }} />
+      {/* ========================================================================= */}
+      {/* 4. COMMENT ÇA MARCHE (3 ÉTAPES)                                           */}
+      {/* ========================================================================= */}
+      <section id="comment" className="max-w-[1200px] mx-auto px-4 sm:px-6 py-16 sm:py-20">
+        <div className="mb-10">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#14213D] tracking-tight mb-2">
+            Comment ça marche ?
+          </h2>
+          <p className="text-base sm:text-lg text-[#3A4152]">
+            Trois étapes, et vous savez exactement ce qui peut vous faire gagner du temps.
+          </p>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
+        {/* Composant animé avec frappe automatique du titre et mise en valeur séquentielle des blocs */}
+        <AnimatedStepsSection />
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 5. TOUT CE QU'IL FAUT, RANGÉ EN 4 COINS                                   */}
+      {/* ========================================================================= */}
+      <section ref={toolsSectionRef} id="outils" className="bg-white border-y border-[#E3DED4] py-16 sm:py-20">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+
+          <div className="mb-8">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#14213D] tracking-tight mb-2">
+              Tout ce qu'il faut, rangé en 4 coins
+            </h2>
+            <p className="text-base sm:text-lg text-[#3A4152]">
+              Choisissez ce qui vous parle. Vous pourrez ajouter le reste plus tard.
+            </p>
+          </div>
+
+          {/* Onglets des 4 coins avec indicateur dynamique de progression */}
+          <div
+            role="tablist"
+            className="flex flex-wrap gap-2.5 mb-8"
+            onMouseEnter={() => setIsTabsPaused(true)}
+            onMouseLeave={() => setIsTabsPaused(false)}
+          >
+            {[
+              { id: 0, label: 'Factures & paiements' },
+              { id: 1, label: 'Trouver des clients' },
+              { id: 2, label: 'Me faire connaître' },
+              { id: 3, label: 'Mon quotidien' }
+            ].map((tab) => {
+              const isSelected = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center gap-4 p-5 rounded-2xl text-left transition-all duration-300 group cursor-pointer ${
-                    isActive
-                      ? "bg-gradient-to-br from-[hsl(221,83%,53%)] to-[hsl(263,70%,50%)] text-foreground shadow-xl shadow-blue-500/20 scale-[1.02]"
-                      : "bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-blue-300 hover:shadow-md"
-                  }`}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`relative overflow-hidden min-h-[46px] px-5 rounded-full font-bold text-sm sm:text-base transition-all duration-300 cursor-pointer select-none ${isSelected
+                      ? "bg-[#1C3A6B] text-white border-2 border-[#1C3A6B] shadow-md ring-2 ring-[#1C3A6B]/20 scale-102"
+                      : "bg-white text-[#14213D] border-2 border-[#C9C2B5] hover:border-slate-500 hover:bg-slate-50"
+                    }`}
                 >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                    isActive
-                      ? "bg-foreground/20"
-                      : "bg-blue-50 text-blue-600 group-hover:bg-blue-100"
-                  }`}>
-                    <Icon size={22} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className={`font-bold text-base mb-0.5 ${isActive ? "text-foreground" : "text-slate-800"}`}>
-                      {tab.label}
-                    </div>
-                    <div className={`text-xs ${isActive ? "text-foreground/70" : "text-muted-foreground"}`}>
-                      {tab.desc}
-                    </div>
-                  </div>
-                  <ChevronRight size={18} className={`shrink-0 transition-transform ${
-                    isActive ? "text-foreground/60 translate-x-0" : "text-muted-foreground -translate-x-1 group-hover:translate-x-0 group-hover:text-blue-400"
-                  }`} />
+                  <span className="relative z-10 flex items-center gap-2">
+                    {tab.label}
+                    {isSelected && (
+                      <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping inline-block" />
+                    )}
+                  </span>
+
+                  {/* Barre de progression temporelle sur l'onglet actif */}
+                  {isSelected && (
+                    <span
+                      className="absolute bottom-0 left-0 h-1 bg-amber-400 transition-all duration-75 ease-linear"
+                      style={{ width: `${Math.min(100, Math.max(0, tabProgress))}%` }}
+                    />
+                  )}
                 </button>
               );
             })}
           </div>
 
-          {/* Small hint below tabs */}
-          <p className="text-center text-xs mt-4" style={{ color: "hsl(215 16% 60%)" }}>
-            {isEn ? "↑ Click a tab to explore each section" : "↑ Cliquez sur un onglet pour explorer chaque section"}
-          </p>
-        </section>
-      </div>
+          {/* Contenu de l'onglet actif avec transition fluide et pause au survol */}
+          <div
+            key={activeTab}
+            onMouseEnter={() => setIsTabsPaused(true)}
+            onMouseLeave={() => setIsTabsPaused(false)}
+            className="bg-[#F6F3EE] rounded-3xl p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center transition-all duration-500 animate-in fade-in-50 slide-in-from-bottom-2"
+          >
 
-      {/* ── SOLUTIONS IA ── */}
-      {activeTab === 'solutions' && (
-      <section id="solutions" className="container max-w-6xl mx-auto py-10 ia-animate-in">
-        <div className="flex items-center gap-4 mb-10">
-          <div className="w-1 h-10 rounded-full ia-gradient-hero" />
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-              {isEn ? "Our AI Solutions" : "Nos Solutions IA"}
-            </h2>
-            <p className="text-sm mt-1" style={{ color: "hsl(215 16% 47%)" }}>
-              {isEn
-                ? "8 categories of tools and services to accelerate your digital transformation."
-                : "8 catégories d'outils et services pour accélérer votre transformation digitale."}
-            </p>
-          </div>
-        </div>
+            {/* ── COIN 1 : FACTURES & PAIEMENTS ── */}
+            {activeTab === 0 && (
+              <>
+                <div className="lg:col-span-7 flex flex-col items-start gap-4 text-left">
+                  <h3 className="font-extrabold text-2xl sm:text-3xl text-[#14213D]">
+                    Factures & paiements
+                  </h3>
+                  <p className="text-base text-[#3A4152] leading-relaxed">
+                    Faites vos papiers en quelques minutes et soyez payé plus vite.
+                  </p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {iaCategories.map((cat, idx) => {
-            const Icon = cat.icon;
-            const freeCount = cat.apps.filter(a => a.tier === "free").length;
-            const premiumCount = cat.apps.filter(a => a.tier === "premium").length;
-            
-            const earliestDateStr = cat.apps.reduce((earliest, app) => {
-              if (app.href || !app.releaseDate) return earliest;
-              if (!earliest) return app.releaseDate;
-              return new Date(app.releaseDate) < new Date(earliest) ? app.releaseDate : earliest;
-            }, undefined as string | undefined);
+                  <ul className="space-y-3 text-sm sm:text-base text-[#14213D] mt-2">
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Un devis propre en 2 minutes, même depuis votre téléphone</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Le devis accepté devient une facture en un clic</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Les clients en retard sont relancés pour vous, poliment</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Photographiez un ticket fournisseur, il est rangé tout seul</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Prêt pour la facture électronique obligatoire 2026 (Factur-X / PPF)</span>
+                    </li>
+                  </ul>
 
-            const hasActiveApps = cat.apps.some(a => !!a.href);
-
-            return (
-              <Link
-                key={cat.id}
-                to={`/services-ia/${cat.slug}`}
-                className={`ia-card relative overflow-hidden p-7 flex flex-col group transition-all duration-300 ${hasActiveApps ? 'hover:shadow-lg hover:border-[hsl(221,83%,53%)]/30' : 'opacity-75 grayscale hover:grayscale-0 hover:opacity-100'}`}
-                style={{ animationDelay: `${idx * 0.06}s` }}
-              >
-                {/* Decorative background icon in bottom right */}
-                <div className="ia-watermark-anim absolute -bottom-6 -right-6 w-32 h-32 group-hover:opacity-[0.08] transition-all pointer-events-none flex items-center justify-center text-slate-800" style={{ animationDelay: `${idx * 0.2}s` }}>
-                  <Icon size={128} />
-                </div>
-                
-                <div className="flex items-start justify-between mb-4 relative z-10">
-                  <div className="w-12 h-12 rounded-xl ia-gradient-hero flex items-center justify-center text-foreground ia-float" style={{ animationDelay: `${idx * 0.5}s` }}>
-                    <Icon size={22} />
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5">
-                    {earliestDateStr ? (
-                      <div className="bg-white/80 backdrop-blur-sm px-2 py-1.5 rounded-lg border border-border shadow-sm">
-                        <Countdown targetDate={earliestDateStr} />
-                      </div>
-                    ) : hasActiveApps ? (
-                      <span className="ia-badge bg-[hsl(221,83%,53%)]/10 text-[hsl(221,83%,53%)] border-[hsl(221,83%,53%)]/20 text-[10px] font-bold">
-                        {isEn ? "Available" : "Disponible"}
-                      </span>
-                    ) : (
-                      <span className="ia-badge bg-slate-100 text-slate-500 border-slate-200 text-[10px] font-bold">
-                        {isEn ? "Coming soon" : "Arrive bientôt"}
-                      </span>
-                    )}
+                  <div className="pt-2">
+                    <Link
+                      to="/services-ia/factures"
+                      className="inline-flex items-center gap-2 bg-[#1C3A6B] hover:bg-[#142B52] text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors"
+                    >
+                      Essayer la facturation Factur-X <ArrowRight size={16} />
+                    </Link>
                   </div>
                 </div>
 
-                <h3 className="font-semibold text-base mb-2 group-hover:text-[hsl(221,83%,53%)] transition-colors relative z-10" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  {isEn ? cat.nameEn : cat.name}
-                </h3>
-                <p className="text-sm mb-4 leading-relaxed flex-1 relative z-10" style={{ color: "hsl(215 16% 47%)" }}>
-                  {isEn ? cat.descEn : cat.desc}
-                </p>
+                {/* Exemple concret */}
+                <div className="lg:col-span-5 bg-white border border-[#E3DED4] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col gap-3 text-xs sm:text-sm text-left">
+                  <div className="font-extrabold text-sm sm:text-base text-slate-900">
+                    Devis n° D-2026-014
+                  </div>
+                  <div className="flex justify-between border-b border-[#E3DED4] pb-2 text-slate-700">
+                    <span>Remplacement chauffe-eau 200 L</span>
+                    <span className="font-bold">1 450,00 €</span>
+                  </div>
+                  <div className="flex justify-between border-b border-[#E3DED4] pb-2 text-slate-700">
+                    <span>Main d'œuvre (4 h)</span>
+                    <span className="font-bold">400,00 €</span>
+                  </div>
+                  <div className="flex justify-between text-base font-extrabold text-slate-900 pt-1">
+                    <span>Total TTC</span>
+                    <span>1 850,00 €</span>
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Link to="/services-ia/factures" className="flex-1 text-center py-2 px-3 rounded-lg bg-[#1C3A6B] text-white font-bold text-xs hover:bg-[#142B52]">
+                      Envoyer au client
+                    </Link>
+                    <Link to="/services-ia/devis" className="flex-1 text-center py-2 px-3 rounded-lg border border-[#C9C2B5] text-slate-800 font-bold text-xs hover:bg-slate-100">
+                      Faire signer
+                    </Link>
+                  </div>
+                </div>
+              </>
+            )}
 
-                <div className="flex items-center gap-3 text-xs mb-4 relative z-10">
-                  <span className="ia-badge ia-badge-free">{freeCount} {isEn ? "Free" : "Gratuit"}</span>
-                  <span className="ia-badge ia-badge-premium">{premiumCount} Premium</span>
+            {/* ── COIN 2 : TROUVER DES CLIENTS ── */}
+            {activeTab === 1 && (
+              <>
+                <div className="lg:col-span-7 flex flex-col items-start gap-4 text-left">
+                  <h3 className="font-extrabold text-2xl sm:text-3xl text-[#14213D]">
+                    Trouver des clients
+                  </h3>
+                  <p className="text-base text-[#3A4152] leading-relaxed">
+                    Remplissez votre carnet de commandes sans y passer vos soirées.
+                  </p>
+
+                  <ul className="space-y-3 text-sm sm:text-base text-[#14213D] mt-2">
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Une liste de clients potentiels près de chez vous</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Des messages de présentation déjà écrits, à votre nom</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Les appels d'offres de votre secteur, expliqués simplement</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Un carnet de clients qui vous rappelle qui recontacter</span>
+                    </li>
+                  </ul>
+
+                  <div className="pt-2">
+                    <Link
+                      to="/services-ia/generateur-leads"
+                      className="inline-flex items-center gap-2 bg-[#1C3A6B] hover:bg-[#142B52] text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors"
+                    >
+                      Voir les opportunités locales <ArrowRight size={16} />
+                    </Link>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-1 text-sm font-semibold text-[hsl(221,83%,53%)] group-hover:gap-2 transition-all mt-auto relative z-10">
-                  {isEn ? "Discover" : "Découvrir"} <ChevronRight size={14} />
+                {/* Exemple concret */}
+                <div className="lg:col-span-5 bg-white border border-[#E3DED4] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col gap-3 text-xs sm:text-sm text-left">
+                  <div className="font-extrabold text-sm sm:text-base text-slate-900">
+                    12 clients potentiels à moins de 20 km
+                  </div>
+                  <div className="flex justify-between items-center border-b border-[#E3DED4] pb-2.5">
+                    <span>Syndic Les Hauts de Seine</span>
+                    <span className="text-[#2E6B45] font-bold">À contacter</span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-[#E3DED4] pb-2.5">
+                    <span>Agence immobilière du Centre</span>
+                    <span className="text-[#2E6B45] font-bold">À contacter</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-1 text-slate-500">
+                    <span>Résidence Le Clos Fleuri</span>
+                    <span>Contacté le 2 oct.</span>
+                  </div>
                 </div>
-              </Link>
-            );
-          })}
-        </div>
+              </>
+            )}
 
-        {/* Decorative separator */}
-        <div className="flex items-center justify-center gap-4 my-6">
-          <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, hsl(221 83% 53% / 0.15), transparent)" }} />
-          <div className="flex items-center gap-2">
-            <Sparkles size={14} style={{ color: "hsl(221 83% 53% / 0.3)" }} />
-            <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: "hsl(215 16% 65%)" }}>{isEn ? "More categories" : "Plus de catégories"}</span>
-            <Sparkles size={14} style={{ color: "hsl(221 83% 53% / 0.3)" }} />
+            {/* ── COIN 3 : ME FAIRE CONNAÎTRE ── */}
+            {activeTab === 2 && (
+              <>
+                <div className="lg:col-span-7 flex flex-col items-start gap-4 text-left">
+                  <h3 className="font-extrabold text-2xl sm:text-3xl text-[#14213D]">
+                    Me faire connaître
+                  </h3>
+                  <p className="text-base text-[#3A4152] leading-relaxed">
+                    Montrez votre travail sans devenir community manager.
+                  </p>
+
+                  <ul className="space-y-3 text-sm sm:text-base text-[#14213D] mt-2">
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Une photo de chantier devient un post Facebook ou Instagram</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Refonte de votre site web : une vitrine moderne sur mobile qui transforme les visites en appels et devis</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Des réponses toutes prêtes aux avis Google</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Une plaquette ou une présentation pour vos rendez-vous</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Être le 1er artisan visible sur Google dans votre ville</span>
+                    </li>
+                  </ul>
+
+                  <div className="pt-2">
+                    <Link
+                      to="/services-ia/generateur-contenu"
+                      className="inline-flex items-center gap-2 bg-[#1C3A6B] hover:bg-[#142B52] text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors"
+                    >
+                      Créer un post chantier en 1 clic <ArrowRight size={16} />
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Exemple concret */}
+                <div className="lg:col-span-5 bg-white border border-[#E3DED4] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col gap-3 text-xs sm:text-sm text-left">
+                  <div className="h-32 rounded-xl bg-[#E8E2D6] flex items-center justify-center text-slate-500 font-bold">
+                    [Photo de chantier terminée]
+                  </div>
+                  <p className="text-slate-800 leading-snug">
+                    « Salle de bain terminée à Troyes cette semaine. Douche à l'italienne, carrelage grand format. Merci à M. et Mme Roux pour leur confiance ! »
+                  </p>
+                  <div className="flex gap-2 pt-1">
+                    <Link to="/services-ia/generateur-contenu" className="flex-1 text-center py-2 px-3 rounded-lg bg-[#1C3A6B] text-white font-bold text-xs hover:bg-[#142B52]">
+                      Publier
+                    </Link>
+                    <Link to="/services-ia/generateur-contenu" className="flex-1 text-center py-2 px-3 rounded-lg border border-[#C9C2B5] text-slate-800 font-bold text-xs hover:bg-slate-100">
+                      Modifier le texte
+                    </Link>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── COIN 4 : MON QUOTIDIEN ── */}
+            {activeTab === 3 && (
+              <>
+                <div className="lg:col-span-7 flex flex-col items-start gap-4 text-left">
+                  <h3 className="font-extrabold text-2xl sm:text-3xl text-[#14213D]">
+                    Mon quotidien
+                  </h3>
+                  <p className="text-base text-[#3A4152] leading-relaxed">
+                    Les petites corvées qui mangent vos journées, faites plus vite.
+                  </p>
+
+                  <ul className="space-y-3 text-sm sm:text-base text-[#14213D] mt-2">
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Répondre à vos e-mails en dictant 2 phrases (Gmail, OVH...)</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Comprendre un long document en 30 secondes</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Préparer un rendez-vous client en 2 minutes</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="text-[#2E6B45] shrink-0 mt-0.5" strokeWidth={3} size={18} />
+                      <span>Retrouver n'importe quel papier en le demandant simplement</span>
+                    </li>
+                  </ul>
+
+                  <div className="pt-2">
+                    <Link
+                      to="/services-ia/assistant-email"
+                      className="inline-flex items-center gap-2 bg-[#1C3A6B] hover:bg-[#142B52] text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors"
+                    >
+                      Connecter ma boîte mail <ArrowRight size={16} />
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Exemple concret */}
+                <div className="lg:col-span-5 bg-white border border-[#E3DED4] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col gap-3 text-xs sm:text-sm text-left">
+                  <div className="font-bold text-slate-800">Que voulez-vous faire ?</div>
+                  <div className="border-2 border-[#1C3A6B] rounded-xl p-3 text-slate-800 font-semibold bg-white">
+                    « Retrouve la facture de M. Petit de septembre »
+                  </div>
+                  <div className="flex justify-between items-center bg-[#F6F3EE] rounded-xl p-3 mt-1">
+                    <span>Facture F-2026-029 · M. Petit</span>
+                    <span className="font-extrabold text-slate-900">640,00 €</span>
+                  </div>
+                </div>
+              </>
+            )}
+
           </div>
-          <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, hsl(221 83% 53% / 0.15), transparent)" }} />
+
         </div>
       </section>
-      )}
 
-      {/* ── TARIFICATION (IT4ALL 2026) ── */}
-      {activeTab === 'tarification' && (
-      <section className="container max-w-7xl mx-auto py-6 ia-animate-in">
-        <FintechPricingTab />
-      </section>
-      )}
-
-      {/* ── PARCOURS CLIENT & TEMOIGNAGES ── */}
-      {activeTab === 'parcours' && (
-      <div className="ia-animate-in">
-        <section className="container max-w-3xl mx-auto py-10">
-        <div className="flex items-center gap-4 mb-10">
-          <div className="w-1 h-10 rounded-full ia-gradient-hero" />
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-              {isEn ? "Your journey to AI" : "Votre parcours vers l'IA"}
-            </h2>
-            <p className="text-sm mt-1" style={{ color: "hsl(215 16% 47%)" }}>
-              {isEn
-                ? "A progressive path from first diagnostic to full digital transformation."
-                : "Un chemin progressif, du premier diagnostic à la transformation digitale complète."}
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          {iaJourney.map((step, i) => {
-            const iconMap: Record<string, any> = { Search, Target, Zap, Users, Rocket };
-            const Icon = iconMap[step.icon];
-            
-            return (
-              <div key={step.id} className="ia-journey-step ia-animate-in relative" style={{ animationDelay: `${i * 0.08}s` }}>
-                <div className="absolute left-[27px] top-10 bottom-[-24px] w-0.5 bg-gradient-to-b from-border to-transparent" />
-                <div className="ia-card p-6 flex flex-col md:flex-row gap-6 relative z-10 hover:border-gold/30 transition-colors">
-                  <div className="w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center text-foreground ia-gradient-hero shadow-lg border border-white/10">
-                    {Icon ? <Icon size={24} /> : <div className="font-bold text-xl">{i + 1}</div>}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold mb-2 text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      {i + 1}. {isEn ? step.stepEn : step.step}
-                    </h3>
-                    <p className="text-sm leading-relaxed mb-4" style={{ color: "hsl(215 16% 65%)" }}>
-                      {isEn ? step.descEn : step.desc}
-                    </p>
-                    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold" style={{ background: "hsl(221 83% 53% / 0.1)", borderColor: "hsl(221 83% 53% / 0.2)", color: "hsl(221 83% 65%)" }}>
-                      <Zap size={14} style={{ color: "hsl(42 55% 56%)" }} />
-                      <span>{isEn ? "KPI / ROI Validation" : "Validation KPI / ROI"} : {isEn ? step.roiEn : step.roi}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Storytelling Block / Conviction */}
-        <motion.div 
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="mt-16 text-center relative py-12 group"
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(221,83%,53%)]/5 to-transparent blur-xl pointer-events-none group-hover:via-[hsl(221,83%,53%)]/10 transition-colors duration-1000" />
-          
-          {/* Creative Objects: Interactive Neural Core */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg h-full pointer-events-none opacity-20 group-hover:opacity-70 transition-opacity duration-1000">
-            <motion.div 
-              animate={{ rotate: 180 }} 
-              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <div className="w-[280px] h-[280px] rounded-full border border-[hsl(42,55%,56%)]/30 border-dashed" />
-            </motion.div>
-            <motion.div 
-              animate={{ scale: [1, 1.1, 1] }} 
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <Cpu className="text-[hsl(221,83%,53%)] w-32 h-32 group-hover:scale-125 group-hover:text-[hsl(42,55%,56%)] transition-all duration-700 ease-out" strokeWidth={0.5} />
-            </motion.div>
-            <motion.div 
-              animate={{ y: [20, -20, 20], opacity: [0.2, 0.8, 0.2] }} 
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-[20%] left-[25%] text-[hsl(42,55%,56%)] font-mono text-xs font-bold"
-            >
-              10110
-            </motion.div>
-            <motion.div 
-              animate={{ y: [-20, 20, -20], opacity: [0.1, 0.6, 0.1] }} 
-              transition={{ duration: 4, delay: 1, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-[30%] right-[20%] text-[hsl(221,83%,53%)] font-mono text-xs font-bold"
-            >
-              01001
-            </motion.div>
-          </div>
-
-          <h2 className="text-2xl mb-8 relative z-10 text-foreground font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
-            {isEn ? "Our " : "Notre "}
-            <span style={{ color: "hsl(42 55% 56%)" }}>{isEn ? "Vision" : "conviction"}</span>
+      {/* ========================================================================= */}
+      {/* 6. FAIT POUR LES GENS DE MÉTIER (6 TUILES)                                */}
+      {/* ========================================================================= */}
+      <section id="pourqui" className="max-w-[1200px] mx-auto px-4 sm:px-6 py-16 sm:py-20">
+        <div className="mb-10 text-left">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#14213D] tracking-tight mb-2">
+            Fait pour les gens de métier
           </h2>
-          
-          <div className="text-base md:text-lg italic text-muted-foreground leading-relaxed relative z-10 p-8 rounded-3xl bg-background/40 backdrop-blur-md border border-white/5 group-hover:border-[hsl(42,55%,56%)]/30 group-hover:shadow-[0_0_40px_rgba(205,167,81,0.1)] transition-all duration-700 max-w-4xl mx-auto">
-            <span className="text-[hsl(221,83%,53%)]/20 group-hover:text-[hsl(221,83%,53%)]/50 text-6xl absolute -top-4 -left-4 font-bold transition-colors duration-700">"</span>
-            {isEn 
-              ? "Artificial Intelligence should not be an intimidating 'black box' nor an overpriced turnkey factory. At BNE, we know that innovation only makes sense if it serves humans and profitability. That's why we refuse imposed off-the-shelf solutions. Our philosophy? Custom AI, introduced module by module. We move at your pace: we identify, deploy, validate the Return on Investment (ROI), and train your teams. No leap of faith, just a smooth and measured transition towards the company of tomorrow."
-              : "L'Intelligence Artificielle ne doit pas être une \"boîte noire\" intimidante ni une usine à gaz hors de prix. Chez BNE, nous savons que l'innovation n'a de sens que si elle sert l'humain et la rentabilité. C'est pourquoi nous refusons les solutions clés en main imposées. Notre philosophie ? L'IA sur-mesure, introduite module par module. Nous avançons à votre rythme : on identifie, on déploie, on valide le retour sur investissement (ROI), et on forme vos équipes. Pas de saut dans le vide, juste une transition fluide et mesurée vers l'entreprise de demain."}
-            <span className="text-[hsl(221,83%,53%)]/20 group-hover:text-[hsl(221,83%,53%)]/50 text-6xl absolute -bottom-8 -right-4 rotate-180 font-bold transition-colors duration-700">"</span>
-          </div>
-          
-          <p className="mt-10 tracking-[0.2em] uppercase text-xs font-bold relative z-10 group-hover:tracking-[0.3em] transition-all duration-700" style={{ color: "hsl(221 83% 53% / 0.8)" }}>
-            {isEn ? "The customized AI philosophy by BNE" : "La philosophie IA sur-mesure par BNE"}
+          <p className="text-base sm:text-lg text-[#3A4152]">
+            Que vous soyez seul ou avec une équipe, votre espace s'adapte à votre activité.
           </p>
-        </motion.div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+          <Link
+            to="/services-ia/diagnostic"
+            className="bg-white border border-[#E3DED4] hover:border-[#1C3A6B] rounded-2xl p-6 flex flex-col gap-2.5 transition-all text-decoration-none group shadow-xs"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#FBEBD9] text-[#8A4510] flex items-center justify-center">
+              <Wrench size={22} />
+            </div>
+            <span className="font-extrabold text-lg text-[#14213D] group-hover:text-[#1C3A6B] transition-colors">
+              Bâtiment & travaux
+            </span>
+            <span className="text-sm text-[#5A5F6B]">
+              Plombiers, électriciens, maçons, peintres, menuisiers…
+            </span>
+          </Link>
+
+          <Link
+            to="/services-ia/diagnostic"
+            className="bg-white border border-[#E3DED4] hover:border-[#1C3A6B] rounded-2xl p-6 flex flex-col gap-2.5 transition-all text-decoration-none group shadow-xs"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#FBEBD9] text-[#8A4510] flex items-center justify-center">
+              <Utensils size={22} />
+            </div>
+            <span className="font-extrabold text-lg text-[#14213D] group-hover:text-[#1C3A6B] transition-colors">
+              Métiers de bouche
+            </span>
+            <span className="text-sm text-[#5A5F6B]">
+              Boulangers, bouchers, traiteurs, restaurateurs…
+            </span>
+          </Link>
+
+          <Link
+            to="/services-ia/diagnostic"
+            className="bg-white border border-[#E3DED4] hover:border-[#1C3A6B] rounded-2xl p-6 flex flex-col gap-2.5 transition-all text-decoration-none group shadow-xs"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#FBEBD9] text-[#8A4510] flex items-center justify-center">
+              <Scissors size={22} />
+            </div>
+            <span className="font-extrabold text-lg text-[#14213D] group-hover:text-[#1C3A6B] transition-colors">
+              Beauté & bien-être
+            </span>
+            <span className="text-sm text-[#5A5F6B]">
+              Coiffeurs, esthéticiennes, spa, praticiens…
+            </span>
+          </Link>
+
+          <Link
+            to="/services-ia/diagnostic"
+            className="bg-white border border-[#E3DED4] hover:border-[#1C3A6B] rounded-2xl p-6 flex flex-col gap-2.5 transition-all text-decoration-none group shadow-xs"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#FBEBD9] text-[#8A4510] flex items-center justify-center">
+              <Car size={22} />
+            </div>
+            <span className="font-extrabold text-lg text-[#14213D] group-hover:text-[#1C3A6B] transition-colors">
+              Auto & réparation
+            </span>
+            <span className="text-sm text-[#5A5F6B]">
+              Garagistes, carrossiers, dépanneurs, mécaniciens…
+            </span>
+          </Link>
+
+          <Link
+            to="/services-ia/diagnostic"
+            className="bg-white border border-[#E3DED4] hover:border-[#1C3A6B] rounded-2xl p-6 flex flex-col gap-2.5 transition-all text-decoration-none group shadow-xs"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#FBEBD9] text-[#8A4510] flex items-center justify-center">
+              <Store size={22} />
+            </div>
+            <span className="font-extrabold text-lg text-[#14213D] group-hover:text-[#1C3A6B] transition-colors">
+              Commerçants
+            </span>
+            <span className="text-sm text-[#5A5F6B]">
+              Boutiques, fleuristes, cavistes, vente au détail…
+            </span>
+          </Link>
+
+          <Link
+            to="/services-ia/diagnostic"
+            className="bg-white border border-[#E3DED4] hover:border-[#1C3A6B] rounded-2xl p-6 flex flex-col gap-2.5 transition-all text-decoration-none group shadow-xs"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#FBEBD9] text-[#8A4510] flex items-center justify-center">
+              <Briefcase size={22} />
+            </div>
+            <span className="font-extrabold text-lg text-[#14213D] group-hover:text-[#1C3A6B] transition-colors">
+              Indépendants & conseil
+            </span>
+            <span className="text-sm text-[#5A5F6B]">
+              Services à domicile, consultants, formateurs, créateurs…
+            </span>
+          </Link>
+
+        </div>
       </section>
 
-      <div className="ia-section-divider max-w-5xl mx-auto" />
+      {/* ========================================================================= */}
+      {/* 7. VOUS N'ÊTES PAS SEUL : UN CONSEILLER QUI CONNAÎT VOTRE MÉTIER         */}
+      {/* ========================================================================= */}
+      {/* ========================================================================= */}
+      {/* 7. VOUS N'ÊTES PAS SEUL : UN CONSEILLER QUI CONNAÎT VOTRE MÉTIER         */}
+      {/* ========================================================================= */}
+      <section className="bg-[#142B52] text-white py-16 sm:py-20">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
-      {/* TEMOIGNAGES — Coming soon */}
-      <section className="container max-w-5xl mx-auto py-16">
-        <div className="flex items-center gap-4 mb-10">
-          <div className="w-1 h-10 rounded-full ia-gradient-hero" />
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-              {isEn ? "They trust us" : "Ils nous font confiance"}
+          <div className="lg:col-span-7 flex flex-col items-start gap-4">
+            <span className="text-[#F2C08A] font-bold text-sm uppercase tracking-wider">
+              Vous n'êtes pas seul
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+              Un conseiller qui connaît votre métier
             </h2>
-            <p className="text-sm mt-1" style={{ color: "hsl(215 16% 47%)" }}>
-              {isEn ? "Testimonials and partner logos coming soon." : "Témoignages et logos partenaires à venir."}
+            <p className="text-base sm:text-lg text-[#D6DEEC] leading-relaxed max-w-xl">
+              Les outils, c'est bien. Quelqu'un pour vous accompagner, c'est mieux. On vous aide à démarrer, on audite la rentabilité réelle de vos chantiers, on refait votre site web clé en main, et on peut construire un outil rien que pour vous.
             </p>
-          </div>
-        </div>
 
-        <div className="ia-card p-12 md:p-16 text-center opacity-60">
-          <div className="flex justify-center gap-2 mb-4">
-            {[...Array(5)].map((_, j) => (
-              <Star key={j} size={18} fill="hsl(215 16% 80%)" color="hsl(215 16% 80%)" />
-            ))}
-          </div>
-          <h3 className="text-lg font-bold mb-2" style={{ fontFamily: "'Inter', sans-serif", color: "hsl(215 16% 40%)" }}>
-            {isEn ? "Reviews & Partners" : "Avis & Partenaires"}
-          </h3>
-          <p className="text-sm italic" style={{ color: "hsl(215 16% 55%)" }}>
-            {isEn ? "Coming soon" : "Arrive bientôt"}
-          </p>
-        </div>
-      </section>
-      </div>
-      )}
-
-      {/* CTA FINAL */}
-      <section className="py-8">
-        <div className="container max-w-4xl mx-auto">
-          <div className="relative rounded-2xl p-6 md:p-10 text-center text-foreground overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(221 83% 48%) 0%, hsl(263 60% 42%) 50%, hsl(42 45% 40%) 100%)" }}>
-            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 50%, white 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-            {/* Gold accent corner */}
-            <div className="absolute top-0 right-0 w-40 h-40 opacity-20 blur-[60px]" style={{ background: "hsl(42 55% 56%)" }} />
-            <div className="relative z-10">
-              <h2 className="text-xl md:text-2xl font-bold mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {isEn ? "Ready to transform your business?" : "Prêt à transformer votre entreprise ?"}
-              </h2>
-              <p className="text-sm opacity-90 mb-5 max-w-lg mx-auto">
-                {isEn
-                  ? "Start your free AI diagnostic and discover your company's potential."
-                  : "Commencez votre diagnostic IA gratuit et découvrez le potentiel de votre entreprise."}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link to="/services-ia/diagnostic" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[hsl(221,83%,53%)] font-bold rounded-xl hover:bg-foreground/90 transition-all shadow-lg text-sm">
-                  {isEn ? "Start free diagnostic" : "Démarrer le diagnostic gratuit"}
-                  <ArrowRight size={14} />
-                </Link>
-                <Link to="/contact" className="inline-flex items-center gap-2 px-6 py-3 bg-foreground/15 backdrop-blur-sm text-foreground font-semibold rounded-xl border border-border/30 hover:bg-foreground/25 transition-all text-sm">
-                  {isEn ? "Contact us" : "Nous contacter"}
-                </Link>
-              </div>
+            <div className="flex flex-wrap gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsCallbackOpen(true)}
+                className="bg-white text-[#142B52] hover:bg-slate-100 font-extrabold text-sm px-6 py-3.5 rounded-xl transition-colors cursor-pointer shadow-sm"
+              >
+                Être rappelé
+              </button>
+              <button
+                type="button"
+                onClick={() => toast.info("Eric Papain Mezatio peut se déplacer ou faire une démonstration en visio. Cliquez sur 'Être rappelé' pour convenir d'un rendez-vous.")}
+                className="text-white hover:text-[#F2C08A] font-bold text-sm px-4 py-3.5 transition-colors cursor-pointer"
+              >
+                Voir l'accompagnement
+              </button>
             </div>
           </div>
+
+          <div className="lg:col-span-5 bg-[#1C3A6B] rounded-3xl p-6 sm:p-7 flex items-center gap-5 shadow-lg border border-white/10 relative overflow-hidden group hover:border-[#F2C08A]/30 transition-all">
+            <div className="w-20 h-20 rounded-full bg-[#E8E2D6] text-[#142B52] font-black text-2xl flex items-center justify-center shrink-0 shadow-inner ring-4 ring-white/10">
+              EPM
+            </div>
+            <div className="flex flex-col text-left">
+              <div className="font-extrabold text-xl sm:text-2xl text-white min-h-[2rem] flex items-center flex-wrap leading-tight">
+                <span>Eric Papain Mezatio</span>
+              </div>
+              <div className="text-xs sm:text-sm text-[#D6DEEC] mt-0.5">
+                Votre conseiller dédié, du lundi au vendredi
+              </div>
+              <a
+                href="tel:+33753784796"
+                className="text-[#F2C08A] hover:text-amber-300 font-extrabold text-sm sm:text-base mt-2 flex items-center gap-1.5 transition-colors hover:underline"
+                title="Appeler Eric Papain Mezatio"
+              >
+                <PhoneCall size={16} /> +33 753 784 796
+              </a>
+            </div>
+          </div>
+
         </div>
       </section>
 
-      <UserProfileModal
-        isOpen={modalState.isOpen}
-        onClose={() => setModalState({ ...modalState, isOpen: false })}
-        defaultTab={modalState.tab}
-      />
+      {/* ========================================================================= */}
+      {/* 8. PREUVES RÉELLES & CONCRÈTES (SANS FAUX CHIFFRES)                      */}
+      {/* ========================================================================= */}
+      <section aria-label="Garanties et avis" className="max-w-[1200px] mx-auto px-4 sm:px-6 py-16 sm:py-20">
+        <div className="mb-10 text-left">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#14213D] tracking-tight mb-2">
+            Des garanties concrètes pour votre sérénité
+          </h2>
+          <p className="text-base sm:text-lg text-[#3A4152]">
+            Pas de promesses creuses : nous protégeons vos données et nous engageons par écrit.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          <div className="bg-white border border-[#E3DED4] rounded-2xl p-6 sm:p-7 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="text-[#2E6B45] font-extrabold text-xs uppercase tracking-wider mb-2">
+                Conformité 2026 garantie
+              </div>
+              <p className="text-base text-slate-800 leading-relaxed mb-4">
+                « Dès l'émission de votre première facture, nous générons le format officiel Factur-X EN 16931 et l'empreinte de contrôle fiscal PAF. Zéro stress pour votre comptabilité. »
+              </p>
+            </div>
+            <span className="text-xs font-bold text-[#5A5F6B]">Conformité DGFiP & Portails Agréés</span>
+          </div>
+
+          <div className="bg-white border border-[#E3DED4] rounded-2xl p-6 sm:p-7 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="text-[#2E6B45] font-extrabold text-xs uppercase tracking-wider mb-2">
+                Souveraineté des données
+              </div>
+              <p className="text-base text-slate-800 leading-relaxed mb-4">
+                « Vos documents et vos devis ne sont jamais utilisés pour entraîner des modèles publics d'IA. Ils sont stockés sur des serveurs sécurisés en Europe. »
+              </p>
+            </div>
+            <span className="text-xs font-bold text-[#5A5F6B]">Confidentialité & RGPD certifiés</span>
+          </div>
+
+          <div className="bg-white border border-[#E3DED4] rounded-2xl p-6 sm:p-7 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="text-[#2E6B45] font-extrabold text-xs uppercase tracking-wider mb-2">
+                Assistance humaine continue
+              </div>
+              <p className="text-base text-slate-800 leading-relaxed mb-4">
+                « Un numéro fixe, un conseiller basé en France qui répond en moins de 3 sonneries. Nous venons même vous aider à configurer vos modèles si besoin. »
+              </p>
+            </div>
+            <span className="text-xs font-bold text-[#5A5F6B]">Support téléphonique du lundi au vendredi</span>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 9. TARIFS CLAIRS ("GRATUIT POUR COMMENCER")                              */}
+      {/* ========================================================================= */}
+      <section id="tarifs" className="bg-white border-y border-[#E3DED4] py-14">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-6">
+          <div className="max-w-2xl text-left">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#14213D] tracking-tight mb-2">
+              Gratuit pour commencer
+            </h2>
+            <p className="text-base sm:text-lg text-[#3A4152] leading-relaxed">
+              Le diagnostic et les outils de base sont gratuits. Pour aller plus loin, à partir de <strong>12 € HT par mois</strong>, sans engagement. Offert la première année pour les créateurs d'entreprise.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsPricingModalOpen(true)}
+            className="px-6 py-3.5 rounded-xl border-2 border-[#1C3A6B] text-[#1C3A6B] hover:bg-[#1C3A6B] hover:text-white font-extrabold text-base transition-colors cursor-pointer"
+          >
+            Voir les tarifs
+          </button>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 10. FOIRE AUX QUESTIONS ("VOS QUESTIONS")                                 */}
+      {/* ========================================================================= */}
+      <section id="questions" className="max-w-[860px] mx-auto px-4 sm:px-6 py-16 sm:py-20 text-left">
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-[#14213D] tracking-tight mb-8">
+          Vos questions
+        </h2>
+
+        <div className="flex flex-col gap-3">
+          {[
+            {
+              q: "Je ne suis pas à l'aise avec l'ordinateur. C'est pour moi ?",
+              a: "Oui. Tout est écrit simplement, les boutons sont gros, et un conseiller peut vous montrer au téléphone. Vous pouvez aussi tout faire depuis votre téléphone sur votre chantier."
+            },
+            {
+              q: "C'est vraiment gratuit ?",
+              a: "Le diagnostic et les outils de base sont gratuits, sans carte bancaire requise. Vous ne payez que si vous décidez d'activer des modules avancés."
+            },
+            {
+              q: "Que deviennent mes documents ?",
+              a: "Ils sont rangés dans votre espace, visibles par vous seul. Vous pouvez les télécharger au format PDF ou les supprimer à tout moment en un clic."
+            },
+            {
+              q: "Suis-je prêt pour la facture électronique obligatoire ?",
+              a: "Le diagnostic vous le dit en 3 minutes, et l'outil de facturation est déjà au format officiel Factur-X conforme à la réforme 2026."
+            },
+            {
+              q: "Je peux arrêter quand je veux ?",
+              a: "Oui, tous nos forfaits sont sans engagement de durée. Vous récupérez l'intégralité de vos documents et contacts avant de partir."
+            }
+          ].map((item, idx) => {
+            const isOpen = openFaq === idx;
+            return (
+              <div
+                key={idx}
+                className="bg-white border border-[#E3DED4] rounded-2xl overflow-hidden transition-all shadow-2xs"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(isOpen ? null : idx)}
+                  className="w-full text-left p-5 sm:p-6 flex items-center justify-between gap-4 font-bold text-base sm:text-lg text-[#14213D] cursor-pointer"
+                >
+                  <span>{item.q}</span>
+                  {isOpen ? <ChevronUp size={20} className="text-[#1C3A6B] shrink-0" /> : <ChevronDown size={20} className="text-slate-400 shrink-0" />}
+                </button>
+                {isOpen && (
+                  <div className="px-5 sm:px-6 pb-6 text-sm sm:text-base text-[#3A4152] leading-relaxed border-t border-slate-100 pt-3">
+                    {item.a}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 11. CTA FINAL                                                             */}
+      {/* ========================================================================= */}
+      <section className="max-w-[1200px] mx-auto px-4 sm:px-6 pb-20">
+        <div className="bg-[#FBEBD9] rounded-3xl p-10 sm:p-14 flex flex-col items-center text-center gap-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#14213D] tracking-tight">
+            Combien de temps pourriez-vous gagner ?
+          </h2>
+          <p className="text-lg sm:text-xl text-[#3A4152]">
+            Réponse en 3 minutes, gratuitement.
+          </p>
+          <div className="pt-2">
+            <Link
+              to="/services-ia/diagnostic"
+              className="inline-flex items-center gap-2 bg-[#1C3A6B] hover:bg-[#142B52] text-white font-extrabold text-lg sm:text-xl px-8 py-4 rounded-xl shadow-md transition-all text-decoration-none"
+            >
+              Faire mon diagnostic gratuit
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 12. FOOTER LÉGAL                                                          */}
+      {/* ========================================================================= */}
+      <footer className="bg-white border-t border-[#E3DED4] py-8 text-xs sm:text-sm text-[#5A5F6B]">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-4">
+          <span>© 2026 M.DIV Business · SIRET 911 982 726 00018 · La Chapelle-Saint-Luc</span>
+          <nav aria-label="Liens légaux" className="flex flex-wrap gap-4 sm:gap-6">
+            <Link to="/charte" className="hover:underline">Mentions légales</Link>
+            <Link to="/charte" className="hover:underline">Conditions d'utilisation</Link>
+            <Link to="/charte" className="hover:underline">Confidentialité & Sécurité</Link>
+            <Link to="/contact" className="hover:underline">Contact</Link>
+          </nav>
+        </div>
+      </footer>
+
+      {/* ========================================================================= */}
+      {/* MODALE : RAPPEL CONSEILLER                                                */}
+      {/* ========================================================================= */}
+      {/* ========================================================================= */}
+      {/* MODALE : RAPPEL CONSEILLER                                                */}
+      {/* ========================================================================= */}
+      {isCallbackOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div>
+                <h3 className="font-extrabold text-lg text-slate-900">Être rappelé par Eric Papain Mezatio</h3>
+                <p className="text-xs text-slate-500">Votre conseiller dédié vous rappelle sans engagement.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCallbackOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCallbackSubmit} className="flex flex-col gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Votre nom ou entreprise <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={callbackName}
+                  onChange={(e) => setCallbackName(e.target.value)}
+                  placeholder="ex : Julien Dupont - SARL Dupont"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 focus:border-[#1C3A6B] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Votre numéro de téléphone <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={callbackPhone}
+                  onChange={(e) => setCallbackPhone(e.target.value)}
+                  placeholder="ex : 06 12 34 56 78"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 focus:border-[#1C3A6B] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Créneau de rappel souhaité</label>
+                <select
+                  value={callbackTime}
+                  onChange={(e) => setCallbackTime(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 focus:border-[#1C3A6B] outline-none bg-white"
+                >
+                  <option value="Dès que possible">Dès que possible (9h - 18h)</option>
+                  <option value="En fin de matinée (11h - 12h30)">En fin de matinée (11h - 12h30)</option>
+                  <option value="En début d'après-midi (14h - 16h)">En début d'après-midi (14h - 16h)</option>
+                  <option value="En fin de journée (17h - 19h)">En fin de journée (17h - 19h)</option>
+                </select>
+              </div>
+
+              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCallbackOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingCallback}
+                  className="px-5 py-2 rounded-xl bg-[#1C3A6B] text-white font-bold text-xs hover:bg-[#142B52] transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isSubmittingCallback ? "Transmission..." : "Valider"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODALE : TARIFS COMPLETS                                                  */}
+      {/* ========================================================================= */}
+      {isPricingModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl max-h-[85vh] overflow-y-auto flex flex-col gap-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div>
+                <h3 className="font-extrabold text-xl text-slate-900">Nos formules simples & transparentes</h3>
+                <p className="text-xs text-slate-500">Sans engagement, résiliable à tout moment.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPricingModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              {/* Gratuit */}
+              <div className="border border-slate-200 rounded-2xl p-5 flex flex-col justify-between">
+                <div>
+                  <div className="font-extrabold text-lg text-slate-900">Gratuit</div>
+                  <div className="text-2xl font-black text-slate-900 my-2">0 €</div>
+                  <p className="text-xs text-slate-500 mb-3">Pour tester et faire son diagnostic.</p>
+                  <ul className="text-xs space-y-2 text-slate-700">
+                    <li className="flex items-center gap-1.5"><Check size={14} className="text-[#2E6B45]" /> Bilan et diagnostic complet</li>
+                    <li className="flex items-center gap-1.5"><Check size={14} className="text-[#2E6B45]" /> Création de devis & factures simples</li>
+                    <li className="flex items-center gap-1.5"><Check size={14} className="text-[#2E6B45]" /> Scan de 5 tickets / mois</li>
+                  </ul>
+                </div>
+                <Link
+                  to="/services-ia/diagnostic"
+                  className="mt-4 block text-center py-2 px-3 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs hover:bg-slate-200"
+                >
+                  Démarrer gratuit
+                </Link>
+              </div>
+
+              {/* Indépendant */}
+              <div className="border-2 border-[#1C3A6B] bg-[#E4ECF8]/20 rounded-2xl p-5 flex flex-col justify-between shadow-xs">
+                <div>
+                  <span className="bg-[#1C3A6B] text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    Recommandé
+                  </span>
+                  <div className="font-extrabold text-lg text-slate-900 mt-1">Indépendant</div>
+                  <div className="text-2xl font-black text-[#1C3A6B] my-2">12 € <span className="text-xs text-slate-500 font-normal">HT/mois</span></div>
+                  <p className="text-xs text-slate-500 mb-3">Pour gérer son activité sans stress.</p>
+                  <ul className="text-xs space-y-2 text-slate-700">
+                    <li className="flex items-center gap-1.5"><Check size={14} className="text-[#2E6B45]" /> Factures & devis Factur-X illimités</li>
+                    <li className="flex items-center gap-1.5"><Check size={14} className="text-[#2E6B45]" /> Relances impayés automatiques</li>
+                    <li className="flex items-center gap-1.5"><Check size={14} className="text-[#2E6B45]" /> Dépenses & scan de tickets illimités</li>
+                    <li className="flex items-center gap-1.5"><Check size={14} className="text-[#2E6B45]" /> Support téléphonique dédié</li>
+                  </ul>
+                </div>
+                <Link
+                  to="/services-ia/diagnostic"
+                  className="mt-4 block text-center py-2 px-3 rounded-xl bg-[#1C3A6B] text-white font-bold text-xs hover:bg-[#142B52]"
+                >
+                  Choisir cette formule
+                </Link>
+              </div>
+
+              {/* TPE / Équipe */}
+              <div className="border border-slate-200 rounded-2xl p-5 flex flex-col justify-between">
+                <div>
+                  <div className="font-extrabold text-lg text-slate-900">Équipe & TPE</div>
+                  <div className="text-2xl font-black text-slate-900 my-2">29 € <span className="text-xs text-slate-500 font-normal">HT/mois</span></div>
+                  <p className="text-xs text-slate-500 mb-3">Pour les petites entreprises de 2 à 9 personnes.</p>
+                  <ul className="text-xs space-y-2 text-slate-700">
+                    <li className="flex items-center gap-1.5"><Check size={14} className="text-[#2E6B45]" /> Tout le forfait Indépendant</li>
+                    <li className="flex items-center gap-1.5"><Check size={14} className="text-[#2E6B45]" /> Module Équipe & plannings</li>
+                    <li className="flex items-center gap-1.5"><Check size={14} className="text-[#2E6B45]" /> Rapprochement bancaire & FEC</li>
+                    <li className="flex items-center gap-1.5"><Check size={14} className="text-[#2E6B45]" /> Conseiller attitré et visio</li>
+                  </ul>
+                </div>
+                <Link
+                  to="/services-ia/diagnostic"
+                  className="mt-4 block text-center py-2 px-3 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800"
+                >
+                  Choisir Équipe
+                </Link>
+              </div>
+
+            </div>
+
+            <p className="text-xs text-slate-500 text-center pt-2 border-t border-slate-200">
+              Offert la première année pour les créateurs d'entreprise récents. Tous les prix s'entendent hors taxes.
+            </p>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

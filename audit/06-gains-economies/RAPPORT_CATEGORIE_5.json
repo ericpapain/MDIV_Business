@@ -1,0 +1,38 @@
+{
+  "category": "Gains & Économies",
+  "validatedModulesCount": 3,
+  "totalModulesCount": 3,
+  "timestamp": "2026-10-31T21:56:48.665Z",
+  "results": [
+    {
+      "moduleId": "mod_18_diagnostic",
+      "name": "Bilan Express & Diagnostic de Rentabilité",
+      "status": "FONCTIONNEL",
+      "details": "Audit interactif en 4 questions, calcul automatisé du volume d'heures gaspillées (8 à 15 h/semaine) et projection des gains financiers annuels récupérables.",
+      "evidence": [
+        "mod18_diagnostic_01_init.png",
+        "mod18_diagnostic_02_filled.png",
+        "mod18_diagnostic_03_results.png"
+      ]
+    },
+    {
+      "moduleId": "mod_19_roi",
+      "name": "Calculateur ROI & Amortissement SaaS",
+      "status": "FONCTIONNEL",
+      "details": "Simulation interactive des économies réelles, seuil de rentabilité en jours et projection des gains nets basée sur le taux horaire réel de l'entreprise.",
+      "evidence": [
+        "mod19_roi_01_init.png",
+        "mod19_roi_02_simulated.png"
+      ]
+    },
+    {
+      "moduleId": "mod_20_benchmark",
+      "name": "Benchmark Sectoriel & Comparatifs Marché",
+      "status": "FONCTIONNEL",
+      "details": "Indicateurs de comparaison par corps d'état (BTP, électricien, plombier, services), délais moyens de règlement clients (DSO 48j), taux de transformation de devis et axes d'optimisation.",
+      "evidence": [
+        "mod20_benchmark_01_init.png"
+      ]
+    }
+  ]
+}

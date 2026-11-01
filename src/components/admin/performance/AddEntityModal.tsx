@@ -155,7 +155,7 @@ export function AddEntityModal({
             <form onSubmit={handleRelationSubmit} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Nom / Titre *</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Nom / Titre *</label>
                   <input
                     type="text"
                     required
@@ -166,7 +166,7 @@ export function AddEntityModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Société / Entité</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Société / Entité</label>
                   <input
                     type="text"
                     value={relCompany}
@@ -179,7 +179,7 @@ export function AddEntityModal({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Type de relation</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Type de relation</label>
                   <select
                     value={relType}
                     onChange={(e) => setRelType(e.target.value as RelationType)}
@@ -194,7 +194,7 @@ export function AddEntityModal({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Forfait mensuel (€ TTC)</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Forfait mensuel (€ TTC)</label>
                   <input
                     type="number"
                     value={relMonthlyFee}
@@ -207,7 +207,7 @@ export function AddEntityModal({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Email</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Email</label>
                   <input
                     type="email"
                     value={relEmail}
@@ -216,7 +216,7 @@ export function AddEntityModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Téléphone</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Téléphone</label>
                   <input
                     type="tel"
                     value={relPhone}
@@ -227,7 +227,7 @@ export function AddEntityModal({
               </div>
 
               <div>
-                <label className="block text-[11px] text-muted-foreground mb-1">Prochaine action concrète</label>
+                <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Prochaine action concrète</label>
                 <input
                   type="text"
                   value={relNextAction}
@@ -247,7 +247,7 @@ export function AddEntityModal({
           <TabsContent value="project">
             <form onSubmit={handleProjectSubmit} className="space-y-3">
               <div>
-                <label className="block text-[11px] text-muted-foreground mb-1">Nom du projet *</label>
+                <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Nom du projet *</label>
                 <input
                   type="text"
                   required
@@ -260,7 +260,7 @@ export function AddEntityModal({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Client associé</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Client associé</label>
                   <select
                     value={projRelId}
                     onChange={(e) => setProjRelId(Number(e.target.value))}
@@ -274,7 +274,7 @@ export function AddEntityModal({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Budget (€)</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Budget (€)</label>
                   <input
                     type="number"
                     value={projBudget}
@@ -285,7 +285,7 @@ export function AddEntityModal({
               </div>
 
               <div>
-                <label className="block text-[11px] text-muted-foreground mb-1">Date d'échéance prévue</label>
+                <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Date d'échéance prévue</label>
                 <input
                   type="date"
                   value={projTargetDate}
@@ -295,7 +295,7 @@ export function AddEntityModal({
               </div>
 
               <div>
-                <label className="block text-[11px] text-muted-foreground mb-1">Description / Objectifs</label>
+                <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Description / Objectifs</label>
                 <textarea
                   rows={2}
                   value={projDesc}
@@ -314,7 +314,7 @@ export function AddEntityModal({
           <TabsContent value="activity">
             <form onSubmit={handleActivitySubmit} className="space-y-3">
               <div>
-                <label className="block text-[11px] text-muted-foreground mb-1">Intitulé de l'action *</label>
+                <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Intitulé de l'action *</label>
                 <input
                   type="text"
                   required
@@ -327,7 +327,7 @@ export function AddEntityModal({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Type d'action</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Type d'action</label>
                   <select
                     value={actType}
                     onChange={(e) => setActType(e.target.value as ActivityType)}
@@ -343,7 +343,7 @@ export function AddEntityModal({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] text-muted-foreground mb-1">Relation liée</label>
+                  <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Relation liée</label>
                   <select
                     value={actRelId}
                     onChange={(e) => setActRelId(Number(e.target.value))}
@@ -357,7 +357,7 @@ export function AddEntityModal({
               </div>
 
               <div>
-                <label className="block text-[11px] text-muted-foreground mb-1">Commentaires / Résumé</label>
+                <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Commentaires / Résumé</label>
                 <textarea
                   rows={2}
                   value={actComments}
@@ -367,7 +367,7 @@ export function AddEntityModal({
               </div>
 
               <div>
-                <label className="block text-[11px] text-muted-foreground mb-1">Prochaine action à planifier</label>
+                <label className="block text-[11px] text-slate-700 dark:text-slate-200 font-medium mb-1">Prochaine action à planifier</label>
                 <input
                   type="text"
                   value={actNextTitle}

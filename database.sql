@@ -31,11 +31,15 @@ CREATE TABLE IF NOT EXISTS `companies` (
   `data_source` ENUM('INSEE', 'INPI', 'BODACC', 'PAPPERS', 'MANUAL') DEFAULT 'INSEE',
   `official_data` JSON DEFAULT NULL COMMENT 'Snapshot brut certifié des sources officielles',
   `password_hash` VARCHAR(255) NOT NULL COMMENT 'Mot de passe principal ou rétro-compatible',
+  `google_id` VARCHAR(100) DEFAULT NULL COMMENT 'Identifiant unique Google OAuth 2.0 (sub)',
+  `avatar_url` VARCHAR(500) DEFAULT NULL COMMENT 'Photo de profil Google',
+  `auth_provider` ENUM('local', 'google', 'microsoft', 'apple') DEFAULT 'local',
   `status` ENUM('active', 'inactive', 'banned') DEFAULT 'active',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_siren` (`siren`),
-  INDEX `idx_email` (`email`)
+  INDEX `idx_email` (`email`),
+  INDEX `idx_comp_google` (`google_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 1b. Table des Utilisateurs / Collaborateurs (1 Entreprise -> N Utilisateurs)
@@ -51,10 +55,14 @@ CREATE TABLE IF NOT EXISTS `users` (
   `role` ENUM('ADMIN', 'MANAGER', 'USER') DEFAULT 'ADMIN',
   `email_verified` TINYINT(1) DEFAULT 1,
   `verification_token` VARCHAR(255) DEFAULT NULL,
+  `google_id` VARCHAR(100) DEFAULT NULL COMMENT 'Identifiant unique Google OAuth 2.0 (sub)',
+  `avatar_url` VARCHAR(500) DEFAULT NULL COMMENT 'Photo de profil Google',
+  `auth_provider` ENUM('local', 'google', 'microsoft', 'apple') DEFAULT 'local',
   `status` ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_user_email` (`email`),
+  INDEX `idx_user_google` (`google_id`),
   CONSTRAINT `fk_users_company` 
     FOREIGN KEY (`company_id`) 
     REFERENCES `companies`(`id`) 
@@ -90,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `diagnostics` (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 3. Table des Clients (par Entreprise)
+-- 3. Table des Clients (par Entreprise - Conformité Annuaire Central PPF & Facturation 2026)
 CREATE TABLE IF NOT EXISTS `clients` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `company_id` INT NOT NULL,
@@ -98,10 +106,19 @@ CREATE TABLE IF NOT EXISTS `clients` (
   `email` VARCHAR(255) NOT NULL,
   `phone` VARCHAR(50) DEFAULT NULL,
   `company` VARCHAR(255) DEFAULT NULL,
+  `siren` VARCHAR(9) NULL,
+  `siret` VARCHAR(14) NULL,
+  `vat_number` VARCHAR(30) NULL,
+  `country_code` VARCHAR(2) NOT NULL DEFAULT 'FR',
   `address` TEXT DEFAULT NULL,
+  `postal_code` VARCHAR(10) NULL,
+  `city` VARCHAR(100) NULL,
+  `ppf_routing_id` VARCHAR(50) NULL COMMENT 'Identifiant Annuaire Central PPF/PDP',
   `notes` TEXT DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_clients_siret` (`siret`),
+  INDEX `idx_clients_siren` (`siren`),
   CONSTRAINT `fk_clients_company` 
     FOREIGN KEY (`company_id`) 
     REFERENCES `companies`(`id`) 
@@ -152,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `quotes` (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 6. Table des Factures IA & Audit Légal
+-- 6. Table des Factures IA & Audit Légal (Conformité Facturation Électronique 2026 / PPF & PDP)
 CREATE TABLE IF NOT EXISTS `invoices` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `company_id` INT NOT NULL,
@@ -161,16 +178,27 @@ CREATE TABLE IF NOT EXISTS `invoices` (
   `invoice_number` VARCHAR(100) NOT NULL,
   `date` DATE NOT NULL,
   `due_date` DATE NOT NULL,
+  `operation_nature` ENUM('goods', 'services', 'mixed') NOT NULL DEFAULT 'services',
+  `vat_payment_on_debit` TINYINT(1) NOT NULL DEFAULT 0,
   `amount_ht` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `amount_vat` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `amount_ttc` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `currency` VARCHAR(3) NOT NULL DEFAULT 'EUR',
+  `invoice_type_code` VARCHAR(5) NOT NULL DEFAULT '380' COMMENT '380: Facture, 381: Avoir, 384: Rectificative, 389: Acompte',
   `status` ENUM('pending', 'paid', 'overdue', 'cancelled') DEFAULT 'pending',
+  `ppf_deposit_id` VARCHAR(100) NULL COMMENT 'Identifiant unique transaction PPF',
+  `ppf_status` ENUM('DEPOSEE', 'ACHEMINEE', 'REJETEE', 'REFUSEE', 'MISE_A_DISPOSITION', 'PRISE_EN_CHARGE', 'APPROUVEE', 'PAIEMENT_TRANSMIS', 'PAYEE') NOT NULL DEFAULT 'DEPOSEE',
+  `rejection_reason` TEXT NULL,
+  `sha256_hash` VARCHAR(64) NULL COMMENT 'Empreinte cryptographique Piste d Audit Fiable',
+  `previous_invoice_hash` VARCHAR(64) NULL COMMENT 'Chaînage séquentiel inaltérable',
   `pdp_status` VARCHAR(50) DEFAULT 'DEPOSITED',
   `pdp_operator` VARCHAR(100) DEFAULT 'PDP n° 0039',
   `xml_content` LONGTEXT NULL,
   `legal_check_result` JSON DEFAULT NULL COMMENT 'Rapport de conformité IA',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_invoices_ppf_status` (`ppf_status`),
+  INDEX `idx_invoices_number` (`invoice_number`),
   CONSTRAINT `fk_invoices_company` 
     FOREIGN KEY (`company_id`) 
     REFERENCES `companies`(`id`) 
@@ -181,6 +209,54 @@ CREATE TABLE IF NOT EXISTS `invoices` (
     REFERENCES `clients`(`id`) 
     ON DELETE SET NULL 
     ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6b. Table des Lignes d'Articles (Items conformes norme sémantique EN 16931)
+CREATE TABLE IF NOT EXISTS `invoice_items` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `invoice_id` INT NOT NULL,
+  `line_number` INT NOT NULL DEFAULT 1,
+  `description` TEXT NOT NULL,
+  `quantity` DECIMAL(12,4) NOT NULL DEFAULT 1.0000,
+  `unit_code` VARCHAR(10) NOT NULL DEFAULT 'H87' COMMENT 'Code UN/ECE Rec 20 (H87: pièce, HUR: heure, MTK: m2)',
+  `unit_price_ht` DECIMAL(12,4) NOT NULL DEFAULT 0.0000,
+  `vat_rate` DECIMAL(5,2) NOT NULL DEFAULT 20.00,
+  `vat_category_code` VARCHAR(5) NOT NULL DEFAULT 'S' COMMENT 'S: Standard, Z: Zéro, E: Exonéré, AE: Autoliquidation',
+  `vat_exemption_reason` VARCHAR(255) NULL COMMENT 'Motif légal d exonération obligatoire si taux zéro',
+  `discount_rate` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  `line_total_ht` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  INDEX `idx_items_invoice` (`invoice_id`),
+  CONSTRAINT `fk_items_invoice` FOREIGN KEY (`invoice_id`) REFERENCES `invoices`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6c. Table des Règlements & E-Reporting des Prestations de Services
+CREATE TABLE IF NOT EXISTS `invoice_payments` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `invoice_id` INT NOT NULL,
+  `company_id` INT NOT NULL,
+  `payment_date` DATE NOT NULL,
+  `amount_paid` DECIMAL(12,2) NOT NULL,
+  `payment_method` ENUM('transfer', 'check', 'card', 'direct_debit', 'cash') NOT NULL DEFAULT 'transfer',
+  `transaction_reference` VARCHAR(100) NULL,
+  `e_reporting_transmitted` TINYINT(1) NOT NULL DEFAULT 0,
+  `e_reporting_date` DATETIME NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_payments_invoice` (`invoice_id`),
+  INDEX `idx_payments_company` (`company_id`),
+  CONSTRAINT `fk_payments_invoice` FOREIGN KEY (`invoice_id`) REFERENCES `invoices`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6d. Table du Journal d'Audit Inaltérable (Piste d'Audit Fiable - PAF Art. 289-VII-1° CGI)
+CREATE TABLE IF NOT EXISTS `paf_invoice_audit_trail` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `invoice_id` INT NOT NULL,
+  `action` VARCHAR(50) NOT NULL COMMENT 'CREATION, SIGNATURE, DEPOT_PPF, CHANGEMENT_STATUT, PAIEMENT',
+  `previous_status` VARCHAR(50) NULL,
+  `new_status` VARCHAR(50) NOT NULL,
+  `payload_hash` VARCHAR(64) NOT NULL,
+  `operator_id` INT NULL,
+  `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_paf_invoice` (`invoice_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 7. Table des Relances de Paiement & Dossiers Impayés
@@ -350,5 +426,80 @@ CREATE TABLE IF NOT EXISTS `analytics_visits` (
   INDEX `idx_analytics_page` (`page_path`),
   INDEX `idx_analytics_country` (`country`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 11. Table des Partenaires & Alliances
+CREATE TABLE IF NOT EXISTS `partners` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(255) NOT NULL,
+  `category` VARCHAR(150) DEFAULT 'Partenaire',
+  `country` VARCHAR(100) DEFAULT 'France',
+  `flag` VARCHAR(10) DEFAULT '🇫🇷',
+  `sector` VARCHAR(255) DEFAULT '',
+  `website` VARCHAR(255) DEFAULT '',
+  `logo_url` VARCHAR(500) DEFAULT '',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `partners` (`name`, `category`, `country`, `flag`, `sector`, `website`, `logo_url`) 
+VALUES 
+  ('ITID France', 'Santé & Médecine Interventionnelle', 'France', '🇫🇷', 'Institut de la Douleur · Dr Jerry Mezat', 'https://itid-france.com', '/assets/logos/logo-itid.png'),
+  ('Belkinois', 'Hospitalité & Prestige', 'France', '🇫🇷', 'Gastronomie & Réception Privée', '', '/assets/Logo Ambassador et partenaires/belkinois.jpg'),
+  ('Stéphane Grodin', 'Stratégie & Affaires', 'France', '🇫🇷', 'Partenaire & Ambassadeur BNE', '', '/assets/Logo Ambassador et partenaires/Stephane Grodin logo.jpeg'),
+  ('IT4ALL', 'Numérique & IA', 'Europe', '🇪🇺', 'Technologies Digitales & Solutions SaaS', '', '/IT4ALL.jpeg')
+ON DUPLICATE KEY UPDATE `name`=`name`;
+
+-- 14. Table des Boîtes de Messagerie Connectées (Multi-fournisseurs universel)
+CREATE TABLE IF NOT EXISTS `company_mailboxes` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `company_id` INT NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `display_name` VARCHAR(150) DEFAULT NULL,
+  `provider` VARCHAR(50) NOT NULL DEFAULT 'custom_imap' COMMENT 'gmail, itid_ovh, ovh, outlook, yahoo, icloud, custom_imap',
+  `imap_host` VARCHAR(255) NOT NULL,
+  `imap_port` INT NOT NULL DEFAULT 993,
+  `imap_ssl` TINYINT(1) NOT NULL DEFAULT 1,
+  `imap_user` VARCHAR(255) NOT NULL,
+  `imap_password` TEXT NOT NULL,
+  `smtp_host` VARCHAR(255) NOT NULL,
+  `smtp_port` INT NOT NULL DEFAULT 465,
+  `smtp_ssl` TINYINT(1) NOT NULL DEFAULT 1,
+  `smtp_user` VARCHAR(255) NOT NULL,
+  `smtp_password` TEXT NOT NULL,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+  `last_sync_at` DATETIME DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_mailbox_company` (`company_id`),
+  INDEX `idx_mailbox_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 15. Table d'Indexation et d'Historique des Échanges d'Emails (Inbound & Outbound)
+CREATE TABLE IF NOT EXISTS `email_threads_cache` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `company_id` INT NOT NULL,
+  `mailbox_id` INT NOT NULL,
+  `message_id` VARCHAR(255) NOT NULL,
+  `direction` ENUM('inbound', 'outbound') NOT NULL DEFAULT 'inbound',
+  `sender_email` VARCHAR(255) NOT NULL,
+  `sender_name` VARCHAR(150) DEFAULT NULL,
+  `recipient_email` VARCHAR(255) NOT NULL,
+  `recipient_name` VARCHAR(150) DEFAULT NULL,
+  `subject` VARCHAR(500) NOT NULL,
+  `snippet` TEXT DEFAULT NULL,
+  `body_text` LONGTEXT DEFAULT NULL,
+  `body_html` LONGTEXT DEFAULT NULL,
+  `received_at` DATETIME NOT NULL,
+  `is_read` TINYINT(1) NOT NULL DEFAULT 0,
+  `has_attachments` TINYINT(1) NOT NULL DEFAULT 0,
+  `raw_headers` JSON DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_thread_company` (`company_id`),
+  INDEX `idx_thread_mailbox` (`mailbox_id`),
+  INDEX `idx_thread_sender` (`sender_email`),
+  INDEX `idx_thread_recipient` (`recipient_email`),
+  INDEX `idx_thread_date` (`received_at`),
+  UNIQUE KEY `uniq_msg_mailbox` (`mailbox_id`, `message_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 

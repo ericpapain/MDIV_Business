@@ -1,7 +1,7 @@
 import { NavLink, Link, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { 
-  Menu, X, ChevronDown, Receipt, Zap, TrendingUp, Megaphone, 
+  Menu, X, ChevronDown, ChevronUp, Receipt, Zap, TrendingUp, Megaphone, 
   Search, Sparkles, ShieldCheck, ArrowRight, FileText, 
   Settings, LogOut, LogIn, Building2, Tag, Tag as TagIcon
 } from "lucide-react";
@@ -63,11 +63,32 @@ export function SiteHeader() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const location = useLocation();
-  // Section Services IA fermée / En maintenance : maintien de la navigation MDIV Business
+  // Navigation active sur les pages IA, ou navigation classique MDIV
   const isIAPage = false;
   const isEn = language === 'en';
 
   const navRef = useRef<HTMLDivElement>(null);
+
+  // État de masquage du header dans un chevron (pour libérer le menu des Services IA)
+  const [isHeaderHidden, setIsHeaderHidden] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('mdiv_header_hidden');
+      if (saved !== null) return saved === 'true';
+      return location.pathname === '/services-ia';
+    } catch {
+      return location.pathname === '/services-ia';
+    }
+  });
+
+  const toggleHeaderHidden = () => {
+    setIsHeaderHidden(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('mdiv_header_hidden', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // Détection du Pôle Actif
   const isPoleActive = (poleKey: string) => {
@@ -95,8 +116,12 @@ export function SiteHeader() {
       return currentPath === '/services-ia/devis' || currentPath === '/services-ia/devis-automatique';
     }
 
-    if (targetPath === '/services-ia/diagnostic') {
-      return currentPath === '/services-ia/diagnostic' || currentPath === '/diagnostic-ia';
+    if (targetPath === '/services-ia/diagnostic' || targetPath.includes('diagnostic_express')) {
+      return (
+        currentPath === '/services-ia/diagnostic' || 
+        currentPath === '/diagnostic-ia' || 
+        (currentPath === '/services-ia/dashboard' && location.search.includes('diagnostic_express'))
+      );
     }
 
     if (targetPath === '/services-ia/tarifs') {
@@ -220,7 +245,34 @@ export function SiteHeader() {
     : (scrolled ? "glass-strong py-3" : "bg-transparent py-5");
 
   return (
-    <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${headerBgClass}`} ref={navRef}>
+    <>
+      {/* ========================================================================= */}
+      {/* CHEVRON FLOTTANT DISCRET : POSITIONNÉ EN HAUT À GAUCHE                    */}
+      {/* ========================================================================= */}
+      {isHeaderHidden && (
+        <div className="fixed top-0 left-2 sm:left-4 z-[60] animate-in fade-in slide-in-from-top-1 duration-200">
+          <button
+            type="button"
+            onClick={toggleHeaderHidden}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-b-xl bg-slate-900/90 hover:bg-slate-950 text-white dark:bg-white/95 dark:text-slate-900 shadow-md backdrop-blur-md border border-t-0 border-slate-700/60 dark:border-slate-300 text-[11px] font-bold transition-all hover:pt-1.5 cursor-pointer group"
+            title="Afficher le bandeau principal M.DIV Business"
+            aria-label="Afficher le bandeau principal"
+          >
+            <ChevronDown size={12} className="text-amber-400 group-hover:translate-y-0.5 transition-transform" />
+            <span className="font-display tracking-tight text-[10.5px]">M.DIV</span>
+            <span className="text-[9px] bg-white/20 dark:bg-slate-200 px-1 py-0.2 rounded font-extrabold text-slate-200 dark:text-slate-800">
+              Menu
+            </span>
+          </button>
+        </div>
+      )}
+
+      <header 
+        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${headerBgClass} ${
+          isHeaderHidden ? "-translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
+        }`} 
+        ref={navRef}
+      >
       <div className="w-full flex items-center justify-between gap-2 xl:gap-4 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* ========================================================================= */}
@@ -244,29 +296,20 @@ export function SiteHeader() {
             </div>
           </Link>
 
-          {/* Logo Partenaire IT4ALL (Fortement agrandi & mis en avant sur les pages IA) */}
+          {/* Logo Partenaire IT4WORK (Fortement agrandi & mis en avant sur les pages IA) */}
           {isIAPage && (
             <div className="flex items-center pl-2 sm:pl-3 border-l border-slate-300">
               <Link 
                 to="/services-ia" 
                 className="group flex flex-col items-center justify-center p-1 sm:p-1.5 rounded-xl bg-transparent border border-transparent hover:scale-105 transition-all text-center" 
-                title="Partenaire Innovation Technologique IT4ALL"
+                title="Partenaire Innovation Technologique IT4WORK"
               >
                 <img 
                   src="/IT4ALL.jpeg" 
-                  alt="IT4ALL Innovation" 
-                  className="h-8 sm:h-12 md:h-14 w-auto rounded-md object-contain mix-blend-multiply" 
+                  alt="IT4WORK Innovation" 
+                  className="h-10 sm:h-14 md:h-16 w-auto rounded-md object-contain mix-blend-multiply" 
                   onError={(e)=>{ (e.target as HTMLElement).style.display = 'none'; }}
                 />
-                <div className="hidden xs:flex text-[6.5px] sm:text-[7.5px] md:text-[8.5px] font-extrabold tracking-wide uppercase items-center justify-center gap-1 sm:gap-1.5 mt-0.5 px-1 leading-tight flex-wrap xl:whitespace-nowrap select-none">
-                  <span className="text-[#0a2540] font-black">AI</span>
-                  <span className="text-[#00b4d8] font-black text-[7.5px] sm:text-[9px] leading-none">•</span>
-                  <span className="text-[#0a2540] font-black">DATA</span>
-                  <span className="text-[#00b4d8] font-black text-[7.5px] sm:text-[9px] leading-none">•</span>
-                  <span className="text-[#0a2540] font-black">OPTIMIZATION</span>
-                  <span className="text-[#00b4d8] font-black text-[7.5px] sm:text-[9px] leading-none">•</span>
-                  <span className="text-[#0a2540] font-black">DIGITAL SOLUTIONS</span>
-                </div>
               </Link>
             </div>
           )}
@@ -444,7 +487,7 @@ export function SiteHeader() {
               {activeDropdown === 'audit-roi' && (
                 <div className="absolute left-0 mt-2 w-[440px] bg-white border border-slate-200 rounded-2xl shadow-2xl shadow-slate-950/20 p-3.5 grid grid-cols-1 gap-1.5 ia-animate-in z-50">
                   {renderDropdownItem(
-                    '/services-ia/diagnostic',
+                    isAuthenticated ? '/services-ia/dashboard?view=diagnostic_express' : '/services-ia/diagnostic',
                     <Search size={18} />,
                     'Diagnostic IA Express',
                     'Évaluation de votre maturité IA et feuille de route opérationnelle.'
@@ -521,6 +564,22 @@ export function SiteHeader() {
         {/* ========================================================================= */}
         <div className={`hidden ${isIAPage ? "2xl:flex" : "xl:flex"} items-center gap-2 xl:gap-2.5 shrink-0 z-20`}>
           
+          {/* Bouton pour replier le header dans un chevron */}
+          <button 
+            type="button"
+            onClick={toggleHeaderHidden}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0 ${
+              isIAPage 
+                ? "border-slate-300/80 bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-950" 
+                : "border-gold/30 hover:bg-gold/10 text-foreground"
+            }`}
+            title="Masquer ce bandeau dans un chevron pour libérer l'écran"
+            aria-label="Masquer le bandeau principal"
+          >
+            <ChevronUp size={14} className="text-amber-500" />
+            <span className="text-[11px]">Masquer</span>
+          </button>
+
           {/* Theme Toggle (Mode sombre / clair) */}
           <ThemeToggle />
 
@@ -568,7 +627,7 @@ export function SiteHeader() {
                       <p className="text-xs font-bold truncate text-slate-900">{company?.name}</p>
                       <p className="text-[10px] text-slate-500 truncate">{company?.email}</p>
                     </div>
-                    <Link to="/dashboard" onClick={() => setUserDropdownOpen(false)} className="px-4 py-2 text-xs font-semibold hover:bg-slate-50 text-slate-700 flex items-center gap-2">
+                    <Link to="/services-ia/dashboard?view=company" onClick={() => setUserDropdownOpen(false)} className="px-4 py-2 text-xs font-semibold hover:bg-slate-50 text-slate-700 flex items-center gap-2">
                       <Building2 size={14} className="text-blue-600" /> Tableau de bord
                     </Link>
                     <button onClick={() => { logout(); setUserDropdownOpen(false); }} className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-red-50 text-red-600 flex items-center gap-2">
@@ -580,7 +639,7 @@ export function SiteHeader() {
             ) : (
               <div className="flex items-center gap-2 shrink-0">
                 <Link
-                  to="/login"
+                  to="/services-ia/diagnostic/login"
                   className="px-3.5 py-1.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-100 text-slate-800 transition-colors shrink-0 shadow-sm"
                 >
                   Connexion
@@ -596,14 +655,34 @@ export function SiteHeader() {
           )}
         </div>
 
-        {/* Bouton Menu Mobile (Adapté pour basculer dès que le zoom réduit la largeur sous xl) */}
-        <button 
-          onClick={() => setOpen(!open)} 
-          className={`${isIAPage ? "2xl:hidden" : "xl:hidden"} p-2 rounded-xl shrink-0 ${isIAPage ? "text-slate-800 bg-white hover:bg-slate-100 border border-slate-200 shadow-sm" : "text-foreground hover:bg-foreground/10"}`}
-          aria-label="Menu"
-        >
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        {/* Contrôles Mobile : Bouton Masquer + Hamburger Menu */}
+        <div className={`${isIAPage ? "2xl:hidden" : "xl:hidden"} flex items-center gap-1.5 shrink-0`}>
+          <button 
+            type="button"
+            onClick={toggleHeaderHidden}
+            className={`p-2 rounded-xl shrink-0 ${
+              isIAPage 
+                ? "text-slate-800 bg-white hover:bg-slate-100 border border-slate-200 shadow-sm" 
+                : "text-foreground hover:bg-foreground/10"
+            }`}
+            title="Masquer le bandeau principal dans un chevron"
+            aria-label="Masquer le bandeau"
+          >
+            <ChevronUp size={20} className="text-amber-500" />
+          </button>
+
+          <button 
+            onClick={() => setOpen(!open)} 
+            className={`p-2 rounded-xl shrink-0 ${
+              isIAPage 
+                ? "text-slate-800 bg-white hover:bg-slate-100 border border-slate-200 shadow-sm" 
+                : "text-foreground hover:bg-foreground/10"
+            }`}
+            aria-label="Menu"
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -633,7 +712,7 @@ export function SiteHeader() {
             {isIAPage && !isAuthenticated && (
               <div className="grid grid-cols-2 gap-2 pt-1 pb-2">
                 <Link
-                  to="/login"
+                  to="/services-ia/diagnostic/login"
                   onClick={() => setOpen(false)}
                   className="py-2.5 px-3 rounded-xl text-center text-xs font-bold border border-slate-200 bg-white hover:bg-slate-100 text-slate-800 shadow-sm"
                 >
@@ -777,7 +856,11 @@ export function SiteHeader() {
                         </span>
                       )}
                     </div>
-                    <Link to="/services-ia/diagnostic" onClick={() => setOpen(false)} className={`block py-1.5 px-2.5 rounded-xl font-medium transition-all ${isAppActive('/services-ia/diagnostic') ? 'bg-sky-100 text-sky-950 font-extrabold border border-sky-300 flex items-center justify-between' : 'text-slate-700 hover:text-blue-600'}`}>
+                    <Link 
+                      to={isAuthenticated ? '/services-ia/dashboard?view=diagnostic_express' : '/services-ia/diagnostic'} 
+                      onClick={() => setOpen(false)} 
+                      className={`block py-1.5 px-2.5 rounded-xl font-medium transition-all ${isAppActive('/services-ia/diagnostic') ? 'bg-sky-100 text-sky-950 font-extrabold border border-sky-300 flex items-center justify-between' : 'text-slate-700 hover:text-blue-600'}`}
+                    >
                       <span>Diagnostic IA Express</span>
                       {isAppActive('/services-ia/diagnostic') && <span className="text-[9px] px-1.5 py-0.2 bg-sky-200 text-sky-900 rounded font-black">Actif</span>}
                     </Link>
@@ -824,6 +907,21 @@ export function SiteHeader() {
           </div>
         </div>
       )}
+
+      {/* Onglet Chevron discret au bas du header pour le replier facilement d'un clic */}
+      <div className="absolute -bottom-5.5 left-1/2 -translate-x-1/2 z-50">
+        <button
+          type="button"
+          onClick={toggleHeaderHidden}
+          className="flex items-center gap-1 px-3 py-0.5 rounded-b-xl bg-slate-900/90 hover:bg-slate-950 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md backdrop-blur-md border border-t-0 border-slate-700/60 dark:border-slate-300 text-[10px] font-bold uppercase tracking-wider transition-all hover:pb-1 cursor-pointer group"
+          title="Masquer le bandeau principal dans un chevron"
+          aria-label="Masquer le bandeau principal"
+        >
+          <ChevronUp size={12} className="text-amber-400 group-hover:-translate-y-0.5 transition-transform" />
+          <span>Masquer</span>
+        </button>
+      </div>
     </header>
+  </>
   );
 }
