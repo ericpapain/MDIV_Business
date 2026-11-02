@@ -120,7 +120,9 @@ const App = () => (
                   <Route path="/live/:id" element={<EventLiveDisplayPage />} />
 
                   {/* Borne Mobile Self-Check-in de Présence (QR Entrée de salle) */}
+                  <Route path="/evenements/:id/presence" element={<EventSelfCheckIn />} />
                   <Route path="/evenements/:eventId/presence" element={<EventSelfCheckIn />} />
+                  <Route path="/checkin/:id" element={<EventSelfCheckIn />} />
                   <Route path="/checkin/:eventId" element={<EventSelfCheckIn />} />
 
                   <Route element={<SiteLayout />}>

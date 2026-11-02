@@ -18,14 +18,17 @@ import {
   Mail, 
   Ticket,
   ExternalLink,
-  ChevronLeft
+  ChevronLeft,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 export default function EventSelfCheckIn() {
-  const { eventId } = useParams<{ eventId: string }>();
+  const { eventId, id } = useParams<{ eventId?: string; id?: string }>();
+  const activeEventId = eventId || id;
+
   const [emailQuery, setEmailQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<{
@@ -39,13 +42,13 @@ export default function EventSelfCheckIn() {
 
   // Récupération des informations de l'événement
   const { data: event, isLoading: isEventLoading } = useQuery({
-    queryKey: ['self-checkin-event', eventId],
+    queryKey: ['self-checkin-event', activeEventId],
     queryFn: async () => {
-      const res = await fetch(`/api/event_engine.php?action=get_event&id=${eventId}`);
+      const res = await fetch(`/api/event_engine.php?action=get_event&id=${activeEventId}`);
       const json = await res.json();
       return json.data || json;
     },
-    enabled: !!eventId
+    enabled: !!activeEventId
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,7 +67,7 @@ export default function EventSelfCheckIn() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          event_id: Number(eventId),
+          event_id: Number(activeEventId),
           email_query: query
         })
       });
@@ -315,4 +318,3 @@ export default function EventSelfCheckIn() {
     </div>
   );
 }
-
