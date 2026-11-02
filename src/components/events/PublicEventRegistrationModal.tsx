@@ -168,8 +168,21 @@ export function PublicEventRegistrationModal({
         throw new Error(data.error || "Erreur lors de l'enregistrement de l'inscription.");
       }
 
-      setRegistrationResult(data);
-      toast.success("Inscription validée avec succès !");
+      const resultWithAttendee = {
+        ...data,
+        attendee: data.attendee || {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          job_title: formData.job_title,
+          photo_url: photoPreview,
+          ticket_code: data.ticket_code
+        }
+      };
+      setRegistrationResult(resultWithAttendee);
+      toast.success("Votre inscription a bien été prise en compte !");
     } catch (err: any) {
       toast.error(err.message || "Erreur réseau lors de l'inscription.");
     } finally {
