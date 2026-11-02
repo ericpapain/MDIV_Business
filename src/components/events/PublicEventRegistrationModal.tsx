@@ -19,6 +19,8 @@ interface PublicEventRegistrationModalProps {
   onClose: () => void;
 }
 
+const isTruthyBool = (val: any): boolean => val === true || val === 1 || val === '1' || val === 'true';
+
 export function PublicEventRegistrationModal({
   eventId,
   isOpen,
@@ -63,7 +65,7 @@ export function PublicEventRegistrationModal({
   const featuresConfig = event?.features_config || {};
   const isCustomFieldsEnabled = featuresConfig['custom_fields']?.enabled !== false;
   const isNetworkingEnabled = featuresConfig['networking_wall']?.enabled !== false;
-  const customFields: EventCustomField[] = (event?.custom_fields || []).filter((f: EventCustomField) => f.is_active);
+  const customFields: EventCustomField[] = (event?.custom_fields || []).filter((f: EventCustomField) => f.is_active === undefined || isTruthyBool(f.is_active));
 
   // Gestion de l'upload photo
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,9 +123,10 @@ export function PublicEventRegistrationModal({
     // Validation des champs personnalisés obligatoires
     if (isCustomFieldsEnabled) {
       for (const field of customFields) {
-        if (field.is_required) {
+        const isRequired = isTruthyBool(field.is_required);
+        if (isRequired) {
           const val = customAnswers[field.field_key];
-          if (val === undefined || val === null || String(val).trim() === "") {
+          if (val === undefined || val === null || (typeof val === 'string' && val.trim() === '') || (Array.isArray(val) && val.length === 0)) {
             toast.error(`Le champ obligatoire « ${field.label} » doit être renseigné.`);
             return;
           }
@@ -425,6 +428,7 @@ export function PublicEventRegistrationModal({
 
                 <div className="space-y-3.5">
                   {customFields.map((field) => {
+                    const isRequired = isTruthyBool(field.is_required);
                     const val = customAnswers[field.field_key] || "";
                     const optionsList = Array.isArray(field.options)
                       ? field.options
@@ -435,7 +439,7 @@ export function PublicEventRegistrationModal({
                     return (
                       <div key={field.field_key} className="space-y-1">
                         <label className="block text-[11px] font-bold text-foreground">
-                          {field.label} {field.is_required && <span className="text-red-400">*</span>}
+                          {field.label} {isRequired && <span className="text-red-400">*</span>}
                         </label>
                         {field.description && (
                           <p className="text-[10.5px] text-muted-foreground">{field.description}</p>
@@ -444,7 +448,7 @@ export function PublicEventRegistrationModal({
                         {/* Rendu dynamique selon le type */}
                         {field.field_type === 'textarea' ? (
                           <textarea
-                            required={field.is_required}
+                            required={isRequired}
                             rows={3}
                             value={val}
                             onChange={(e) => setCustomAnswers({ ...customAnswers, [field.field_key]: e.target.value })}
@@ -453,7 +457,7 @@ export function PublicEventRegistrationModal({
                           />
                         ) : field.field_type === 'select' ? (
                           <select
-                            required={field.is_required}
+                            required={isRequired}
                             value={val}
                             onChange={(e) => setCustomAnswers({ ...customAnswers, [field.field_key]: e.target.value })}
                             className="w-full bg-background border border-input rounded-xl px-3.5 py-2.5 text-xs text-foreground focus:outline-none focus:border-amber-500"
@@ -521,7 +525,7 @@ export function PublicEventRegistrationModal({
                               field.field_type === 'date' ? 'date' :
                               field.field_type === 'url' ? 'url' : 'text'
                             }
-                            required={field.is_required}
+                            required={isRequired}
                             value={val}
                             onChange={(e) => setCustomAnswers({ ...customAnswers, [field.field_key]: e.target.value })}
                             placeholder={field.placeholder || ""}

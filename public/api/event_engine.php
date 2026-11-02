@@ -299,6 +299,8 @@ try {
         $stmtFields->execute([$id]);
         $fields = $stmtFields->fetchAll(PDO::FETCH_ASSOC);
         foreach ($fields as &$f) {
+            $f['is_required'] = ($f['is_required'] == 1 || $f['is_required'] === true || $f['is_required'] === '1' || $f['is_required'] === 'true');
+            $f['is_active'] = ($f['is_active'] == 1 || $f['is_active'] === true || $f['is_active'] === '1' || $f['is_active'] === 'true');
             if (!empty($f['options']) && is_string($f['options'])) $f['options'] = json_decode($f['options'], true);
             if (!empty($f['validation_rules']) && is_string($f['validation_rules'])) $f['validation_rules'] = json_decode($f['validation_rules'], true);
             if (!empty($f['conditional_logic']) && is_string($f['conditional_logic'])) $f['conditional_logic'] = json_decode($f['conditional_logic'], true);
@@ -318,6 +320,8 @@ try {
         $stmt->execute([$eventId]);
         $fields = $stmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($fields as &$f) {
+            $f['is_required'] = ($f['is_required'] == 1 || $f['is_required'] === true || $f['is_required'] === '1' || $f['is_required'] === 'true');
+            $f['is_active'] = ($f['is_active'] == 1 || $f['is_active'] === true || $f['is_active'] === '1' || $f['is_active'] === 'true');
             if (!empty($f['options']) && is_string($f['options'])) $f['options'] = json_decode($f['options'], true);
             if (!empty($f['validation_rules']) && is_string($f['validation_rules'])) $f['validation_rules'] = json_decode($f['validation_rules'], true);
             if (!empty($f['conditional_logic']) && is_string($f['conditional_logic'])) $f['conditional_logic'] = json_decode($f['conditional_logic'], true);
@@ -336,14 +340,16 @@ try {
         $label = trim($f['label'] ?? 'Nouvelle question');
         $desc = trim($f['description'] ?? '');
         $fieldType = trim($f['field_type'] ?? 'text');
-        $isRequired = !empty($f['is_required']) ? 1 : 0;
+        $rawReq = $f['is_required'] ?? false;
+        $isRequired = ($rawReq === true || $rawReq === 1 || $rawReq === '1' || $rawReq === 'true') ? 1 : 0;
         $defVal = trim($f['default_value'] ?? '');
         $placeholder = trim($f['placeholder'] ?? '');
         $options = isset($f['options']) ? (is_string($f['options']) ? $f['options'] : json_encode($f['options'], JSON_UNESCAPED_UNICODE)) : null;
         $validation = isset($f['validation_rules']) ? (is_string($f['validation_rules']) ? $f['validation_rules'] : json_encode($f['validation_rules'], JSON_UNESCAPED_UNICODE)) : null;
         $cond = isset($f['conditional_logic']) ? (is_string($f['conditional_logic']) ? $f['conditional_logic'] : json_encode($f['conditional_logic'], JSON_UNESCAPED_UNICODE)) : null;
         $sortOrder = intval($f['sort_order'] ?? 1);
-        $isActive = isset($f['is_active']) ? ($f['is_active'] ? 1 : 0) : 1;
+        $rawAct = $f['is_active'] ?? true;
+        $isActive = ($rawAct === false || $rawAct === 0 || $rawAct === '0' || $rawAct === 'false') ? 0 : 1;
 
         if ($fieldId > 0) {
             $stmt = $pdo->prepare("UPDATE event_custom_fields SET field_key=?, label=?, description=?, field_type=?, is_required=?, default_value=?, placeholder=?, options=?, validation_rules=?, conditional_logic=?, sort_order=?, is_active=? WHERE id=? AND event_id=?");
