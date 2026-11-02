@@ -182,3 +182,4 @@ graph TD
 * **Exporter (Inscrits)** : Export propre au format CSV UTF-8 avec BOM (compatible Excel/Google Sheets).
 * **Importer (Inscrits)** : Importateur CSV pour charger une liste de participants et synchroniser le CRM en lot.
 * **Débordement de texte** : Correction intégrale par `break-all`, `break-words`, `overflow-hidden` et `max-w-lg` sur la modale de fiche participant et le networking wall.
+

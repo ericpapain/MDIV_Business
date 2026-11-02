@@ -176,3 +176,4 @@ CREATE TABLE IF NOT EXISTS `event_tombola_tickets` (
   CONSTRAINT `fk_tticket_event` FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_tticket_attendee` FOREIGN KEY (`attendee_id`) REFERENCES `event_attendees`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
