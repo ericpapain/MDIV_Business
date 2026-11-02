@@ -3,8 +3,9 @@
 
 import { useState } from 'react';
 import { EventAttendee } from '@/types/eventEngine';
-import { Calendar, MapPin, Building2, ShieldCheck, Sparkles, UserCheck, Printer, Download, QrCode } from 'lucide-react';
+import { Calendar, MapPin, Building2, ShieldCheck, UserCheck, Printer, Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { downloadQrCode } from '@/utils/downloadQrCode';
 import { toast } from 'sonner';
 
 interface DigitalBadgeCardProps {
@@ -23,6 +24,7 @@ export function DigitalBadgeCard({
   qrCodeUrl
 }: DigitalBadgeCardProps) {
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handlePrint = () => {
     setIsPrinting(true);
@@ -30,15 +32,18 @@ export function DigitalBadgeCard({
     setTimeout(() => setIsPrinting(false), 1000);
   };
 
-  const handleDownload = () => {
-    // Téléchargement direct du QR code ou invitation à imprimer
-    const a = document.createElement('a');
-    a.href = qrCodeUrl;
-    a.download = `pass-${attendee.ticket_code}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    toast.success("Votre QR Code d'accès a été téléchargé.");
+  const handleDownload = async () => {
+    if (!qrCodeUrl) return;
+    setIsDownloading(true);
+    try {
+      const attendeeName = `${attendee.first_name || ''} ${attendee.last_name || ''}`.trim() || attendee.ticket_code;
+      await downloadQrCode(qrCodeUrl, eventTitle, attendeeName);
+      toast.success("Votre QR Code d'accès a été téléchargé avec succès.");
+    } catch (err: any) {
+      toast.error("Erreur lors du téléchargement du QR code.");
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -165,9 +170,18 @@ export function DigitalBadgeCard({
         <Button
           type="button"
           onClick={handleDownload}
+          disabled={isDownloading}
           className="text-xs rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold flex items-center gap-1.5 cursor-pointer px-4 shadow"
         >
-          <Download size={14} /> Télécharger QR
+          {isDownloading ? (
+            <>
+              <Loader2 size={14} className="animate-spin" /> Téléchargement...
+            </>
+          ) : (
+            <>
+              <Download size={14} /> Télécharger QR
+            </>
+          )}
         </Button>
       </div>
     </div>
