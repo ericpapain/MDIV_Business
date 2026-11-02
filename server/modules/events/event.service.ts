@@ -828,6 +828,24 @@ export class EventService {
     return attendee;
   }
 
+  deleteAttendee(attendeeId: number): void {
+    this.ensureDbCollections();
+    const db = getDb();
+    if (db.event_attendees) {
+      db.event_attendees = db.event_attendees.filter((a: any) => Number(a.id) !== Number(attendeeId));
+    }
+    if (db.event_custom_field_answers) {
+      db.event_custom_field_answers = db.event_custom_field_answers.filter((a: any) => Number(a.attendee_id) !== Number(attendeeId));
+    }
+    if (db.event_pitches) {
+      db.event_pitches = db.event_pitches.filter((p: any) => Number(p.attendee_id) !== Number(attendeeId));
+    }
+    if (db.event_meeting_bookings) {
+      db.event_meeting_bookings = db.event_meeting_bookings.filter((b: any) => Number(b.attendee_id) !== Number(attendeeId));
+    }
+    saveDb();
+  }
+
   // --- 6. Pitch Entreprise (Candidatures, Modération & Showcase) ---
   getPitches(eventId: number, statusFilter?: string): EventPitch[] {
     this.ensureDbCollections();

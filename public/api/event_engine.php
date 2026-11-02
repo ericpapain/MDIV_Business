@@ -17,206 +17,246 @@ require_once __DIR__ . '/config.php';
 $pdo = get_db_connection();
 
 // Auto-initialisation résiliente des tables événementielles si absentes de la base MySQL
-function ensure_event_engine_tables(PDO $pdo) {
-    try {
-        $pdo->query("SELECT 1 FROM event_attendees LIMIT 1");
-        return; // Les tables existent déjà, zéro surcharge d'exécution
-    } catch (Throwable $e) {
-        // Table absente : création automatique de l'ensemble du schéma MDIV Event Engine
+function ensure_event_engine_tables(PDO $pdo, $force = false) {
+    if (!$force) {
         try {
-            // 1. Colonnes sur la table events
-            try { $pdo->exec("ALTER TABLE events ADD COLUMN features_config LONGTEXT DEFAULT NULL"); } catch (Throwable $t) {}
-            try { $pdo->exec("ALTER TABLE events ADD COLUMN max_attendees INT DEFAULT NULL"); } catch (Throwable $t) {}
-            try { $pdo->exec("ALTER TABLE events ADD COLUMN is_registration_open TINYINT(1) NOT NULL DEFAULT 1"); } catch (Throwable $t) {}
-
-            // 2. Table event_custom_fields
-            $pdo->exec("CREATE TABLE IF NOT EXISTS `event_custom_fields` (
-                `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `event_id` INT NOT NULL,
-                `field_key` VARCHAR(64) NOT NULL,
-                `label` VARCHAR(255) NOT NULL,
-                `description` VARCHAR(500) NULL,
-                `field_type` VARCHAR(50) NOT NULL DEFAULT 'text',
-                `is_required` TINYINT(1) NOT NULL DEFAULT 0,
-                `default_value` TEXT NULL,
-                `placeholder` VARCHAR(255) NULL,
-                `options` LONGTEXT NULL,
-                `validation_rules` LONGTEXT NULL,
-                `conditional_logic` LONGTEXT NULL,
-                `sort_order` INT NOT NULL DEFAULT 0,
-                `is_active` TINYINT(1) NOT NULL DEFAULT 1,
-                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                INDEX `idx_evt_fld_order` (`event_id`, `sort_order`, `is_active`),
-                INDEX `idx_evt_fld_key` (`event_id`, `field_key`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-
-            // 3. Table event_attendees
-            $pdo->exec("CREATE TABLE IF NOT EXISTS `event_attendees` (
-                `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `event_id` INT NOT NULL,
-                `client_id` INT NULL,
-                `first_name` VARCHAR(100) NOT NULL,
-                `last_name` VARCHAR(100) NOT NULL,
-                `email` VARCHAR(255) NOT NULL,
-                `phone` VARCHAR(50) NULL,
-                `company` VARCHAR(255) NULL,
-                `job_title` VARCHAR(255) NULL,
-                `sector` VARCHAR(150) NULL,
-                `pitch_text` TEXT NULL,
-                `expertises` LONGTEXT NULL,
-                `linkedin_url` VARCHAR(255) NULL,
-                `photo_url` VARCHAR(500) NULL,
-                `photo_status` VARCHAR(50) NOT NULL DEFAULT 'approved',
-                `ticket_code` VARCHAR(50) NOT NULL UNIQUE,
-                `status` VARCHAR(50) NOT NULL DEFAULT 'registered',
-                `checked_in_at` DATETIME NULL,
-                `checked_in_by` VARCHAR(100) NULL,
-                `badge_url` VARCHAR(500) NULL,
-                `networking_opt_in` TINYINT(1) NOT NULL DEFAULT 1,
-                `photo_consent` TINYINT(1) NOT NULL DEFAULT 1,
-                `gdpr_consent` TINYINT(1) NOT NULL DEFAULT 1,
-                `acquisition_source` VARCHAR(100) DEFAULT 'website',
-                `selected_activities` LONGTEXT NULL,
-                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX `idx_att_evt_status` (`event_id`, `status`),
-                INDEX `idx_att_email` (`email`),
-                INDEX `idx_att_ticket` (`ticket_code`),
-                INDEX `idx_att_client` (`client_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-
-            // 4. Table event_custom_field_answers
-            $pdo->exec("CREATE TABLE IF NOT EXISTS `event_custom_field_answers` (
-                `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-                `attendee_id` INT NOT NULL,
-                `field_id` INT NOT NULL,
-                `field_key` VARCHAR(64) NOT NULL,
-                `value_text` TEXT NULL,
-                `value_file_url` VARCHAR(500) NULL,
-                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE KEY `uk_att_fld` (`attendee_id`, `field_id`),
-                INDEX `idx_ans_fld` (`field_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-
-            // 5. Table event_pitches
-            $pdo->exec("CREATE TABLE IF NOT EXISTS `event_pitches` (
-                `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `event_id` INT NOT NULL,
-                `attendee_id` INT NULL,
-                `client_id` INT NULL,
-                `company_name` VARCHAR(255) NOT NULL,
-                `project_title` VARCHAR(255) NOT NULL,
-                `presentation` TEXT NOT NULL,
-                `needs` TEXT NULL,
-                `speaker_name` VARCHAR(255) NOT NULL,
-                `speaker_role` VARCHAR(150) NULL,
-                `speaker_bio` TEXT NULL,
-                `speaker_avatar` VARCHAR(500) NULL,
-                `deck_url` VARCHAR(500) NULL,
-                `deck_filename` VARCHAR(255) NULL,
-                `status` VARCHAR(50) NOT NULL DEFAULT 'pending',
-                `speaking_order` INT NOT NULL DEFAULT 99,
-                `pitch_time` VARCHAR(50) NULL,
-                `moderator_notes` TEXT NULL,
-                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX `idx_pitch_evt_status` (`event_id`, `status`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-
-            // 6. Tables B2B meeting slots & bookings
-            $pdo->exec("CREATE TABLE IF NOT EXISTS `event_meeting_slots` (
-                `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `event_id` INT NOT NULL,
-                `partner_id` INT NULL,
-                `partner_name` VARCHAR(255) NOT NULL,
-                `partner_role` VARCHAR(150) NULL,
-                `partner_company` VARCHAR(255) NULL,
-                `partner_avatar` VARCHAR(500) NULL,
-                `date` DATE NOT NULL,
-                `start_time` VARCHAR(10) NOT NULL,
-                `end_time` VARCHAR(10) NOT NULL,
-                `duration_minutes` INT NOT NULL DEFAULT 20,
-                `location_mode` VARCHAR(100) NOT NULL DEFAULT 'Table 1',
-                `capacity` INT NOT NULL DEFAULT 1,
-                `booked_count` INT NOT NULL DEFAULT 0,
-                `booking_qr_url` VARCHAR(500) NULL,
-                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                INDEX `idx_slot_evt_partner` (`event_id`, `partner_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-
-            $pdo->exec("CREATE TABLE IF NOT EXISTS `event_meeting_bookings` (
-                `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `event_id` INT NOT NULL,
-                `slot_id` INT NOT NULL,
-                `partner_id` INT NULL,
-                `partner_name` VARCHAR(255) NOT NULL,
-                `attendee_id` INT NULL,
-                `client_id` INT NULL,
-                `attendee_name` VARCHAR(255) NOT NULL,
-                `attendee_email` VARCHAR(255) NOT NULL,
-                `attendee_phone` VARCHAR(50) NULL,
-                `attendee_company` VARCHAR(255) NULL,
-                `status` VARCHAR(50) NOT NULL DEFAULT 'confirmed',
-                `notes` TEXT NULL,
-                `appointment_id` INT NULL,
-                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                `cancelled_at` DATETIME NULL,
-                INDEX `idx_mb_slot` (`slot_id`),
-                INDEX `idx_mb_evt` (`event_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-
-            // 7. Tables Tombola
-            $pdo->exec("CREATE TABLE IF NOT EXISTS `event_tombola_prizes` (
-                `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `event_id` INT NOT NULL,
-                `title` VARCHAR(255) NOT NULL,
-                `description` TEXT NULL,
-                `sponsor` VARCHAR(255) NULL,
-                `image_url` VARCHAR(500) NULL,
-                `winners_count` INT NOT NULL DEFAULT 1,
-                `sort_order` INT NOT NULL DEFAULT 1,
-                `drawn_count` INT NOT NULL DEFAULT 0,
-                `is_drawn` TINYINT(1) NOT NULL DEFAULT 0,
-                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-
-            $pdo->exec("CREATE TABLE IF NOT EXISTS `event_tombola_draws` (
-                `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `event_id` INT NOT NULL,
-                `prize_id` INT NOT NULL,
-                `prize_title` VARCHAR(255) NOT NULL,
-                `winner_attendee_id` INT NOT NULL,
-                `winner_name` VARCHAR(255) NOT NULL,
-                `winner_company` VARCHAR(255) NULL,
-                `winner_email` VARCHAR(255) NOT NULL,
-                `winner_ticket_code` VARCHAR(50) NOT NULL,
-                `draw_hash` VARCHAR(64) NOT NULL,
-                `drawn_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                INDEX `idx_draw_evt_prize` (`event_id`, `prize_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-
-            // 8. Table Régie & Diffusion Live
-            $pdo->exec("CREATE TABLE IF NOT EXISTS `event_live_states` (
-                `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `event_id` INT NOT NULL UNIQUE,
-                `current_scene` VARCHAR(50) NOT NULL DEFAULT 'welcome',
-                `is_auto_mode` TINYINT(1) NOT NULL DEFAULT 0,
-                `auto_interval_seconds` INT NOT NULL DEFAULT 25,
-                `ticker_message` TEXT NULL,
-                `ticker_enabled` TINYINT(1) NOT NULL DEFAULT 1,
-                `active_video_url` VARCHAR(500) NULL,
-                `is_video_playing` TINYINT(1) NOT NULL DEFAULT 0,
-                `spotlight_attendee_id` INT NULL,
-                `spotlight_speaker_name` VARCHAR(255) NULL,
-                `spotlight_qr_url` VARCHAR(500) NULL,
-                `spotlight_qr_title` VARCHAR(255) NULL,
-                `enabled_scenes` LONGTEXT NOT NULL,
-                `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-        } catch (Throwable $setupErr) {
-            error_log('Event engine auto-schema creation error: ' . $setupErr->getMessage());
+            $test = $pdo->query("SELECT 1 FROM `event_attendees` LIMIT 1");
+            if ($test) return; // Tables déjà créées
+        } catch (Throwable $e) {
+            // Continuer pour créer les tables
         }
     }
+
+    // 1. Colonnes sécurisées sur la table events (évite toute erreur de syntaxe IF NOT EXISTS)
+    try {
+        $existingCols = [];
+        $colStmt = $pdo->query("SHOW COLUMNS FROM `events`");
+        if ($colStmt) {
+            while ($c = $colStmt->fetch(PDO::FETCH_ASSOC)) {
+                $existingCols[] = strtolower($c['Field']);
+            }
+        }
+        if (!in_array('features_config', $existingCols)) {
+            try { $pdo->exec("ALTER TABLE `events` ADD `features_config` LONGTEXT DEFAULT NULL"); } catch (Throwable $t) {}
+        }
+        if (!in_array('max_attendees', $existingCols)) {
+            try { $pdo->exec("ALTER TABLE `events` ADD `max_attendees` INT DEFAULT NULL"); } catch (Throwable $t) {}
+        }
+        if (!in_array('is_registration_open', $existingCols)) {
+            try { $pdo->exec("ALTER TABLE `events` ADD `is_registration_open` TINYINT(1) NOT NULL DEFAULT 1"); } catch (Throwable $t) {}
+        }
+    } catch (Throwable $colErr) {}
+
+    // 2. Table event_custom_fields
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `event_custom_fields` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `event_id` INT NOT NULL,
+            `field_key` VARCHAR(64) NOT NULL,
+            `label` VARCHAR(255) NOT NULL,
+            `description` VARCHAR(500) NULL,
+            `field_type` VARCHAR(50) NOT NULL DEFAULT 'text',
+            `is_required` TINYINT(1) NOT NULL DEFAULT 0,
+            `default_value` TEXT NULL,
+            `placeholder` VARCHAR(255) NULL,
+            `options` LONGTEXT NULL,
+            `validation_rules` LONGTEXT NULL,
+            `conditional_logic` LONGTEXT NULL,
+            `sort_order` INT NOT NULL DEFAULT 0,
+            `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_evt_fld_order` (`event_id`, `sort_order`, `is_active`),
+            INDEX `idx_evt_fld_key` (`event_id`, `field_key`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Throwable $e) {
+        error_log("event_custom_fields creation: " . $e->getMessage());
+    }
+
+    // 3. Table event_attendees (DATETIME universel compatible MySQL 5.5 à 8.0+)
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `event_attendees` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `event_id` INT NOT NULL,
+            `client_id` INT NULL,
+            `first_name` VARCHAR(100) NOT NULL,
+            `last_name` VARCHAR(100) NOT NULL,
+            `email` VARCHAR(255) NOT NULL,
+            `phone` VARCHAR(50) NULL,
+            `company` VARCHAR(255) NULL,
+            `job_title` VARCHAR(255) NULL,
+            `sector` VARCHAR(150) NULL,
+            `pitch_text` TEXT NULL,
+            `expertises` LONGTEXT NULL,
+            `linkedin_url` VARCHAR(255) NULL,
+            `photo_url` VARCHAR(500) NULL,
+            `photo_status` VARCHAR(50) NOT NULL DEFAULT 'approved',
+            `ticket_code` VARCHAR(50) NOT NULL UNIQUE,
+            `status` VARCHAR(50) NOT NULL DEFAULT 'registered',
+            `checked_in_at` DATETIME NULL,
+            `checked_in_by` VARCHAR(100) NULL,
+            `badge_url` VARCHAR(500) NULL,
+            `networking_opt_in` TINYINT(1) NOT NULL DEFAULT 1,
+            `photo_consent` TINYINT(1) NOT NULL DEFAULT 1,
+            `gdpr_consent` TINYINT(1) NOT NULL DEFAULT 1,
+            `acquisition_source` VARCHAR(100) DEFAULT 'website',
+            `selected_activities` LONGTEXT NULL,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME NULL,
+            INDEX `idx_att_evt_status` (`event_id`, `status`),
+            INDEX `idx_att_email` (`email`),
+            INDEX `idx_att_ticket` (`ticket_code`),
+            INDEX `idx_att_client` (`client_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Throwable $e) {
+        error_log("event_attendees creation: " . $e->getMessage());
+    }
+
+    // 4. Table event_custom_field_answers
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `event_custom_field_answers` (
+            `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+            `attendee_id` INT NOT NULL,
+            `field_id` INT NOT NULL,
+            `field_key` VARCHAR(64) NOT NULL,
+            `value_text` TEXT NULL,
+            `value_file_url` VARCHAR(500) NULL,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_ans_att_fld` (`attendee_id`, `field_id`),
+            INDEX `idx_ans_fld` (`field_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Throwable $e) {
+        error_log("event_custom_field_answers creation: " . $e->getMessage());
+    }
+
+    // 5. Table event_pitches
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `event_pitches` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `event_id` INT NOT NULL,
+            `attendee_id` INT NULL,
+            `client_id` INT NULL,
+            `company_name` VARCHAR(255) NOT NULL,
+            `project_title` VARCHAR(255) NOT NULL,
+            `presentation` TEXT NOT NULL,
+            `needs` TEXT NULL,
+            `speaker_name` VARCHAR(255) NOT NULL,
+            `speaker_role` VARCHAR(150) NULL,
+            `speaker_bio` TEXT NULL,
+            `speaker_avatar` VARCHAR(500) NULL,
+            `deck_url` VARCHAR(500) NULL,
+            `deck_filename` VARCHAR(255) NULL,
+            `status` VARCHAR(50) NOT NULL DEFAULT 'pending',
+            `speaking_order` INT NOT NULL DEFAULT 99,
+            `pitch_time` VARCHAR(50) NULL,
+            `moderator_notes` TEXT NULL,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME NULL,
+            INDEX `idx_pitch_evt_status` (`event_id`, `status`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Throwable $e) {
+        error_log("event_pitches creation: " . $e->getMessage());
+    }
+
+    // 6. Tables B2B meeting slots & bookings
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `event_meeting_slots` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `event_id` INT NOT NULL,
+            `partner_id` INT NULL,
+            `partner_name` VARCHAR(255) NOT NULL,
+            `partner_role` VARCHAR(150) NULL,
+            `partner_company` VARCHAR(255) NULL,
+            `partner_avatar` VARCHAR(500) NULL,
+            `date` DATE NOT NULL,
+            `start_time` VARCHAR(10) NOT NULL,
+            `end_time` VARCHAR(10) NOT NULL,
+            `duration_minutes` INT NOT NULL DEFAULT 20,
+            `location_mode` VARCHAR(100) NOT NULL DEFAULT 'Table 1',
+            `capacity` INT NOT NULL DEFAULT 1,
+            `booked_count` INT NOT NULL DEFAULT 0,
+            `booking_qr_url` VARCHAR(500) NULL,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_slot_evt_partner` (`event_id`, `partner_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Throwable $e) {}
+
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `event_meeting_bookings` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `event_id` INT NOT NULL,
+            `slot_id` INT NOT NULL,
+            `partner_id` INT NULL,
+            `partner_name` VARCHAR(255) NOT NULL,
+            `attendee_id` INT NULL,
+            `client_id` INT NULL,
+            `attendee_name` VARCHAR(255) NOT NULL,
+            `attendee_email` VARCHAR(255) NOT NULL,
+            `attendee_phone` VARCHAR(50) NULL,
+            `attendee_company` VARCHAR(255) NULL,
+            `status` VARCHAR(50) NOT NULL DEFAULT 'confirmed',
+            `notes` TEXT NULL,
+            `appointment_id` INT NULL,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `cancelled_at` DATETIME NULL,
+            INDEX `idx_mb_slot` (`slot_id`),
+            INDEX `idx_mb_evt` (`event_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Throwable $e) {}
+
+    // 7. Tables Tombola
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `event_tombola_prizes` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `event_id` INT NOT NULL,
+            `title` VARCHAR(255) NOT NULL,
+            `description` TEXT NULL,
+            `sponsor` VARCHAR(255) NULL,
+            `image_url` VARCHAR(500) NULL,
+            `winners_count` INT NOT NULL DEFAULT 1,
+            `sort_order` INT NOT NULL DEFAULT 1,
+            `drawn_count` INT NOT NULL DEFAULT 0,
+            `is_drawn` TINYINT(1) NOT NULL DEFAULT 0,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Throwable $e) {}
+
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `event_tombola_draws` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `event_id` INT NOT NULL,
+            `prize_id` INT NOT NULL,
+            `prize_title` VARCHAR(255) NOT NULL,
+            `winner_attendee_id` INT NOT NULL,
+            `winner_name` VARCHAR(255) NOT NULL,
+            `winner_company` VARCHAR(255) NULL,
+            `winner_email` VARCHAR(255) NOT NULL,
+            `winner_ticket_code` VARCHAR(50) NOT NULL,
+            `draw_hash` VARCHAR(64) NOT NULL,
+            `drawn_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_draw_evt_prize` (`event_id`, `prize_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Throwable $e) {}
+
+    // 8. Table Régie & Diffusion Live
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `event_live_states` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `event_id` INT NOT NULL UNIQUE,
+            `current_scene` VARCHAR(50) NOT NULL DEFAULT 'welcome',
+            `is_auto_mode` TINYINT(1) NOT NULL DEFAULT 0,
+            `auto_interval_seconds` INT NOT NULL DEFAULT 25,
+            `ticker_message` TEXT NULL,
+            `ticker_enabled` TINYINT(1) NOT NULL DEFAULT 1,
+            `active_video_url` VARCHAR(500) NULL,
+            `is_video_playing` TINYINT(1) NOT NULL DEFAULT 0,
+            `spotlight_attendee_id` INT NULL,
+            `spotlight_speaker_name` VARCHAR(255) NULL,
+            `spotlight_qr_url` VARCHAR(500) NULL,
+            `spotlight_qr_title` VARCHAR(255) NULL,
+            `enabled_scenes` LONGTEXT NOT NULL,
+            `updated_at` DATETIME NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Throwable $e) {}
 }
 ensure_event_engine_tables($pdo);
 $action = $_GET['action'] ?? '';
@@ -410,6 +450,7 @@ try {
 
     // 3. INSCRIPTION PUBLIQUE ET SYNCHRONISATION CRM SANS DOUBLON
     if ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        ensure_event_engine_tables($pdo);
         $eventId = intval($data['event_id'] ?? 0);
         if ($eventId <= 0) throw new Exception("event_id requis");
 
@@ -738,6 +779,57 @@ L'équipe d'organisation MDIV Network & BNE.";
             ON DUPLICATE KEY UPDATE current_scene = VALUES(current_scene), is_auto_mode = VALUES(is_auto_mode), auto_interval_seconds = VALUES(auto_interval_seconds), ticker_message = VALUES(ticker_message), ticker_enabled = VALUES(ticker_enabled), active_video_url = VALUES(active_video_url), is_video_playing = VALUES(is_video_playing), spotlight_attendee_id = VALUES(spotlight_attendee_id), spotlight_speaker_name = VALUES(spotlight_speaker_name), spotlight_qr_url = VALUES(spotlight_qr_url), spotlight_qr_title = VALUES(spotlight_qr_title), enabled_scenes = VALUES(enabled_scenes)");
         $stmt->execute([$eventId, $scene, $auto, $interval, $tickerMsg, $tickerEn, $videoUrl, $videoPlay, $spotAttId, $spotSpk, $spotQr, $spotQrTitle, $scenes]);
         echo json_encode(['success' => true, 'message' => 'État live mis à jour.']);
+        exit();
+    }
+
+    
+    // Action: Diagnostic et migration du schéma
+    if ($action === 'init_schema' || $action === 'migrate_tables') {
+        ensure_event_engine_tables($pdo, true);
+        $tables = ['events', 'event_attendees', 'event_custom_fields', 'event_custom_field_answers', 'event_pitches', 'event_meeting_slots', 'event_meeting_bookings', 'event_tombola_prizes', 'event_tombola_draws', 'event_live_states'];
+        $report = [];
+        foreach ($tables as $t) {
+            try {
+                $check = $pdo->query("SELECT COUNT(*) FROM `$t`");
+                $report[$t] = ['status' => 'ok', 'count' => intval($check->fetchColumn())];
+            } catch (Throwable $err) {
+                $report[$t] = ['status' => 'missing_or_error', 'error' => $err->getMessage()];
+            }
+        }
+        echo json_encode(['success' => true, 'tables' => $report, 'message' => "Schéma vérifié et tables créées avec succès."]);
+        exit();
+    }
+
+    // Action: Supprimer définitivement un participant (CRM & Tables événementielles)
+    if ($action === 'delete_attendee' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $attendeeId = intval($data['attendee_id'] ?? ($data['id'] ?? ($_GET['attendee_id'] ?? ($_GET['id'] ?? 0))));
+        if ($attendeeId <= 0) throw new Exception("attendee_id requis");
+
+        // 1. Supprimer les réponses personnalisées
+        try {
+            $pdo->prepare("DELETE FROM event_custom_field_answers WHERE attendee_id = ?")->execute([$attendeeId]);
+        } catch (Throwable $e) {}
+
+        // 2. Supprimer les réservations de meeting B2B
+        try {
+            $pdo->prepare("DELETE FROM event_meeting_bookings WHERE attendee_id = ?")->execute([$attendeeId]);
+        } catch (Throwable $e) {}
+
+        // 3. Supprimer les candidatures pitch liées
+        try {
+            $pdo->prepare("DELETE FROM event_pitches WHERE attendee_id = ?")->execute([$attendeeId]);
+        } catch (Throwable $e) {}
+
+        // 4. Supprimer les tirages tombola liés
+        try {
+            $pdo->prepare("DELETE FROM event_tombola_draws WHERE winner_attendee_id = ?")->execute([$attendeeId]);
+        } catch (Throwable $e) {}
+
+        // 5. Supprimer l'inscription dans event_attendees
+        $stmtDel = $pdo->prepare("DELETE FROM event_attendees WHERE id = ?");
+        $stmtDel->execute([$attendeeId]);
+
+        echo json_encode(['success' => true, 'message' => "Inscription supprimée avec succès du CRM."]);
         exit();
     }
 
