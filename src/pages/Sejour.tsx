@@ -52,16 +52,18 @@ export default function Sejour() {
             return (
               <div key={e.id} className="luxe-card rounded-sm overflow-hidden group flex flex-col h-full min-h-[560px]">
                 {e.image_url && (
-                  <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image_url)}>
-                    <img src={e.image_url} alt={isEn && e.title_en ? e.title_en : e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-                    {/* Badge prix */}
-                    {e.price && (
-                      <div className="absolute top-4 left-4 bg-gold/90 text-background px-3 py-1.5 rounded-sm text-sm font-bold shadow-lg">
-                        {e.price}
+                  <div className="aspect-[4/3] p-[2mm] overflow-hidden relative shrink-0 cursor-zoom-in bg-black/40 border-b border-gold/15" onClick={() => setSelectedImage(e.image_url)}>
+                    <div className="w-full h-full overflow-hidden relative rounded-xs border border-gold/20">
+                      <img src={e.image_url} alt={isEn && e.title_en ? e.title_en : e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                      {/* Badge prix */}
+                      {e.price && (
+                        <div className="absolute top-2.5 left-2.5 bg-gold/90 text-background px-3 py-1.5 rounded-sm text-sm font-bold shadow-lg">
+                          {e.price}
+                        </div>
+                      )}
+                      <div className="absolute top-2.5 right-2.5 glass-strong px-3 py-1.5 rounded-sm text-[10px] uppercase tracking-[0.2em] text-gold-light flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-soft" /> {t("sejour.upcoming.open")}
                       </div>
-                    )}
-                    <div className="absolute top-4 right-4 glass-strong px-3 py-1.5 rounded-sm text-[10px] uppercase tracking-[0.2em] text-gold-light flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-soft" /> {t("sejour.upcoming.open")}
                     </div>
                   </div>
                 )}
@@ -129,8 +131,10 @@ export default function Sejour() {
           {localizedEvents.past.map((e: any) => (
             <div key={e.id} className="luxe-card rounded-sm overflow-hidden group opacity-90 hover:opacity-100 flex flex-col relative h-full min-h-[560px]">
                 {e.image_url && (
-                  <div className="aspect-[4/3] overflow-hidden relative shrink-0 cursor-zoom-in" onClick={() => setSelectedImage(e.image_url)}>
-                    <img src={e.image_url} alt={isEn && e.title_en ? e.title_en : e.title} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                  <div className="aspect-[4/3] p-[2mm] overflow-hidden relative shrink-0 cursor-zoom-in bg-black/40 border-b border-gold/15" onClick={() => setSelectedImage(e.image_url)}>
+                    <div className="w-full h-full overflow-hidden relative rounded-xs border border-gold/20">
+                      <img src={e.image_url} alt={isEn && e.title_en ? e.title_en : e.title} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                    </div>
                   </div>
                 )}
                 <div className="p-6 flex flex-col flex-1">
