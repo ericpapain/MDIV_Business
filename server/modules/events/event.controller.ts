@@ -126,6 +126,14 @@ export class EventController {
         return sendJson(res, 200, { success: true, data: attendees });
       }
 
+      // --- SUPPRESSION D'INSCRIPTION / PARTICIPANT ---
+      if (action === 'delete_attendee' && method === 'POST') {
+        const attendeeId = parsed.fields?.attendee_id || parsed.fields?.id || urlObj.searchParams.get('id');
+        if (!attendeeId) throw new Error("attendee_id requis");
+        eventService.deleteAttendee(Number(attendeeId));
+        return sendJson(res, 200, { success: true, message: "Inscription supprimée avec succès" });
+      }
+
       // --- ÉMARGEMENT / CHECK-IN ---
       if (action === 'check_in' && method === 'POST') {
         const ticketCode = parsed.fields?.ticket_code;

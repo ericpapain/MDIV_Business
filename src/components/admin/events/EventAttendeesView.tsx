@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { EventAttendee } from '@/types/eventEngine';
 import { 
-  Users, Search, Download, CheckCircle2, Clock, XCircle, 
+  Users, Search, Download, Trash2, CheckCircle2, Clock, XCircle, 
   ExternalLink, QrCode, Filter, UserCheck, Eye, Mail, Phone, 
   Building2, Camera, ShieldCheck, RefreshCw, X, Upload, UserMinus, Percent
 } from 'lucide-react';
@@ -37,6 +37,54 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
       return json.data || [];
     }
   });
+
+  
+  // Suppression d'un participant dans le CRM
+  const deleteAttendeeMutation = useMutation({
+    mutationFn: async (attendeeId: number) => {
+      const res = await fetch('/api/event_engine.php?action=delete_attendee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attendee_id: attendeeId })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Impossible de supprimer l'inscription");
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Inscription supprimée avec succès du CRM.");
+      queryClient.invalidateQueries({ queryKey: ['admin-attendees'] });
+      setSelectedAttendee(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Erreur lors de la suppression de l'inscription");
+    }
+  });
+
+  // Téléchargement sécurisé de la photo du participant en HD (usage vidéo / cartes PPTX)
+  const handleDownloadPhoto = async (photoUrl: string, attendeeName: string) => {
+    try {
+      toast.info("Téléchargement de la photo...");
+      const response = await fetch(photoUrl);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      const cleanName = attendeeName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      a.download = `photo_${cleanName}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+      toast.success("Photo téléchargée avec succès !");
+    } catch (e) {
+      const a = document.createElement('a');
+      a.href = photoUrl;
+      a.target = '_blank';
+      a.download = `photo_${attendeeName}.jpg`;
+      a.click();
+    }
+  };
 
   const checkInMutation = useMutation({
     mutationFn: async (ticketCode: string) => {
@@ -311,14 +359,14 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
         <div className="border border-border rounded-2xl overflow-hidden bg-card shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
-              <thead className="bg-muted/40 text-muted-foreground border-b border-border uppercase tracking-wider text-[10px]">
+              <thead className="bg-slate-900 border-b border-border/80 uppercase tracking-wider text-[11px] font-bold text-white shadow-xs">
                 <tr>
-                  <th className="py-3 px-4">Participant</th>
-                  <th className="py-3 px-4">Entreprise & Rôle</th>
-                  <th className="py-3 px-4">Coordonnées</th>
-                  <th className="py-3 px-4">Billet & Statut</th>
-                  <th className="py-3 px-4">Émargement</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3.5 px-4 text-white font-bold tracking-wider">Participant</th>
+                  <th className="py-3.5 px-4 text-white font-bold tracking-wider">Entreprise & Rôle</th>
+                  <th className="py-3.5 px-4 text-white font-bold tracking-wider">Coordonnées</th>
+                  <th className="py-3.5 px-4 text-white font-bold tracking-wider">Billet & Statut</th>
+                  <th className="py-3.5 px-4 text-white font-bold tracking-wider">Émargement</th>
+                  <th className="py-3.5 px-4 text-right text-white font-bold tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -409,16 +457,41 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                         )}
                       </td>
 
-                      {/* Action Détail */}
+                      {/* Actions : Détail, Télécharger Photo HD, Supprimer */}
                       <td className="py-3 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedAttendee(attendee)}
-                          className="p-1.5 text-muted-foreground hover:text-amber-400 cursor-pointer transition-colors"
-                          title="Voir la fiche complète & réponses"
-                        >
-                          <Eye size={15} />
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          {attendee.photo_url && (
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadPhoto(attendee.photo_url!, `${attendee.first_name}_${attendee.last_name}`)}
+                              className="p-1.5 text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg cursor-pointer transition-colors"
+                              title="Télécharger la photo du participant en HD (PPTX / Vidéo)"
+                            >
+                              <Download size={15} />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedAttendee(attendee)}
+                            className="p-1.5 text-muted-foreground hover:text-amber-400 hover:bg-amber-500/10 rounded-lg cursor-pointer transition-colors"
+                            title="Voir la fiche complète & réponses"
+                          >
+                            <Eye size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (window.confirm(`Confirmez-vous la suppression définitive de l'inscription de ${attendee.first_name} ${attendee.last_name} ?\n\nCette action retirera le participant du CRM, du listing et supprimera ses réponses.`)) {
+                                deleteAttendeeMutation.mutate(attendee.id);
+                              }
+                            }}
+                            disabled={deleteAttendeeMutation.isPending}
+                            className="p-1.5 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors"
+                            title="Supprimer définitivement cette inscription"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -473,11 +546,34 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                 </div>
               </div>
 
-              {/* Pitch */}
+              {/* Pitch de présentation entreprise avec protection anti-débordement totale */}
               {selectedAttendee.pitch_text && (
-                <div className="p-3 bg-card border border-border rounded-xl overflow-hidden w-full">
-                  <div className="font-bold text-foreground mb-1 text-[11px]">Pitch de présentation entreprise :</div>
-                  <p className="text-muted-foreground italic leading-relaxed break-words break-all [overflow-wrap:anywhere] [word-break:break-word]">« {selectedAttendee.pitch_text} »</p>
+                <div className="p-3.5 bg-card/60 border border-border rounded-xl w-full min-w-0 max-w-full overflow-hidden">
+                  <div className="font-bold text-foreground mb-1.5 text-[11px]">Pitch de présentation entreprise :</div>
+                  <p className="text-muted-foreground italic leading-relaxed break-all break-words [word-break:break-all] [overflow-wrap:anywhere] max-w-full overflow-hidden">
+                    « {selectedAttendee.pitch_text} »
+                  </p>
+                </div>
+              )}
+
+              {/* Téléchargement direct photo HD si disponible */}
+              {selectedAttendee.photo_url && (
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Camera size={16} className="text-emerald-400" />
+                    <div>
+                      <div className="text-[11px] font-semibold text-emerald-300">Photo HD du participant</div>
+                      <div className="text-[10px] text-muted-foreground">Format réutilisable pour cartes de visite, trombinoscope & présentations PPTX</div>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => handleDownloadPhoto(selectedAttendee.photo_url!, `${selectedAttendee.first_name}_${selectedAttendee.last_name}`)}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] rounded-lg px-3 py-1 h-7"
+                  >
+                    <Download size={13} className="mr-1.5" /> Télécharger HD
+                  </Button>
                 </div>
               )}
 
@@ -518,7 +614,20 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-border flex justify-end">
+              <div className="pt-3 border-t border-border flex items-center justify-between">
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (window.confirm(`Confirmez-vous la suppression définitive de l'inscription de ${selectedAttendee.first_name} ${selectedAttendee.last_name} ?`)) {
+                      deleteAttendeeMutation.mutate(selectedAttendee.id);
+                    }
+                  }}
+                  disabled={deleteAttendeeMutation.isPending}
+                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 text-xs rounded-xl"
+                >
+                  <Trash2 size={13} className="mr-1.5" /> Supprimer l'inscription
+                </Button>
                 <Button 
                   type="button" 
                   onClick={() => setSelectedAttendee(null)}
