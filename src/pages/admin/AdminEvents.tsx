@@ -599,133 +599,135 @@ export default function AdminEvents() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
           <div className="relative w-full max-w-6xl max-h-[92vh] bg-background border border-gold/30 rounded-lg shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             
-            {/* Modal Header */}
-            <div className="p-6 border-b border-border/40 bg-muted/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="px-2 py-0.5 bg-gold/15 text-gold text-[10px] font-mono rounded tracking-wider uppercase">MDIV EVENT ENGINE</span>
-                  <span className="text-xs text-muted-foreground font-mono">ID #{selectedEngineEvent.id}</span>
+            {/* Modal Header & Navigation Tabs intégrés dans le même conteneur (shrink-0, toujours visible et solidaire) */}
+            <div className="border-b border-border/40 bg-muted/20 shrink-0">
+              <div className="p-6 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2 py-0.5 bg-gold/15 text-gold text-[10px] font-mono rounded tracking-wider uppercase">MDIV EVENT ENGINE</span>
+                    <span className="text-xs text-muted-foreground font-mono">ID #{selectedEngineEvent.id}</span>
+                  </div>
+                  <h2 className="font-display text-2xl text-foreground flex items-center gap-3">
+                    {selectedEngineEvent.title}
+                  </h2>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                    <span className="flex items-center gap-1"><Calendar size={13} className="text-gold" /> {new Date(selectedEngineEvent.date).toLocaleDateString()} à {new Date(selectedEngineEvent.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span className="flex items-center gap-1"><MapPin size={13} className="text-gold" /> {selectedEngineEvent.location}</span>
+                  </div>
                 </div>
-                <h2 className="font-display text-2xl text-foreground flex items-center gap-3">
-                  {selectedEngineEvent.title}
-                </h2>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                  <span className="flex items-center gap-1"><Calendar size={13} className="text-gold" /> {new Date(selectedEngineEvent.date).toLocaleDateString()} à {new Date(selectedEngineEvent.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  <span className="flex items-center gap-1"><MapPin size={13} className="text-gold" /> {selectedEngineEvent.location}</span>
+
+                {/* Action Buttons & Close */}
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`/evenements/${selectedEngineEvent.id}/inscription`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-1.5 rounded-sm bg-muted/40 hover:bg-gold/10 text-muted-foreground hover:text-gold border border-border/60 text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <ExternalLink size={13} /> Page publique
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedEngineEvent(null)}
+                    className="p-2 rounded-sm bg-muted/40 hover:bg-destructive/15 text-muted-foreground hover:text-destructive border border-border/60 transition-colors cursor-pointer"
+                    title="Fermer"
+                  >
+                    <X size={16} />
+                  </button>
                 </div>
               </div>
 
-              {/* Action Buttons & Close */}
-              <div className="flex items-center gap-2">
-                <a
-                  href={`/evenements/${selectedEngineEvent.id}/inscription`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1.5 rounded-sm bg-muted/40 hover:bg-gold/10 text-muted-foreground hover:text-gold border border-border/60 text-xs flex items-center gap-1.5 transition-colors"
-                >
-                  <ExternalLink size={13} /> Page publique
-                </a>
+              {/* Navigation Tabs (Directement dans le même div parent pour ne jamais être masqué) */}
+              <div className="flex border-t border-border/30 bg-muted/10 px-6 gap-2 overflow-x-auto scrollbar-thin">
                 <button
                   type="button"
-                  onClick={() => setSelectedEngineEvent(null)}
-                  className="p-2 rounded-sm bg-muted/40 hover:bg-destructive/15 text-muted-foreground hover:text-destructive border border-border/60 transition-colors"
-                  title="Fermer"
+                  onClick={() => setEngineTab("features")}
+                  className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+                    engineTab === "features"
+                      ? "border-gold text-gold bg-gold/10 font-bold"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-gold/30"
+                  }`}
                 >
-                  <X size={16} />
+                  <Layers size={14} /> 1. Catalogue
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEngineTab("fields")}
+                  className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+                    engineTab === "fields"
+                      ? "border-gold text-gold bg-gold/10 font-bold"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-gold/30"
+                  }`}
+                >
+                  <FileText size={14} /> 2. Champs & Questions
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEngineTab("attendees")}
+                  className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+                    engineTab === "attendees"
+                      ? "border-gold text-gold bg-gold/10 font-bold"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-gold/30"
+                  }`}
+                >
+                  <Users size={14} /> 3. Inscrits & CRM
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEngineTab("pitches")}
+                  className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+                    engineTab === "pitches"
+                      ? "border-gold text-gold bg-gold/10 font-bold"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-gold/30"
+                  }`}
+                >
+                  <Megaphone size={14} /> 4. Pitchs Entreprises
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEngineTab("meetings")}
+                  className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+                    engineTab === "meetings"
+                      ? "border-gold text-gold bg-gold/10 font-bold"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-gold/30"
+                  }`}
+                >
+                  <CalendarCheck size={14} /> 5. Rendez-vous B2B
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEngineTab("tombola")}
+                  className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+                    engineTab === "tombola"
+                      ? "border-gold text-gold bg-gold/10 font-bold"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-gold/30"
+                  }`}
+                >
+                  <Gift size={14} /> 6. Tombola
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEngineTab("regie")}
+                  className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+                    engineTab === "regie"
+                      ? "border-rose-500 text-rose-400 bg-rose-500/15 font-bold"
+                      : "border-transparent text-muted-foreground hover:text-rose-400 hover:border-rose-500/30"
+                  }`}
+                >
+                  <Radio size={14} className="text-rose-500 animate-pulse" /> 7. Régie LIVE (1080p)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEngineTab("links")}
+                  className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+                    engineTab === "links"
+                      ? "border-gold text-gold bg-gold/10 font-bold"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-gold/30"
+                  }`}
+                >
+                  <Sparkles size={14} /> 8. Diffusion & Liens
                 </button>
               </div>
-            </div>
-
-            {/* Navigation Tabs */}
-            <div className="flex border-b border-border/40 bg-muted/10 px-6 gap-2 overflow-x-auto">
-              <button
-                type="button"
-                onClick={() => setEngineTab("features")}
-                className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap ${
-                  engineTab === "features"
-                    ? "border-gold text-gold bg-gold/5"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Layers size={14} /> 1. Catalogue
-              </button>
-              <button
-                type="button"
-                onClick={() => setEngineTab("fields")}
-                className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap ${
-                  engineTab === "fields"
-                    ? "border-gold text-gold bg-gold/5"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <FileText size={14} /> 2. Champs & Questions
-              </button>
-              <button
-                type="button"
-                onClick={() => setEngineTab("attendees")}
-                className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap ${
-                  engineTab === "attendees"
-                    ? "border-gold text-gold bg-gold/5"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Users size={14} /> 3. Inscrits & CRM
-              </button>
-              <button
-                type="button"
-                onClick={() => setEngineTab("pitches")}
-                className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap ${
-                  engineTab === "pitches"
-                    ? "border-gold text-gold bg-gold/5"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Megaphone size={14} /> 4. Pitchs Entreprises
-              </button>
-              <button
-                type="button"
-                onClick={() => setEngineTab("meetings")}
-                className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap ${
-                  engineTab === "meetings"
-                    ? "border-gold text-gold bg-gold/5"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <CalendarCheck size={14} /> 5. Rendez-vous B2B
-              </button>
-              <button
-                type="button"
-                onClick={() => setEngineTab("tombola")}
-                className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap ${
-                  engineTab === "tombola"
-                    ? "border-gold text-gold bg-gold/5"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Gift size={14} /> 6. Tombola
-              </button>
-              <button
-                type="button"
-                onClick={() => setEngineTab("regie")}
-                className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap ${
-                  engineTab === "regie"
-                    ? "border-rose-500 text-rose-400 bg-rose-500/10 font-bold"
-                    : "border-transparent text-muted-foreground hover:text-rose-400"
-                }`}
-              >
-                <Radio size={14} className="text-rose-500 animate-pulse" /> 7. Régie LIVE (1080p)
-              </button>
-              <button
-                type="button"
-                onClick={() => setEngineTab("links")}
-                className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-all whitespace-nowrap ${
-                  engineTab === "links"
-                    ? "border-gold text-gold bg-gold/5"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Sparkles size={14} /> 8. Diffusion & Liens
-              </button>
             </div>
 
             {/* Modal Body */}
