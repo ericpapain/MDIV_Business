@@ -79,32 +79,32 @@ export default function Events() {
 
                       <div className="mt-auto pt-5 flex flex-col gap-3">
                         {/* Bouton Réserver - MDIV EVENT ENGINE */}
-                        <div className="flex flex-wrap items-center gap-2.5">
+                        <div className="flex items-center gap-2 flex-nowrap w-full">
                           {e.features_config?.online_registration?.enabled !== false ? (
                             <button 
                               type="button"
                               onClick={() => setRegistrationEventId(e.id)} 
-                              className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit cursor-pointer transition-transform hover:scale-[1.02]"
+                              className="btn-gold flex-1 min-w-0 px-3.5 py-2.5 text-[10.5px] uppercase tracking-[0.16em] rounded-sm flex items-center justify-center gap-1.5 cursor-pointer transition-transform hover:scale-[1.02] whitespace-nowrap"
                             >
-                              <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                              <Ticket size={12} className="shrink-0" /> <span className="truncate">{isEn ? "Book a seat" : "Réserver une place"}</span> <ArrowRight size={11} className="shrink-0" />
                             </button>
                           ) : e.billetterie_url ? (
-                            <a href={e.billetterie_url} target="_blank" rel="noopener noreferrer" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
-                              <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                            <a href={e.billetterie_url} target="_blank" rel="noopener noreferrer" className="btn-gold flex-1 min-w-0 px-3.5 py-2.5 text-[10.5px] uppercase tracking-[0.16em] rounded-sm flex items-center justify-center gap-1.5 whitespace-nowrap">
+                              <Ticket size={12} className="shrink-0" /> <span className="truncate">{isEn ? "Book a seat" : "Réserver une place"}</span> <ArrowRight size={11} className="shrink-0" />
                             </a>
                           ) : (
-                            <Link to={e.id ? `/evenements/${e.id}/inscription` : "/evenements"} className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
-                              <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                            <Link to={e.id ? `/evenements/${e.id}/inscription` : "/evenements"} className="btn-gold flex-1 min-w-0 px-3.5 py-2.5 text-[10.5px] uppercase tracking-[0.16em] rounded-sm flex items-center justify-center gap-1.5 whitespace-nowrap">
+                              <Ticket size={12} className="shrink-0" /> <span className="truncate">{isEn ? "Book a seat" : "Réserver une place"}</span> <ArrowRight size={11} className="shrink-0" />
                             </Link>
                           )}
 
-                          {/* Bouton vers la page officielle de l'événement */}
+                          {/* Bouton vers la page officielle de l'événement aligné sur la même ligne */}
                           <Link 
                             to={`/evenements/${e.id}`}
-                            className="px-4 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-1.5 w-fit border border-gold/40 text-gold hover:bg-gold/15 hover:border-gold transition-all duration-300 font-medium cursor-pointer shadow-xs"
+                            className="flex-1 min-w-0 px-3 py-2.5 text-[10.5px] uppercase tracking-[0.16em] rounded-sm flex items-center justify-center gap-1.5 border border-gold/40 text-gold hover:bg-gold/15 hover:border-gold transition-all duration-300 font-medium cursor-pointer shadow-xs whitespace-nowrap"
                             title={isEn ? "View event details" : "Consulter la page de cet événement"}
                           >
-                            <ExternalLink size={12} /> {isEn ? "View page" : "Voir l'événement"}
+                            <ExternalLink size={12} className="shrink-0" /> <span className="truncate">{isEn ? "View page" : "Voir l'événement"}</span>
                           </Link>
                         </div>
 
