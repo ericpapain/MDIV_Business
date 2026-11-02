@@ -655,15 +655,31 @@ L'équipe d'organisation MDIV Network & BNE.";
             error_log("Confirmation email warning: " . $e->getMessage());
         }
 
+        $attendeeObj = [
+            'id' => $attendeeId,
+            'event_id' => $eventId,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $email,
+            'phone' => $phone,
+            'company' => $company,
+            'job_title' => $jobTitle,
+            'sector' => $sector,
+            'photo_url' => $photoUrl,
+            'ticket_code' => $ticketCode,
+            'status' => 'confirmed'
+        ];
+
         echo json_encode([
             'success' => true,
             'ticket_code' => $ticketCode,
+            'attendee' => $attendeeObj,
             'qr_code_data_url' => $qrCodeDataUrl,
             'qr_payload' => json_decode($qrPayload, true),
             'client_id' => $clientId,
             'crm_synced' => $crmSynced,
             'badge_url' => "/badges/$ticketCode",
-            'message' => "Inscription validée avec succès pour $firstName $lastName."
+            'message' => "Votre inscription a bien été prise en compte."
         ]);
         exit();
     }
