@@ -458,8 +458,8 @@ export class EventService {
           event_id: Number(eventId),
           field_type: fieldData.field_type || db.event_custom_fields[idx].field_type || 'text',
           options: parsedOptions,
-          is_required: fieldData.is_required !== undefined ? !!fieldData.is_required : db.event_custom_fields[idx].is_required,
-          is_active: fieldData.is_active !== undefined ? !!fieldData.is_active : db.event_custom_fields[idx].is_active,
+          is_required: fieldData.is_required !== undefined ? (fieldData.is_required === true || fieldData.is_required === 1 || fieldData.is_required === '1' || fieldData.is_required === 'true') : db.event_custom_fields[idx].is_required,
+          is_active: fieldData.is_active !== undefined ? (fieldData.is_active !== false && fieldData.is_active !== 0 && fieldData.is_active !== '0' && fieldData.is_active !== 'false') : db.event_custom_fields[idx].is_active,
           updated_at: new Date().toISOString()
         };
         saveDb();

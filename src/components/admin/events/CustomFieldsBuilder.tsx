@@ -36,6 +36,8 @@ const FIELD_TYPE_LABELS: Record<CustomFieldType, { label: string; icon: any }> =
   photo: { label: "Photo / Image", icon: Image },
 };
 
+const isTruthyBool = (val: any): boolean => val === true || val === 1 || val === '1' || val === 'true';
+
 export function CustomFieldsBuilder({ eventId, fields: controlledFields, onFieldsChange }: CustomFieldsBuilderProps) {
   const [editingField, setEditingField] = useState<Partial<EventCustomField> | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -158,7 +160,12 @@ export function CustomFieldsBuilder({ eventId, fields: controlledFields, onField
   };
 
   const handleEditField = (field: EventCustomField) => {
-    setEditingField({ ...field, options: field.options ? [...field.options] : [] });
+    setEditingField({
+      ...field,
+      is_required: isTruthyBool(field.is_required),
+      is_active: field.is_active === undefined || isTruthyBool(field.is_active),
+      options: field.options ? [...field.options] : []
+    });
     setNewOptionText("");
     setIsModalOpen(true);
   };
@@ -238,14 +245,14 @@ export function CustomFieldsBuilder({ eventId, fields: controlledFields, onField
       label: editingField.label.trim(),
       description: editingField.description || "",
       field_type: editingField.field_type || "text",
-      is_required: !!editingField.is_required,
+      is_required: isTruthyBool(editingField.is_required),
       placeholder: editingField.placeholder || "",
       default_value: editingField.default_value || "",
       options: editingField.options || [],
       validation_rules: editingField.validation_rules || {},
       conditional_logic: editingField.conditional_logic,
       sort_order: editingField.sort_order || (fields.length + 1),
-      is_active: editingField.is_active !== undefined ? editingField.is_active : true,
+      is_active: editingField.is_active === undefined || isTruthyBool(editingField.is_active),
       id: editingField.id
     };
 
@@ -352,13 +359,17 @@ export function CustomFieldsBuilder({ eventId, fields: controlledFields, onField
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-xs text-foreground truncate">{field.label}</span>
-                      {field.is_required && (
+                      {isTruthyBool(field.is_required) ? (
                         <Badge variant="outline" className="text-[9px] text-red-400 border-red-500/20 bg-red-500/5 px-1.5 py-0">
                           Obligatoire
                         </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[9px] text-slate-400 border-border bg-muted/40 px-1.5 py-0">
+                          Facultatif
+                        </Badge>
                       )}
-                      {!field.is_active && (
-                        <Badge variant="outline" className="text-[9px] text-muted-foreground">
+                      {!isTruthyBool(field.is_active) && (
+                        <Badge variant="outline" className="text-[9px] text-amber-400 border-amber-500/20 bg-amber-500/5">
                           Désactivé
                         </Badge>
                       )}
@@ -538,8 +549,8 @@ export function CustomFieldsBuilder({ eventId, fields: controlledFields, onField
                     <div className="text-[10.5px] text-muted-foreground">Le participant devra y répondre avant de valider son inscription</div>
                   </div>
                   <Switch
-                    checked={editingField.is_required || false}
-                    onCheckedChange={(checked) => setEditingField({ ...editingField, is_required: checked })}
+                    checked={isTruthyBool(editingField?.is_required)}
+                    onCheckedChange={(checked) => setEditingField(prev => prev ? { ...prev, is_required: checked } : null)}
                   />
                 </div>
 
@@ -549,8 +560,8 @@ export function CustomFieldsBuilder({ eventId, fields: controlledFields, onField
                     <div className="text-[10.5px] text-muted-foreground">Visible sur le formulaire public</div>
                   </div>
                   <Switch
-                    checked={editingField.is_active !== false}
-                    onCheckedChange={(checked) => setEditingField({ ...editingField, is_active: checked })}
+                    checked={editingField?.is_active === undefined || isTruthyBool(editingField?.is_active)}
+                    onCheckedChange={(checked) => setEditingField(prev => prev ? { ...prev, is_active: checked } : null)}
                   />
                 </div>
               </div>
