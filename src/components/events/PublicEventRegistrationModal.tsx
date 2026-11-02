@@ -426,6 +426,11 @@ export function PublicEventRegistrationModal({
                 <div className="space-y-3.5">
                   {customFields.map((field) => {
                     const val = customAnswers[field.field_key] || "";
+                    const optionsList = Array.isArray(field.options)
+                      ? field.options
+                      : (typeof field.options === 'string' && field.options.trim()
+                          ? (() => { try { return JSON.parse(field.options); } catch { return []; } })()
+                          : []);
 
                     return (
                       <div key={field.field_key} className="space-y-1">
@@ -440,6 +445,7 @@ export function PublicEventRegistrationModal({
                         {field.field_type === 'textarea' ? (
                           <textarea
                             required={field.is_required}
+                            rows={3}
                             value={val}
                             onChange={(e) => setCustomAnswers({ ...customAnswers, [field.field_key]: e.target.value })}
                             placeholder={field.placeholder || ""}
@@ -452,14 +458,14 @@ export function PublicEventRegistrationModal({
                             onChange={(e) => setCustomAnswers({ ...customAnswers, [field.field_key]: e.target.value })}
                             className="w-full bg-background border border-input rounded-xl px-3.5 py-2.5 text-xs text-foreground focus:outline-none focus:border-amber-500"
                           >
-                            <option value="">Sélectionnez une option...</option>
-                            {field.options?.map((opt) => (
+                            <option value="">{field.placeholder || "Sélectionnez une option..."}</option>
+                            {optionsList.map((opt: any) => (
                               <option key={opt.value} value={opt.value}>{opt.label}</option>
                             ))}
                           </select>
                         ) : field.field_type === 'radio' ? (
                           <div className="space-y-1.5 pt-1">
-                            {field.options?.map((opt) => (
+                            {optionsList.map((opt: any) => (
                               <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-xs text-foreground">
                                 <input
                                   type="radio"
@@ -473,6 +479,29 @@ export function PublicEventRegistrationModal({
                               </label>
                             ))}
                           </div>
+                        ) : field.field_type === 'checkbox_group' ? (
+                          <div className="space-y-1.5 pt-1">
+                            {optionsList.map((opt: any) => {
+                              const currentSelected = Array.isArray(val) ? val : (typeof val === 'string' && val ? val.split(',') : []);
+                              const isChecked = currentSelected.includes(opt.value);
+                              return (
+                                <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-xs text-foreground">
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      const nextSelected = e.target.checked
+                                        ? [...currentSelected, opt.value]
+                                        : currentSelected.filter((v: string) => v !== opt.value);
+                                      setCustomAnswers({ ...customAnswers, [field.field_key]: nextSelected });
+                                    }}
+                                    className="rounded text-amber-500 border-slate-600 focus:ring-amber-500/20"
+                                  />
+                                  <span>{opt.label}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
                         ) : field.field_type === 'checkbox' ? (
                           <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-200 dark:text-slate-100 font-medium pt-1">
                             <input
@@ -485,7 +514,13 @@ export function PublicEventRegistrationModal({
                           </label>
                         ) : (
                           <input
-                            type={field.field_type === 'number' ? 'number' : field.field_type === 'date' ? 'date' : 'text'}
+                            type={
+                              field.field_type === 'email' ? 'email' :
+                              field.field_type === 'phone' ? 'tel' :
+                              field.field_type === 'number' ? 'number' :
+                              field.field_type === 'date' ? 'date' :
+                              field.field_type === 'url' ? 'url' : 'text'
+                            }
                             required={field.is_required}
                             value={val}
                             onChange={(e) => setCustomAnswers({ ...customAnswers, [field.field_key]: e.target.value })}
