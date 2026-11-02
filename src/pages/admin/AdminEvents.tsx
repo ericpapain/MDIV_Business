@@ -4,7 +4,7 @@ import {
   Plus, Trash2, Calendar, MapPin, Loader2, Edit, Clock, 
   ChevronDown, ChevronUp, Check, X, Sliders, Layers, Users, 
   ExternalLink, Copy, CheckCircle2, Sparkles, Settings2, FileText,
-  Megaphone, CalendarCheck, Gift, Radio, Tv
+  Megaphone, CalendarCheck, Gift, Radio, Tv, Archive
 } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { useToast } from "@/hooks/use-toast";
@@ -165,6 +165,46 @@ export default function AdminEvents() {
       toast({ title: "Événement supprimé" });
       queryClient.invalidateQueries({ queryKey: ["admin-events"] });
       if (selectedEngineEvent?.id) setSelectedEngineEvent(null);
+    }
+  });
+
+  const duplicateEvent = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch("/api/event_engine.php?action=duplicate_event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, event_id: id }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      toast({ title: "Événement dupliqué", description: "Une copie complète avec configuration et champs sur-mesure a été créée." });
+      queryClient.invalidateQueries({ queryKey: ["admin-events"] });
+    },
+    onError: (err: any) => {
+      toast({ variant: "destructive", title: "Erreur", description: err.message });
+    }
+  });
+
+  const archiveEvent = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch("/api/event_engine.php?action=archive_event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, event_id: id }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      toast({ title: "Statut mis à jour", description: "L'événement a été basculé entre actif et archivé." });
+      queryClient.invalidateQueries({ queryKey: ["admin-events"] });
+    },
+    onError: (err: any) => {
+      toast({ variant: "destructive", title: "Erreur", description: err.message });
     }
   });
 
@@ -522,6 +562,8 @@ export default function AdminEvents() {
                       key={ev.id} 
                       ev={ev} 
                       onEdit={() => startEdit(ev)} 
+                      onDuplicate={() => duplicateEvent.mutate(ev.id)}
+                      onArchive={() => archiveEvent.mutate(ev.id)}
                       onDelete={() => { if(confirm("Supprimer cet événement ?")) deleteEvent.mutate(ev.id); }}
                       onOpenEngine={(tab) => openEngineModal(ev, tab)}
                     />
@@ -538,6 +580,8 @@ export default function AdminEvents() {
                       key={ev.id} 
                       ev={ev} 
                       onEdit={() => startEdit(ev)} 
+                      onDuplicate={() => duplicateEvent.mutate(ev.id)}
+                      onArchive={() => archiveEvent.mutate(ev.id)}
                       onDelete={() => { if(confirm("Supprimer cet événement ?")) deleteEvent.mutate(ev.id); }}
                       onOpenEngine={(tab) => openEngineModal(ev, tab)}
                     />
@@ -929,11 +973,15 @@ export default function AdminEvents() {
 function EnhancedEventCard({ 
   ev, 
   onEdit, 
+  onDuplicate,
+  onArchive,
   onDelete, 
   onOpenEngine 
 }: { 
   ev: any; 
   onEdit: () => void; 
+  onDuplicate: () => void;
+  onArchive: () => void;
   onDelete: () => void; 
   onOpenEngine: (tab?: "features" | "fields" | "attendees" | "pitches" | "meetings" | "tombola" | "regie" | "links") => void; 
 }) {
@@ -1023,13 +1071,40 @@ function EnhancedEventCard({
           <span>Moteur</span>
         </button>
 
+        <a 
+          href={`/evenements/${ev.id}`} 
+          target="_blank" 
+          rel="noreferrer"
+          className="p-1.5 text-muted-foreground hover:text-gold transition-colors rounded-sm cursor-pointer ml-1"
+          title="Voir la page publique de l'événement"
+        >
+          <ExternalLink size={15} />
+        </a>
+
         <button 
           onClick={onEdit} 
-          className="p-1.5 text-muted-foreground hover:text-gold transition-colors rounded-sm cursor-pointer ml-1"
+          className="p-1.5 text-muted-foreground hover:text-gold transition-colors rounded-sm cursor-pointer"
           title="Modifier les infos de base"
         >
           <Edit size={15} />
         </button>
+
+        <button 
+          onClick={onDuplicate} 
+          className="p-1.5 text-muted-foreground hover:text-amber-400 transition-colors rounded-sm cursor-pointer"
+          title="Dupliquer l'événement (avec tous ses modules)"
+        >
+          <Copy size={15} />
+        </button>
+
+        <button 
+          onClick={onArchive} 
+          className="p-1.5 text-muted-foreground hover:text-amber-300 transition-colors rounded-sm cursor-pointer"
+          title={ev.status === 'past' ? "Désarchiver (Repasser à venir)" : "Archiver l'événement"}
+        >
+          <Archive size={15} />
+        </button>
+
         <button 
           onClick={onDelete} 
           className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm transition-colors cursor-pointer"

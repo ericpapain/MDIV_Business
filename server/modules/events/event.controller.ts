@@ -77,10 +77,40 @@ export class EventController {
       }
 
       if (action === 'delete_custom_field') {
-        const id = parsed.fields?.id || urlObj.searchParams.get('id');
+        const id = parsed.fields?.field_id || parsed.fields?.id || urlObj.searchParams.get('id') || urlObj.searchParams.get('field_id');
         if (!id) throw new Error("ID de champ requis");
         eventService.deleteCustomField(Number(id));
-        return sendJson(res, 200, { success: true });
+        return sendJson(res, 200, { success: true, message: "Question supprimée avec succès" });
+      }
+
+      if (action === 'duplicate_custom_field' && method === 'POST') {
+        const eventId = parsed.fields?.event_id;
+        const fieldId = parsed.fields?.field_id || parsed.fields?.id;
+        if (!eventId || !fieldId) throw new Error("event_id et field_id requis");
+        const dup = eventService.duplicateCustomField(Number(eventId), Number(fieldId));
+        return sendJson(res, 200, { success: true, data: dup, message: "Question dupliquée avec succès" });
+      }
+
+      if (action === 'reorder_custom_fields' && method === 'POST') {
+        const eventId = parsed.fields?.event_id;
+        const orderedIds = parsed.fields?.ordered_ids || [];
+        if (!eventId) throw new Error("event_id requis");
+        eventService.reorderCustomFields(Number(eventId), orderedIds);
+        return sendJson(res, 200, { success: true, message: "Ordre mis à jour" });
+      }
+
+      if (action === 'duplicate_event' && method === 'POST') {
+        const eventId = parsed.fields?.event_id || parsed.fields?.id;
+        if (!eventId) throw new Error("event_id requis");
+        const dupEvent = eventService.duplicateEvent(Number(eventId));
+        return sendJson(res, 200, { success: true, data: dupEvent, message: "Événement dupliqué avec succès" });
+      }
+
+      if (action === 'archive_event' && method === 'POST') {
+        const eventId = parsed.fields?.event_id || parsed.fields?.id;
+        if (!eventId) throw new Error("event_id requis");
+        const archEvent = eventService.archiveEvent(Number(eventId));
+        return sendJson(res, 200, { success: true, data: archEvent, message: "Statut d'archivage mis à jour" });
       }
 
       // --- INSCRIPTION PUBLIQUE DU PARTICIPANT ---

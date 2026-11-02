@@ -7,7 +7,7 @@ import { EventCustomField, CustomFieldType, FieldOption } from '@/types/eventEng
 import { 
   Plus, Trash2, ArrowUp, ArrowDown, Edit2, Check, X, 
   HelpCircle, Sparkles, FileText, List, CheckSquare, 
-  Image, Paperclip, Link as LinkIcon, Calendar, Hash, Phone, Mail, Loader2
+  Image, Paperclip, Link as LinkIcon, Calendar, Hash, Phone, Mail, Loader2, Copy
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,7 +61,12 @@ export function CustomFieldsBuilder({ eventId, fields: controlledFields, onField
       const res = await fetch('/api/event_engine.php?action=save_custom_field', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event_id: eventId, field: fieldData }),
+        body: JSON.stringify({
+          event_id: eventId,
+          id: fieldData.id,
+          ...fieldData,
+          field: fieldData
+        }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
@@ -77,12 +82,33 @@ export function CustomFieldsBuilder({ eventId, fields: controlledFields, onField
     }
   });
 
+  const duplicateMutation = useMutation({
+    mutationFn: async (fieldId: number) => {
+      const res = await fetch('/api/event_engine.php?action=duplicate_custom_field', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event_id: eventId, field_id: fieldId, id: fieldId }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-fields', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
+      toast.success("Question dupliquée avec succès !");
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Erreur de duplication.");
+    }
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (fieldId: number) => {
       const res = await fetch('/api/event_engine.php?action=delete_custom_field', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event_id: eventId, field_id: fieldId }),
+        body: JSON.stringify({ event_id: eventId, field_id: fieldId, id: fieldId }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
@@ -137,6 +163,31 @@ export function CustomFieldsBuilder({ eventId, fields: controlledFields, onField
     setIsModalOpen(true);
   };
 
+  const handleDuplicateField = (field: EventCustomField) => {
+    if (onFieldsChange) {
+      const duplicated: EventCustomField = {
+        ...field,
+        id: undefined,
+        field_key: `${field.field_key}_copy_${Date.now()}`,
+        label: `${field.label} (Copie)`,
+        sort_order: fields.length + 1
+      };
+      onFieldsChange([...fields, duplicated]);
+      toast.success("Question dupliquée avec succès !");
+    } else if (field.id) {
+      duplicateMutation.mutate(field.id);
+    } else {
+      // Local clone if field has no DB id yet
+      const duplicated: EventCustomField = {
+        ...field,
+        field_key: `${field.field_key}_copy_${Date.now()}`,
+        label: `${field.label} (Copie)`,
+        sort_order: fields.length + 1
+      };
+      saveMutation.mutate(duplicated);
+    }
+  };
+
   const handleDeleteField = (index: number) => {
     const targetField = fields[index];
     if (onFieldsChange) {
@@ -145,6 +196,8 @@ export function CustomFieldsBuilder({ eventId, fields: controlledFields, onField
       toast.success("Question supprimée du formulaire.");
     } else if (targetField?.id) {
       deleteMutation.mutate(targetField.id);
+    } else {
+      toast.error("Impossible de supprimer cette question : identifiant introuvable.");
     }
   };
 
@@ -341,6 +394,14 @@ export function CustomFieldsBuilder({ eventId, fields: controlledFields, onField
                     title="Descendre"
                   >
                     <ArrowDown size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDuplicateField(field)}
+                    className="p-1.5 text-muted-foreground hover:text-amber-400 cursor-pointer"
+                    title="Dupliquer la question"
+                  >
+                    <Copy size={14} />
                   </button>
                   <button
                     type="button"

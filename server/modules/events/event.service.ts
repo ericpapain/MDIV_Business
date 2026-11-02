@@ -432,18 +432,35 @@ export class EventService {
       .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
   }
 
-  saveCustomField(eventId: number, fieldData: Partial<EventCustomField>): EventCustomField {
+  saveCustomField(eventId: number, rawInput: any): EventCustomField {
     this.ensureDbCollections();
     const db = getDb();
     if (!db.event_custom_fields) db.event_custom_fields = [];
 
-    if (fieldData.id) {
-      const idx = db.event_custom_fields.findIndex((f: any) => Number(f.id) === Number(fieldData.id));
+    // Normalisation : supporte { event_id, field: { ... } } et les clés à plat
+    const fieldData = rawInput && rawInput.field && typeof rawInput.field === 'object'
+      ? { ...rawInput.field, ...rawInput }
+      : (rawInput || {});
+
+    const targetId = fieldData.id ? Number(fieldData.id) : undefined;
+    const rawOptions = fieldData.options;
+    const parsedOptions = Array.isArray(rawOptions)
+      ? rawOptions
+      : (typeof rawOptions === 'string' && rawOptions.trim() ? JSON.parse(rawOptions) : []);
+
+    if (targetId) {
+      const idx = db.event_custom_fields.findIndex((f: any) => Number(f.id) === targetId);
       if (idx !== -1) {
         db.event_custom_fields[idx] = {
           ...db.event_custom_fields[idx],
           ...fieldData,
-          event_id: Number(eventId)
+          id: targetId,
+          event_id: Number(eventId),
+          field_type: fieldData.field_type || db.event_custom_fields[idx].field_type || 'text',
+          options: parsedOptions,
+          is_required: fieldData.is_required !== undefined ? !!fieldData.is_required : db.event_custom_fields[idx].is_required,
+          is_active: fieldData.is_active !== undefined ? !!fieldData.is_active : db.event_custom_fields[idx].is_active,
+          updated_at: new Date().toISOString()
         };
         saveDb();
         return db.event_custom_fields[idx];
@@ -464,10 +481,10 @@ export class EventService {
       is_required: !!fieldData.is_required,
       default_value: fieldData.default_value || "",
       placeholder: fieldData.placeholder || "",
-      options: fieldData.options || [],
+      options: parsedOptions,
       validation_rules: fieldData.validation_rules || {},
       conditional_logic: fieldData.conditional_logic,
-      sort_order: fieldData.sort_order ?? db.event_custom_fields.length + 1,
+      sort_order: fieldData.sort_order ?? (db.event_custom_fields.filter((f: any) => Number(f.event_id) === Number(eventId)).length + 1),
       is_active: fieldData.is_active !== undefined ? !!fieldData.is_active : true,
       created_at: new Date().toISOString()
     };
@@ -475,6 +492,81 @@ export class EventService {
     db.event_custom_fields.push(newField);
     saveDb();
     return newField;
+  }
+
+  duplicateCustomField(eventId: number, fieldId: number): EventCustomField {
+    this.ensureDbCollections();
+    const db = getDb();
+    const source = (db.event_custom_fields || []).find((f: any) => Number(f.id) === Number(fieldId));
+    if (!source) throw new Error("Question introuvable.");
+
+    return this.saveCustomField(eventId, {
+      ...source,
+      id: undefined,
+      field_key: `${source.field_key}_copy_${Date.now()}`,
+      label: `${source.label} (Copie)`,
+      sort_order: (source.sort_order || 0) + 1
+    });
+  }
+
+  reorderCustomFields(eventId: number, orderedIds: number[]): boolean {
+    this.ensureDbCollections();
+    const db = getDb();
+    if (!Array.isArray(db.event_custom_fields)) return true;
+
+    orderedIds.forEach((id, index) => {
+      const field = db.event_custom_fields.find((f: any) => Number(f.id) === Number(id));
+      if (field) {
+        field.sort_order = index + 1;
+      }
+    });
+    saveDb();
+    return true;
+  }
+
+  duplicateEvent(eventId: number): any {
+    this.ensureDbCollections();
+    const db = getDb();
+    const source = (db.events || []).find((e: any) => Number(e.id) === Number(eventId));
+    if (!source) throw new Error("Événement source introuvable.");
+
+    const nextId = db.events.length > 0 ? Math.max(...db.events.map((e: any) => Number(e.id) || 0)) + 1 : 1;
+    const cloned = {
+      ...JSON.parse(JSON.stringify(source)),
+      id: nextId,
+      title: `${source.title} (Copie)`,
+      event_code: `EVT${nextId}`,
+      status: 'upcoming',
+      created_at: new Date().toISOString()
+    };
+    db.events.push(cloned);
+
+    // Cloner aussi les custom fields
+    const sourceFields = (db.event_custom_fields || []).filter((f: any) => Number(f.event_id) === Number(eventId));
+    sourceFields.forEach((sf: any) => {
+      const nextFieldId = db.event_custom_fields.length > 0 ? Math.max(...db.event_custom_fields.map((f: any) => Number(f.id) || 0)) + 1 : 1;
+      db.event_custom_fields.push({
+        ...JSON.parse(JSON.stringify(sf)),
+        id: nextFieldId,
+        event_id: nextId,
+        created_at: new Date().toISOString()
+      });
+    });
+
+    saveDb();
+    return cloned;
+  }
+
+  archiveEvent(eventId: number): any {
+    this.ensureDbCollections();
+    const db = getDb();
+    const ev = (db.events || []).find((e: any) => Number(e.id) === Number(eventId));
+    if (!ev) throw new Error("Événement introuvable.");
+
+    ev.status = ev.status === 'past' ? 'upcoming' : 'past';
+    ev.updated_at = new Date().toISOString();
+    saveDb();
+    return ev;
   }
 
   deleteCustomField(fieldId: number) {
@@ -521,6 +613,7 @@ export class EventService {
       // Règle de priorité : on ne remplace pas les données commerciales fermes, mais on complète les champs vides
       if (!existingClient.phone && payload.phone) existingClient.phone = payload.phone;
       if (!existingClient.company && payload.company) existingClient.company = payload.company;
+      if (photoUrl) existingClient.photo_url = photoUrl;
       crmSynced = true;
     } else {
       // Création d'un nouveau contact propre dans le CRM
@@ -537,6 +630,7 @@ export class EventService {
         phone: payload.phone || "",
         status: "prospect",
         notes: `Inscrit en ligne le ${new Date().toLocaleDateString('fr-FR')} via l'événement : ${event.title}`,
+        photo_url: photoUrl || null,
         created_at: new Date().toISOString()
       };
       db.clients.push(newClient);
@@ -566,11 +660,26 @@ export class EventService {
 
     // Données QR code cryptographique / token
     const qrPayload = JSON.stringify({
-      t: ticketCode,
-      e: event.id,
-      n: `${payload.first_name} ${payload.last_name}`,
-      c: payload.company || '',
-      ts: Date.now()
+      system: "MDIV_EVENT_ENGINE",
+      version: "2.0",
+      ticket: {
+        id: ticketCode,
+        type: "REGISTRATION_BADGE"
+      },
+      event: {
+        id: Number(event.id),
+        title: event.title
+      },
+      attendee: {
+        id: nextAttendeeId,
+        name: `${payload.first_name} ${payload.last_name}`.trim(),
+        company: payload.company || "",
+        email: cleanEmail
+      },
+      checkin: {
+        url: `/admin/events/checkin?ticket=${ticketCode}`,
+        token: Buffer.from(`${ticketCode}:${event.id}`).toString('base64')
+      }
     });
     const qrCodeDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrPayload)}`;
 
@@ -605,6 +714,31 @@ export class EventService {
     };
 
     db.event_attendees.push(newAttendee);
+
+    // Auto-alimentation de la base Pitch si pitch_text est renseigné
+    if (payload.pitch_text && payload.pitch_text.trim()) {
+      if (!Array.isArray(db.event_pitches)) db.event_pitches = [];
+      const nextPitchId = db.event_pitches.length > 0 ? Math.max(...db.event_pitches.map((p: any) => Number(p.id) || 0)) + 1 : 1;
+      db.event_pitches.push({
+        id: nextPitchId,
+        event_id: Number(payload.event_id),
+        attendee_id: nextAttendeeId,
+        client_id: clientId,
+        company_name: payload.company || "Partenaire",
+        project_title: `Pitch de ${payload.first_name} ${payload.last_name}`,
+        presentation: payload.pitch_text.trim(),
+        needs: "Recherche de partenariats & synergies d'affaires",
+        speaker_name: `${payload.first_name} ${payload.last_name}`,
+        speaker_role: payload.job_title || "Participant",
+        speaker_avatar: photoUrl || null,
+        speaker_photo_url: photoUrl || null,
+        status: "pending",
+        speaking_order: db.event_pitches.length + 1,
+        pitch_time: "",
+        moderator_notes: "Candidature enregistrée lors de l'inscription en ligne",
+        created_at: new Date().toISOString()
+      });
+    }
 
     // Enregistrement des réponses aux champs personnalisés
     if (payload.custom_answers && typeof payload.custom_answers === 'object') {

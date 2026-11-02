@@ -287,22 +287,23 @@ try {
     }
 
     if ($action === 'save_custom_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-        $eventId = intval($data['event_id'] ?? 0);
+        $f = isset($data['field']) && is_array($data['field']) ? array_merge($data, $data['field']) : $data;
+        $eventId = intval($f['event_id'] ?? ($data['event_id'] ?? 0));
         if ($eventId <= 0) throw new Exception("event_id requis");
 
-        $fieldId = isset($data['id']) ? intval($data['id']) : 0;
-        $fieldKey = trim($data['field_key'] ?? ('custom_' . time()));
-        $label = trim($data['label'] ?? 'Nouvelle question');
-        $desc = trim($data['description'] ?? '');
-        $fieldType = trim($data['field_type'] ?? 'text');
-        $isRequired = !empty($data['is_required']) ? 1 : 0;
-        $defVal = trim($data['default_value'] ?? '');
-        $placeholder = trim($data['placeholder'] ?? '');
-        $options = isset($data['options']) ? json_encode($data['options'], JSON_UNESCAPED_UNICODE) : null;
-        $validation = isset($data['validation_rules']) ? json_encode($data['validation_rules'], JSON_UNESCAPED_UNICODE) : null;
-        $cond = isset($data['conditional_logic']) ? json_encode($data['conditional_logic'], JSON_UNESCAPED_UNICODE) : null;
-        $sortOrder = intval($data['sort_order'] ?? 1);
-        $isActive = isset($data['is_active']) ? ($data['is_active'] ? 1 : 0) : 1;
+        $fieldId = isset($f['id']) ? intval($f['id']) : (isset($f['field_id']) ? intval($f['field_id']) : 0);
+        $fieldKey = trim($f['field_key'] ?? ('custom_' . time()));
+        $label = trim($f['label'] ?? 'Nouvelle question');
+        $desc = trim($f['description'] ?? '');
+        $fieldType = trim($f['field_type'] ?? 'text');
+        $isRequired = !empty($f['is_required']) ? 1 : 0;
+        $defVal = trim($f['default_value'] ?? '');
+        $placeholder = trim($f['placeholder'] ?? '');
+        $options = isset($f['options']) ? (is_string($f['options']) ? $f['options'] : json_encode($f['options'], JSON_UNESCAPED_UNICODE)) : null;
+        $validation = isset($f['validation_rules']) ? (is_string($f['validation_rules']) ? $f['validation_rules'] : json_encode($f['validation_rules'], JSON_UNESCAPED_UNICODE)) : null;
+        $cond = isset($f['conditional_logic']) ? (is_string($f['conditional_logic']) ? $f['conditional_logic'] : json_encode($f['conditional_logic'], JSON_UNESCAPED_UNICODE)) : null;
+        $sortOrder = intval($f['sort_order'] ?? 1);
+        $isActive = isset($f['is_active']) ? ($f['is_active'] ? 1 : 0) : 1;
 
         if ($fieldId > 0) {
             $stmt = $pdo->prepare("UPDATE event_custom_fields SET field_key=?, label=?, description=?, field_type=?, is_required=?, default_value=?, placeholder=?, options=?, validation_rules=?, conditional_logic=?, sort_order=?, is_active=? WHERE id=? AND event_id=?");
@@ -310,10 +311,100 @@ try {
         } else {
             $stmt = $pdo->prepare("INSERT INTO event_custom_fields (event_id, field_key, label, description, field_type, is_required, default_value, placeholder, options, validation_rules, conditional_logic, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([$eventId, $fieldKey, $label, $desc, $fieldType, $isRequired, $defVal, $placeholder, $options, $validation, $cond, $sortOrder, $isActive]);
-            $fieldId = $pdo->lastInsertId();
+            $fieldId = intval($pdo->lastInsertId());
         }
 
         echo json_encode(['success' => true, 'id' => $fieldId, 'message' => "Champ personnalisé enregistré"]);
+        exit();
+    }
+
+    if ($action === 'delete_custom_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $fieldId = intval($data['id'] ?? ($data['field_id'] ?? ($_GET['id'] ?? 0)));
+        $eventId = intval($data['event_id'] ?? ($_GET['event_id'] ?? 0));
+        if ($fieldId <= 0) throw new Exception("ID de champ requis");
+
+        // Supprimer d'abord les réponses associées
+        $pdo->prepare("DELETE FROM event_custom_field_answers WHERE field_id = ?")->execute([$fieldId]);
+
+        // Supprimer la question
+        if ($eventId > 0) {
+            $pdo->prepare("DELETE FROM event_custom_fields WHERE id = ? AND event_id = ?")->execute([$fieldId, $eventId]);
+        } else {
+            $pdo->prepare("DELETE FROM event_custom_fields WHERE id = ?")->execute([$fieldId]);
+        }
+
+        echo json_encode(['success' => true, 'message' => "Question supprimée avec succès"]);
+        exit();
+    }
+
+    if ($action === 'duplicate_custom_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $fieldId = intval($data['field_id'] ?? ($data['id'] ?? 0));
+        if ($fieldId <= 0) throw new Exception("field_id requis");
+        $stmt = $pdo->prepare("SELECT * FROM event_custom_fields WHERE id = ?");
+        $stmt->execute([$fieldId]);
+        $orig = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$orig) throw new Exception("Question source introuvable");
+
+        $newKey = $orig['field_key'] . '_copie_' . substr(bin2hex(random_bytes(2)), 0, 4);
+        $newLabel = $orig['label'] . ' (Copie)';
+        $newOrder = intval($orig['sort_order']) + 1;
+
+        $stmtIns = $pdo->prepare("INSERT INTO event_custom_fields (event_id, field_key, label, description, field_type, is_required, default_value, placeholder, options, validation_rules, conditional_logic, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmtIns->execute([$orig['event_id'], $newKey, $newLabel, $orig['description'], $orig['field_type'], $orig['is_required'], $orig['default_value'], $orig['placeholder'], $orig['options'], $orig['validation_rules'], $orig['conditional_logic'], $newOrder, 1]);
+        $newId = intval($pdo->lastInsertId());
+        echo json_encode(['success' => true, 'id' => $newId, 'message' => "Question dupliquée"]);
+        exit();
+    }
+
+    if ($action === 'reorder_custom_fields' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $orderedIds = $data['ordered_ids'] ?? [];
+        if (is_array($orderedIds)) {
+            $stmt = $pdo->prepare("UPDATE event_custom_fields SET sort_order = ? WHERE id = ?");
+            foreach ($orderedIds as $idx => $fId) {
+                $stmt->execute([$idx + 1, intval($fId)]);
+            }
+        }
+        echo json_encode(['success' => true, 'message' => "Ordre mis à jour"]);
+        exit();
+    }
+
+    if ($action === 'duplicate_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $eventId = intval($data['event_id'] ?? ($data['id'] ?? 0));
+        if ($eventId <= 0) throw new Exception("event_id requis");
+        $stmt = $pdo->prepare("SELECT * FROM events WHERE id = ?");
+        $stmt->execute([$eventId]);
+        $orig = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$orig) throw new Exception("Événement introuvable");
+
+        $newTitle = $orig['title'] . ' (Copie)';
+        $stmtIns = $pdo->prepare("INSERT INTO events (title, title_en, date, location, description, description_en, image_url, type, price, billetterie_url, program, status, features_config, max_attendees, is_registration_open) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'upcoming', ?, ?, ?)");
+        $stmtIns->execute([
+            $newTitle, $orig['title_en'], $orig['date'], $orig['location'], $orig['description'], $orig['description_en'], $orig['image_url'], $orig['type'], $orig['price'], $orig['billetterie_url'], $orig['program'], $orig['features_config'], $orig['max_attendees'], $orig['is_registration_open']
+        ]);
+        $newEventId = intval($pdo->lastInsertId());
+
+        // Dupliquer les questions personnalisées
+        $stmtF = $pdo->prepare("SELECT * FROM event_custom_fields WHERE event_id = ?");
+        $stmtF->execute([$eventId]);
+        $origFields = $stmtF->fetchAll(PDO::FETCH_ASSOC);
+        $stmtInsF = $pdo->prepare("INSERT INTO event_custom_fields (event_id, field_key, label, description, field_type, is_required, default_value, placeholder, options, validation_rules, conditional_logic, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        foreach ($origFields as $of) {
+            $stmtInsF->execute([$newEventId, $of['field_key'], $of['label'], $of['description'], $of['field_type'], $of['is_required'], $of['default_value'], $of['placeholder'], $of['options'], $of['validation_rules'], $of['conditional_logic'], $of['sort_order'], $of['is_active']]);
+        }
+
+        echo json_encode(['success' => true, 'id' => $newEventId, 'message' => "Événement dupliqué avec succès"]);
+        exit();
+    }
+
+    if ($action === 'archive_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $eventId = intval($data['event_id'] ?? ($data['id'] ?? 0));
+        if ($eventId <= 0) throw new Exception("event_id requis");
+        $stmt = $pdo->prepare("SELECT status FROM events WHERE id = ?");
+        $stmt->execute([$eventId]);
+        $cur = $stmt->fetchColumn();
+        $newStatus = ($cur === 'past' || $cur === 'archived') ? 'upcoming' : 'past';
+        $pdo->prepare("UPDATE events SET status = ? WHERE id = ?")->execute([$newStatus, $eventId]);
+        echo json_encode(['success' => true, 'status' => $newStatus, 'message' => "Statut mis à jour"]);
         exit();
     }
 
@@ -409,16 +500,31 @@ try {
             error_log("CRM Sync warning: " . $e->getMessage());
         }
 
-        // Génération du Ticket Code & QR Code
+        // Génération du Ticket Code & QR Code riche et structuré
         $ticketCode = 'EVT-' . $eventId . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
         $qrPayload = json_encode([
-            't' => $ticketCode,
-            'e' => $eventId,
-            'n' => "$firstName $lastName",
-            'c' => $company,
-            'ts' => time()
-        ]);
-        $qrCodeDataUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' . urlencode($qrPayload);
+            'system' => 'MDIV_EVENT_ENGINE',
+            'version' => '2.0',
+            'ticket' => [
+                'code' => $ticketCode,
+                'issued_at' => date('c'),
+                'event_id' => $eventId,
+                'event_title' => $event['title']
+            ],
+            'attendee' => [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $email,
+                'company' => $company,
+                'job_title' => $jobTitle,
+                'client_id' => $clientId
+            ],
+            'checkin' => [
+                'status' => 'valid',
+                'security_hash' => hash('sha256', "$ticketCode|$eventId|$email")
+            ]
+        ], JSON_UNESCAPED_UNICODE);
+        $qrCodeDataUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($qrPayload);
 
         // Insertion dans event_attendees
         $stmtAtt = $pdo->prepare("INSERT INTO event_attendees (event_id, client_id, first_name, last_name, email, phone, company, job_title, sector, pitch_text, linkedin_url, photo_url, ticket_code, status, networking_opt_in, photo_consent, gdpr_consent, acquisition_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?, ?, ?, ?)");
@@ -426,6 +532,33 @@ try {
             $eventId, $clientId, $firstName, $lastName, $email, $phone, $company, $jobTitle, $sector, $pitchText, $linkedinUrl, $photoUrl, $ticketCode, $networkingOptIn, $photoConsent, $gdprConsent, $source
         ]);
         $attendeeId = intval($pdo->lastInsertId());
+
+        // Synchronisation de la photo dans la table CRM clients
+        if (!empty($photoUrl) && !empty($clientId)) {
+            try {
+                $pdo->prepare("UPDATE clients SET photo_url = ? WHERE id = ?")->execute([$photoUrl, $clientId]);
+            } catch (Exception $e) {}
+        }
+
+        // Auto-alimentation du module Pitch si pitch_text est renseigné
+        if (!empty($pitchText)) {
+            try {
+                $stmtPitch = $pdo->prepare("INSERT INTO event_pitches (event_id, attendee_id, client_id, company_name, project_title, presentation, speaker_name, speaker_role, speaker_avatar, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')");
+                $stmtPitch->execute([
+                    $eventId,
+                    $attendeeId,
+                    $clientId,
+                    !empty($company) ? $company : "$firstName $lastName",
+                    "Pitch Entreprise - " . (!empty($company) ? $company : "$firstName $lastName"),
+                    $pitchText,
+                    "$firstName $lastName",
+                    !empty($jobTitle) ? $jobTitle : "Dirigeant",
+                    $photoUrl
+                ]);
+            } catch (Exception $e) {
+                error_log("Pitch auto-creation notice: " . $e->getMessage());
+            }
+        }
 
         // Insertion des réponses personnalisées
         if (!empty($data['custom_answers']) && is_array($data['custom_answers'])) {
@@ -442,16 +575,44 @@ try {
             }
         }
 
-        // Notification e-mail (sans bloquer si échec)
+        // Envoi effectif de l'e-mail de confirmation
         try {
-            require_once __DIR__ . '/mail/mailer.php';
-            // Simulation ou appel mailer réel
-        } catch (Exception $e) {}
+            $emailSubject = "Confirmation de votre inscription : " . $event['title'];
+            $emailBody = "Bonjour $firstName $lastName,
+
+"
+                       . "Votre inscription à l'événement \"" . $event['title'] . "\" est bien confirmée !
+
+"
+                       . "DÉTAILS DE VOTRE PASS :
+"
+                       . "- Numéro de billet : $ticketCode
+"
+                       . "- Date : " . date('d/m/Y', strtotime($event['date'])) . "
+"
+                       . "- Lieu : " . ($event['location'] ?? 'Voir informations événement') . "
+
+"
+                       . "Présentez simplement votre badge numérique ou votre QR Code lors de votre arrivée à l'accueil.
+
+"
+                       . "Cordialement,
+L'équipe d'organisation MDIV Network & BNE.";
+
+            $headers = "From: MDIV Network <contact@mdiv-business.com>\r\n"
+                     . "Reply-To: contact@mdiv-business.com\r\n"
+                     . "Content-Type: text/plain; charset=UTF-8\r\n"
+                     . "X-Mailer: PHP/" . phpversion();
+            @mail($email, $emailSubject, $emailBody, $headers);
+        } catch (Exception $e) {
+            error_log("Confirmation email warning: " . $e->getMessage());
+        }
 
         echo json_encode([
             'success' => true,
             'ticket_code' => $ticketCode,
             'qr_code_data_url' => $qrCodeDataUrl,
+            'qr_payload' => json_decode($qrPayload, true),
             'client_id' => $clientId,
             'crm_synced' => $crmSynced,
             'badge_url' => "/badges/$ticketCode",
@@ -460,7 +621,7 @@ try {
         exit();
     }
 
-    // 4. LISTE DES INSCRITS POUR LE TABLEAU CRM ADMIN
+    // 4. LISTE DES INSCRITS POUR LE TABLEAU CRM ADMIN AVEC RÉPONSES & COMPTEURS DYNAMIQUES
     if ($action === 'get_attendees') {
         $eventId = intval($_GET['event_id'] ?? 0);
         $sql = "SELECT a.*, c.name as crm_client_name, c.company as crm_client_company 
@@ -474,7 +635,38 @@ try {
         $stmt = $pdo->query($sql);
         $attendees = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        echo json_encode(['success' => true, 'data' => $attendees]);
+        $registeredCount = count($attendees);
+        $attendedCount = 0;
+        $waitlistCount = 0;
+
+        foreach ($attendees as &$att) {
+            if ($att['status'] === 'attended') $attendedCount++;
+            if ($att['status'] === 'cancelled' || $att['status'] === 'pending') $waitlistCount++;
+
+            $stmtAns = $pdo->prepare("SELECT field_key, value_text FROM event_custom_field_answers WHERE attendee_id = ?");
+            $stmtAns->execute([$att['id']]);
+            $ansRows = $stmtAns->fetchAll(PDO::FETCH_ASSOC);
+            $cAnswers = [];
+            foreach ($ansRows as $ar) {
+                $dec = json_decode($ar['value_text'], true);
+                $cAnswers[$ar['field_key']] = ($dec !== null) ? $dec : $ar['value_text'];
+            }
+            $att['custom_answers'] = $cAnswers;
+        }
+
+        $absentCount = max(0, $registeredCount - $attendedCount - $waitlistCount);
+
+        echo json_encode([
+            'success' => true, 
+            'data' => $attendees,
+            'stats' => [
+                'total_registered' => $registeredCount,
+                'total_attended' => $attendedCount,
+                'total_absent' => $absentCount,
+                'waitlist_count' => $waitlistCount,
+                'attendance_rate' => $registeredCount > 0 ? round(($attendedCount / $registeredCount) * 100) : 0
+            ]
+        ]);
         exit();
     }
 
@@ -669,6 +861,38 @@ try {
         if (!$slot || $slot['booked_count'] >= $slot['capacity']) {
             throw new Exception("Ce créneau n'est plus disponible.");
         }
+
+        $attendeeEmail = strtolower(trim($data['attendee_email'] ?? ''));
+        $attendeeId = !empty($data['attendee_id']) ? intval($data['attendee_id']) : null;
+        $clientId = !empty($data['client_id']) ? intval($data['client_id']) : null;
+        $attendeeCompany = trim($data['attendee_company'] ?? '');
+        $attendeeName = trim($data['attendee_name'] ?? 'Participant');
+
+        // Résolution automatique des relations pour éviter toute clé orpheline
+        if (!empty($attendeeEmail)) {
+            if (!$attendeeId) {
+                $stmtAtt = $pdo->prepare("SELECT id, client_id, company, first_name, last_name FROM event_attendees WHERE event_id = ? AND LOWER(TRIM(email)) = ? LIMIT 1");
+                $stmtAtt->execute([$slot['event_id'], $attendeeEmail]);
+                $attRow = $stmtAtt->fetch(PDO::FETCH_ASSOC);
+                if ($attRow) {
+                    $attendeeId = intval($attRow['id']);
+                    if (!$clientId && !empty($attRow['client_id'])) $clientId = intval($attRow['client_id']);
+                    if (empty($attendeeCompany) && !empty($attRow['company'])) $attendeeCompany = $attRow['company'];
+                    if ($attendeeName === 'Participant') $attendeeName = $attRow['first_name'] . ' ' . $attRow['last_name'];
+                }
+            }
+
+            if (!$clientId) {
+                $stmtCli = $pdo->prepare("SELECT id, company, name FROM clients WHERE LOWER(TRIM(email)) = ? LIMIT 1");
+                $stmtCli->execute([$attendeeEmail]);
+                $cliRow = $stmtCli->fetch(PDO::FETCH_ASSOC);
+                if ($cliRow) {
+                    $clientId = intval($cliRow['id']);
+                    if (empty($attendeeCompany) && !empty($cliRow['company'])) $attendeeCompany = $cliRow['company'];
+                }
+            }
+        }
+
         $pdo->prepare("UPDATE event_meeting_slots SET booked_count = booked_count + 1 WHERE id = ?")->execute([$slotId]);
         $stmtBook = $pdo->prepare("INSERT INTO event_meeting_bookings (event_id, slot_id, partner_id, partner_name, attendee_id, client_id, attendee_name, attendee_email, attendee_phone, attendee_company, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?)");
         $stmtBook->execute([
@@ -676,15 +900,20 @@ try {
             $slotId,
             $slot['partner_id'],
             $slot['partner_name'],
-            $data['attendee_id'] ?? null,
-            $data['client_id'] ?? null,
-            $data['attendee_name'] ?? 'Participant',
-            $data['attendee_email'] ?? '',
+            $attendeeId,
+            $clientId,
+            $attendeeName,
+            $attendeeEmail,
             $data['attendee_phone'] ?? '',
-            $data['attendee_company'] ?? '',
+            $attendeeCompany,
             $data['notes'] ?? ''
         ]);
-        echo json_encode(['success' => true, 'message' => "Rendez-vous réservé avec succès."]);
+        echo json_encode([
+            'success' => true, 
+            'attendee_id' => $attendeeId,
+            'client_id' => $clientId,
+            'message' => "Rendez-vous réservé avec succès."
+        ]);
         exit();
     }
 

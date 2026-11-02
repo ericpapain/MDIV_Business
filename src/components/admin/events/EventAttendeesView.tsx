@@ -7,7 +7,7 @@ import { EventAttendee } from '@/types/eventEngine';
 import { 
   Users, Search, Download, CheckCircle2, Clock, XCircle, 
   ExternalLink, QrCode, Filter, UserCheck, Eye, Mail, Phone, 
-  Building2, Camera, ShieldCheck, RefreshCw, X
+  Building2, Camera, ShieldCheck, RefreshCw, X, Upload, UserMinus, Percent
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -73,7 +73,64 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
     return matchesSearch && matchesStatus;
   });
 
-  // Export CSV
+  // Calcul dynamique des compteurs en temps réel (zéro valeur figée)
+  const totalRegistered = attendees.length;
+  const attendedCount = attendees.filter(a => a.status === 'attended').length;
+  const absentCount = attendees.filter(a => a.status !== 'attended' && a.status !== 'cancelled').length;
+  const cancelledCount = attendees.filter(a => a.status === 'cancelled').length;
+  const attendanceRate = totalRegistered > 0 ? Math.round((attendedCount / totalRegistered) * 100) : 0;
+
+  // Import CSV des participants
+  const handleImportCsv = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result as string;
+        const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+        if (lines.length <= 1) {
+          toast.error("Le fichier CSV est vide ou ne contient que l'en-tête.");
+          return;
+        }
+
+        // Parse CSV simple (Nom, Prénom, Email, Entreprise)
+        let importedCount = 0;
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(',').map(c => c.replace(/^["']|["']$/g, '').trim());
+          if (cols.length >= 3 && cols[2].includes('@')) {
+            const [lastName, firstName, email, phone, company] = cols;
+            try {
+              await fetch('/api/event_engine.php?action=register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  event_id: selectedEventId || 1,
+                  first_name: firstName || "Participant",
+                  last_name: lastName || "MDIV",
+                  email: email,
+                  phone: phone || "",
+                  company: company || "",
+                  gdpr_consent: true
+                })
+              });
+              importedCount++;
+            } catch (err) {
+              // ignore single line error
+            }
+          }
+        }
+
+        queryClient.invalidateQueries({ queryKey: ['admin-attendees'] });
+        toast.success(`Import terminé : ${importedCount} participant(s) synchronisé(s) dans le CRM.`);
+      } catch (err) {
+        toast.error("Erreur lors de la lecture du fichier CSV.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
   const handleExportCsv = () => {
     if (filteredAttendees.length === 0) {
       toast.error("Aucun participant à exporter.");
@@ -139,6 +196,17 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
             </select>
           )}
 
+          <label className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border hover:bg-muted text-xs rounded-xl cursor-pointer transition-colors text-foreground">
+            <Upload size={14} className="text-amber-400" />
+            <span>Importer CSV</span>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleImportCsv}
+              className="hidden"
+            />
+          </label>
+
           <Button
             type="button"
             onClick={handleExportCsv}
@@ -157,6 +225,45 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
           >
             <RefreshCw size={14} />
           </Button>
+        </div>
+      </div>
+
+      {/* Compteurs dynamiques en temps réel (Recalculés automatiquement) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-card border border-border rounded-xl p-3 shadow-xs">
+          <div className="flex items-center justify-between text-muted-foreground text-[11px] mb-1">
+            <span>Total Inscrits</span>
+            <Users size={14} className="text-amber-400" />
+          </div>
+          <div className="text-xl font-bold font-mono text-foreground">{totalRegistered}</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">Participants enregistrés</div>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-3 shadow-xs">
+          <div className="flex items-center justify-between text-muted-foreground text-[11px] mb-1">
+            <span>Présents (Émargés)</span>
+            <CheckCircle2 size={14} className="text-emerald-400" />
+          </div>
+          <div className="text-xl font-bold font-mono text-emerald-400">{attendedCount}</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">Badges scannés à l'accueil</div>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-3 shadow-xs">
+          <div className="flex items-center justify-between text-muted-foreground text-[11px] mb-1">
+            <span>En attente / Absents</span>
+            <UserMinus size={14} className="text-slate-400" />
+          </div>
+          <div className="text-xl font-bold font-mono text-amber-300">{absentCount}</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">Non encore émargés</div>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-3 shadow-xs">
+          <div className="flex items-center justify-between text-muted-foreground text-[11px] mb-1">
+            <span>Taux de Présence</span>
+            <Percent size={14} className="text-blue-400" />
+          </div>
+          <div className="text-xl font-bold font-mono text-blue-400">{attendanceRate}%</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">Ratio présence effective</div>
         </div>
       </div>
 
@@ -368,21 +475,21 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
 
               {/* Pitch */}
               {selectedAttendee.pitch_text && (
-                <div className="p-3 bg-card border border-border rounded-xl overflow-hidden">
+                <div className="p-3 bg-card border border-border rounded-xl overflow-hidden w-full">
                   <div className="font-bold text-foreground mb-1 text-[11px]">Pitch de présentation entreprise :</div>
-                  <p className="text-muted-foreground italic leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">« {selectedAttendee.pitch_text} »</p>
+                  <p className="text-muted-foreground italic leading-relaxed break-words break-all [overflow-wrap:anywhere] [word-break:break-word]">« {selectedAttendee.pitch_text} »</p>
                 </div>
               )}
 
               {/* Réponses aux questions personnalisées */}
               {selectedAttendee.custom_answers && Object.keys(selectedAttendee.custom_answers).length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 w-full overflow-hidden">
                   <div className="font-bold text-foreground text-[11px]">Réponses au formulaire d'inscription :</div>
-                  <div className="bg-card border border-border rounded-xl p-3 space-y-2">
+                  <div className="bg-card border border-border rounded-xl p-3 space-y-2 overflow-hidden w-full">
                     {Object.entries(selectedAttendee.custom_answers).map(([key, value]) => (
-                      <div key={key} className="border-b border-border/40 pb-1.5 last:border-0 last:pb-0">
+                      <div key={key} className="border-b border-border/40 pb-1.5 last:border-0 last:pb-0 overflow-hidden">
                         <div className="text-[10px] text-muted-foreground uppercase">{key}</div>
-                        <div className="font-medium text-foreground break-words [overflow-wrap:anywhere] [word-break:break-word]">{String(value)}</div>
+                        <div className="font-medium text-foreground break-words break-all [overflow-wrap:anywhere] [word-break:break-word]">{String(value)}</div>
                       </div>
                     ))}
                   </div>
