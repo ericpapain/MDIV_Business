@@ -325,11 +325,11 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
       {/* Modal Détail Participant */}
       {selectedAttendee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-lg p-6 shadow-2xl animate-scale-in max-h-[90vh] overflow-y-auto">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-lg p-6 shadow-2xl animate-scale-in max-h-[90vh] overflow-y-auto overflow-x-hidden">
             <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
-              <div className="flex items-center gap-2.5">
-                <Users className="text-amber-400" size={18} />
-                <h3 className="font-bold text-sm text-foreground">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Users className="text-amber-400 shrink-0" size={18} />
+                <h3 className="font-bold text-sm text-foreground truncate">
                   Fiche Participant : {selectedAttendee.first_name} {selectedAttendee.last_name}
                 </h3>
               </div>
@@ -368,9 +368,9 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
 
               {/* Pitch */}
               {selectedAttendee.pitch_text && (
-                <div className="p-3 bg-card border border-border rounded-xl">
+                <div className="p-3 bg-card border border-border rounded-xl overflow-hidden">
                   <div className="font-bold text-foreground mb-1 text-[11px]">Pitch de présentation entreprise :</div>
-                  <p className="text-muted-foreground italic leading-relaxed">« {selectedAttendee.pitch_text} »</p>
+                  <p className="text-muted-foreground italic leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">« {selectedAttendee.pitch_text} »</p>
                 </div>
               )}
 
@@ -382,7 +382,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                     {Object.entries(selectedAttendee.custom_answers).map(([key, value]) => (
                       <div key={key} className="border-b border-border/40 pb-1.5 last:border-0 last:pb-0">
                         <div className="text-[10px] text-muted-foreground uppercase">{key}</div>
-                        <div className="font-medium text-foreground">{String(value)}</div>
+                        <div className="font-medium text-foreground break-words [overflow-wrap:anywhere] [word-break:break-word]">{String(value)}</div>
                       </div>
                     ))}
                   </div>

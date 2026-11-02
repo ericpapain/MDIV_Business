@@ -292,7 +292,7 @@ export function EventNetworkingWall({ eventId }: EventNetworkingWallProps) {
               {selectedAttendee.pitch_text && (
                 <div className="mt-5 p-4 rounded-xl bg-slate-950/70 border border-slate-800 text-sm text-slate-300">
                   <p className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-1">Présentation / Pitch</p>
-                  <p className="italic">"{selectedAttendee.pitch_text}"</p>
+                  <p className="italic break-words [overflow-wrap:anywhere] [word-break:break-word]">"{selectedAttendee.pitch_text}"</p>
                 </div>
               )}
 
