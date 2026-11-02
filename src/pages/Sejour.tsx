@@ -1,6 +1,6 @@
 import { getEvents } from "@/data/mockData";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, MapPin, ArrowRight, Play, ListChecks, Ticket } from "lucide-react";
+import { Calendar, MapPin, ArrowRight, Play, ListChecks, Ticket, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -77,19 +77,29 @@ export default function Sejour() {
                     </div>
                   )}
 
-                  <SimpleCountdown targetDateStr={e.date} />
+                  <SimpleCountdown targetDateStr={e.date} attendeesCount={e.attendees_count ?? 0} />
 
                   <div className="mt-auto pt-5 flex flex-col gap-3">
-                    {/* Bouton Réserver */}
-                    {e.billetterie_url ? (
-                      <a href={e.billetterie_url} target="_blank" rel="noopener noreferrer" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
-                        <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
-                      </a>
-                    ) : (
-                      <Link to={e.id ? `/evenements/${e.id}/inscription` : "/evenements"} className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
-                        <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                    {/* Bouton Réserver & Bouton Découvrir */}
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      {e.billetterie_url ? (
+                        <a href={e.billetterie_url} target="_blank" rel="noopener noreferrer" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
+                          <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                        </a>
+                      ) : (
+                        <Link to={e.id ? `/evenements/${e.id}/inscription` : "/evenements"} className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
+                          <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                        </Link>
+                      )}
+
+                      <Link 
+                        to={`/evenements/${e.id}`}
+                        className="px-4 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-1.5 w-fit border border-gold/40 text-gold hover:bg-gold/15 hover:border-gold transition-all duration-300 font-medium cursor-pointer shadow-xs"
+                        title={isEn ? "View stay details" : "Consulter la page de ce séjour"}
+                      >
+                        <ExternalLink size={12} /> {isEn ? "View page" : "Voir l'événement"}
                       </Link>
-                    )}
+                    </div>
 
                     {/* Bouton Programme */}
                     {hasProgram ? (

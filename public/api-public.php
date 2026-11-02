@@ -22,16 +22,44 @@ if ($action === 'videos') {
 
 if ($action === 'events') {
     $type = isset($_GET['type']) ? $_GET['type'] : null;
-    $typeFilter = $type ? " AND type = " . $pdo->quote($type) : "";
+    $typeFilter = $type ? " AND e.type = " . $pdo->quote($type) : "";
     
+    // Vérification résiliente de la présence de la table event_attendees
+    $hasAttendees = false;
+    try {
+        $pdo->query("SELECT 1 FROM event_attendees LIMIT 1");
+        $hasAttendees = true;
+    } catch (Throwable $t) {}
+
+    $countSubquery = $hasAttendees 
+        ? "(SELECT COUNT(*) FROM event_attendees ea WHERE ea.event_id = e.id AND ea.status != 'cancelled') as attendees_count"
+        : "0 as attendees_count";
+
     // upcoming
-    $stmtUp = $pdo->query("SELECT * FROM events WHERE date >= NOW() $typeFilter ORDER BY date ASC");
+    $stmtUp = $pdo->query("SELECT e.*, $countSubquery FROM events e WHERE e.date >= NOW() $typeFilter ORDER BY e.date ASC");
     $upcoming = $stmtUp->fetchAll();
     
     // past
-    $stmtPast = $pdo->query("SELECT * FROM events WHERE date < NOW() $typeFilter ORDER BY date DESC");
+    $stmtPast = $pdo->query("SELECT e.*, $countSubquery FROM events e WHERE e.date < NOW() $typeFilter ORDER BY e.date DESC");
     $past = $stmtPast->fetchAll();
     
+    // Décodage de features_config et conversion de attendees_count
+    foreach ($upcoming as &$ev) {
+        if (isset($ev['features_config']) && is_string($ev['features_config'])) {
+            $ev['features_config'] = json_decode($ev['features_config'], true) ?: [];
+        }
+        $ev['attendees_count'] = intval($ev['attendees_count'] ?? 0);
+    }
+    unset($ev);
+
+    foreach ($past as &$ev) {
+        if (isset($ev['features_config']) && is_string($ev['features_config'])) {
+            $ev['features_config'] = json_decode($ev['features_config'], true) ?: [];
+        }
+        $ev['attendees_count'] = intval($ev['attendees_count'] ?? 0);
+    }
+    unset($ev);
+
     echo json_encode([
         'success' => true,
         'data' => [

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, MapPin, ArrowRight, Play, Loader2, ListChecks, Ticket } from "lucide-react";
+import { Calendar, MapPin, ArrowRight, Play, Loader2, ListChecks, Ticket, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -75,27 +75,38 @@ export default function Events() {
                         </div>
                       )}
 
-                      <SimpleCountdown targetDateStr={e.date} />
+                      <SimpleCountdown targetDateStr={e.date} attendeesCount={e.attendees_count ?? 0} />
 
                       <div className="mt-auto pt-5 flex flex-col gap-3">
                         {/* Bouton Réserver - MDIV EVENT ENGINE */}
-                        {e.features_config?.online_registration?.enabled !== false ? (
-                          <button 
-                            type="button"
-                            onClick={() => setRegistrationEventId(e.id)} 
-                            className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit cursor-pointer transition-transform hover:scale-[1.02]"
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          {e.features_config?.online_registration?.enabled !== false ? (
+                            <button 
+                              type="button"
+                              onClick={() => setRegistrationEventId(e.id)} 
+                              className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit cursor-pointer transition-transform hover:scale-[1.02]"
+                            >
+                              <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                            </button>
+                          ) : e.billetterie_url ? (
+                            <a href={e.billetterie_url} target="_blank" rel="noopener noreferrer" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
+                              <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                            </a>
+                          ) : (
+                            <Link to={e.id ? `/evenements/${e.id}/inscription` : "/evenements"} className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
+                              <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                            </Link>
+                          )}
+
+                          {/* Bouton vers la page officielle de l'événement */}
+                          <Link 
+                            to={`/evenements/${e.id}`}
+                            className="px-4 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-1.5 w-fit border border-gold/40 text-gold hover:bg-gold/15 hover:border-gold transition-all duration-300 font-medium cursor-pointer shadow-xs"
+                            title={isEn ? "View event details" : "Consulter la page de cet événement"}
                           >
-                            <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
-                          </button>
-                        ) : e.billetterie_url ? (
-                          <a href={e.billetterie_url} target="_blank" rel="noopener noreferrer" className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
-                            <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
-                          </a>
-                        ) : (
-                          <Link to={e.id ? `/evenements/${e.id}/inscription` : "/evenements"} className="btn-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] rounded-sm flex items-center gap-2 w-fit">
-                            <Ticket size={12} /> {isEn ? "Book a seat" : "Réserver une place"} <ArrowRight size={12} />
+                            <ExternalLink size={12} /> {isEn ? "View page" : "Voir l'événement"}
                           </Link>
-                        )}
+                        </div>
 
                         {/* Bouton Programme */}
                         {hasProgram ? (
