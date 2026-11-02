@@ -1,9 +1,12 @@
 // src/components/events/EventRegistrationConfirmation.tsx
-// Écran de confirmation d'inscription MDIV EVENT ENGINE
+// Écran de confirmation d'inscription MDIV EVENT ENGINE avec téléchargement forcé et nominatif du QR Code
 
+import { useState } from 'react';
 import { RegistrationResult } from '@/types/eventEngine';
-import { CheckCircle2, Download, Calendar, MapPin, Ticket, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Download, Calendar, MapPin, Ticket, ShieldCheck, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { downloadQrCode } from '@/utils/downloadQrCode';
+import { toast } from 'sonner';
 
 interface EventRegistrationConfirmationProps {
   result: RegistrationResult;
@@ -17,10 +20,28 @@ export function EventRegistrationConfirmation({
   onReset
 }: EventRegistrationConfirmationProps) {
   const { attendee, ticket_code, qr_code_data_url } = result;
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const displayName = attendee?.first_name 
     ? `${attendee.first_name} ${attendee.last_name || ''}`.trim()
-    : "";
+    : (attendee?.name || "");
+
+  const handleDownloadQr = async () => {
+    if (!qr_code_data_url) return;
+    setIsDownloading(true);
+    try {
+      await downloadQrCode(
+        qr_code_data_url,
+        event?.title || "Evenement",
+        displayName || ticket_code || "Participant"
+      );
+      toast.success("Votre QR Code d'accès a été téléchargé avec succès !");
+    } catch (e: any) {
+      toast.error("Erreur lors du téléchargement du QR Code");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="space-y-6 text-center animate-fade-in py-2">
@@ -77,13 +98,22 @@ export function EventRegistrationConfirmation({
       {/* Actions */}
       <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
         {qr_code_data_url && (
-          <a
-            href={qr_code_data_url}
-            download={`billet_${ticket_code || 'mdiv'}.png`}
+          <Button
+            type="button"
+            onClick={handleDownloadQr}
+            disabled={isDownloading}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
           >
-            <Download size={14} /> Télécharger mon pass (QR Code)
-          </a>
+            {isDownloading ? (
+              <>
+                <Loader2 size={14} className="animate-spin" /> Téléchargement en cours...
+              </>
+            ) : (
+              <>
+                <Download size={14} /> Télécharger mon pass (QR Code)
+              </>
+            )}
+          </Button>
         )}
 
         <Button

@@ -855,16 +855,117 @@ L'équipe d'organisation MDIV Network & BNE.";
         exit();
     }
 
-    // 5. ÉMARGEMENT / CHECK-IN
+    // 5. ÉMARGEMENT / CHECK-IN (SCANNER ACCUEIL SANDRA & BORNE ENTRÉE)
     if ($action === 'check_in' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $ticketCode = trim($data['ticket_code'] ?? '');
-        $by = trim($data['checked_in_by'] ?? 'Accueil');
-        if (empty($ticketCode)) throw new Exception("ticket_code requis");
+        $attendeeId = intval($data['attendee_id'] ?? 0);
+        $by = trim($data['checked_in_by'] ?? 'Sandra / Accueil');
 
-        $stmt = $pdo->prepare("UPDATE event_attendees SET status = 'attended', checked_in_at = NOW(), checked_in_by = ? WHERE ticket_code = ?");
-        $stmt->execute([$by, $ticketCode]);
+        if (empty($ticketCode) && $attendeeId <= 0) {
+            throw new Exception("ticket_code ou attendee_id requis");
+        }
 
-        echo json_encode(['success' => true, 'message' => "Émargement enregistré"]);
+        // Recherche du participant
+        if (!empty($ticketCode)) {
+            $stmt = $pdo->prepare("SELECT a.*, e.title as event_title, e.date as event_date, e.location as event_location FROM event_attendees a LEFT JOIN events e ON a.event_id = e.id WHERE a.ticket_code = ? LIMIT 1");
+            $stmt->execute([$ticketCode]);
+        } else {
+            $stmt = $pdo->prepare("SELECT a.*, e.title as event_title, e.date as event_date, e.location as event_location FROM event_attendees a LEFT JOIN events e ON a.event_id = e.id WHERE a.id = ? LIMIT 1");
+            $stmt->execute([$attendeeId]);
+        }
+        $attendee = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$attendee) {
+            echo json_encode([
+                'success' => false,
+                'error' => "Billet introuvable pour ce QR Code (" . htmlspecialchars($ticketCode) . ")"
+            ]);
+            exit();
+        }
+
+        $already = ($attendee['status'] === 'attended');
+
+        if (!$already) {
+            $upd = $pdo->prepare("UPDATE event_attendees SET status = 'attended', checked_in_at = NOW(), checked_in_by = ? WHERE id = ?");
+            $upd->execute([$by, $attendee['id']]);
+            $attendee['status'] = 'attended';
+            $attendee['checked_in_at'] = date('Y-m-d H:i:s');
+            $attendee['checked_in_by'] = $by;
+        }
+
+        echo json_encode([
+            'success' => true,
+            'already_checked_in' => $already,
+            'message' => $already 
+                ? "Participant déjà émargé le " . date('d/m/Y à H:i', strtotime($attendee['checked_in_at']))
+                : "Émargement validé avec succès pour " . $attendee['first_name'] . " " . $attendee['last_name'],
+            'attendee' => $attendee
+        ]);
+        exit();
+    }
+
+    // 5.b SELF CHECK-IN BORNE ENTRÉE (PAR SCAN QR KAKEMONO + EMAIL OU DÉBUT EMAIL)
+    if ($action === 'self_check_in' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $eventId = intval($data['event_id'] ?? 0);
+        $emailQuery = trim(strtolower($data['email_query'] ?? ''));
+
+        if ($eventId <= 0) throw new Exception("event_id requis");
+        if (empty($emailQuery)) throw new Exception("Veuillez saisir votre email d'inscription ou votre identifiant");
+
+        // Recherche tolérante : email exact OU préfixe (ex: jean.dupont pour jean.dupont@gmail.com)
+        $cleanPrefix = explode('@', $emailQuery)[0];
+
+        $stmt = $pdo->prepare("
+            SELECT a.*, e.title as event_title, e.date as event_date, e.location as event_location 
+            FROM event_attendees a
+            JOIN events e ON a.event_id = e.id
+            WHERE a.event_id = ? 
+              AND (
+                LOWER(a.email) = ?
+                OR LOWER(a.email) LIKE ?
+                OR LOWER(SUBSTRING_INDEX(a.email, '@', 1)) = ?
+              )
+            LIMIT 5
+        ");
+        $stmt->execute([$eventId, $emailQuery, $emailQuery . '%', $cleanPrefix]);
+        $matches = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (count($matches) === 0) {
+            echo json_encode([
+                'success' => false,
+                'error' => "Aucune inscription trouvée avec cet identifiant pour cet événement. Veuillez vérifier votre saisie ou vous rapprocher de l'accueil Sandra."
+            ]);
+            exit();
+        }
+
+        if (count($matches) > 1) {
+            echo json_encode([
+                'success' => false,
+                'ambiguous' => true,
+                'error' => "Plusieurs participants correspondent à cette saisie. Veuillez saisir votre adresse email complète (avec le @)."
+            ]);
+            exit();
+        }
+
+        $attendee = $matches[0];
+        $already = ($attendee['status'] === 'attended');
+
+        if (!$already) {
+            $upd = $pdo->prepare("UPDATE event_attendees SET status = 'attended', checked_in_at = NOW(), checked_in_by = 'Borne Entrée (Self-Checkin)' WHERE id = ?");
+            $upd->execute([$attendee['id']]);
+            $attendee['status'] = 'attended';
+            $attendee['checked_in_at'] = date('Y-m-d H:i:s');
+            $attendee['checked_in_by'] = 'Borne Entrée (Self-Checkin)';
+        }
+
+        echo json_encode([
+            'success' => true,
+            'already_checked_in' => $already,
+            'message' => $already 
+                ? "Vous avez déjà validé votre présence le " . date('d/m/Y à H:i', strtotime($attendee['checked_in_at'])) . ". Bienvenue !"
+                : "Bienvenue " . $attendee['first_name'] . " " . $attendee['last_name'] . " ! Votre présence est confirmée.",
+            'attendee' => $attendee
+        ]);
         exit();
     }
 

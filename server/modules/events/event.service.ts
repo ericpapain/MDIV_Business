@@ -812,7 +812,7 @@ export class EventService {
     return list.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }
 
-  checkInAttendee(ticketCode: string, checkedInBy: string = "Admin"): EventAttendee {
+  checkInAttendee(ticketCode: string, checkedInBy: string = "Admin"): { attendee: EventAttendee; already_checked_in: boolean } {
     this.ensureDbCollections();
     const db = getDb();
     const attendee = (db.event_attendees || []).find((a: any) => a.ticket_code === ticketCode);
@@ -820,12 +820,47 @@ export class EventService {
       throw new Error(`Billet introuvable pour le code : ${ticketCode}`);
     }
 
-    attendee.status = "attended";
-    attendee.checked_in_at = new Date().toISOString();
-    attendee.checked_in_by = checkedInBy;
+    const already_checked_in = attendee.status === "attended";
+    if (!already_checked_in) {
+      attendee.status = "attended";
+      attendee.checked_in_at = new Date().toISOString();
+      attendee.checked_in_by = checkedInBy;
+      saveDb();
+    }
 
-    saveDb();
-    return attendee;
+    return { attendee, already_checked_in };
+  }
+
+  selfCheckInAttendee(eventId: number, emailQuery: string): { attendee: EventAttendee; already_checked_in: boolean } {
+    this.ensureDbCollections();
+    const db = getDb();
+    const q = (emailQuery || '').trim().toLowerCase();
+    const cleanPrefix = q.split('@')[0];
+
+    const matches = (db.event_attendees || []).filter((a: any) => {
+      if (Number(a.event_id) !== Number(eventId)) return false;
+      const em = (a.email || '').trim().toLowerCase();
+      const emPrefix = em.split('@')[0];
+      return em === q || em.startsWith(q) || emPrefix === cleanPrefix;
+    });
+
+    if (matches.length === 0) {
+      throw new Error("Aucune inscription trouvée avec cet identifiant pour cet événement.");
+    }
+    if (matches.length > 1) {
+      throw new Error("Plusieurs participants correspondent à cette saisie. Veuillez saisir votre adresse email complète.");
+    }
+
+    const attendee = matches[0];
+    const already_checked_in = attendee.status === "attended";
+    if (!already_checked_in) {
+      attendee.status = "attended";
+      attendee.checked_in_at = new Date().toISOString();
+      attendee.checked_in_by = "Borne Entrée (Self-Checkin)";
+      saveDb();
+    }
+
+    return { attendee, already_checked_in };
   }
 
   deleteAttendee(attendeeId: number): void {

@@ -7,9 +7,12 @@ import { EventAttendee } from '@/types/eventEngine';
 import { 
   Users, Search, Download, Trash2, CheckCircle2, Clock, XCircle, 
   ExternalLink, QrCode, Filter, UserCheck, Eye, Mail, Phone, 
-  Building2, Camera, ShieldCheck, RefreshCw, X, Upload, UserMinus, Percent
+  Building2, Camera, ShieldCheck, RefreshCw, X, Upload, UserMinus, Percent, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EventCameraCheckInModal } from './EventCameraCheckInModal';
+import { EventAccessPortalModal } from './EventAccessPortalModal';
+import { downloadQrCode } from '@/utils/downloadQrCode';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
@@ -23,6 +26,8 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedAttendee, setSelectedAttendee] = useState<EventAttendee | null>(null);
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+  const [isAccessPortalModalOpen, setIsAccessPortalModalOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -276,6 +281,49 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
         </div>
       </div>
 
+      {/* MODULE ACCUEIL & ÉMARGEMENT : MODE SANDRA + BORNE ENTRÉE */}
+      <div className="bg-gradient-to-r from-amber-500/10 via-card to-card border border-amber-500/30 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center shrink-0">
+            <Camera size={20} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="font-bold text-foreground text-sm font-serif">
+                Poste d'Accueil & Contrôle d'Accès
+              </h4>
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">
+                Studio Régie
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Validez les arrivées via la caméra (Sandra) ou téléchargez le QR Code à poser sur le kakemono d'entrée.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <Button
+            type="button"
+            onClick={() => setIsCameraModalOpen(true)}
+            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs rounded-xl px-4 py-2.5 flex items-center gap-2 shadow-md hover:scale-[1.02] transition-transform cursor-pointer"
+          >
+            <Camera size={15} />
+            <span>Scanner Caméra (Mode Sandra)</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsAccessPortalModalOpen(true)}
+            className="border-amber-400/40 text-amber-300 hover:bg-amber-400/10 font-medium text-xs rounded-xl px-3.5 py-2.5 flex items-center gap-2 cursor-pointer"
+          >
+            <QrCode size={15} />
+            <span>Borne Entrée (QR Kakemono)</span>
+          </Button>
+        </div>
+      </div>
+
       {/* Compteurs dynamiques en temps réel (Recalculés automatiquement) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-card border border-border rounded-xl p-3 shadow-xs">
@@ -460,6 +508,21 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                       {/* Actions : Détail, Télécharger Photo HD, Supprimer */}
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          {/* Téléchargement direct du QR Billet de ce participant */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const evTitle = eventsList?.find(e => e.id === attendee.event_id)?.title || 'Evenement_MDIV';
+                              const qrUrl = attendee.badge_url || `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(attendee.ticket_code)}&margin=10`;
+                              downloadQrCode(qrUrl, evTitle, `${attendee.first_name}_${attendee.last_name}`);
+                              toast.success(`Téléchargement du QR Code de ${attendee.first_name} ${attendee.last_name}`);
+                            }}
+                            className="p-1.5 text-muted-foreground hover:text-amber-400 hover:bg-amber-500/10 rounded-lg cursor-pointer transition-colors"
+                            title="Télécharger le QR Code d'accès de ce participant"
+                          >
+                            <QrCode size={15} />
+                          </button>
+
                           {attendee.photo_url && (
                             <button
                               type="button"
@@ -640,6 +703,24 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
           </div>
         </div>
       )}
+
+      {/* Modale Scanner Caméra Accueil Sandra */}
+      <EventCameraCheckInModal
+        isOpen={isCameraModalOpen}
+        onClose={() => setIsCameraModalOpen(false)}
+        onSuccessCheckIn={() => refetch()}
+      />
+
+      {/* Modale Borne d'Entrée & Kakemono */}
+      <EventAccessPortalModal
+        isOpen={isAccessPortalModalOpen}
+        onClose={() => setIsAccessPortalModalOpen(false)}
+        event={
+          eventsList?.find(e => e.id === selectedEventId) || 
+          eventsList?.[0] || 
+          { id: selectedEventId || 1, title: "Événement MDIV" }
+        }
+      />
     </div>
   );
 }

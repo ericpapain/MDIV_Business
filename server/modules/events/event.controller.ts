@@ -137,10 +137,32 @@ export class EventController {
       // --- ÉMARGEMENT / CHECK-IN ---
       if (action === 'check_in' && method === 'POST') {
         const ticketCode = parsed.fields?.ticket_code;
-        const checkedInBy = parsed.fields?.checked_in_by || "Accueil";
+        const checkedInBy = parsed.fields?.checked_in_by || "Sandra / Accueil";
         if (!ticketCode) throw new Error("ticket_code requis");
-        const attendee = eventService.checkInAttendee(ticketCode, checkedInBy);
-        return sendJson(res, 200, { success: true, data: attendee, message: `Émargement validé pour ${attendee.first_name} ${attendee.last_name}` });
+        const result = eventService.checkInAttendee(ticketCode, checkedInBy);
+        return sendJson(res, 200, {
+          success: true,
+          data: result.attendee,
+          already_checked_in: result.already_checked_in,
+          message: result.already_checked_in
+            ? `Participant déjà émargé (${result.attendee.first_name} ${result.attendee.last_name})`
+            : `Émargement validé avec succès pour ${result.attendee.first_name} ${result.attendee.last_name}`
+        });
+      }
+
+      if (action === 'self_check_in' && method === 'POST') {
+        const eventId = Number(parsed.fields?.event_id);
+        const emailQuery = parsed.fields?.email_query;
+        if (!eventId || !emailQuery) throw new Error("event_id et email_query requis");
+        const result = eventService.selfCheckInAttendee(eventId, emailQuery);
+        return sendJson(res, 200, {
+          success: true,
+          data: result.attendee,
+          already_checked_in: result.already_checked_in,
+          message: result.already_checked_in
+            ? `Bienvenue ${result.attendee.first_name} ! Vous êtes déjà enregistré.`
+            : `Bienvenue ${result.attendee.first_name} ${result.attendee.last_name} ! Présence confirmée.`
+        });
       }
 
 

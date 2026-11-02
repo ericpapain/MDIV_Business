@@ -39,6 +39,7 @@ const EventReplay = lazy(() => import("./pages/EventReplay"));
 const EventRegistrationPage = lazy(() => import("./pages/EventRegistrationPage"));
 const EventHubPage = lazy(() => import("./pages/EventHubPage"));
 const EventLiveDisplayPage = lazy(() => import("./pages/EventLiveDisplayPage"));
+const EventSelfCheckIn = lazy(() => import("./pages/events/EventSelfCheckIn"));
 const EventRegiePage = lazy(() => import("./pages/admin/EventRegiePage"));
 const Charte = lazy(() => import("./pages/Charte"));
 const SejoursBNE = lazy(() => import("./pages/SejoursBNE"));
@@ -117,6 +118,10 @@ const App = () => (
                   {/* Live Stage Displays (1920x1080 sans chrome standard) */}
                   <Route path="/evenements/:id/live" element={<EventLiveDisplayPage />} />
                   <Route path="/live/:id" element={<EventLiveDisplayPage />} />
+
+                  {/* Borne Mobile Self-Check-in de Présence (QR Entrée de salle) */}
+                  <Route path="/evenements/:eventId/presence" element={<EventSelfCheckIn />} />
+                  <Route path="/checkin/:eventId" element={<EventSelfCheckIn />} />
 
                   <Route element={<SiteLayout />}>
                     {/* 1. Routes publiques (accessibles sans connexion) */}
