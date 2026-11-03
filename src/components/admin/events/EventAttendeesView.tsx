@@ -43,6 +43,19 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
     }
   });
 
+  // Récupération des questions personnalisées de l'événement pour enrichir l'export CSV et la modale participant
+  const { data: customFields = [] } = useQuery<any[]>({
+    queryKey: ['custom-fields', selectedEventId],
+    queryFn: async () => {
+      const url = selectedEventId 
+        ? `/api/event_engine.php?action=get_custom_fields&event_id=${selectedEventId}`
+        : `/api/event_engine.php?action=get_custom_fields`;
+      const res = await fetch(url);
+      const json = await res.json();
+      return json.data || [];
+    }
+  });
+
   
   // Suppression d'un participant dans le CRM
   const deleteAttendeeMutation = useMutation({
@@ -174,7 +187,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
             // Mapping automatique des réponses personnalisées par intitulé (label) ou par clé
             const customAnswers: Record<string, any> = {};
             rawHeaders.forEach((h, hIdx) => {
-              const cf = customFields.find((f: any) => 
+              const cf = (customFields || []).find((f: any) => 
                 (f.label && f.label.toLowerCase() === h.toLowerCase()) || 
                 (f.field_key && f.field_key.toLowerCase() === h.toLowerCase())
               );
@@ -225,7 +238,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
     const questionMap = new Map<string, { label: string; field_key: string }>();
 
     // D'abord les questions configurées sur l'événement
-    customFields.forEach((cf: any) => {
+    (customFields || []).forEach((cf: any) => {
       if (cf.field_key) {
         questionMap.set(cf.field_key, {
           label: cf.label || cf.field_key,
@@ -732,7 +745,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                   />
                 ) : (
                   <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 font-bold flex items-center justify-center text-xl border border-amber-500/30">
-                    {selectedAttendee.first_name.charAt(0)}{selectedAttendee.last_name.charAt(0)}
+                    {(selectedAttendee.first_name || "P").charAt(0)}{(selectedAttendee.last_name || "").charAt(0)}
                   </div>
                 )}
                 <div>
@@ -868,7 +881,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                 ) : selectedAttendee.custom_answers && Object.keys(selectedAttendee.custom_answers).length > 0 ? (
                   <div className="bg-card/70 border border-border/70 rounded-2xl p-4 space-y-3 divide-y divide-border/40">
                     {Object.entries(selectedAttendee.custom_answers).map(([key, value], idx) => {
-                      const matchedField = customFields.find((f: any) => f.field_key === key);
+                      const matchedField = (customFields || []).find((f: any) => f.field_key === key);
                       const displayLabel = matchedField?.label || key.replace(/_/g, ' ');
                       return (
                         <div key={key} className={idx > 0 ? "pt-2.5" : ""}>
