@@ -611,14 +611,14 @@ try {
         if (!empty($data['custom_answers']) && is_array($data['custom_answers'])) {
             $stmtAns = $pdo->prepare("INSERT INTO event_custom_field_answers (attendee_id, field_id, field_key, value_text) VALUES (?, ?, ?, ?)");
             foreach ($data['custom_answers'] as $fKey => $fVal) {
-                // Trouver le field_id
-                $stmtFld = $pdo->prepare("SELECT id FROM event_custom_fields WHERE event_id = ? AND field_key = ? LIMIT 1");
-                $stmtFld->execute([$eventId, $fKey]);
+                $numId = is_numeric($fKey) ? intval($fKey) : 0;
+                $stmtFld = $pdo->prepare("SELECT id, field_key, label FROM event_custom_fields WHERE event_id = ? AND (field_key = ? OR id = ?) LIMIT 1");
+                $stmtFld->execute([$eventId, $fKey, $numId]);
                 $fRow = $stmtFld->fetch(PDO::FETCH_ASSOC);
-                if ($fRow) {
-                    $valStr = is_array($fVal) ? json_encode($fVal, JSON_UNESCAPED_UNICODE) : strval($fVal);
-                    $stmtAns->execute([$attendeeId, $fRow['id'], $fKey, $valStr]);
-                }
+                $fieldId = $fRow ? intval($fRow['id']) : 0;
+                $canonKey = $fRow ? $fRow['field_key'] : strval($fKey);
+                $valStr = is_array($fVal) ? json_encode($fVal, JSON_UNESCAPED_UNICODE) : strval($fVal);
+                $stmtAns->execute([$attendeeId, $fieldId, $canonKey, $valStr]);
             }
         }
 
@@ -702,19 +702,49 @@ L'équipe d'organisation MDIV Network & BNE.";
         $attendedCount = 0;
         $waitlistCount = 0;
 
+        // Récupérer la liste des questions personnalisées pour cet événement (avec labels complets)
+        $eventCustomFields = [];
+        if ($eventId > 0) {
+            $stmtF = $pdo->prepare("SELECT id, event_id, field_key, label, field_type, sort_order, options, is_required FROM event_custom_fields WHERE event_id = ? AND is_active = 1 ORDER BY sort_order ASC, id ASC");
+            $stmtF->execute([$eventId]);
+            $eventCustomFields = $stmtF->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $stmtF = $pdo->query("SELECT id, event_id, field_key, label, field_type, sort_order, options, is_required FROM event_custom_fields WHERE is_active = 1 ORDER BY sort_order ASC, id ASC");
+            $eventCustomFields = $stmtF->fetchAll(PDO::FETCH_ASSOC);
+        }
+
         foreach ($attendees as &$att) {
             if ($att['status'] === 'attended') $attendedCount++;
             if ($att['status'] === 'cancelled' || $att['status'] === 'pending') $waitlistCount++;
 
-            $stmtAns = $pdo->prepare("SELECT field_key, value_text FROM event_custom_field_answers WHERE attendee_id = ?");
-            $stmtAns->execute([$att['id']]);
+            $stmtAns = $pdo->prepare("
+                SELECT a.field_id, a.field_key, a.value_text, 
+                       f.label, f.field_type, f.options, f.sort_order 
+                FROM event_custom_field_answers a
+                LEFT JOIN event_custom_fields f ON (a.field_id = f.id OR (a.field_key = f.field_key AND f.event_id = ?))
+                WHERE a.attendee_id = ?
+                ORDER BY COALESCE(f.sort_order, 999) ASC, a.id ASC
+            ");
+            $stmtAns->execute([$att['event_id'], $att['id']]);
             $ansRows = $stmtAns->fetchAll(PDO::FETCH_ASSOC);
             $cAnswers = [];
+            $cDetails = [];
             foreach ($ansRows as $ar) {
                 $dec = json_decode($ar['value_text'], true);
-                $cAnswers[$ar['field_key']] = ($dec !== null) ? $dec : $ar['value_text'];
+                $val = ($dec !== null) ? $dec : $ar['value_text'];
+                $cAnswers[$ar['field_key']] = $val;
+                $questionLabel = !empty($ar['label']) ? $ar['label'] : $ar['field_key'];
+                $cDetails[] = [
+                    'field_id' => intval($ar['field_id']),
+                    'field_key' => $ar['field_key'],
+                    'label' => $questionLabel,
+                    'value' => $val,
+                    'field_type' => $ar['field_type'] ?? 'text',
+                    'options' => $ar['options'] ?? null
+                ];
             }
             $att['custom_answers'] = $cAnswers;
+            $att['custom_answers_details'] = $cDetails;
         }
 
         $absentCount = max(0, $registeredCount - $attendedCount - $waitlistCount);
@@ -722,6 +752,7 @@ L'équipe d'organisation MDIV Network & BNE.";
         echo json_encode([
             'success' => true, 
             'data' => $attendees,
+            'custom_fields' => $eventCustomFields,
             'stats' => [
                 'total_registered' => $registeredCount,
                 'total_attended' => $attendedCount,

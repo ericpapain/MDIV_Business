@@ -133,7 +133,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
   const cancelledCount = attendees.filter(a => a.status === 'cancelled').length;
   const attendanceRate = totalRegistered > 0 ? Math.round((attendedCount / totalRegistered) * 100) : 0;
 
-  // Import CSV des participants
+  // Import CSV intelligent des participants avec prise en charge des questions personnalisées
   const handleImportCsv = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -148,12 +148,41 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
           return;
         }
 
-        // Parse CSV simple (Nom, Prénom, Email, Entreprise)
+        const delimiter = lines[0].includes(';') ? ';' : ',';
+        const rawHeaders = lines[0].split(delimiter).map(c => c.replace(/^[\"']|[\"']$/g, '').trim());
+
         let importedCount = 0;
         for (let i = 1; i < lines.length; i++) {
-          const cols = lines[i].split(',').map(c => c.replace(/^["']|["']$/g, '').trim());
-          if (cols.length >= 3 && cols[2].includes('@')) {
-            const [lastName, firstName, email, phone, company] = cols;
+          const cols = lines[i].split(delimiter).map(c => c.replace(/^[\"']|[\"']$/g, '').trim());
+          if (cols.length >= 2) {
+            const emailIdx = rawHeaders.findIndex(h => /email|courriel|mail/i.test(h));
+            const email = (emailIdx !== -1 && cols[emailIdx]) ? cols[emailIdx] : cols.find(c => c.includes('@'));
+            if (!email || !email.includes('@')) continue;
+
+            const lastNameIdx = rawHeaders.findIndex(h => /^nom/i.test(h));
+            const firstNameIdx = rawHeaders.findIndex(h => /^pr[eé]nom/i.test(h));
+            const phoneIdx = rawHeaders.findIndex(h => /t[eé]l/i.test(h));
+            const companyIdx = rawHeaders.findIndex(h => /entreprise|soci[eé]t[eé]/i.test(h));
+            const roleIdx = rawHeaders.findIndex(h => /fonction|poste|r[oô]le/i.test(h));
+
+            const lastName = lastNameIdx !== -1 ? cols[lastNameIdx] : cols[0] || "Participant";
+            const firstName = firstNameIdx !== -1 ? cols[firstNameIdx] : cols[1] || "";
+            const phone = phoneIdx !== -1 ? cols[phoneIdx] : "";
+            const company = companyIdx !== -1 ? cols[companyIdx] : "";
+            const jobTitle = roleIdx !== -1 ? cols[roleIdx] : "";
+
+            // Mapping automatique des réponses personnalisées par intitulé (label) ou par clé
+            const customAnswers: Record<string, any> = {};
+            rawHeaders.forEach((h, hIdx) => {
+              const cf = customFields.find((f: any) => 
+                (f.label && f.label.toLowerCase() === h.toLowerCase()) || 
+                (f.field_key && f.field_key.toLowerCase() === h.toLowerCase())
+              );
+              if (cf && cols[hIdx] !== undefined && cols[hIdx] !== "") {
+                customAnswers[cf.field_key] = cols[hIdx];
+              }
+            });
+
             try {
               await fetch('/api/event_engine.php?action=register', {
                 method: 'POST',
@@ -163,20 +192,20 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                   first_name: firstName || "Participant",
                   last_name: lastName || "MDIV",
                   email: email,
-                  phone: phone || "",
-                  company: company || "",
+                  phone: phone,
+                  company: company,
+                  job_title: jobTitle,
+                  custom_answers: customAnswers,
                   gdpr_consent: true
                 })
               });
               importedCount++;
-            } catch (err) {
-              // ignore single line error
-            }
+            } catch (err) {}
           }
         }
 
         queryClient.invalidateQueries({ queryKey: ['admin-attendees'] });
-        toast.success(`Import terminé : ${importedCount} participant(s) synchronisé(s) dans le CRM.`);
+        toast.success(`Import terminé : ${importedCount} participant(s) synchronisé(s) dans le CRM avec leurs réponses.`);
       } catch (err) {
         toast.error("Erreur lors de la lecture du fichier CSV.");
       }
@@ -184,41 +213,148 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
     reader.readAsText(file);
     e.target.value = '';
   };
+
+  // Export CSV complet avec intitulés exacts de TOUTES les questions personnalisées
   const handleExportCsv = () => {
     if (filteredAttendees.length === 0) {
       toast.error("Aucun participant à exporter.");
       return;
     }
 
-    const headers = ["Ticket", "Nom", "Prénom", "Email", "Téléphone", "Entreprise", "Fonction", "Secteur", "Statut", "Émargement", "Networking Opt-in", "ID Client CRM", "Date Inscription"];
-    const rows = filteredAttendees.map(a => [
-      a.ticket_code,
-      `"${a.last_name}"`,
-      `"${a.first_name}"`,
-      a.email,
-      a.phone || "",
-      `"${a.company || ""}"`,
-      `"${a.job_title || ""}"`,
-      `"${a.sector || ""}"`,
-      a.status,
-      a.checked_in_at ? new Date(a.checked_in_at).toLocaleString('fr-FR') : "Non",
-      a.networking_opt_in ? "Oui" : "Non",
-      a.client_id || "Nouveau",
-      new Date(a.created_at).toLocaleDateString('fr-FR')
-    ]);
+    // 1. Rassembler l'ensemble des questions personnalisées avec leurs intitulés (labels) complets
+    const questionMap = new Map<string, { label: string; field_key: string }>();
 
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
-      + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    // D'abord les questions configurées sur l'événement
+    customFields.forEach((cf: any) => {
+      if (cf.field_key) {
+        questionMap.set(cf.field_key, {
+          label: cf.label || cf.field_key,
+          field_key: cf.field_key
+        });
+      }
+    });
 
-    const encodedUri = encodeURI(csvContent);
+    // Ensuite toutes les questions trouvées dans l'historique des participants
+    filteredAttendees.forEach((a: any) => {
+      if (a.custom_answers_details && Array.isArray(a.custom_answers_details)) {
+        a.custom_answers_details.forEach((item: any) => {
+          if (!questionMap.has(item.field_key)) {
+            questionMap.set(item.field_key, {
+              label: item.label || item.field_key,
+              field_key: item.field_key
+            });
+          }
+        });
+      } else if (a.custom_answers) {
+        Object.keys(a.custom_answers).forEach((k: string) => {
+          if (!questionMap.has(k)) {
+            questionMap.set(k, {
+              label: k,
+              field_key: k
+            });
+          }
+        });
+      }
+    });
+
+    const questionList = Array.from(questionMap.values());
+
+    // 2. Colonnes de base + chaque intitulé de question en colonne dédiée
+    const baseHeaders = [
+      "Ticket",
+      "Nom",
+      "Prénom",
+      "Email",
+      "Téléphone",
+      "Entreprise",
+      "Fonction",
+      "Secteur",
+      "Statut Billet",
+      "Émargement",
+      "Date/Heure Émargement",
+      "Opérateur Accueil",
+      "Networking Opt-in",
+      "Droit Image",
+      "ID Client CRM",
+      "Date Inscription"
+    ];
+
+    const questionHeaders = questionList.map(q => q.label);
+    const allHeaders = [...baseHeaders, ...questionHeaders];
+
+    // 3. Données des participants avec réponses placées sous les bonnes colonnes
+    const rows = filteredAttendees.map((a: any) => {
+      const baseCols = [
+        a.ticket_code || "",
+        a.last_name || "",
+        a.first_name || "",
+        a.email || "",
+        a.phone || "",
+        a.company || "",
+        a.job_title || "",
+        a.sector || "",
+        a.status || "registered",
+        a.status === 'attended' ? "Présent" : "Non émargé",
+        a.checked_in_at ? new Date(a.checked_in_at).toLocaleString('fr-FR') : "",
+        a.checked_in_by || "",
+        a.networking_opt_in ? "Oui" : "Non",
+        a.photo_consent ? "Oui" : "Non",
+        a.client_id ? `Client #${a.client_id}` : "Nouveau",
+        a.created_at ? new Date(a.created_at).toLocaleDateString('fr-FR') : ""
+      ];
+
+      const questionCols = questionList.map(q => {
+        let val: any = undefined;
+
+        if (a.custom_answers_details && Array.isArray(a.custom_answers_details)) {
+          const detail = a.custom_answers_details.find((d: any) => d.field_key === q.field_key);
+          if (detail !== undefined) val = detail.value;
+        }
+
+        if (val === undefined && a.custom_answers && a.custom_answers[q.field_key] !== undefined) {
+          val = a.custom_answers[q.field_key];
+        }
+
+        if (Array.isArray(val)) {
+          return val.join(", ");
+        }
+        if (typeof val === 'boolean') {
+          return val ? "Oui" : "Non";
+        }
+        if (val === null || val === undefined) {
+          return "";
+        }
+        return String(val);
+      });
+
+      return [...baseCols, ...questionCols];
+    });
+
+    // Échappement CSV Excel (séparateur point-virgule compatible France/Europe avec BOM UTF-8)
+    const escapeCsv = (str: any) => {
+      const s = String(str ?? '').replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
+    const csvContent = "\uFEFF" + [
+      allHeaders.map(escapeCsv).join(";"),
+      ...rows.map(r => r.map(escapeCsv).join(";"))
+    ].join("\r\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blobUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `inscrits_evenement_${selectedEventId || 'tous'}_${Date.now()}.csv`);
+    link.href = blobUrl;
+    const currentEvent = eventsList?.find(e => e.id === selectedEventId);
+    const evTitle = currentEvent?.title || "MDIV_Evenement";
+    const cleanTitle = evTitle.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_').slice(0, 30);
+    link.download = `inscrits_${cleanTitle}_${Date.now()}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
 
-    toast.success("Export CSV téléchargé avec succès.");
+    toast.success(`Export CSV généré avec ${questionList.length} question(s) personnalisée(s) et ${filteredAttendees.length} participant(s).`);
   };
 
   return (
@@ -640,20 +776,128 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                 </div>
               )}
 
-              {/* Réponses aux questions personnalisées */}
-              {selectedAttendee.custom_answers && Object.keys(selectedAttendee.custom_answers).length > 0 && (
-                <div className="space-y-2 w-full overflow-hidden">
-                  <div className="font-bold text-foreground text-[11px]">Réponses au formulaire d'inscription :</div>
-                  <div className="bg-card border border-border rounded-xl p-3 space-y-2 overflow-hidden w-full">
-                    {Object.entries(selectedAttendee.custom_answers).map(([key, value]) => (
-                      <div key={key} className="border-b border-border/40 pb-1.5 last:border-0 last:pb-0 overflow-hidden">
-                        <div className="text-[10px] text-muted-foreground uppercase">{key}</div>
-                        <div className="font-medium text-foreground break-words break-all [overflow-wrap:anywhere] [word-break:break-word]">{String(value)}</div>
+              {/* Billet & QR Code d'accès rapide */}
+              <div className="p-3.5 bg-gradient-to-r from-amber-500/10 via-card to-card border border-amber-500/30 rounded-2xl flex items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-12 h-12 bg-white rounded-xl p-1 shrink-0 flex items-center justify-center border border-amber-400 shadow-sm">
+                    <img 
+                      src={selectedAttendee.badge_url || `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(selectedAttendee.ticket_code)}&margin=10`}
+                      alt="QR Billet" 
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-foreground truncate">Billet d'Accès Officiel</div>
+                    <div className="text-[11px] font-mono text-amber-400 font-semibold truncate">{selectedAttendee.ticket_code}</div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {selectedAttendee.status === 'attended' 
+                        ? `✓ Émargé le ${selectedAttendee.checked_in_at ? new Date(selectedAttendee.checked_in_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''} (${selectedAttendee.checked_in_by || 'Accueil'})` 
+                        : "Non émargé"}
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    const evTitle = eventsList?.find(e => e.id === selectedAttendee.event_id)?.title || 'Evenement_MDIV';
+                    const qrUrl = selectedAttendee.badge_url || `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(selectedAttendee.ticket_code)}&margin=10`;
+                    downloadQrCode(qrUrl, evTitle, `${selectedAttendee.first_name}_${selectedAttendee.last_name}`);
+                    toast.success("QR Code téléchargé avec succès !");
+                  }}
+                  className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] rounded-xl px-3 py-1.5 h-8 gap-1.5 shrink-0 shadow cursor-pointer"
+                >
+                  <Download size={13} /> Télécharger QR
+                </Button>
+              </div>
+
+              {/* Réponses aux questions personnalisées avec vrais intitulés */}
+              <div className="space-y-2.5 w-full overflow-hidden">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-foreground text-xs flex items-center gap-1.5">
+                    <FileText className="text-amber-400" size={14} />
+                    <span>Réponses au formulaire d'inscription :</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    {selectedAttendee.custom_answers_details?.length || Object.keys(selectedAttendee.custom_answers || {}).length || 0} question(s)
+                  </span>
+                </div>
+
+                {selectedAttendee.custom_answers_details && selectedAttendee.custom_answers_details.length > 0 ? (
+                  <div className="bg-card/70 border border-border/70 rounded-2xl p-4 space-y-3.5 divide-y divide-border/40">
+                    {selectedAttendee.custom_answers_details.map((item, idx) => (
+                      <div key={item.field_key || idx} className={idx > 0 ? "pt-3" : ""}>
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="text-xs font-semibold text-foreground leading-snug">
+                            {item.label}
+                          </span>
+                          {item.field_type && (
+                            <span className="text-[9.5px] uppercase tracking-wider font-mono text-amber-400/90 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 shrink-0">
+                              {item.field_type}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Rendu dynamique de la réponse */}
+                        {Array.isArray(item.value) ? (
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            {item.value.map((opt: any, oIdx: number) => (
+                              <Badge key={oIdx} className="bg-amber-500/15 border-amber-500/30 text-amber-300 text-[10.5px] font-medium">
+                                {String(opt)}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : typeof item.value === 'boolean' ? (
+                          <span className="text-xs font-semibold text-amber-300">
+                            {item.value ? "✓ Oui" : "✗ Non"}
+                          </span>
+                        ) : typeof item.value === 'string' && item.value.length > 80 ? (
+                          <p className="text-xs text-muted-foreground bg-muted/20 p-2.5 rounded-xl border border-border/40 leading-relaxed italic mt-1 break-words">
+                            « {item.value} »
+                          </p>
+                        ) : (
+                          <span className="text-xs font-medium text-amber-200/95 bg-muted/20 px-2.5 py-1 rounded-lg inline-block mt-0.5 break-words">
+                            {item.value !== null && item.value !== undefined && String(item.value).trim() !== "" 
+                              ? String(item.value) 
+                              : <span className="text-muted-foreground italic">Non renseigné</span>}
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                ) : selectedAttendee.custom_answers && Object.keys(selectedAttendee.custom_answers).length > 0 ? (
+                  <div className="bg-card/70 border border-border/70 rounded-2xl p-4 space-y-3 divide-y divide-border/40">
+                    {Object.entries(selectedAttendee.custom_answers).map(([key, value], idx) => {
+                      const matchedField = customFields.find((f: any) => f.field_key === key);
+                      const displayLabel = matchedField?.label || key.replace(/_/g, ' ');
+                      return (
+                        <div key={key} className={idx > 0 ? "pt-2.5" : ""}>
+                          <div className="text-xs font-semibold text-foreground mb-0.5">
+                            {displayLabel}
+                          </div>
+                          {Array.isArray(value) ? (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {value.map((v: any, vIdx: number) => (
+                                <Badge key={vIdx} className="bg-amber-500/15 text-amber-300 text-[10px]">
+                                  {String(v)}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-xs text-amber-200/90 font-medium break-words">
+                              {String(value)}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-3 bg-muted/20 rounded-xl text-xs text-muted-foreground italic text-center">
+                    Aucune question personnalisée pour cette inscription.
+                  </div>
+                )}
+              </div>
 
               {/* Consentements RGPD & Networking */}
               <div className="p-3 bg-muted/20 rounded-xl space-y-1 text-[11px] text-muted-foreground">

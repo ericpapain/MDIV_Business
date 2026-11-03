@@ -17,6 +17,7 @@ import { EventTombolaAdminTab } from "@/components/admin/events/EventTombolaAdmi
 import { EventRegieControlTab } from "@/components/admin/events/EventRegieControlTab";
 import { EventFeaturesConfig } from "@/types/eventEngine";
 import { defaultEventFeatures } from "@/lib/eventFeatureCatalog";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 
 interface ProgramSlot {
   time: string;
@@ -401,15 +402,26 @@ export default function AdminEvents() {
                     <input type="text" placeholder="URL billetterie externe (optionnel)" className="w-full px-3 py-2 bg-muted/30 border border-border rounded-sm text-sm" value={billetterieUrl} onChange={e => setBilletterieUrl(e.target.value)} />
                   </div>
 
-                  {/* Description FR */}
+                  {/* Description FR enrichie */}
                   <div>
-                    <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Description (FR)</label>
-                    <textarea required value={description} onChange={e => setDescription(e.target.value)} rows={3} className="w-full px-3.5 py-2.5 bg-muted/30 border border-border rounded-xl text-sm resize-y min-h-[80px]" />
+                    <RichTextEditor
+                      label="Description (FR)"
+                      required
+                      value={description}
+                      onChange={setDescription}
+                      placeholder="Décrivez les temps forts, intervenants, ateliers et objectifs..."
+                      minHeight="140px"
+                    />
                   </div>
-                  {/* Description EN */}
+                  {/* Description EN enrichie */}
                   <div>
-                    <label className="text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-200 font-semibold mb-1 block">Description (EN) <span className="text-gold/50">optionnel</span></label>
-                    <textarea value={descriptionEn} onChange={e => setDescriptionEn(e.target.value)} rows={3} placeholder="English description..." className="w-full px-3.5 py-2.5 bg-muted/30 border border-border rounded-xl text-sm resize-y min-h-[80px]" />
+                    <RichTextEditor
+                      label="Description (EN) optionnel"
+                      value={descriptionEn}
+                      onChange={setDescriptionEn}
+                      placeholder="English description with rich formatting..."
+                      minHeight="120px"
+                    />
                   </div>
 
                   {/* Slider Toggle */}

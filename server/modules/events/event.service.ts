@@ -809,6 +809,32 @@ export class EventService {
     if (eventId) {
       list = list.filter((a: any) => Number(a.event_id) === Number(eventId));
     }
+    const answersList = db.event_custom_field_answers || [];
+    const fieldsList = db.event_custom_fields || [];
+    list.forEach((att: any) => {
+      const attAnswers = answersList.filter((ans: any) => Number(ans.attendee_id) === Number(att.id));
+      const cAnswers: Record<string, any> = {};
+      const cDetails: any[] = [];
+      attAnswers.forEach((ans: any) => {
+        let val = ans.value_text;
+        try {
+          const parsed = JSON.parse(ans.value_text);
+          if (parsed !== null) val = parsed;
+        } catch {}
+        cAnswers[ans.field_key] = val;
+        const fld = fieldsList.find((f: any) => Number(f.id) === Number(ans.field_id) || f.field_key === ans.field_key);
+        cDetails.push({
+          field_id: ans.field_id,
+          field_key: ans.field_key,
+          label: fld?.label || ans.field_key,
+          value: val,
+          field_type: fld?.field_type || 'text',
+          options: fld?.options || null
+        });
+      });
+      att.custom_answers = cAnswers;
+      att.custom_answers_details = cDetails;
+    });
     return list.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }
 
