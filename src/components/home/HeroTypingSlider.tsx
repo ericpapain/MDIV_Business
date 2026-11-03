@@ -87,8 +87,18 @@ export default function HeroTypingSlider() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const activeNews = newsItems.filter(item => item.is_active !== 0 && item.is_active !== false);
-  const slides = activeNews.length > 0 ? activeNews : DEFAULT_NEWS;
+  // Dédoublonnage strict : un événement / article ne doit JAMAIS apparaître plus d'une fois dans le slider
+  const slides = React.useMemo(() => {
+    const active = newsItems.filter(item => item.is_active !== 0 && item.is_active !== false);
+    const seen = new Set<string>();
+    const unique = active.filter(item => {
+      const key = (item.title || '').trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    return unique.length > 0 ? unique : DEFAULT_NEWS;
+  }, [newsItems]);
 
   // Effet de saisie au clavier (Typewriter)
   useEffect(() => {
@@ -349,21 +359,31 @@ export default function HeroTypingSlider() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.35 }}
-                      className="p-3 sm:p-3.5 rounded-sm bg-black/35 backdrop-blur-sm border border-white/10 shadow-lg flex items-end justify-between gap-3"
+                      className="p-3 sm:p-3.5 rounded-sm bg-black/45 sm:bg-black/35 backdrop-blur-md sm:backdrop-blur-sm border border-white/10 shadow-lg flex flex-col sm:flex-row items-center sm:items-end justify-between gap-3 text-center sm:text-left"
                     >
                       {/* Bloc texte (Titre 1 ligne + Commentaire max 2 lignes = 3 lignes max) */}
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <h3 className="font-display text-base sm:text-lg md:text-xl text-white font-bold tracking-tight truncate drop-shadow-md">
+                      <div className="flex-1 min-w-0 space-y-1 w-full text-center sm:text-left">
+                        <h3 className="font-display text-base sm:text-lg md:text-xl text-white font-bold tracking-tight truncate drop-shadow-md text-center sm:text-left">
                           {currentNews.title}
                         </h3>
-                        <p className="text-xs sm:text-sm text-white/90 font-light leading-relaxed line-clamp-2 drop-shadow">
-                          {currentNews.comment}
+                        <p className="text-xs sm:text-sm text-white/90 font-light leading-relaxed line-clamp-2 drop-shadow text-center sm:text-left">
+                          {currentNews.comment
+                            ? currentNews.comment
+                                .replace(/<[^>]*>/g, ' ')
+                                .replace(/&nbsp;/g, ' ')
+                                .replace(/&amp;/g, '&')
+                                .replace(/&lt;/g, '<')
+                                .replace(/&gt;/g, '>')
+                                .replace(/&quot;/g, '"')
+                                .replace(/\s+/g, ' ')
+                                .trim()
+                            : ''}
                         </p>
                       </div>
 
-                      {/* Bouton plus court positionné à l'angle droit */}
+                      {/* Bouton centré sur mobile, aligné à droite sur desktop */}
                       {currentNews.link_url && (
-                        <div className="shrink-0 mb-0.5">
+                        <div className="shrink-0 mb-0.5 mx-auto sm:mx-0">
                           {currentNews.link_url.startsWith("http") ? (
                             <a
                               href={currentNews.link_url}
@@ -391,8 +411,8 @@ export default function HeroTypingSlider() {
               </div>
 
               {/* Barre de pagination et points indicateurs en bas */}
-              <div className="px-5 py-3 bg-black/70 border-t border-border/40 flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div className="px-4 sm:px-5 py-2.5 sm:py-3 bg-black/70 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-center sm:text-left">
+                <div className="flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 flex-wrap">
                   <button
                     onClick={handleReturnToText}
                     className="px-2 py-0.5 rounded-sm text-[10px] uppercase tracking-wider text-muted-foreground hover:text-gold border border-border/60 hover:border-gold/40 transition-colors flex items-center gap-1"

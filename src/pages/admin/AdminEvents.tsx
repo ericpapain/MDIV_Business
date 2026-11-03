@@ -122,7 +122,13 @@ export default function AdminEvents() {
       if (!d.success) throw new Error(d.error);
       return d;
     },
-    onSuccess: async () => {
+    onSuccess: async (resData: any) => {
+      const eventTargetId = editingId || resData?.id;
+      const targetLink = eventTargetId ? `/evenements/${eventTargetId}` : "/evenements";
+      const plainComment = description
+        ? description.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim()
+        : title;
+
       if (showInSlider) {
         try {
           await fetch("/api-admin.php?action=save_hero_news", {
@@ -130,16 +136,28 @@ export default function AdminEvents() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               title,
-              comment: description,
+              comment: plainComment,
               image_url: imageUrl,
               tag: "Événement",
-              link_url: "/evenements",
+              link_url: targetLink,
             }),
           });
           queryClient.invalidateQueries({ queryKey: ["hero-news"] });
         } catch (e) {
           console.error("Slider sync failed:", e);
         }
+      } else {
+        try {
+          await fetch("/api-admin.php?action=remove_event_hero_news", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title,
+              link_url: targetLink,
+            }),
+          });
+          queryClient.invalidateQueries({ queryKey: ["hero-news"] });
+        } catch (e) {}
       }
       toast({ 
         title: editingId ? "Événement modifié" : "Événement créé",
