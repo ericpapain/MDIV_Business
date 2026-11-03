@@ -144,7 +144,27 @@ if ($action === 'site_stats') {
 if ($action === 'hero_news') {
     try {
         $stmt = $pdo->query("SELECT * FROM hero_news WHERE is_active = 1 ORDER BY order_num ASC, created_at DESC");
-        $news = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        $rawNews = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        
+        // Dédoublonnage strict par titre et nettoyage automatique des doublons dans la BDD
+        $news = [];
+        $seenTitles = [];
+        foreach ($rawNews as $item) {
+            $key = mb_strtolower(trim($item['title']));
+            if (!isset($seenTitles[$key])) {
+                $seenTitles[$key] = true;
+                // Nettoyage des balises HTML du commentaire
+                $cleanComment = trim(strip_tags(html_entity_decode($item['comment'], ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+                $item['comment'] = preg_replace('/\s+/', ' ', $cleanComment);
+                $news[] = $item;
+            } else {
+                // Purge du doublon dans la base de données
+                try {
+                    $delDup = $pdo->prepare("DELETE FROM hero_news WHERE id = ?");
+                    $delDup->execute([$item['id']]);
+                } catch (Exception $e) {}
+            }
+        }
         if (count($news) === 0) {
             // Fallback si la table vient d'être créée ou est vide
             $news = [

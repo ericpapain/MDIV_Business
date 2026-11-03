@@ -609,8 +609,11 @@ if ($action === 'get_hero_news' && $_SERVER['REQUEST_METHOD'] === 'GET') {
 
 if ($action === 'save_hero_news' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = isset($data->id) && !empty($data->id) ? (int)$data->id : null;
-    $title = $data->title ?? '';
-    $comment = $data->comment ?? '';
+    $title = trim($data->title ?? '');
+    $rawComment = $data->comment ?? '';
+    // Nettoyage strict des balises HTML pour le commentaire affiché dans le slider
+    $cleanComment = trim(strip_tags(html_entity_decode($rawComment, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+    $comment = preg_replace('/\s+/', ' ', $cleanComment);
     $image_url = $data->image_url ?? '';
     $link_url = $data->link_url ?? '';
     $tag = $data->tag ?? 'Actualité Principale';
@@ -627,8 +630,45 @@ if ($action === 'save_hero_news' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("UPDATE hero_news SET title = ?, comment = ?, image_url = ?, link_url = ?, tag = ?, order_num = ?, is_active = ? WHERE id = ?");
         $stmt->execute([$title, $comment, $image_url, $link_url, $tag, $order_num, $is_active, $id]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO hero_news (title, comment, image_url, link_url, tag, order_num, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$title, $comment, $image_url, $link_url, $tag, $order_num, $is_active]);
+        // Recherche si un slide existe déjà avec le même titre ou le même link_url
+        $chk = null;
+        if (!empty($link_url) && $link_url !== '/evenements') {
+            $stmtChk = $pdo->prepare("SELECT id FROM hero_news WHERE link_url = ?");
+            $stmtChk->execute([$link_url]);
+            $chk = $stmtChk->fetch(PDO::FETCH_ASSOC);
+        }
+        if (!$chk) {
+            $stmtChk = $pdo->prepare("SELECT id FROM hero_news WHERE title = ?");
+            $stmtChk->execute([$title]);
+            $chk = $stmtChk->fetch(PDO::FETCH_ASSOC);
+        }
+
+        if ($chk && !empty($chk['id'])) {
+            $id = $chk['id'];
+            $stmt = $pdo->prepare("UPDATE hero_news SET title = ?, comment = ?, image_url = ?, link_url = ?, tag = ?, order_num = ?, is_active = ? WHERE id = ?");
+            $stmt->execute([$title, $comment, $image_url, $link_url, $tag, $order_num, $is_active, $id]);
+            // Supprimer d'éventuels autres doublons résiduels
+            $delDups = $pdo->prepare("DELETE FROM hero_news WHERE title = ? AND id != ?");
+            $delDups->execute([$title, $id]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO hero_news (title, comment, image_url, link_url, tag, order_num, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$title, $comment, $image_url, $link_url, $tag, $order_num, $is_active]);
+        }
+    }
+    echo json_encode(['success' => true]);
+    exit();
+}
+
+if ($action === 'remove_event_hero_news' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $title = trim($data->title ?? '');
+    $link_url = trim($data->link_url ?? '');
+    if (!empty($link_url) && $link_url !== '/evenements') {
+        $del = $pdo->prepare("DELETE FROM hero_news WHERE link_url = ?");
+        $del->execute([$link_url]);
+    }
+    if (!empty($title)) {
+        $del = $pdo->prepare("DELETE FROM hero_news WHERE title = ?");
+        $del->execute([$title]);
     }
     echo json_encode(['success' => true]);
     exit();
