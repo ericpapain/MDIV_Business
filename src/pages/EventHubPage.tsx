@@ -31,6 +31,7 @@ import { EventPitchesSection } from '@/components/events/EventPitchesSection';
 import { EventPartnersMeetingsSection } from '@/components/events/EventPartnersMeetingsSection';
 import { EventTombolaAnimation } from '@/components/events/EventTombolaAnimation';
 import { EventNetworkingWall } from '@/components/events/EventNetworkingWall';
+import EventDescriptionExpandable from "@/components/events/EventDescriptionExpandable";
 import { SimpleCountdown } from '@/components/event/SimpleCountdown';
 import { EventFeaturesConfig } from '@/types/eventEngine';
 import { defaultEventFeatures } from '@/lib/eventFeatureCatalog';

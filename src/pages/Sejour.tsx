@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { ProgramPanel } from "@/components/site/ProgramPanel";
+import EventDescriptionExpandable from "@/components/events/EventDescriptionExpandable";
 import { SimpleCountdown } from "@/components/event/SimpleCountdown";
 
 
