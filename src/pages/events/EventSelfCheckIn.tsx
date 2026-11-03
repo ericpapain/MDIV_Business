@@ -41,10 +41,11 @@ export default function EventSelfCheckIn() {
   } | null>(null);
 
   // Récupération des informations de l'événement
-  const { data: event, isLoading: isEventLoading } = useQuery({
+  const { data: event, isLoading: isEventLoading, isError } = useQuery({
     queryKey: ['self-checkin-event', activeEventId],
     queryFn: async () => {
       const res = await fetch(`/api/event_engine.php?action=get_event&id=${activeEventId}`);
+      if (!res.ok) throw new Error("Erreur serveur lors de la récupération de l'événement");
       const json = await res.json();
       return json.data || json;
     },
@@ -126,7 +127,7 @@ export default function EventSelfCheckIn() {
               Chargement de la borne...
             </p>
           </div>
-        ) : !event || !event.id ? (
+        ) : isError || !event || !event.id ? (
           <div className="text-center bg-card/60 backdrop-blur-md border border-border/60 rounded-3xl p-8 space-y-4 shadow-xl">
             <AlertCircle className="w-12 h-12 text-destructive mx-auto" />
             <h2 className="text-lg font-bold text-foreground">Événement introuvable</h2>

@@ -121,6 +121,14 @@ export interface EventAttendee {
   acquisition_source?: string;
   selected_activities?: string[];
   custom_answers?: Record<string, any>;
+  custom_answers_details?: Array<{
+    field_id?: number;
+    field_key: string;
+    label: string;
+    value: any;
+    field_type?: string;
+    options?: any;
+  }>;
   created_at: string;
   updated_at?: string;
 }

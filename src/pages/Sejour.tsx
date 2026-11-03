@@ -70,7 +70,7 @@ export default function Sejour() {
                 <div className="p-6 flex flex-col flex-1">
                   <div className="font-mono text-xs text-gold-light flex items-center gap-2 mb-3"><Calendar size={12} /> {new Date(e.date).toLocaleDateString()} <span className="text-muted-foreground">·</span> <MapPin size={12} /> {e.location}</div>
                   <div className="font-display text-2xl mb-2">{isEn && e.title_en ? e.title_en : e.title}</div>
-                  <div className="text-sm text-muted-foreground mb-4 leading-relaxed whitespace-pre-line">{isEn && e.description_en ? e.description_en : e.description}</div>
+                  <EventDescriptionExpandable description={isEn && e.description_en ? e.description_en : e.description} maxLines={6} isEn={isEn} />
                   
                   {/* Prix si pas d'image */}
                   {e.price && !e.image_url && (
@@ -142,7 +142,7 @@ export default function Sejour() {
                     <Calendar size={12} /> {new Date(e.date).toLocaleDateString()} <span className="text-muted-foreground">·</span> <MapPin size={12} /> {e.location}
                   </div>
                   <div className="font-display text-2xl mb-2">{isEn && e.title_en ? e.title_en : e.title}</div>
-                  <div className="text-sm text-muted-foreground mb-4 leading-relaxed whitespace-pre-line">{isEn && e.description_en ? e.description_en : e.description}</div>
+                  <EventDescriptionExpandable description={isEn && e.description_en ? e.description_en : e.description} maxLines={6} isEn={isEn} />
 
                   <div className="mt-auto pt-5 border-t border-gold/10">
                     <Link to={`/revivre/${e.id}`} className="text-xs uppercase tracking-[0.2em] text-primary hover:text-gold-light flex items-center gap-2 transition-colors w-fit">

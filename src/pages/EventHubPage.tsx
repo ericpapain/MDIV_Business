@@ -155,9 +155,9 @@ export default function EventHubPage() {
                 )}
               </div>
 
-              <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line max-w-2xl">
-                {event.description}
-              </p>
+              <div className="max-w-2xl">
+                <EventDescriptionExpandable description={event.description} maxLines={8} />
+              </div>
 
               {/* Countdown */}
               <div className="pt-2">
