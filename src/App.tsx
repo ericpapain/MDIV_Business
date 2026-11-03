@@ -13,6 +13,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AuthRequiredModal } from "./components/auth/AuthRequiredModal";
 import { AnalyticsTracker } from "./components/analytics/AnalyticsTracker";
+import { AppErrorBoundary } from "./components/AppErrorBoundary";
 
 // ─── Critical routes (loaded eagerly) ───────────────────────────────────────
 import Home from "./pages/Home";
@@ -113,6 +114,7 @@ const App = () => (
             <BrowserRouter>
               <AnalyticsTracker />
               <AuthExplorerListener />
+              <AppErrorBoundary>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   {/* Live Stage Displays (1920x1080 sans chrome standard) */}
@@ -205,6 +207,7 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
+              </AppErrorBoundary>
             </BrowserRouter>
           </AuthProvider>
         </TooltipProvider>

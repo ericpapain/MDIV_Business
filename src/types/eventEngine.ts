@@ -31,6 +31,7 @@ export interface EventFeatureConfig {
 }
 
 export type EventFeaturesMap = Record<string, EventFeatureConfig>;
+export type EventFeaturesConfig = Record<string, EventFeatureConfig>;
 
 // ============================================================================
 // CONSTRUCTEUR DE CHAMPS PERSONNALISÉS (13 TYPES REQUIS)

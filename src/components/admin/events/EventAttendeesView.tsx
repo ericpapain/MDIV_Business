@@ -7,7 +7,7 @@ import { EventAttendee } from '@/types/eventEngine';
 import { 
   Users, Search, Download, Trash2, CheckCircle2, Clock, XCircle, 
   ExternalLink, QrCode, Filter, UserCheck, Eye, Mail, Phone, 
-  Building2, Camera, ShieldCheck, RefreshCw, X, Upload, UserMinus, Percent, Sparkles
+  Building2, Camera, ShieldCheck, RefreshCw, X, Upload, UserMinus, Percent, Sparkles, FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EventCameraCheckInModal } from './EventCameraCheckInModal';
