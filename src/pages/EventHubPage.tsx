@@ -33,6 +33,7 @@ import { EventTombolaAnimation } from '@/components/events/EventTombolaAnimation
 import { EventNetworkingWall } from '@/components/events/EventNetworkingWall';
 import EventDescriptionExpandable from "@/components/events/EventDescriptionExpandable";
 import { SimpleCountdown } from '@/components/event/SimpleCountdown';
+import { toast } from 'sonner';
 import { EventFeaturesConfig } from '@/types/eventEngine';
 import { defaultEventFeatures } from '@/lib/eventFeatureCatalog';
 
@@ -76,6 +77,28 @@ export default function EventHubPage() {
   const handleTabChange = (newTab: string) => {
     setActiveTab(newTab);
     setSearchParams({ tab: newTab });
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: event?.title || 'Événement MDIV Business Network',
+      text: event?.short_description || event?.title,
+      url: window.location.href,
+    };
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Lien de l'événement copié dans le presse-papier !");
+    } catch {
+      toast.error('Impossible de copier le lien.');
+    }
   };
 
   if (isLoading) {
@@ -165,36 +188,27 @@ export default function EventHubPage() {
                 <SimpleCountdown targetDateStr={event.date} />
               </div>
 
-              {/* Registration CTA */}
-              <div className="pt-3 flex flex-wrap items-center gap-3">
+              {/* Registration CTA - Design Responsive Mobile & Desktop */}
+              <div className="pt-4 w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
                 {hasRegistration && (
                   <Button
+                    type="button"
                     onClick={() => setIsRegistrationOpen(true)}
-                    className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-extrabold px-6 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 gap-2 cursor-pointer"
+                    className="w-full sm:w-auto flex-1 sm:flex-initial bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-extrabold px-4 sm:px-6 py-3.5 sm:py-2.5 h-auto min-h-[48px] rounded-xl shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] text-xs sm:text-sm tracking-wide text-center"
                   >
-                    <Ticket className="w-4 h-4" />
-                    Réserver ma place & Obtenir mon Badge
+                    <Ticket className="w-4 h-4 shrink-0 text-slate-950" />
+                    <span className="leading-tight">Réserver ma place &amp; Obtenir mon Badge</span>
                   </Button>
                 )}
 
                 <Button
+                  type="button"
                   variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator.share({
-                        title: event.title,
-                        url: window.location.href,
-                      });
-                    } else {
-                      navigator.clipboard.writeText(window.location.href);
-                      alert('Lien copié dans le presse-papier !');
-                    }
-                  }}
-                  className="border-slate-700 text-slate-300 hover:text-white text-xs gap-1.5"
+                  onClick={handleShare}
+                  className="w-full sm:w-auto border-border/80 bg-card/60 hover:bg-card text-foreground hover:text-amber-400 text-xs h-11 sm:h-12 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors shrink-0 cursor-pointer"
                 >
-                  <Share2 className="w-3.5 h-3.5" />
-                  Partager
+                  <Share2 className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                  <span>Partager</span>
                 </Button>
               </div>
             </div>

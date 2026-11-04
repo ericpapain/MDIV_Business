@@ -2,6 +2,29 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
+// ─── Sécurisation des déploiements : rechargement automatique si un chunk est obsolète ───
+window.addEventListener('vite:preloadError', (event) => {
+  console.warn('Détection d\'un chunk JS obsolète suite à une mise à jour, rechargement...', event);
+  window.location.reload();
+});
+
+window.addEventListener('error', (event) => {
+  const msg = event?.message || '';
+  if (
+    msg.includes('Failed to fetch dynamically imported module') ||
+    msg.includes('Importing a module script failed') ||
+    msg.includes('error loading dynamically imported module') ||
+    msg.includes('Loading chunk')
+  ) {
+    const lastReload = sessionStorage.getItem('last_chunk_reload');
+    const now = Date.now();
+    if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+      sessionStorage.setItem('last_chunk_reload', now.toString());
+      window.location.reload();
+    }
+  }
+});
+
 const originalFetch = window.fetch;
 window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   let urlStr = '';
