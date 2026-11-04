@@ -4,9 +4,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { EventAttendee } from '@/types/eventEngine';
-import { 
-  Users, Search, Download, Trash2, CheckCircle2, Clock, XCircle, 
-  ExternalLink, QrCode, Filter, UserCheck, Eye, Mail, Phone, 
+import {
+  Users, Search, Download, Trash2, CheckCircle2, Clock, XCircle,
+  ExternalLink, QrCode, Filter, UserCheck, Eye, Mail, Phone,
   Building2, Camera, ShieldCheck, RefreshCw, X, Upload, UserMinus, Percent, Sparkles, FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
   const { data: attendees = [], isLoading, refetch } = useQuery<EventAttendee[]>({
     queryKey: ['admin-attendees', selectedEventId],
     queryFn: async () => {
-      const url = selectedEventId 
+      const url = selectedEventId
         ? `/api/event_engine.php?action=get_attendees&event_id=${selectedEventId}`
         : `/api/event_engine.php?action=get_attendees`;
       const res = await fetch(url);
@@ -47,7 +47,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
   const { data: customFields = [] } = useQuery<any[]>({
     queryKey: ['custom-fields', selectedEventId],
     queryFn: async () => {
-      const url = selectedEventId 
+      const url = selectedEventId
         ? `/api/event_engine.php?action=get_custom_fields&event_id=${selectedEventId}`
         : `/api/event_engine.php?action=get_custom_fields`;
       const res = await fetch(url);
@@ -56,7 +56,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
     }
   });
 
-  
+
   // Suppression d'un participant dans le CRM
   const deleteAttendeeMutation = useMutation({
     mutationFn: async (attendeeId: number) => {
@@ -127,7 +127,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
   // Filtrage des participants
   const filteredAttendees = attendees.filter(att => {
     const q = searchQuery.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       q === "" ||
       att.first_name.toLowerCase().includes(q) ||
       att.last_name.toLowerCase().includes(q) ||
@@ -187,8 +187,8 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
             // Mapping automatique des réponses personnalisées par intitulé (label) ou par clé
             const customAnswers: Record<string, any> = {};
             rawHeaders.forEach((h, hIdx) => {
-              const cf = (customFields || []).find((f: any) => 
-                (f.label && f.label.toLowerCase() === h.toLowerCase()) || 
+              const cf = (customFields || []).find((f: any) =>
+                (f.label && f.label.toLowerCase() === h.toLowerCase()) ||
                 (f.field_key && f.field_key.toLowerCase() === h.toLowerCase())
               );
               if (cf && cols[hIdx] !== undefined && cols[hIdx] !== "") {
@@ -213,7 +213,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                 })
               });
               importedCount++;
-            } catch (err) {}
+            } catch (err) { }
           }
         }
 
@@ -430,7 +430,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
         </div>
       </div>
 
-      {/* MODULE ACCUEIL & ÉMARGEMENT : MODE SANDRA + BORNE ENTRÉE */}
+      {/* MODULE ACCUEIL & ÉMARGEMENT : Mode réception  + BORNE ENTRÉE */}
       <div className="bg-gradient-to-r from-amber-500/10 via-card to-card border border-amber-500/30 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center shrink-0">
@@ -458,7 +458,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
             className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs rounded-xl px-4 py-2.5 flex items-center gap-2 shadow-md hover:scale-[1.02] transition-transform cursor-pointer"
           >
             <Camera size={15} />
-            <span>Scanner Caméra (Mode Sandra)</span>
+            <span>Scanner Caméra (Mode réception )</span>
           </Button>
 
           <Button
@@ -725,8 +725,8 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                   Fiche Participant : {selectedAttendee.first_name} {selectedAttendee.last_name}
                 </h3>
               </div>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setSelectedAttendee(null)}
                 className="text-muted-foreground hover:text-foreground cursor-pointer"
               >
@@ -793,9 +793,9 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
               <div className="p-3.5 bg-gradient-to-r from-amber-500/10 via-card to-card border border-amber-500/30 rounded-2xl flex items-center justify-between gap-3 shadow-xs">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-12 h-12 bg-white rounded-xl p-1 shrink-0 flex items-center justify-center border border-amber-400 shadow-sm">
-                    <img 
+                    <img
                       src={selectedAttendee.badge_url || `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(selectedAttendee.ticket_code)}&margin=10`}
-                      alt="QR Billet" 
+                      alt="QR Billet"
                       className="w-full h-full object-contain"
                     />
                   </div>
@@ -803,8 +803,8 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                     <div className="text-xs font-bold text-foreground truncate">Billet d'Accès Officiel</div>
                     <div className="text-[11px] font-mono text-amber-400 font-semibold truncate">{selectedAttendee.ticket_code}</div>
                     <div className="text-[10px] text-muted-foreground">
-                      {selectedAttendee.status === 'attended' 
-                        ? `✓ Émargé le ${selectedAttendee.checked_in_at ? new Date(selectedAttendee.checked_in_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''} (${selectedAttendee.checked_in_by || 'Accueil'})` 
+                      {selectedAttendee.status === 'attended'
+                        ? `✓ Émargé le ${selectedAttendee.checked_in_at ? new Date(selectedAttendee.checked_in_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''} (${selectedAttendee.checked_in_by || 'Accueil'})`
                         : "Non émargé"}
                     </div>
                   </div>
@@ -870,8 +870,8 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                           </p>
                         ) : (
                           <span className="text-xs font-medium text-amber-200/95 bg-muted/20 px-2.5 py-1 rounded-lg inline-block mt-0.5 break-words">
-                            {item.value !== null && item.value !== undefined && String(item.value).trim() !== "" 
-                              ? String(item.value) 
+                            {item.value !== null && item.value !== undefined && String(item.value).trim() !== ""
+                              ? String(item.value)
                               : <span className="text-muted-foreground italic">Non renseigné</span>}
                           </span>
                         )}
@@ -935,7 +935,7 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
               </div>
 
               <div className="pt-3 border-t border-border flex items-center justify-between">
-                <Button 
+                <Button
                   type="button"
                   variant="outline"
                   onClick={() => {
@@ -948,8 +948,8 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
                 >
                   <Trash2 size={13} className="mr-1.5" /> Supprimer l'inscription
                 </Button>
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   onClick={() => setSelectedAttendee(null)}
                   className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl"
                 >
@@ -973,8 +973,8 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
         isOpen={isAccessPortalModalOpen}
         onClose={() => setIsAccessPortalModalOpen(false)}
         event={
-          eventsList?.find(e => e.id === selectedEventId) || 
-          eventsList?.[0] || 
+          eventsList?.find(e => e.id === selectedEventId) ||
+          eventsList?.[0] ||
           { id: selectedEventId || 1, title: "Événement MDIV" }
         }
       />
