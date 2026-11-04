@@ -1,16 +1,16 @@
 // src/components/admin/events/EventCameraCheckInModal.tsx
-// Mode Sandra / Accueil : Scanner Caméra en direct pour émargement ultra-rapide des participants
+// Mode réception  / Accueil : Scanner Caméra en direct pour émargement ultra-rapide des participants
 
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { 
-  Camera, 
-  CameraOff, 
-  CheckCircle2, 
-  AlertCircle, 
-  X, 
-  UserCheck, 
-  RefreshCw, 
+import {
+  Camera,
+  CameraOff,
+  CheckCircle2,
+  AlertCircle,
+  X,
+  UserCheck,
+  RefreshCw,
   Sparkles,
   Building2,
   Mail,
@@ -57,7 +57,7 @@ export function EventCameraCheckInModal({
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + duration);
-    } catch {}
+    } catch { }
   };
 
   // Extraction intelligente du ticket_code
@@ -68,13 +68,13 @@ export function EventCameraCheckInModal({
         const obj = JSON.parse(trimmed);
         if (obj.ticket_code) return obj.ticket_code;
         if (obj.ticket) return obj.ticket;
-      } catch {}
+      } catch { }
     }
     try {
       const u = new URL(trimmed);
       const code = u.searchParams.get('ticket') || u.searchParams.get('ticket_code');
       if (code) return code;
-    } catch {}
+    } catch { }
     return trimmed;
   };
 
@@ -202,7 +202,7 @@ export function EventCameraCheckInModal({
                   Scanner d'Accueil & Émargement
                 </h3>
                 <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">
-                  Mode Sandra
+                  Mode réception
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -259,11 +259,10 @@ export function EventCameraCheckInModal({
 
           {/* Fiche du dernier participant pointé */}
           {lastScannedAttendee && (
-            <div className={`p-4 rounded-2xl border transition-all animate-scale-in ${
-              alreadyCheckedIn 
-                ? 'bg-amber-500/10 border-amber-500/30' 
+            <div className={`p-4 rounded-2xl border transition-all animate-scale-in ${alreadyCheckedIn
+                ? 'bg-amber-500/10 border-amber-500/30'
                 : 'bg-emerald-500/10 border-emerald-500/30'
-            }`}>
+              }`}>
               <div className="flex items-center gap-3.5">
                 {lastScannedAttendee.photo_url ? (
                   <img
