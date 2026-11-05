@@ -186,13 +186,13 @@ export default function AdminReplays() {
       <div className="glass-strong p-6 rounded-sm border border-border">
         <label className="block text-xs uppercase tracking-[0.1em] text-slate-700 dark:text-slate-200 font-semibold mb-2">Sélectionner un événement passé</label>
         <select 
-          className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 py-3 text-sm focus:border-gold outline-none"
+          className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 py-3 text-sm focus:border-gold outline-none text-white font-medium cursor-pointer"
           value={selectedEventId}
           onChange={(e) => setSelectedEventId(e.target.value)}
         >
-          <option value="">-- Choisir un événement --</option>
+          <option value="" className="bg-[#0a0d0f] text-white py-2">-- Choisir un événement --</option>
           {pastEvents.map((ev: any) => (
-            <option key={ev.id} value={ev.id.toString()}>[{ev.type}] {ev.title} - {new Date(ev.date).toLocaleDateString()}</option>
+            <option key={ev.id} value={ev.id.toString()} className="bg-[#0a0d0f] text-white py-2">[{ev.type}] {ev.title} - {new Date(ev.date).toLocaleDateString()}</option>
           ))}
         </select>
       </div>
