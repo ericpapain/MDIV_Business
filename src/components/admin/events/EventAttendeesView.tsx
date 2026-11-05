@@ -389,11 +389,11 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
             <select
               value={selectedEventId || ""}
               onChange={(e) => setSelectedEventId(e.target.value ? Number(e.target.value) : undefined)}
-              className="bg-card border border-input rounded-xl px-3 py-1.5 text-xs text-foreground focus:outline-none"
+              className="bg-card border border-input rounded-xl px-3 py-1.5 text-xs text-foreground dark:text-white font-medium focus:outline-none cursor-pointer"
             >
-              <option value="">Tous les événements</option>
+              <option value="" className="bg-card dark:bg-slate-900 text-foreground dark:text-white">Tous les événements</option>
               {eventsList.map(ev => (
-                <option key={ev.id} value={ev.id}>{ev.title}</option>
+                <option key={ev.id} value={ev.id} className="bg-card dark:bg-slate-900 text-foreground dark:text-white">{ev.title}</option>
               ))}
             </select>
           )}
@@ -529,12 +529,12 @@ export function EventAttendeesView({ eventId, eventsList }: EventAttendeesViewPr
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full py-2 px-3 bg-card border border-input rounded-xl text-xs text-foreground focus:outline-none"
+            className="w-full py-2 px-3 bg-card border border-input rounded-xl text-xs text-foreground dark:text-white font-medium focus:outline-none cursor-pointer"
           >
-            <option value="all">Tous les statuts</option>
-            <option value="confirmed">Confirmés</option>
-            <option value="attended">Émargés / Présents</option>
-            <option value="cancelled">Annulés</option>
+            <option value="all" className="bg-card dark:bg-slate-900 text-foreground dark:text-white">Tous les statuts</option>
+            <option value="confirmed" className="bg-card dark:bg-slate-900 text-foreground dark:text-white">Confirmés</option>
+            <option value="attended" className="bg-card dark:bg-slate-900 text-foreground dark:text-white">Émargés / Présents</option>
+            <option value="cancelled" className="bg-card dark:bg-slate-900 text-foreground dark:text-white">Annulés</option>
           </select>
         </div>
       </div>

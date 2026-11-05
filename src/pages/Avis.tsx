@@ -210,10 +210,10 @@ export default function Avis() {
                 value={formData.country} 
                 onValueChange={(val) => setFormData({...formData, country: val})}
               >
-                <SelectTrigger className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 h-12 text-sm outline-none focus:border-gold/60 transition-colors text-foreground">
+                <SelectTrigger className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 h-12 text-sm outline-none focus:border-gold/60 transition-colors text-white font-medium">
                   <SelectValue placeholder={isEn ? "Select" : "Sélectionner"} />
                 </SelectTrigger>
-                <SelectContent className="bg-[#0a0d0f] border-border text-foreground z-[200] max-h-72">
+                <SelectContent className="bg-[#0a0d0f] border-border text-white z-[200] max-h-72">
                   {sortedCountries.map((country) => (
                     <SelectItem key={country.code} value={country.labelFr} className="focus:bg-gold/20 cursor-pointer">
                       <div className="flex items-center gap-3">
@@ -233,17 +233,19 @@ export default function Avis() {
             <div>
               <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">{isEn ? "Past event" : "Événement passé"}</div>
               <select 
-                className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors text-foreground"
+                className="w-full bg-[#0a0d0f] border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold/60 transition-colors text-white font-medium cursor-pointer"
                 value={formData.eventId}
                 onChange={e => setFormData({...formData, eventId: e.target.value})}
                 required
               >
-                <option value="" className="bg-[#0a0d0f]">{isEn ? "Select an event" : "Sélectionner un événement"}</option>
+                <option value="" className="bg-[#0a0d0f] text-white py-2 font-medium">{isEn ? "Select an event" : "Sélectionner un événement"}</option>
                 {(dbEvents.length > 0 
                   ? dbEvents.filter((ev: any) => new Date(ev.target_date || ev.date) < new Date())
                   : localPastEvents
                 ).map((ev: any) => (
-                  <option key={ev.id} value={ev.id.toString()} className="bg-[#0a0d0f]">{ev.title} ({ev.city || ev.lieu})</option>
+                  <option key={ev.id} value={ev.id.toString()} className="bg-[#0a0d0f] text-white py-2 font-medium">
+                    {ev.title} {ev.city || ev.lieu ? `(${ev.city || ev.lieu})` : ''}
+                  </option>
                 ))}
               </select>
             </div>
