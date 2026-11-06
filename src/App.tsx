@@ -180,6 +180,8 @@ const App = () => (
                       <Route path="/blog" element={<Blog />} />
                       <Route path="/blog/:id" element={<BlogPost />} />
                       <Route path="/demo" element={<DemoFlow />} />
+                      <Route path="/charte" element={<Charte />} />
+                      <Route path="/charte-bne" element={<Charte />} />
 
                       {/* Authentification & Inscription */}
                       <Route path="/login" element={<Login />} />
