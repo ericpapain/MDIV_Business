@@ -1,261 +1,287 @@
-import { useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Check, Shield, Handshake, Globe, Zap, ArrowRight, CornerRightDown, Fingerprint, CreditCard, Users, RefreshCw, Key, Timer, ShieldAlert, Star, Lock, Briefcase, Heart, Network, Lightbulb } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { 
+  Shield, 
+  Handshake, 
+  Globe, 
+  Zap, 
+  ArrowRight, 
+  Fingerprint, 
+  CreditCard, 
+  Users, 
+  RefreshCw, 
+  Key, 
+  Timer, 
+  ShieldAlert, 
+  Star, 
+  Lock, 
+  Briefcase, 
+  Heart, 
+  Network, 
+  Lightbulb, 
+  CheckCircle2,
+  CalendarCheck,
+  Award
+} from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 export default function Charte() {
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const { language } = useLanguage();
   const isEn = language === "en";
+  const [activeFilter, setActiveFilter] = useState<string>("all");
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const articles = isEn ? [
-    { title: "THE BNE DNA", desc: "EXPERIENCE → CONNECTION → CONTRIBUTION → DEVELOPMENT → OPPORTUNITIES. The value of the network depends directly on the quality of relationships and the ability of its members to create value together.", icon: Fingerprint },
-    { title: "MEMBERSHIP WITHOUT FEES", desc: "No registration fees, no monthly fees, no annual fees. Membership in BNE cannot be bought; it results from an experience or BNE coaching.", icon: CreditCard },
-    { title: "PARTICIPANT, MEMBER, AND ACTIVE MEMBER", desc: "BNE prioritizes the quality of engagement over the quantity of members. An active member maintains a real relationship with the ecosystem and contributes to its dynamics.", icon: Users },
-    { title: "RECIPROCITY", desc: "« Give value to create value. » Each member contributes according to their skills, possibilities, and network.", icon: RefreshCw },
-    { title: "MEMBER RIGHTS", desc: "Develop your network, be connected, participate in experiences, present your expertise, and develop national and international collaborations.", icon: Key },
-    { title: "MEMBER COMMITMENTS", desc: "Respect the spirit of BNE, recommend members, preserve confidentiality, and adopt a professional attitude. BNE does not ask you to sell it, but to represent it through the value created.", icon: Handshake },
-    { title: "NO DURATION OBLIGATION", desc: "No minimum commitment duration, no annual contract, no recommendation quota. Each member remains free in their level of participation.", icon: Timer },
-    { title: "NOT A PROSPECTING PLATFORM", desc: "Aggressive prospecting or misuse of contact details is incompatible with the spirit of the network. The relationship comes before the transaction.", icon: ShieldAlert },
-    { title: "QUALITY AND SELECTION", desc: "Integration into certain experiences may be subject to selection based on profile, objectives, and complementarities.", icon: Star },
-    { title: "CONFIDENTIALITY AND TRUST", desc: "Information, contacts, or opportunities shared must be treated with discretion. Each member commits to respecting confidentiality.", icon: Lock },
-    { title: "RESPONSIBILITY AND OPPORTUNITIES", desc: "BNE facilitates meetings but guarantees no results. Each member remains responsible for their decisions and commitments.", icon: Briefcase },
-    { title: "ETHICS AND BEHAVIOR", desc: "Respect, Integrity, Professionalism, Contribution, Reciprocity, Openness. Any behavior contrary to these can lead to the suspension of network access.", icon: Heart },
-    { title: "AN INTERNATIONAL NETWORK", desc: "BNE is organized around local ecosystems while fostering national and international connections.", icon: Globe },
-    { title: "THE ROLE OF BNE", desc: "BNE acts as a facilitator between individuals, companies, and territories. It seeks to create a more relevant network, not just a larger one.", icon: Network },
-    { title: "THE BNE PHILOSOPHY", desc: "« I don't just come looking for an opportunity. I also come with the ability to create one for someone else. »", icon: Lightbulb }
+    { num: "01", category: "dna", title: "THE BNE DNA", desc: "EXPERIENCE → CONNECTION → CONTRIBUTION → DEVELOPMENT → OPPORTUNITIES. The network's value depends on relationship quality and our collective ability to generate value.", icon: Fingerprint },
+    { num: "02", category: "membership", title: "MEMBERSHIP WITHOUT FEES", desc: "No registration fees, no monthly fees, no annual dues. BNE membership cannot be bought: it stems from participating in an experience or coaching program.", icon: CreditCard },
+    { num: "03", category: "membership", title: "MEMBERS & ENGAGEMENT", desc: "BNE prioritizes relationship depth over sheer member count. An active member nurtures authentic relationships and energizes the ecosystem.", icon: Users },
+    { num: "04", category: "values", title: "RECIPROCITY", desc: "« Give value to create value. » Each member contributes according to their skills, resources, and connections.", icon: RefreshCw },
+    { num: "05", category: "rights", title: "MEMBER RIGHTS", desc: "Expand your trusted network, get introduced to high-level peers, attend exclusive immersions, share your expertise, and build joint ventures.", icon: Key },
+    { num: "06", category: "commitments", title: "MEMBER COMMITMENTS", desc: "Uphold the BNE spirit, recommend fellow members, maintain confidentiality, and exhibit high professionalism. Represent BNE through the value you create.", icon: Handshake },
+    { num: "07", category: "membership", title: "FREEDOM OF PARTICIPATION", desc: "No minimum duration, no annual locked-in contract, no quota obligations. Every entrepreneur remains free to modulate their involvement.", icon: Timer },
+    { num: "08", category: "ethics", title: "NO SPAM OR AGGRESSIVE PROSPECTING", desc: "Cold aggressive pitching and mass harvesting of member details are strictly prohibited. Trust and genuine connection always precede business transactions.", icon: ShieldAlert },
+    { num: "09", category: "ethics", title: "CURATED EXPERIENCES", desc: "Certain summits and immersion retreats may feature a selection process based on profile complementarity, shared ambitions, and ethics.", icon: Star },
+    { num: "10", category: "ethics", title: "CONFIDENTIALITY & TRUST", desc: "Shared insights, opportunities, and strategic contacts must remain treated with the utmost discretion and mutual confidentiality.", icon: Lock },
+    { num: "11", category: "commitments", title: "RESPONSIBILITY & OPPORTUNITY", desc: "BNE catalyzes high-level connections but members remain exclusively responsible for their own commitments, contracts, and business decisions.", icon: Briefcase },
+    { num: "12", category: "ethics", title: "ETHICS & CONDUCT", desc: "Respect, integrity, active contribution, and openness. Any behavior conflicting with these values may result in network access suspension.", icon: Heart },
+    { num: "13", category: "dna", title: "INTERNATIONAL REACH", desc: "Anchored in regional ecosystems across France, Switzerland, Belgium, Luxembourg, and India, BNE fosters cross-border business bridges.", icon: Globe },
+    { num: "14", category: "dna", title: "THE ROLE OF BNE", desc: "A human-scale catalyst connecting decision-makers, enterprises, and territories. We build a more qualitative network, not just a wider one.", icon: Network },
+    { num: "15", category: "values", title: "THE BNE PHILOSOPHY", desc: "« I do not come merely seeking an opportunity. I also come ready to create one for someone else. »", icon: Lightbulb }
   ] : [
-    { title: "L'ADN DU BNE", desc: "EXPÉRIENCE → CONNEXION → CONTRIBUTION → DÉVELOPPEMENT → OPPORTUNITÉS. La valeur du réseau dépend directement de la qualité des relations et de la capacité de ses membres à créer de la valeur ensemble.", icon: Fingerprint },
-    { title: "UNE ADHÉSION SANS COTISATION", desc: "Aucun frais d'inscription, aucune cotisation mensuelle, aucune cotisation annuelle. L'adhésion au BNE ne s'achète pas, elle résulte d'une expérience ou d'un accompagnement BNE.", icon: CreditCard },
-    { title: "PARTICIPANT, MEMBRE ET MEMBRE ACTIF", desc: "Le BNE privilégie la qualité de l'engagement plutôt que la quantité de membres. Un membre actif entretient une relation réelle avec l'écosystème et contribue à sa dynamique.", icon: Users },
-    { title: "LA RÉCIPROCITÉ", desc: "« Donner de la valeur pour créer de la valeur. » Chaque membre contribue selon ses compétences, ses possibilités et son réseau.", icon: RefreshCw },
-    { title: "LES DROITS DU MEMBRE", desc: "Développer son réseau, être mis en relation, participer aux expériences, présenter son expertise et développer des collaborations nationales et internationales.", icon: Key },
-    { title: "LES ENGAGEMENTS DU MEMBRE", desc: "Respecter l'esprit du BNE, recommander les membres, préserver la confidentialité et adopter une attitude professionnelle. Le BNE ne demande pas de le vendre, mais de le représenter par la valeur créée.", icon: Handshake },
-    { title: "PAS D'OBLIGATION DE DURÉE", desc: "Aucune durée minimale d'engagement, ni contrat annuel, ni quota de recommandations. Chaque membre reste libre de son niveau de participation.", icon: Timer },
-    { title: "PAS UNE PLATEFORME DE PROSPECTION", desc: "La prospection agressive ou l'utilisation abusive des coordonnées sont incompatibles avec l'esprit du réseau. La relation vient avant la transaction.", icon: ShieldAlert },
-    { title: "QUALITÉ ET SÉLECTION", desc: "L'intégration à certaines expériences peut faire l'objet d'une sélection selon le profil, les objectifs et les complémentarités.", icon: Star },
-    { title: "CONFIDENTIALITÉ ET CONFIANCE", desc: "Les informations, contacts ou opportunités partagés doivent être traités avec discrétion. Chaque membre s'engage à respecter la confidentialité.", icon: Lock },
-    { title: "RESPONSABILITÉ ET OPPORTUNITÉS", desc: "Le BNE facilite les rencontres, mais ne garantit aucun résultat. Chaque membre reste responsable de ses décisions et engagements.", icon: Briefcase },
-    { title: "ÉTHIQUE ET COMPORTEMENT", desc: "Respect, Intégrité, Professionnalisme, Contribution, Réciprocité, Ouverture. Tout comportement contraire peut entraîner la suspension de l'accès au réseau.", icon: Heart },
-    { title: "UN RÉSEAU INTERNATIONAL", desc: "Le BNE s'organise autour d'écosystèmes locaux tout en favorisant les connexions nationales et internationales.", icon: Globe },
-    { title: "LE RÔLE DU BNE", desc: "Le BNE agit comme un facilitateur entre les personnes, les entreprises et les territoires. Il cherche à créer un réseau plus pertinent, pas simplement plus grand.", icon: Network },
-    { title: "LA PHILOSOPHIE BNE", desc: "« Je ne viens pas seulement chercher une opportunité. Je viens aussi avec la capacité d'en créer une pour quelqu'un d'autre. »", icon: Lightbulb }
+    { num: "01", category: "dna", title: "L'ADN DU BNE", desc: "EXPÉRIENCE → CONNEXION → CONTRIBUTION → DÉVELOPPEMENT → OPPORTUNITÉS. La valeur du réseau repose sur la qualité humaine des liens et la capacité à créer de la valeur ensemble.", icon: Fingerprint },
+    { num: "02", category: "membership", title: "UNE ADHÉSION SANS COTISATION", desc: "0€ de frais d'inscription, 0€ de cotisation mensuelle ou annuelle. L'adhésion ne s'achète pas : elle découle d'une immersion ou d'un accompagnement BNE.", icon: CreditCard },
+    { num: "03", category: "membership", title: "MEMBRES & ENGAGEMENT", desc: "Le BNE privilégie l'authenticité de l'engagement plutôt que la masse. Un membre actif cultive un lien sincère avec l'écosystème.", icon: Users },
+    { num: "04", category: "values", title: "LA RÉCIPROCITÉ", desc: "« Donner de la valeur pour créer de la valeur. » Chaque membre contribue selon son expertise, ses moyens et ses synergies.", icon: RefreshCw },
+    { num: "05", category: "rights", title: "LES DROITS DU MEMBRE", desc: "Développer son carnet d'adresses qualifié, être mis en relation directe, participer aux expériences, pitcher son savoir-faire et bâtir des collaborations.", icon: Key },
+    { num: "06", category: "commitments", title: "LES ENGAGEMENTS DU MEMBRE", desc: "Respecter l'esprit BNE, recommander les pairs, préserver la confidentialité et incarner le professionnalisme. Incarner le cercle par vos réussites partagées.", icon: Handshake },
+    { num: "07", category: "membership", title: "LIBERTÉ & SANS ENGAGEMENT FORCÉ", desc: "Aucune obligation de durée, aucun contrat annuel restrictif, aucun quota artificiel de recommandation. Chacun participe à son propre rythme.", icon: Timer },
+    { num: "08", category: "ethics", title: "PAS DE PROSPECTION AGRESSIVE", desc: "Le spam, la sollicitation sauvage ou l'abus de coordonnées sont rigoureusement proscrits. La relation de confiance précède toujours la transaction.", icon: ShieldAlert },
+    { num: "09", category: "ethics", title: "SÉLECTION & EXCELLENCE", desc: "L'accès à certains séjours et expériences immersives est sélectionné afin de garantir une totale complémentarité entre dirigeants.", icon: Star },
+    { num: "10", category: "ethics", title: "CONFIDENTIALITÉ & DISCRÉTION", desc: "Les échanges d'opportunités, données stratégiques et contacts doivent être traités sous le sceau de la confidentialité la plus stricte.", icon: Lock },
+    { num: "11", category: "commitments", title: "RESPONSABILITÉ INDIVIDUELLE", desc: "Le BNE favorise les ponts mais ne saurait garantir de résultats financiers. Chaque membre demeure seul décisionnaire de ses partenariats.", icon: Briefcase },
+    { num: "12", category: "ethics", title: "ÉTHIQUE & BIENVEILLANCE", desc: "Intégrité, respect mutuel, ouverture d'esprit et rigueur professionnelle. Tout manquement avéré peut entraîner la suspension de l'accès au réseau.", icon: Heart },
+    { num: "13", category: "dna", title: "ENVERGURE INTERNATIONALE", desc: "Fédéré autour d'écosystèmes locaux (France, Suisse, Belgique, Luxembourg, Inde), le BNE relie dirigeants et territoires d'affaires.", icon: Globe },
+    { num: "14", category: "dna", title: "LE RÔLE DU BNE", desc: "Agir comme accélérateur relationnel et facilitateur d'opportunités. Construire un cercle plus pertinent plutôt qu'une foule anonyme.", icon: Network },
+    { num: "15", category: "values", title: "LA PHILOSOPHIE BNE", desc: "« Je ne viens pas seulement chercher une opportunité. Je viens aussi avec la capacité d'en créer une pour quelqu'un d'autre. »", icon: Lightbulb }
   ];
 
-  const septPrincipes = isEn ? [
-    { title: "EXPERIENCE", text: "Enter BNE through a true experience or coaching.", icon: Zap },
-    { title: "TRUST", text: "Build lasting professional relationships.", icon: Shield },
-    { title: "CONTRIBUTION", text: "Bring value before asking.", icon: Handshake },
-    { title: "CONNECTION", text: "Create the right meetings at the right time.", icon: Globe },
-    { title: "RECIPROCITY", text: "Circulate value within the network.", icon: Check },
-    { title: "DEVELOPMENT", text: "Transform connections into collaborations and opportunities.", icon: ArrowRight },
-    { title: "INTERNATIONAL", text: "Build bridges between entrepreneurs, companies, and territories.", icon: Globe }
+  const septPiliers = isEn ? [
+    { title: "EXPÉRIENCE", text: "Immersion concrète d'abord", icon: Zap },
+    { title: "CONFIANCE", text: "Relations solides et durables", icon: Shield },
+    { title: "CONTRIBUTION", text: "Donner avant de demander", icon: Handshake },
+    { title: "CONNEXION", text: "Rencontres qualifiées au bon moment", icon: Globe },
+    { title: "RÉCIPROCITÉ", text: "Faire circuler la valeur créée", icon: CheckCircle2 },
+    { title: "DÉVELOPPEMENT", text: "Du contact à la collaboration réelle", icon: ArrowRight },
+    { title: "INTERNATIONAL", text: "Des ponts entre territoires d'affaires", icon: Globe }
   ] : [
-    { title: "EXPÉRIENCE", text: "Entrer dans le BNE par une véritable expérience ou un accompagnement.", icon: Zap },
-    { title: "CONFIANCE", text: "Construire des relations professionnelles durables.", icon: Shield },
-    { title: "CONTRIBUTION", text: "Apporter avant de demander.", icon: Handshake },
-    { title: "CONNEXION", text: "Créer les bonnes rencontres au bon moment.", icon: Globe },
-    { title: "RÉCIPROCITÉ", text: "Faire circuler la valeur au sein du réseau.", icon: Check },
-    { title: "DÉVELOPPEMENT", text: "Transformer les connexions en collaborations et opportunités.", icon: ArrowRight },
-    { title: "INTERNATIONAL", text: "Créer des ponts entre entrepreneurs, entreprises et territoires.", icon: Globe }
+    { title: "EXPÉRIENCE", text: "Immersion concrète d'abord", icon: Zap },
+    { title: "CONFIANCE", text: "Relations solides et durables", icon: Shield },
+    { title: "CONTRIBUTION", text: "Donner avant de demander", icon: Handshake },
+    { title: "CONNEXION", text: "Rencontres qualifiées au bon moment", icon: Globe },
+    { title: "RÉCIPROCITÉ", text: "Faire circuler la valeur créée", icon: CheckCircle2 },
+    { title: "DÉVELOPPEMENT", text: "Du contact à la collaboration réelle", icon: ArrowRight },
+    { title: "INTERNATIONAL", text: "Des ponts entre territoires d'affaires", icon: Globe }
   ];
+
+  const categories = isEn ? [
+    { id: "all", label: "All Articles" },
+    { id: "dna", label: "DNA & Vision" },
+    { id: "membership", label: "Membership (0€)" },
+    { id: "ethics", label: "Ethics & Trust" },
+    { id: "values", label: "Values & Rights" }
+  ] : [
+    { id: "all", label: "Tous les Articles" },
+    { id: "dna", label: "ADN & Vision" },
+    { id: "membership", label: "Adhésion (0€)" },
+    { id: "ethics", label: "Éthique & Confiance" },
+    { id: "values", label: "Valeurs & Droits" }
+  ];
+
+  const filteredArticles = activeFilter === "all" 
+    ? articles 
+    : articles.filter(a => a.category === activeFilter);
 
   return (
-    <div className="bg-[#0a0d0f] min-h-screen text-foreground font-sans overflow-hidden">
+    <div className="bg-[#0a0d0f] min-h-screen text-foreground font-sans pt-24 pb-16">
       
-      {/* ── 1. Hero Header Immersif ── */}
-      <section className="relative min-h-[60vh] py-32 flex flex-col items-center justify-center text-center px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center opacity-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0d0f]/80 via-[#0a0d0f]/95 to-[#0a0d0f]" />
-        
-        {/* Effet Halo Doré */}
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gold/20 blur-[150px] rounded-full pointer-events-none" 
-        />
-
-        <div className="relative z-10 max-w-4xl mx-auto mt-20">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="eyebrow text-gold mb-6 flex items-center justify-center gap-4"
-          >
-            <span className="w-12 h-px bg-gold/50" /> {isEn ? "The Official Charter" : "La Charte Officielle"} <span className="w-12 h-px bg-gold/50" />
-          </motion.div>
-          
-          <motion.h1 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="font-display text-5xl md:text-7xl lg:text-8xl leading-[0.9] mb-8"
-          >
-            {isEn ? "Beyond the " : "Au-delà du "}<span className="gold-text italic">{isEn ? "Network." : "Réseau."}</span>
-          </motion.h1>
-          
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.8 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-serif italic"
-          >
-            {isEn 
-              ? "The best opportunities arise from qualified connections, trust, and the value each person brings to others." 
-              : "Les meilleures opportunités naissent de connexions qualifiées, de la confiance et de la valeur que chacun apporte aux autres."}
-          </motion.p>
+      {/* ── 1. Header Compact & Typographie Accueil ── */}
+      <section className="container max-w-5xl mx-auto px-4 text-center mb-8">
+        <div className="eyebrow mb-3 flex items-center justify-center gap-2.5 text-xs uppercase tracking-[0.22em] text-amber-400 font-semibold">
+          <Shield size={14} className="text-amber-400" />
+          <span>{isEn ? "Official BNE Charter" : "La Charte Officielle BNE"}</span>
         </div>
+
+        <h1 className="font-display text-2xl sm:text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-3 leading-tight">
+          {isEn ? "Principles & Commitments of the " : "L'Esprit & les Engagements du "}<span className="gold-text">Cercle BNE</span>
+        </h1>
+
+        <p className="text-xs sm:text-sm md:text-base text-muted-foreground max-w-2xl mx-auto font-serif italic leading-relaxed">
+          {isEn 
+            ? "« Give value to create value. » The human, ethical, and collaborative foundations uniting our business ecosystem." 
+            : "« Donner de la valeur pour créer de la valeur. » Les fondations humaines, déontologiques et professionnelles qui unissent notre écosystème d'affaires."}
+        </p>
       </section>
 
-      {/* ── 2. Le Choc de la Gratuité ── */}
-      <section className="py-16 relative z-20">
-        <div className="container max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="font-display text-4xl md:text-5xl mb-4">{isEn ? "Membership Cannot Be Bought." : "L'Adhésion ne s'achète pas."}</h2>
-            <p className="text-xl text-gold-light font-serif italic">{isEn ? "It is the result of an experience." : "Elle résulte d'une expérience."}</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {(isEn 
-              ? ["0 Registration Fee", "0 Monthly Fee", "0 Annual Fee"]
-              : ["0 Frais d'inscription", "0 Cotisation Mensuelle", "0 Cotisation Annuelle"]
-            ).map((text, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.2, duration: 0.8 }}
-                className="glass-strong p-6 rounded-2xl text-center border border-gold/10 hover:border-gold/30 transition-colors group relative overflow-hidden"
-              >
-                <div className="font-display text-7xl text-transparent bg-clip-text bg-gradient-to-b from-gold to-gold-light/20 mb-4 group-hover:scale-110 transition-transform duration-500 relative z-10">
-                  0€
-                </div>
-                <div className="text-sm uppercase tracking-[0.2em] text-foreground/80 font-bold relative z-10">{text}</div>
-                <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-              </motion.div>
-            ))}
-          </div>
-          <div className="mt-16 text-center max-w-3xl mx-auto text-muted-foreground leading-relaxed">
-            {isEn 
-              ? "A person automatically becomes a member when they participate in a BNE immersion or benefit from eligible coaching. No additional payment is required to become a member."
-              : "Une personne devient automatiquement membre lorsqu'elle participe à une immersion BNE ou bénéficie d'un accompagnement éligible. Aucun paiement supplémentaire n'est demandé pour devenir membre."}
-          </div>
-        </div>
-      </section>
+      {/* ── 2. Bandeau Synthèse : Adhésion sans Cotisation (Compact) ── */}
+      <section className="container max-w-5xl mx-auto px-4 mb-8">
+        <div className="bg-card/70 backdrop-blur-md border border-amber-500/25 rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-32 bg-amber-500/10 blur-2xl rounded-full pointer-events-none" />
 
-      {/* ── 3. Scroll-Spy des Articles ── */}
-      <section className="py-16 bg-[#0a0d0f] relative border-y border-border">
-        <div className="container max-w-7xl">
-          <div className="grid md:grid-cols-12 gap-12 relative">
-            
-            {/* Sticky Sidebar */}
-            <div className="hidden md:block md:col-span-4 lg:col-span-3">
-              <div className="sticky top-32">
-                <h3 className="font-display text-2xl text-gold mb-8">{isEn ? "The Articles" : "Les Articles"}</h3>
-                <div className="absolute left-0 top-16 bottom-0 w-px bg-border" />
-                <ul className="space-y-6 relative z-10 ml-[1px]">
-                  {[0, 3, 7, 11, 14].map((idx) => (
-                     <li key={idx} className="text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground cursor-pointer transition-colors flex items-center gap-4">
-                       <span className="w-4 h-px bg-gold/50" /> {articles[idx].title}
-                     </li>
-                  ))}
-                </ul>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-5 relative z-10">
+            <div className="text-center md:text-left space-y-1">
+              <div className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 mb-1">
+                <Award size={11} /> Modèle Vertueux
               </div>
+              <h2 className="text-base sm:text-lg font-display font-bold text-white">
+                {isEn ? "An Ecosystem Accessible on Quality, Not on Price" : "Une Adhésion Qui Ne S'Achète Pas"}
+              </h2>
+              <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
+                {isEn
+                  ? "Membership results exclusively from participation in an event, immersion, or eligible coaching program. No recurring membership fees."
+                  : "Le statut de membre s'acquiert par l'expérience vécue (événement, séjour ou accompagnement). Aucun droit d'entrée récurrent n'est exigé."}
+              </p>
             </div>
 
-            {/* Articles List */}
-            <div className="md:col-span-8 lg:col-span-9 space-y-12">
-              {articles.map((article, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.6 }}
-                  className="relative group luxe-card p-8 md:p-10 rounded-2xl overflow-hidden"
+            {/* 3 Pills 0€ */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full md:w-auto shrink-0">
+              {(isEn 
+                ? [
+                    { label: "Registration", sub: "0€ entry" },
+                    { label: "Monthly", sub: "0€ / month" },
+                    { label: "Annual", sub: "0€ / year" }
+                  ]
+                : [
+                    { label: "Inscription", sub: "0€ de frais" },
+                    { label: "Mensuel", sub: "0€ / mois" },
+                    { label: "Annuel", sub: "0€ / an" }
+                  ]
+              ).map((item, idx) => (
+                <div 
+                  key={idx}
+                  className="bg-muted/40 border border-white/10 rounded-xl px-3 py-2 text-center hover:border-amber-400/40 transition-colors"
                 >
-                  <div className="absolute inset-0 right-0 opacity-[0.02] group-hover:opacity-[0.08] transition-opacity duration-700 flex items-center justify-end pointer-events-none">
-                     <article.icon className="w-64 h-64 text-gold translate-x-8 group-hover:scale-110 group-hover:-translate-y-4 transition-all duration-700" />
-                  </div>
-
-                  <div className="text-gold/20 font-display text-5xl md:text-6xl mb-6 select-none group-hover:text-gold/40 transition-colors">
-                    {(i + 1).toString().padStart(2, '0')}
-                  </div>
-                  
-                  <div className="relative z-10 border-l-2 border-gold/30 pl-4 md:pl-6">
-                    <h3 className="font-display text-2xl md:text-3xl mb-4 text-foreground">{article.title}</h3>
-                    <p className="text-lg text-muted-foreground leading-relaxed">
-                      {article.desc}
-                    </p>
-                  </div>
-                </motion.div>
+                  <div className="font-display font-extrabold text-base sm:text-lg text-amber-400 leading-none">0€</div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5 font-medium">{item.label}</div>
+                </div>
               ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 4. L'Essentiel : Les 7 Principes ── */}
-      <section className="py-16 container max-w-6xl relative">
-        <div className="text-center mb-20">
-          <div className="eyebrow text-gold mb-4">{isEn ? "The Essentials" : "L'Essentiel"}</div>
-          <h2 className="font-display text-4xl md:text-5xl">{isEn ? "The Charter in 7 Principles" : "La Charte en 7 Principes"}</h2>
+      {/* ── 3. Les 7 Piliers Fondamentaux (Bande Déroulante Compacte) ── */}
+      <section className="container max-w-5xl mx-auto px-4 mb-8">
+        <div className="mb-3 text-center sm:text-left flex items-center justify-between">
+          <h3 className="text-xs uppercase tracking-[0.2em] font-extrabold text-amber-400">
+            {isEn ? "The 7 Core Pillars" : "Les 7 Piliers BNE"}
+          </h3>
+          <span className="text-[11px] text-muted-foreground hidden sm:inline">
+            {isEn ? "The essence in 7 words" : "L'essentiel en 7 notions clés"}
+          </span>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {septPrincipes.map((principe, i) => (
-            <motion.div 
-              key={i}
-              whileHover={{ y: -10 }}
-              className={`luxe-card p-8 rounded-2xl group relative overflow-hidden ${i === 6 ? 'md:col-span-2 lg:col-span-1 lg:col-start-2' : ''}`}
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl group-hover:bg-gold/20 transition-colors" />
-              
-              {/* Interactive Background Icon */}
-              <div className="absolute -bottom-4 -right-4 opacity-5 group-hover:opacity-10 group-hover:scale-125 transition-all duration-500 pointer-events-none">
-                <principe.icon className="w-32 h-32 text-gold" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+          {septPiliers.map((pilier, i) => {
+            const Icon = pilier.icon;
+            return (
+              <div 
+                key={i}
+                className="bg-card/50 border border-border/80 rounded-xl p-2.5 hover:border-amber-400/40 transition-all flex flex-col justify-between group"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <Icon size={14} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-[9px] font-mono text-muted-foreground">0{i+1}</span>
+                </div>
+                <div>
+                  <div className="font-display text-[11px] font-bold text-white tracking-wide truncate">{pilier.title}</div>
+                  <div className="text-[9.5px] text-muted-foreground leading-tight mt-0.5 line-clamp-2">{pilier.text}</div>
+                </div>
               </div>
+            );
+          })}
+        </div>
+      </section>
 
-              <principe.icon className="text-gold/50 mb-6 group-hover:text-gold transition-colors relative z-10" size={32} />
-              <div className="font-display text-xl mb-3 relative z-10">{principe.title}</div>
-              <p className="text-sm text-muted-foreground relative z-10">{principe.text}</p>
-              
-              <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                <CornerRightDown className="text-gold/30" size={24} />
-              </div>
-            </motion.div>
+      {/* ── 4. Filtres de Navigation Rapide par Catégorie ── */}
+      <section className="container max-w-5xl mx-auto px-4 mb-5">
+        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+          {categories.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setActiveFilter(c.id)}
+              className={`text-xs px-3 py-1.5 rounded-full transition-all cursor-pointer font-medium ${
+                activeFilter === c.id
+                  ? "bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20"
+                  : "bg-muted/40 text-muted-foreground hover:text-white hover:bg-muted/70 border border-border/60"
+              }`}
+            >
+              {c.label}
+            </button>
           ))}
         </div>
       </section>
 
-      {/* ── 5. Engagement Final ── */}
-      <section className="py-16 bg-[#0a0d0f] text-center relative overflow-hidden border-t border-border">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gold/10 blur-[150px] rounded-full pointer-events-none" />
-        
-        <div className="container relative z-10 max-w-3xl">
-          <h2 className="font-display text-3xl md:text-5xl mb-8 leading-tight">
-            "{isEn ? "Connecting the right people to create the right opportunities." : "Connecter les bonnes personnes pour créer les bonnes opportunités."}"
-          </h2>
-          <div className="flex flex-col md:flex-row justify-center gap-4 text-xs font-mono tracking-widest text-gold-light/60 uppercase mb-12">
-            <span>{isEn ? "An experience to enter." : "Une expérience pour entrer."}</span>
-            <span className="hidden md:inline">•</span>
-            <span>{isEn ? "Value to remain." : "De la valeur pour rester."}</span>
-            <span className="hidden md:inline">•</span>
-            <span>{isEn ? "Connections to grow." : "Des connexions pour grandir."}</span>
-          </div>
-          <Link to="/contact" className="btn-gold inline-flex px-10 py-5 text-xs uppercase tracking-[0.2em] rounded-sm items-center gap-4 hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_rgba(197,160,89,0.3)]">
-            {isEn ? "Live the experience" : "Vivre l'expérience"} <ArrowRight size={16} />
-          </Link>
+      {/* ── 5. Grille Compacte des 15 Articles (2 Colonnes) ── */}
+      <section className="container max-w-5xl mx-auto px-4 mb-10">
+        <div className="grid md:grid-cols-2 gap-3 sm:gap-3.5">
+          {filteredArticles.map((art) => {
+            const Icon = art.icon;
+            return (
+              <div
+                key={art.num}
+                className="bg-card/55 hover:bg-card/85 border border-border/80 hover:border-amber-400/40 rounded-xl p-4 sm:p-4.5 transition-all shadow-sm flex items-start gap-3.5 group"
+              >
+                {/* Badge Numéro & Icône */}
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/25 flex flex-col items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-amber-400">
+                  <Icon size={16} />
+                  <span className="text-[8.5px] font-mono font-bold text-amber-300 mt-0.5">{art.num}</span>
+                </div>
+
+                {/* Texte de l'article */}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-display font-bold text-xs sm:text-sm text-foreground group-hover:text-amber-300 transition-colors mb-1 tracking-wide">
+                    {art.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {art.desc}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
-      
+
+      {/* ── 6. Engagement & Passerelle Vers l'Action ── */}
+      <section className="container max-w-4xl mx-auto px-4 text-center">
+        <div className="border-t border-border/60 pt-8 space-y-4">
+          <blockquote className="text-sm sm:text-base font-serif italic text-amber-300/90 max-w-2xl mx-auto">
+            "{isEn ? "Connecting the right people to create the right opportunities." : "Connecter les bonnes personnes pour créer les bonnes opportunités."}"
+          </blockquote>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <Link
+              to="/evenements"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs shadow-md shadow-amber-500/20 transition-transform active:scale-[0.98]"
+            >
+              <CalendarCheck size={14} />
+              <span>{isEn ? "Explore Upcoming Events" : "Découvrir les Événements BNE"}</span>
+            </Link>
+
+            <Link
+              to="/contact"
+              className="inline-flex items-center gap-2 border border-border hover:bg-muted text-foreground text-xs px-5 py-2.5 rounded-xl transition-colors"
+            >
+              <span>{isEn ? "Contact the Secretariat" : "Contacter le Secrétariat"}</span>
+              <ArrowRight size={13} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }
