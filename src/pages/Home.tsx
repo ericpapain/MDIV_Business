@@ -32,19 +32,19 @@ function AIAppsBlock() {
             <Sparkles size={12} className="text-gold" /> 
             Pôle Technologies & IA
           </div>
-          <div className="text-[9px] uppercase tracking-[0.2em] bg-gold/10 text-gold border border-gold/30 px-2 py-0.5 rounded-sm font-semibold">
-            Accès Privé
+          <div className="text-[9px] uppercase tracking-[0.2em] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-sm font-semibold">
+            Mode Démo Actif
           </div>
         </div>
 
         <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-          L'accès public aux applications IA est temporairement fermé. Le déploiement est réservé aux membres officiels et séjours d'immersion BNE.
+          Explorez notre suite d'applications d'IA : diagnostic automatisé, vérification Factur-X, analyse de devis et automatisation des processus.
         </p>
 
         <div className="mt-auto pt-2 border-t border-border/50 flex justify-between items-center text-[10px] text-muted-foreground">
-          <span>Déploiement BNE 2026</span>
-          <Link to="/contact?subject=Demande accès IA" className="text-primary hover:text-gold-light underline">
-            En savoir plus ➔
+          <span>Démo Interactive BNE</span>
+          <Link to="/services-ia" className="text-primary hover:text-gold-light underline font-bold">
+            Accéder aux Services IA ➔
           </Link>
         </div>
       </div>

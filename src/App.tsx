@@ -69,8 +69,26 @@ const AccompagnementBNE = lazyWithRetry(() => import("./pages/AccompagnementBNE"
 const Blog = lazyWithRetry(() => import("./pages/Blog"));
 const DemoFlow = lazyWithRetry(() => import("./pages/Demo/DemoFlow"));
 
-// ─── Services IA (Section Fermée / Accès restreint) ─────────────────────────
-const ServicesIAClosed = lazyWithRetry(() => import("./pages/ServicesIAClosed"));
+// ─── Services IA (Activés pour Démo) ─────────────────────────────────────────
+const ServicesIA = lazyWithRetry(() => import("./pages/ServicesIA"));
+const ServicesIACategory = lazyWithRetry(() => import("./pages/ServicesIACategory"));
+const ServicesIADiagnostic = lazyWithRetry(() => import("./pages/ServicesIADiagnostic"));
+const ServicesIADeepDiagnostic = lazyWithRetry(() => import("./pages/ServicesIADeepDiagnostic"));
+const ServicesIACalcROI = lazyWithRetry(() => import("./pages/ServicesIACalcROI"));
+const ServicesIABenchmark = lazyWithRetry(() => import("./pages/ServicesIABenchmark"));
+const ServicesIAMeetings = lazyWithRetry(() => import("./pages/ServicesIAMeetings"));
+const ServicesIASummarizer = lazyWithRetry(() => import("./pages/ServicesIASummarizer"));
+const ServicesIAEmail = lazyWithRetry(() => import("./pages/ServicesIAEmail"));
+const ServicesIAQuote = lazyWithRetry(() => import("./pages/ServicesIAQuote"));
+const ServicesIAInvoice = lazyWithRetry(() => import("./pages/ServicesIAInvoice"));
+const ServicesIAFollowup = lazyWithRetry(() => import("./pages/ServicesIAFollowup"));
+const ServicesIAContent = lazyWithRetry(() => import("./pages/ServicesIAContent"));
+const ServicesIALeads = lazyWithRetry(() => import("./pages/ServicesIALeads"));
+const ServicesIAProspecting = lazyWithRetry(() => import("./pages/ServicesIAProspecting"));
+const ServicesIAMeetingPrep = lazyWithRetry(() => import("./pages/ServicesIAMeetingPrep"));
+const ServicesIAAppointments = lazyWithRetry(() => import("./pages/ServicesIAAppointments"));
+const ServicesIAPricing = lazyWithRetry(() => import("./pages/ServicesIAPricing"));
+const ServicesIADashboard = lazyWithRetry(() => import("./pages/ServicesIADashboard"));
 const PublicClientBooking = lazyWithRetry(() => import("./pages/PublicClientBooking"));
 
 // ─── Admin pages (lazy-loaded) ───────────────────────────────────────────────
@@ -152,11 +170,32 @@ const App = () => (
                       {/* 1. Routes publiques (accessibles sans connexion) */}
                       <Route path="/" element={<Home />} />
 
-                      {/* Services IA (Fermé / Accès Restreint) */}
-                      <Route path="/services-ia" element={<ServicesIAClosed />} />
-                      <Route path="/services-ia/*" element={<ServicesIAClosed />} />
-                      <Route path="/diagnostic-ia" element={<ServicesIAClosed />} />
-                      <Route path="/tarifs" element={<ServicesIAClosed />} />
+                      {/* Services IA (Activés pour Démo) */}
+                      <Route path="/services-ia" element={<ServicesIA />} />
+                      <Route path="/services-ia/dashboard" element={<ServicesIADashboard />} />
+                      <Route path="/services-ia/diagnostic" element={<ServicesIADiagnostic />} />
+                      <Route path="/services-ia/diagnostic/login" element={<Login />} />
+                      <Route path="/services-ia/diagnostic/register" element={<Register />} />
+                      <Route path="/diagnostic-ia" element={<ServicesIADiagnostic />} />
+                      <Route path="/services-ia/deep-diagnostic" element={<ServicesIADeepDiagnostic />} />
+                      <Route path="/services-ia/calc-roi" element={<ServicesIACalcROI />} />
+                      <Route path="/services-ia/benchmark" element={<ServicesIABenchmark />} />
+                      <Route path="/services-ia/comptes-rendus" element={<ServicesIAMeetings />} />
+                      <Route path="/services-ia/resume-documents" element={<ServicesIASummarizer />} />
+                      <Route path="/services-ia/assistant-email" element={<ServicesIAEmail />} />
+                      <Route path="/services-ia/devis" element={<ServicesIAQuote />} />
+                      <Route path="/services-ia/devis-automatique" element={<ServicesIAQuote />} />
+                      <Route path="/services-ia/factures" element={<ServicesIAInvoice />} />
+                      <Route path="/services-ia/verificateur-factures" element={<ServicesIAInvoice />} />
+                      <Route path="/services-ia/relances" element={<ServicesIAFollowup />} />
+                      <Route path="/services-ia/generateur-contenu" element={<ServicesIAContent />} />
+                      <Route path="/services-ia/generateur-leads" element={<ServicesIALeads />} />
+                      <Route path="/services-ia/prospection-email" element={<ServicesIAProspecting />} />
+                      <Route path="/services-ia/prepa-reunion" element={<ServicesIAMeetingPrep />} />
+                      <Route path="/services-ia/rdv" element={<ServicesIAAppointments />} />
+                      <Route path="/services-ia/tarifs" element={<ServicesIAPricing />} />
+                      <Route path="/tarifs" element={<ServicesIAPricing />} />
+                      <Route path="/services-ia/:category" element={<ServicesIACategory />} />
 
                       {/* Présentation, Témoignages & Événements */}
                       <Route path="/contact" element={<Contact />} />
