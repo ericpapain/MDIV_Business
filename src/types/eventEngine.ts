@@ -1,12 +1,12 @@
 // src/types/eventEngine.ts
 // Types stricts pour MDIV EVENT ENGINE - Architecture modulaire
 
-export type FeatureCategory = 
-  | 'registration' 
-  | 'networking' 
-  | 'interaction' 
-  | 'presentation' 
-  | 'operations' 
+export type FeatureCategory =
+  | 'registration'
+  | 'networking'
+  | 'interaction'
+  | 'presentation'
+  | 'operations'
   | 'crm';
 
 export type FeatureAvailability = 'available' | 'in_preparation' | 'unavailable';

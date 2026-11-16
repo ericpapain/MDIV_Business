@@ -878,16 +878,70 @@
 /* ==============================================================================
    CHAMPS DE SAISIE UNIFIÉS (FOND BLANC CASSÉ / TEXTE GRIS FONCÉ / DESIGN PREMIUM)
    ============================================================================== */
-input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]),
-textarea,
-select,
-button[role="combobox"],
-[contenteditable="true"] {
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"]):not([class*="bg-slate-"]):not([class*="bg-black"]):not([class*="bg-[#"]):not(.bg-slate-950):not(.bg-slate-900):not(.bg-slate-800),
+textarea:not([class*="bg-slate-"]):not([class*="bg-black"]):not([class*="bg-[#"]):not(.bg-slate-950):not(.bg-slate-900):not(.bg-slate-800),
+select:not([class*="bg-slate-"]):not([class*="bg-black"]):not([class*="bg-[#"]):not(.bg-slate-950):not(.bg-slate-900):not(.bg-slate-800),
+button[role="combobox"]:not([class*="bg-slate-"]):not([class*="bg-black"]):not([class*="bg-[#"]),
+[contenteditable="true"]:not([class*="bg-slate-"]):not([class*="bg-black"]):not([class*="bg-[#"]) {
   background-color: #F8F7F4 !important;
   color: #222222 !important;
   border: 1px solid #e2e8f0 !important;
   caret-color: #3b82f6 !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Préservation stricte des inputs et textareas en environnement sombre / dark panels */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.bg-slate-900 input:not([type="checkbox"]):not([type="radio"]),
+.bg-slate-900 textarea,
+.bg-slate-950 input:not([type="checkbox"]):not([type="radio"]),
+.bg-slate-950 textarea,
+[class*="bg-slate-9"] input:not([type="checkbox"]):not([type="radio"]),
+[class*="bg-slate-9"] textarea,
+input[class*="bg-slate-"],
+textarea[class*="bg-slate-"],
+input[class*="bg-black"],
+textarea[class*="bg-black"],
+input[class*="bg-[#"],
+textarea[class*="bg-[#"] {
+  background-color: #020617 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #334155 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder,
+.bg-slate-900 input::placeholder,
+.bg-slate-900 textarea::placeholder,
+.bg-slate-950 input::placeholder,
+.bg-slate-950 textarea::placeholder,
+input[class*="bg-slate-"]::placeholder,
+textarea[class*="bg-slate-"]::placeholder,
+input[class*="bg-black"]::placeholder,
+textarea[class*="bg-black"]::placeholder,
+input[class*="bg-[#"]::placeholder,
+textarea[class*="bg-[#"]::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.bg-slate-900 input:focus,
+.bg-slate-900 textarea:focus,
+.bg-slate-950 input:focus,
+.bg-slate-950 textarea:focus,
+input[class*="bg-slate-"]:focus,
+textarea[class*="bg-slate-"]:focus,
+input[class*="bg-black"]:focus,
+textarea[class*="bg-black"]:focus,
+input[class*="bg-[#"]:focus,
+textarea[class*="bg-[#"]:focus {
+  background-color: #020617 !important;
+  color: #ffffff !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
 }
 
 input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):not([type="color"])::placeholder,

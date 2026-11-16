@@ -614,7 +614,8 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher un lot par titre, sponsor, rang ou description..."
-            className="pl-9 bg-slate-900 border-slate-800 rounded-xl text-xs text-white h-10 placeholder:text-slate-500 focus:border-amber-400"
+            className="pl-9 !bg-slate-900 !border-slate-800 rounded-xl text-xs !text-slate-100 h-10 placeholder:!text-slate-400 focus:!border-amber-400"
+            style={{ backgroundColor: '#0f172a', color: '#f8fafc' }}
           />
         </div>
 
@@ -918,7 +919,7 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
       {/* ── 6. Modale Complète d'Ajout / Modification de Lot (Photos & Galerie) ── */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto space-y-5 shadow-2xl relative">
+          <div className="dark bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto space-y-5 shadow-2xl relative text-slate-100">
             
             {/* Header Modale */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -964,7 +965,8 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
                     value={editingPrize.title}
                     onChange={(e) => setEditingPrize({ ...editingPrize, title: e.target.value })}
                     placeholder="ex: 1 An d'Incubation & Mentorat MDIV"
-                    className="bg-slate-950 border-slate-800 text-white rounded-xl text-xs h-10"
+                    className="!bg-slate-950 !border-slate-800 !text-slate-100 placeholder:!text-slate-500 rounded-xl text-xs h-10"
+                    style={{ backgroundColor: '#020617', color: '#f8fafc' }}
                   />
                 </div>
 
@@ -976,7 +978,8 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
                     value={editingPrize.draw_rank}
                     onChange={(e) => setEditingPrize({ ...editingPrize, draw_rank: e.target.value })}
                     placeholder="ex: 1er Prix"
-                    className="bg-slate-950 border-slate-800 text-white rounded-xl text-xs h-10"
+                    className="!bg-slate-950 !border-slate-800 !text-slate-100 placeholder:!text-slate-500 rounded-xl text-xs h-10"
+                    style={{ backgroundColor: '#020617', color: '#f8fafc' }}
                   />
                 </div>
               </div>
@@ -1010,7 +1013,8 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
                     value={editingPrize.value}
                     onChange={(e) => setEditingPrize({ ...editingPrize, value: e.target.value })}
                     placeholder="ex: 1 500 € ou Offert"
-                    className="bg-slate-950 border-slate-800 text-white rounded-xl text-xs h-10"
+                    className="!bg-slate-950 !border-slate-800 !text-slate-100 placeholder:!text-slate-500 rounded-xl text-xs h-10"
+                    style={{ backgroundColor: '#020617', color: '#f8fafc' }}
                   />
                 </div>
 
@@ -1025,7 +1029,8 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
                     required
                     value={editingPrize.winners_count}
                     onChange={(e) => setEditingPrize({ ...editingPrize, winners_count: parseInt(e.target.value, 10) || 1 })}
-                    className="bg-slate-950 border-slate-800 text-white rounded-xl text-xs h-10"
+                    className="!bg-slate-950 !border-slate-800 !text-slate-100 placeholder:!text-slate-500 rounded-xl text-xs h-10"
+                    style={{ backgroundColor: '#020617', color: '#f8fafc' }}
                   />
                 </div>
 
@@ -1037,7 +1042,8 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
                     value={editingPrize.sponsor}
                     onChange={(e) => setEditingPrize({ ...editingPrize, sponsor: e.target.value })}
                     placeholder="ex: BNE Club Privé"
-                    className="bg-slate-950 border-slate-800 text-white rounded-xl text-xs h-10"
+                    className="!bg-slate-950 !border-slate-800 !text-slate-100 placeholder:!text-slate-500 rounded-xl text-xs h-10"
+                    style={{ backgroundColor: '#020617', color: '#f8fafc' }}
                   />
                 </div>
               </div>
@@ -1048,11 +1054,12 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
                   Description Complète du Lot
                 </label>
                 <textarea
-                  rows={2}
+                  rows={3}
                   value={editingPrize.description}
                   onChange={(e) => setEditingPrize({ ...editingPrize, description: e.target.value })}
                   placeholder="Détaillez les prestations, conditions et dotations incluses dans ce lot..."
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder:text-slate-600 focus:border-amber-400 focus:outline-none resize-none"
+                  className="w-full px-3 py-2 !bg-slate-950 !border-slate-800 rounded-xl text-xs !text-slate-100 placeholder:!text-slate-500 focus:!border-amber-400 focus:outline-none resize-none !min-h-[75px]"
+                  style={{ backgroundColor: '#020617', color: '#f8fafc' }}
                 />
               </div>
 
@@ -1128,7 +1135,8 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
                         images: val && !prev.images.includes(val) ? [val, ...prev.images] : prev.images
                       }));
                     }}
-                    className="bg-slate-950 border-slate-800 text-white rounded-xl text-xs h-9"
+                    className="!bg-slate-950 !border-slate-800 !text-slate-100 placeholder:!text-slate-500 rounded-xl text-xs h-9"
+                    style={{ backgroundColor: '#020617', color: '#f8fafc' }}
                   />
                   {editingPrize.image_url && !editingPrize.images.includes(editingPrize.image_url) && (
                     <Button
