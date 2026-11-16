@@ -216,8 +216,23 @@ function ensure_event_engine_tables(PDO $pdo, $force = false) {
             `sort_order` INT NOT NULL DEFAULT 1,
             `drawn_count` INT NOT NULL DEFAULT 0,
             `is_drawn` TINYINT(1) NOT NULL DEFAULT 0,
+            `value` VARCHAR(100) NULL DEFAULT NULL,
+            `draw_rank` VARCHAR(100) NULL DEFAULT '1er Prix',
+            `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+            `images` TEXT NULL,
             `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+        // Migration progressive des colonnes si la table existait déjà
+        $tombolaCols = [
+            'value' => 'VARCHAR(100) NULL DEFAULT NULL',
+            'draw_rank' => "VARCHAR(100) NULL DEFAULT '1er Prix'",
+            'is_active' => 'TINYINT(1) NOT NULL DEFAULT 1',
+            'images' => 'TEXT NULL'
+        ];
+        foreach ($tombolaCols as $col => $def) {
+            try { $pdo->exec("ALTER TABLE `event_tombola_prizes` ADD COLUMN `$col` $def"); } catch (Throwable $t) {}
+        }
     } catch (Throwable $e) {}
 
     try {
@@ -1163,41 +1178,263 @@ L'équipe d'organisation MDIV Network & BNE.";
         exit();
     }
 
-    // 8. TOMBOLA SÉCURISÉE
-    if ($action === 'get_tombola_config' || $action === 'get_tombola_prizes') {
+    // 8. TOMBOLA SÉCURISÉE & GESTION DES LOTS
+    if ($action === 'get_tombola_config' || $action === 'get_tombola_prizes' || $action === 'get_tombola_history' || $action === 'get_public_tombola_prizes') {
         $eventId = intval($_GET['event_id'] ?? ($data['event_id'] ?? 0));
-        $stmtP = $pdo->prepare("SELECT * FROM event_tombola_prizes WHERE event_id = ? ORDER BY sort_order ASC");
-        $stmtP->execute([$eventId]);
-        $prizes = $stmtP->fetchAll(PDO::FETCH_ASSOC);
+        
+        if ($eventId > 0) {
+            $stmtP = $pdo->prepare("SELECT * FROM event_tombola_prizes WHERE event_id = ? ORDER BY sort_order ASC, id ASC");
+            $stmtP->execute([$eventId]);
+            $prizes = $stmtP->fetchAll(PDO::FETCH_ASSOC);
 
-        $stmtD = $pdo->prepare("SELECT * FROM event_tombola_draws WHERE event_id = ? ORDER BY drawn_at DESC");
-        $stmtD->execute([$eventId]);
-        $draws = $stmtD->fetchAll(PDO::FETCH_ASSOC);
+            $stmtD = $pdo->prepare("SELECT * FROM event_tombola_draws WHERE event_id = ? ORDER BY drawn_at DESC");
+            $stmtD->execute([$eventId]);
+            $draws = $stmtD->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            // Vue globale (tous les lots actifs ou de tous les événements)
+            $onlyActive = ($action === 'get_public_tombola_prizes') ? "WHERE p.is_active = 1" : "";
+            $stmtP = $pdo->query("SELECT p.*, e.title as event_title, e.date as event_date 
+                                  FROM event_tombola_prizes p 
+                                  LEFT JOIN events e ON e.id = p.event_id 
+                                  $onlyActive 
+                                  ORDER BY p.sort_order ASC, p.id DESC");
+            $prizes = $stmtP ? $stmtP->fetchAll(PDO::FETCH_ASSOC) : [];
+            $draws = [];
+        }
 
-        echo json_encode(['success' => true, 'data' => ['prizes' => $prizes, 'draws' => $draws]]);
+        foreach ($prizes as &$pz) {
+            $pz['id'] = intval($pz['id']);
+            $pz['event_id'] = intval($pz['event_id']);
+            $pz['winners_count'] = intval($pz['winners_count'] ?? 1);
+            $pz['quantity'] = $pz['winners_count'];
+            $pz['sort_order'] = intval($pz['sort_order'] ?? 1);
+            $pz['drawn_count'] = intval($pz['drawn_count'] ?? 0);
+            $pz['is_drawn'] = (bool)($pz['is_drawn'] ?? 0);
+            $pz['is_active'] = isset($pz['is_active']) ? intval($pz['is_active']) : 1;
+            $pz['value'] = $pz['value'] ?? '';
+            $pz['draw_rank'] = $pz['draw_rank'] ?? '1er Prix';
+            if (isset($pz['images']) && is_string($pz['images']) && trim($pz['images']) !== '') {
+                $decoded = json_decode($pz['images'], true);
+                $pz['images'] = is_array($decoded) ? $decoded : ($pz['image_url'] ? [$pz['image_url']] : []);
+            } else {
+                $pz['images'] = !empty($pz['image_url']) ? [$pz['image_url']] : [];
+            }
+        }
+        unset($pz);
+
+        echo json_encode([
+            'success' => true, 
+            'prizes' => $prizes, 
+            'draws' => $draws,
+            'data' => [
+                'prizes' => $prizes, 
+                'draws' => $draws
+            ]
+        ]);
         exit();
     }
 
-    if ($action === 'draw_tombola' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    // AJOUT / MODIFICATION D'UN LOT DE TOMBOLA
+    if ($action === 'save_tombola_prize' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $prizeId = intval($data['id'] ?? ($data['prize_id'] ?? 0));
+        $eventId = intval($data['event_id'] ?? 0);
+        $title = trim($data['title'] ?? '');
+        $description = trim($data['description'] ?? '');
+        $sponsor = trim($data['sponsor'] ?? '');
+        $value = trim($data['value'] ?? ($data['estimated_value'] ?? ''));
+        $drawRank = trim($data['draw_rank'] ?? '1er Prix');
+        $winnersCount = max(1, intval($data['winners_count'] ?? ($data['quantity'] ?? 1)));
+        $sortOrder = intval($data['sort_order'] ?? 1);
+        $isActive = isset($data['is_active']) ? (intval($data['is_active']) ? 1 : 0) : 1;
+        $imageUrl = trim($data['image_url'] ?? '');
+
+        // Gestion de la galerie d'images
+        $images = [];
+        if (!empty($data['images'])) {
+            $images = is_array($data['images']) ? $data['images'] : json_decode($data['images'], true);
+            if (!is_array($images)) $images = [];
+        }
+        if (empty($imageUrl) && !empty($images[0])) {
+            $imageUrl = $images[0];
+        } elseif (!empty($imageUrl) && !in_array($imageUrl, $images)) {
+            array_unshift($images, $imageUrl);
+        }
+        $imagesJson = json_encode(array_values(array_unique(array_filter($images))));
+
+        if ($eventId <= 0) throw new Exception("L'identifiant d'événement (event_id) est requis");
+        if (empty($title)) throw new Exception("Le titre du lot est requis");
+
+        if ($prizeId > 0) {
+            // Modification
+            $stmt = $pdo->prepare("UPDATE event_tombola_prizes SET 
+                event_id = ?, 
+                title = ?, 
+                description = ?, 
+                sponsor = ?, 
+                value = ?, 
+                draw_rank = ?, 
+                image_url = ?, 
+                images = ?, 
+                winners_count = ?, 
+                sort_order = ?, 
+                is_active = ? 
+                WHERE id = ?");
+            $stmt->execute([
+                $eventId,
+                $title,
+                $description,
+                $sponsor,
+                $value,
+                $drawRank,
+                $imageUrl,
+                $imagesJson,
+                $winnersCount,
+                $sortOrder,
+                $isActive,
+                $prizeId
+            ]);
+        } else {
+            // Nouveau lot
+            if ($sortOrder <= 1) {
+                $maxStmt = $pdo->prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM event_tombola_prizes WHERE event_id = ?");
+                $maxStmt->execute([$eventId]);
+                $sortOrder = intval($maxStmt->fetchColumn());
+            }
+
+            $stmt = $pdo->prepare("INSERT INTO event_tombola_prizes 
+                (event_id, title, description, sponsor, value, draw_rank, image_url, images, winners_count, sort_order, is_active, drawn_count, is_drawn, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, NOW())");
+            $stmt->execute([
+                $eventId,
+                $title,
+                $description,
+                $sponsor,
+                $value,
+                $drawRank,
+                $imageUrl,
+                $imagesJson,
+                $winnersCount,
+                $sortOrder,
+                $isActive
+            ]);
+            $prizeId = intval($pdo->lastInsertId());
+        }
+
+        // Récupération de l'enregistrement frais
+        $fetchStmt = $pdo->prepare("SELECT * FROM event_tombola_prizes WHERE id = ?");
+        $fetchStmt->execute([$prizeId]);
+        $savedPrize = $fetchStmt->fetch(PDO::FETCH_ASSOC);
+        if ($savedPrize) {
+            $savedPrize['id'] = intval($savedPrize['id']);
+            $savedPrize['winners_count'] = intval($savedPrize['winners_count']);
+            $savedPrize['quantity'] = $savedPrize['winners_count'];
+            $savedPrize['is_active'] = intval($savedPrize['is_active'] ?? 1);
+            $savedPrize['images'] = json_decode($savedPrize['images'] ?? '[]', true) ?: [];
+        }
+
+        echo json_encode(['success' => true, 'data' => $savedPrize, 'prize' => $savedPrize, 'message' => "Lot enregistré avec succès"]);
+        exit();
+    }
+
+    // SUPPRESSION D'UN LOT DE TOMBOLA
+    if ($action === 'delete_tombola_prize' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $prizeId = intval($data['prize_id'] ?? ($data['id'] ?? ($_GET['id'] ?? 0)));
+        if ($prizeId <= 0) throw new Exception("Identifiant de lot manquant");
+
+        // Supprimer les tirages liés d'abord
+        $pdo->prepare("DELETE FROM event_tombola_draws WHERE prize_id = ?")->execute([$prizeId]);
+        // Supprimer le lot
+        $pdo->prepare("DELETE FROM event_tombola_prizes WHERE id = ?")->execute([$prizeId]);
+
+        echo json_encode(['success' => true, 'message' => "Lot supprimé avec succès"]);
+        exit();
+    }
+
+    // ACTIVER / DÉSACTIVER UN LOT DE TOMBOLA
+    if ($action === 'toggle_tombola_prize_status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $prizeId = intval($data['prize_id'] ?? ($data['id'] ?? 0));
+        if ($prizeId <= 0) throw new Exception("Identifiant de lot manquant");
+
+        $status = isset($data['is_active']) ? (intval($data['is_active']) ? 1 : 0) : null;
+        if ($status === null) {
+            $stmt = $pdo->prepare("UPDATE event_tombola_prizes SET is_active = IF(is_active = 1, 0, 1) WHERE id = ?");
+            $stmt->execute([$prizeId]);
+        } else {
+            $stmt = $pdo->prepare("UPDATE event_tombola_prizes SET is_active = ? WHERE id = ?");
+            $stmt->execute([$status, $prizeId]);
+        }
+
+        $valStmt = $pdo->prepare("SELECT is_active FROM event_tombola_prizes WHERE id = ?");
+        $valStmt->execute([$prizeId]);
+        $newStatus = intval($valStmt->fetchColumn());
+
+        echo json_encode(['success' => true, 'is_active' => $newStatus, 'message' => "Statut mis à jour"]);
+        exit();
+    }
+
+    // RÉORDONNANCER LES LOTS DE TOMBOLA
+    if ($action === 'reorder_tombola_prizes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $prizesList = $data['prizes'] ?? [];
+        if (!is_array($prizesList)) throw new Exception("Liste de lots invalide");
+
+        $pdo->beginTransaction();
+        $upStmt = $pdo->prepare("UPDATE event_tombola_prizes SET sort_order = ? WHERE id = ?");
+        foreach ($prizesList as $idx => $pItem) {
+            $pId = intval(is_array($pItem) ? ($pItem['id'] ?? 0) : $pItem);
+            $order = is_array($pItem) && isset($pItem['sort_order']) ? intval($pItem['sort_order']) : ($idx + 1);
+            if ($pId > 0) {
+                $upStmt->execute([$order, $pId]);
+            }
+        }
+        $pdo->commit();
+
+        echo json_encode(['success' => true, 'message' => "Ordre des lots mis à jour"]);
+        exit();
+    }
+
+    // TIRAGE AU SORT CSPRNG SÉCURISÉ
+    if (($action === 'draw_tombola' || $action === 'execute_tombola_draw') && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $eventId = intval($data['event_id'] ?? 0);
         $prizeId = intval($data['prize_id'] ?? 0);
+        $rules = $data['rules'] ?? [];
+        $eligibility = $rules['eligibility'] ?? 'checked_in_only';
+        $excludePreviousWinners = !isset($rules['exclude_previous_winners']) || $rules['exclude_previous_winners'];
+
         $stmtP = $pdo->prepare("SELECT * FROM event_tombola_prizes WHERE id = ? AND event_id = ?");
         $stmtP->execute([$prizeId, $eventId]);
         $prize = $stmtP->fetch(PDO::FETCH_ASSOC);
         if (!$prize) throw new Exception("Lot introuvable");
         if ($prize['drawn_count'] >= $prize['winners_count']) throw new Exception("Tous les gagnants de ce lot ont déjà été tirés");
 
-        // Éligibles (émargés et n'ayant pas encore gagné)
+        // Éligibles (selon statut émargé ou confirmé)
+        $statusCondition = ($eligibility === 'all')
+            ? "AND a.status != 'cancelled'"
+            : "AND (a.status = 'attended' OR a.checked_in_at IS NOT NULL OR a.status = 'confirmed')";
+
+        $excludeCondition = $excludePreviousWinners 
+            ? "AND a.id NOT IN (SELECT winner_attendee_id FROM event_tombola_draws WHERE event_id = ?)" 
+            : "";
+
         $sqlEligible = "SELECT a.* FROM event_attendees a 
                         WHERE a.event_id = ? 
-                        AND (a.status = 'attended' OR a.checked_in_at IS NOT NULL OR a.status = 'confirmed')
-                        AND a.id NOT IN (SELECT winner_attendee_id FROM event_tombola_draws WHERE event_id = ?)";
-        $stmtE = $pdo->prepare($sqlEligible);
-        $stmtE->execute([$eventId, $eventId]);
-        $pool = $stmtE->fetchAll(PDO::FETCH_ASSOC);
-        if (empty($pool)) throw new Exception("Aucun participant éligible disponible.");
+                        $statusCondition
+                        $excludeCondition";
 
-        // CSPRNG
+        $stmtE = $pdo->prepare($sqlEligible);
+        $params = $excludePreviousWinners ? [$eventId, $eventId] : [$eventId];
+        $stmtE->execute($params);
+        $pool = $stmtE->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($pool)) {
+            // Fallback souple si le pool est vide pour éviter le blocage
+            $stmtFallback = $pdo->prepare("SELECT a.* FROM event_attendees a WHERE a.event_id = ? AND a.status != 'cancelled'");
+            $stmtFallback->execute([$eventId]);
+            $pool = $stmtFallback->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        if (empty($pool)) throw new Exception("Aucun participant inscrit éligible n'a été trouvé pour cet événement.");
+
+        // CSPRNG cryptographiquement fort
         $idx = random_int(0, count($pool) - 1);
         $winner = $pool[$idx];
         $drawHash = hash('sha256', $eventId . '_' . $prizeId . '_' . $winner['ticket_code'] . '_' . time() . '_' . bin2hex(random_bytes(16)));
@@ -1209,9 +1446,9 @@ L'équipe d'organisation MDIV Network & BNE.";
             $prize['title'],
             $winner['id'],
             $winner['first_name'] . ' ' . $winner['last_name'],
-            $winner['company'],
-            $winner['email'],
-            $winner['ticket_code'],
+            $winner['company'] ?? '',
+            $winner['email'] ?? '',
+            $winner['ticket_code'] ?? 'TKT-' . $winner['id'],
             $drawHash
         ]);
 
@@ -1221,12 +1458,31 @@ L'équipe d'organisation MDIV Network & BNE.";
             'success' => true,
             'draw' => [
                 'winner_name' => $winner['first_name'] . ' ' . $winner['last_name'],
-                'winner_company' => $winner['company'],
-                'winner_ticket_code' => $winner['ticket_code'],
+                'winner_company' => $winner['company'] ?? '',
+                'winner_ticket_code' => $winner['ticket_code'] ?? 'TKT-' . $winner['id'],
                 'draw_hash' => $drawHash,
                 'prize_title' => $prize['title']
-            ]
+            ],
+            'message' => "Gagnant tiré au sort avec succès !"
         ]);
+        exit();
+    }
+
+    // RÉINITIALISER LES TIRAGES
+    if ($action === 'reset_tombola_draws' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $eventId = intval($data['event_id'] ?? 0);
+        $prizeId = intval($data['prize_id'] ?? 0);
+        if ($eventId <= 0) throw new Exception("event_id requis");
+
+        if ($prizeId > 0) {
+            $pdo->prepare("DELETE FROM event_tombola_draws WHERE event_id = ? AND prize_id = ?")->execute([$eventId, $prizeId]);
+            $pdo->prepare("UPDATE event_tombola_prizes SET drawn_count = 0, is_drawn = 0 WHERE id = ? AND event_id = ?")->execute([$prizeId, $eventId]);
+        } else {
+            $pdo->prepare("DELETE FROM event_tombola_draws WHERE event_id = ?")->execute([$eventId]);
+            $pdo->prepare("UPDATE event_tombola_prizes SET drawn_count = 0, is_drawn = 0 WHERE event_id = ?")->execute([$eventId]);
+        }
+
+        echo json_encode(['success' => true, 'message' => "Tirages réinitialisés avec succès."]);
         exit();
     }
 

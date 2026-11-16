@@ -240,24 +240,47 @@ export class EventController {
       // --- TOMBOLA & TIRAGE AU SORT SÉCURISÉ ---
       if (action === 'get_tombola_config' || action === 'get_tombola_prizes') {
         const eventId = urlObj.searchParams.get('event_id') || parsed.fields?.event_id;
-        if (!eventId) throw new Error("event_id requis");
+        if (!eventId) {
+          const prizes = eventService.getPublicTombolaPrizes();
+          return sendJson(res, 200, { success: true, data: { prizes, draws: [] } });
+        }
         const prizes = eventService.getTombolaPrizes(Number(eventId));
         const history = eventService.getTombolaHistory(Number(eventId));
         return sendJson(res, 200, { success: true, data: { prizes, draws: history.draws } });
+      }
+
+      if (action === 'get_public_tombola_prizes' || action === 'tombola_prizes') {
+        const eventId = urlObj.searchParams.get('event_id') || parsed.fields?.event_id;
+        const prizes = eventService.getPublicTombolaPrizes(eventId ? Number(eventId) : undefined);
+        return sendJson(res, 200, { success: true, data: prizes });
       }
 
       if (action === 'save_tombola_prize' && method === 'POST') {
         const eventId = parsed.fields?.event_id;
         if (!eventId) throw new Error("event_id requis");
         const prize = eventService.saveTombolaPrize(Number(eventId), parsed.fields);
-        return sendJson(res, 200, { success: true, data: prize });
+        return sendJson(res, 200, { success: true, data: prize, prize });
       }
 
       if (action === 'delete_tombola_prize' && method === 'POST') {
         const prizeId = parsed.fields?.prize_id || parsed.fields?.id || urlObj.searchParams.get('id');
         if (!prizeId) throw new Error("prize_id requis");
         eventService.deleteTombolaPrize(Number(prizeId));
-        return sendJson(res, 200, { success: true });
+        return sendJson(res, 200, { success: true, message: "Lot supprimé avec succès" });
+      }
+
+      if (action === 'toggle_tombola_prize_status' && method === 'POST') {
+        const prizeId = parsed.fields?.prize_id || parsed.fields?.id;
+        if (!prizeId) throw new Error("prize_id requis");
+        const newStatus = eventService.toggleTombolaPrizeStatus(Number(prizeId), parsed.fields?.is_active);
+        return sendJson(res, 200, { success: true, is_active: newStatus ? 1 : 0 });
+      }
+
+      if (action === 'reorder_tombola_prizes' && method === 'POST') {
+        const prizes = parsed.fields?.prizes;
+        if (!prizes) throw new Error("prizes requis");
+        eventService.reorderTombolaPrizes(prizes);
+        return sendJson(res, 200, { success: true, message: "Ordre mis à jour" });
       }
 
       if ((action === 'execute_tombola_draw' || action === 'draw_tombola') && method === 'POST') {

@@ -136,10 +136,41 @@ export function EventTombolaAnimation({ eventId }: EventTombolaAnimationProps) {
                 </div>
 
                 {/* Prize Won Banner */}
-                <div className="bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-amber-500/20 border border-amber-500/40 rounded-2xl p-4">
-                  <p className="text-xs text-amber-300 font-medium">Lot Remporté</p>
-                  <h4 className="text-xl font-extrabold text-white mt-0.5">{selectedDraw.prize_title}</h4>
-                </div>
+                {(() => {
+                  const wonPrize = prizes.find(p => p.id === selectedDraw.prize_id);
+                  const prizeImg = wonPrize?.image_url || (Array.isArray(wonPrize?.images) && wonPrize.images.length > 0 ? wonPrize.images[0] : null);
+                  return (
+                    <div className="bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-amber-500/20 border border-amber-500/40 rounded-2xl p-4 flex items-center gap-4 text-left">
+                      {prizeImg && (
+                        <img
+                          src={prizeImg}
+                          alt={selectedDraw.prize_title}
+                          className="w-20 h-20 rounded-xl object-cover border border-amber-500/40 shrink-0 shadow-md"
+                        />
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-amber-300 font-semibold uppercase tracking-wider">
+                            {wonPrize?.draw_rank || 'Lot Remporté'}
+                          </span>
+                          {wonPrize?.value && (
+                            <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                              {wonPrize.value}
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="text-lg sm:text-xl font-extrabold text-white mt-0.5">
+                          {selectedDraw.prize_title}
+                        </h4>
+                        {wonPrize?.sponsor && (
+                          <p className="text-xs text-amber-200/80 mt-1">
+                            Offert par {wonPrize.sponsor}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Ticket code & Cryptographic Audit Proof */}
                 <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 text-left space-y-2.5 text-xs">
@@ -202,41 +233,81 @@ export function EventTombolaAnimation({ eventId }: EventTombolaAnimationProps) {
               {prizes.map((prize) => {
                 const prizeDraws = draws.filter((d) => d.prize_id === prize.id);
                 const isFullyDrawn = prizeDraws.length >= prize.winners_count;
+                const photo = prize.image_url || (Array.isArray(prize.images) && prize.images.length > 0 ? prize.images[0] : null);
 
                 return (
                   <div
                     key={prize.id}
-                    className={`bg-slate-900/80 border rounded-2xl p-5 flex flex-col justify-between transition-all ${
+                    className={`bg-slate-900/80 border rounded-2xl overflow-hidden flex flex-col justify-between transition-all ${
                       isFullyDrawn
                         ? 'border-emerald-500/40 bg-emerald-950/10'
                         : 'border-slate-800 hover:border-amber-500/40'
                     }`}
                   >
-                    <div>
-                      <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          <Gift className="w-5 h-5" />
-                        </div>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                            isFullyDrawn
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                              : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                          }`}
-                        >
-                          {isFullyDrawn ? 'Tirage Effectué' : `${prize.winners_count} Gagnant(s)`}
-                        </span>
+                    {/* Photo du lot si présente */}
+                    {photo && (
+                      <div className="relative aspect-[16/9] w-full bg-black overflow-hidden">
+                        <img
+                          src={photo}
+                          alt={prize.title}
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-black/30 pointer-events-none" />
+                        {prize.draw_rank && (
+                          <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-black/80 backdrop-blur-md border border-amber-500/40 text-amber-400 text-[11px] font-bold">
+                            {prize.draw_rank}
+                          </div>
+                        )}
+                        {prize.value && (
+                          <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-500/40 text-emerald-300 text-[11px] font-bold">
+                            {prize.value}
+                          </div>
+                        )}
                       </div>
+                    )}
 
-                      <h4 className="text-base font-bold text-white">{prize.title}</h4>
-                      <p className="text-xs text-slate-400 mt-1 line-clamp-2">{prize.description}</p>
+                    <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          {!photo && (
+                            <div className="flex items-center gap-2">
+                              <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                <Gift className="w-5 h-5" />
+                              </div>
+                              {prize.draw_rank && (
+                                <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                                  {prize.draw_rank}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ml-auto ${
+                              isFullyDrawn
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                            }`}
+                          >
+                            {isFullyDrawn ? 'Tirage Effectué' : `${prize.winners_count} Gagnant(s)`}
+                          </span>
+                        </div>
 
-                      {prize.sponsor && (
-                        <p className="text-xs text-amber-300 font-medium mt-2">
-                          Offert par : {prize.sponsor}
-                        </p>
-                      )}
-                    </div>
+                        <div className="flex items-baseline justify-between gap-2">
+                          <h4 className="text-base font-bold text-white">{prize.title}</h4>
+                          {!photo && prize.value && (
+                            <span className="text-xs font-semibold text-emerald-400 shrink-0">
+                              {prize.value}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-400 mt-1 line-clamp-2">{prize.description}</p>
+
+                        {prize.sponsor && (
+                          <p className="text-xs text-amber-300 font-medium mt-2">
+                            Offert par : {prize.sponsor}
+                          </p>
+                        )}
+                      </div>
 
                     {/* Winners of this prize */}
                     {prizeDraws.length > 0 && (
@@ -248,7 +319,7 @@ export function EventTombolaAnimation({ eventId }: EventTombolaAnimationProps) {
                           <div
                             key={d.id}
                             className="flex items-center justify-between text-xs bg-slate-950/60 p-2 rounded-lg border border-slate-800"
-                          >
+                            >
                             <span className="font-semibold text-white">{d.winner_name}</span>
                             <Button
                               size="sm"
@@ -262,6 +333,7 @@ export function EventTombolaAnimation({ eventId }: EventTombolaAnimationProps) {
                         ))}
                       </div>
                     )}
+                    </div>
                   </div>
                 );
               })}

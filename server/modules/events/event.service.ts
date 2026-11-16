@@ -1172,13 +1172,24 @@ export class EventService {
     const db = getDb();
     if (!db.event_tombola_prizes) db.event_tombola_prizes = [];
 
+    const winnersCount = Number(data.winners_count || data.quantity || 1);
+    const images = Array.isArray(data.images) ? data.images : (data.image_url ? [data.image_url] : []);
+    const imageUrl = data.image_url || images[0] || '';
+
     if (data.id) {
       const idx = db.event_tombola_prizes.findIndex((p: any) => Number(p.id) === Number(data.id));
       if (idx !== -1) {
         db.event_tombola_prizes[idx] = {
           ...db.event_tombola_prizes[idx],
           ...data,
-          event_id: Number(eventId)
+          event_id: Number(eventId),
+          winners_count: winnersCount,
+          quantity: winnersCount,
+          value: data.value || data.estimated_value || '',
+          draw_rank: data.draw_rank || '1er Prix',
+          is_active: data.is_active !== undefined ? (Boolean(data.is_active) ? 1 : 0) : 1,
+          image_url: imageUrl,
+          images: images
         };
         saveDb();
         return db.event_tombola_prizes[idx];
@@ -1189,15 +1200,20 @@ export class EventService {
       ? Math.max(...db.event_tombola_prizes.map((p: any) => Number(p.id) || 0)) + 1
       : 1;
 
-    const newPrize: EventTombolaPrize = {
+    const newPrize: any = {
       id: nextId,
       event_id: Number(eventId),
       title: data.title || "Lot de prestige",
       description: data.description || "",
       sponsor: data.sponsor || "",
-      image_url: data.image_url || "",
-      winners_count: Number(data.winners_count || 1),
+      image_url: imageUrl,
+      images: images,
+      value: data.value || data.estimated_value || '',
+      draw_rank: data.draw_rank || '1er Prix',
+      winners_count: winnersCount,
+      quantity: winnersCount,
       sort_order: Number(data.sort_order || db.event_tombola_prizes.length + 1),
+      is_active: data.is_active !== undefined ? (Boolean(data.is_active) ? 1 : 0) : 1,
       drawn_count: 0,
       is_drawn: false
     };
@@ -1205,6 +1221,53 @@ export class EventService {
     db.event_tombola_prizes.push(newPrize);
     saveDb();
     return newPrize;
+  }
+
+  toggleTombolaPrizeStatus(prizeId: number, isActive?: boolean | number): boolean {
+    this.ensureDbCollections();
+    const db = getDb();
+    const prize = (db.event_tombola_prizes || []).find((p: any) => Number(p.id) === Number(prizeId));
+    if (prize) {
+      prize.is_active = isActive !== undefined ? (isActive ? 1 : 0) : (prize.is_active === 0 ? 1 : 0);
+      saveDb();
+      return Boolean(prize.is_active);
+    }
+    return false;
+  }
+
+  reorderTombolaPrizes(prizesList: any[]): boolean {
+    this.ensureDbCollections();
+    const db = getDb();
+    if (!Array.isArray(prizesList)) return false;
+    prizesList.forEach((item: any, idx: number) => {
+      const pId = Number(typeof item === 'object' ? item.id : item);
+      const order = typeof item === 'object' && item.sort_order !== undefined ? Number(item.sort_order) : idx + 1;
+      const prize = (db.event_tombola_prizes || []).find((p: any) => Number(p.id) === pId);
+      if (prize) prize.sort_order = order;
+    });
+    saveDb();
+    return true;
+  }
+
+  getPublicTombolaPrizes(eventId?: number): any[] {
+    this.ensureDbCollections();
+    const db = getDb();
+    const events = db.events || [];
+    return (db.event_tombola_prizes || [])
+      .filter((p: any) => {
+        const matchesEvent = eventId ? Number(p.event_id) === Number(eventId) : true;
+        const isActive = p.is_active !== undefined ? Boolean(p.is_active) : true;
+        return matchesEvent && isActive;
+      })
+      .map((p: any) => {
+        const ev = events.find((e: any) => Number(e.id) === Number(p.event_id));
+        return {
+          ...p,
+          event_title: ev?.title || "Événement BNE",
+          event_date: ev?.date || ""
+        };
+      })
+      .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
   }
 
   deleteTombolaPrize(prizeId: number) {

@@ -15,6 +15,7 @@ import { AboutBNE } from "@/components/site/AboutBNE";
 import { TestimonialFlag } from "@/components/site/TestimonialFlag";
 import { TestimonialsCarousel } from "@/components/site/TestimonialsCarousel";
 import HeroTypingSlider from "@/components/home/HeroTypingSlider";
+import { HomeTombolaSection } from "@/components/events/HomeTombolaSection";
 
 // Vidéo de paysage cinématographique hébergée sur Google Cloud Storage (sans restriction CORS ni hotlinking)
 const DEMO_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4";
@@ -302,6 +303,9 @@ export default function Home() {
           </div>
         </details>
       </section>
+
+      {/* GRAND TIRAGE & TOMBOLA DES ÉVÉNEMENTS */}
+      <HomeTombolaSection />
 
       {/* PROMESSES */}
       {/* 

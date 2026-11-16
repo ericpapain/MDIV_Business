@@ -249,10 +249,18 @@ export interface EventTombolaPrize {
   description: string;
   sponsor?: string;
   image_url?: string;
+  images?: string[];
+  value?: string;
+  draw_rank?: string;
+  quantity?: number;
   winners_count: number;
   sort_order: number;
   drawn_count: number;
   is_drawn: boolean;
+  is_active?: boolean | number;
+  created_at?: string;
+  event_title?: string;
+  event_date?: string;
 }
 
 export interface EventTombolaDraw {

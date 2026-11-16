@@ -251,6 +251,50 @@ if ($action === 'blog_article') {
     exit();
 }
 
+if ($action === 'tombola_prizes' || $action === 'tombola_public') {
+    $eventId = isset($_GET['event_id']) ? intval($_GET['event_id']) : 0;
+    try {
+        if ($eventId > 0) {
+            $stmt = $pdo->prepare("SELECT p.*, e.title as event_title, e.date as event_date, e.lieu as event_location 
+                                   FROM event_tombola_prizes p 
+                                   LEFT JOIN events e ON e.id = p.event_id 
+                                   WHERE p.event_id = ? AND (p.is_active = 1 OR p.is_active IS NULL) 
+                                   ORDER BY p.sort_order ASC, p.id ASC");
+            $stmt->execute([$eventId]);
+        } else {
+            // Tous les lots actifs (priorité aux événements futurs puis récents)
+            $stmt = $pdo->query("SELECT p.*, e.title as event_title, e.date as event_date, e.lieu as event_location 
+                                 FROM event_tombola_prizes p 
+                                 LEFT JOIN events e ON e.id = p.event_id 
+                                 WHERE (p.is_active = 1 OR p.is_active IS NULL) 
+                                 ORDER BY e.date DESC, p.sort_order ASC, p.id ASC");
+        }
+        $prizes = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        foreach ($prizes as &$pz) {
+            $pz['id'] = intval($pz['id']);
+            $pz['event_id'] = intval($pz['event_id']);
+            $pz['winners_count'] = intval($pz['winners_count'] ?? 1);
+            $pz['quantity'] = $pz['winners_count'];
+            $pz['drawn_count'] = intval($pz['drawn_count'] ?? 0);
+            $pz['is_drawn'] = (bool)($pz['is_drawn'] ?? 0);
+            $pz['is_active'] = 1;
+            $pz['draw_rank'] = $pz['draw_rank'] ?? '1er Prix';
+            $pz['value'] = $pz['value'] ?? '';
+            if (isset($pz['images']) && is_string($pz['images']) && trim($pz['images']) !== '') {
+                $decoded = json_decode($pz['images'], true);
+                $pz['images'] = is_array($decoded) ? $decoded : ($pz['image_url'] ? [$pz['image_url']] : []);
+            } else {
+                $pz['images'] = !empty($pz['image_url']) ? [$pz['image_url']] : [];
+            }
+        }
+        unset($pz);
+        echo json_encode(['success' => true, 'data' => $prizes]);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => true, 'data' => []]);
+    }
+    exit();
+}
+
 http_response_code(400);
 echo json_encode(['success' => false, 'error' => 'Action inconnue']);
 
