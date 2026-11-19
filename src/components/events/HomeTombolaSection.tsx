@@ -9,17 +9,34 @@ export function HomeTombolaSection() {
   const [activeModalPrize, setActiveModalPrize] = useState<EventTombolaPrize | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  const { data, isLoading } = useQuery<{ success: boolean; data: EventTombolaPrize[] }>({
+  const { data, isLoading } = useQuery<{ success: boolean; prizes?: EventTombolaPrize[]; data?: any }>({
     queryKey: ['public-tombola-prizes'],
     queryFn: async () => {
-      const res = await fetch('/api-public.php?action=tombola_prizes');
-      if (!res.ok) return { success: false, data: [] };
-      return res.json();
+      try {
+        const res = await fetch('/api/event_engine.php?action=get_public_tombola_prizes');
+        if (res.ok) {
+          const json = await res.json();
+          const list = json.prizes || json.data?.prizes || (Array.isArray(json.data) ? json.data : []);
+          if (list.length > 0) return { success: true, prizes: list, data: list };
+        }
+      } catch (e) {}
+
+      // Fallback
+      try {
+        const res2 = await fetch('/api-public.php?action=tombola_prizes');
+        if (res2.ok) {
+          const json2 = await res2.json();
+          const list2 = json2.prizes || (Array.isArray(json2.data) ? json2.data : []);
+          return { success: true, prizes: list2, data: list2 };
+        }
+      } catch (e2) {}
+
+      return { success: false, prizes: [], data: [] };
     },
     refetchInterval: 30000,
   });
 
-  const prizes = data?.data || [];
+  const prizes: EventTombolaPrize[] = data?.prizes || (Array.isArray(data?.data) ? data?.data : []) || [];
 
   // Ne rien afficher si aucun lot n'est configuré ou actif
   if (isLoading || prizes.length === 0) {

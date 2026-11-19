@@ -167,7 +167,7 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
   // Enregistrement (Création / Modification)
   const savePrizeMutation = useMutation({
     mutationFn: async (payload: PrizeFormState) => {
-      const res = await fetch('/api/event_engine.php?action=save_tombola_prize', {
+      const res = await fetch(`/api/event_engine.php?action=save_tombola_prize&event_id=${eventId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -206,7 +206,7 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
   // Suppression
   const deletePrizeMutation = useMutation({
     mutationFn: async (prizeId: number) => {
-      const res = await fetch('/api/event_engine.php?action=delete_tombola_prize', {
+      const res = await fetch(`/api/event_engine.php?action=delete_tombola_prize&event_id=${eventId}&prize_id=${prizeId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prize_id: prizeId, event_id: eventId }),
@@ -230,7 +230,7 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
   // Toggle Actif / Inactif
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ prizeId, isActive }: { prizeId: number; isActive: boolean }) => {
-      const res = await fetch('/api/event_engine.php?action=toggle_tombola_prize_status', {
+      const res = await fetch(`/api/event_engine.php?action=toggle_tombola_prize_status&event_id=${eventId}&prize_id=${prizeId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prize_id: prizeId, is_active: isActive ? 1 : 0 }),
