@@ -16,16 +16,80 @@ require_once __DIR__ . '/config.php';
 
 $pdo = get_db_connection();
 
+// Auto-initialisation dédiée et garantie pour les tables et colonnes de la Tombola
+function ensure_tombola_tables(PDO $pdo) {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `event_tombola_prizes` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `event_id` INT NOT NULL,
+            `title` VARCHAR(255) NOT NULL,
+            `description` TEXT NULL,
+            `sponsor` VARCHAR(255) NULL,
+            `image_url` VARCHAR(500) NULL,
+            `winners_count` INT NOT NULL DEFAULT 1,
+            `sort_order` INT NOT NULL DEFAULT 1,
+            `drawn_count` INT NOT NULL DEFAULT 0,
+            `is_drawn` TINYINT(1) NOT NULL DEFAULT 0,
+            `value` VARCHAR(100) NULL DEFAULT NULL,
+            `draw_rank` VARCHAR(100) NULL DEFAULT '1er Prix',
+            `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+            `images` TEXT NULL,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+        $cols = [];
+        $colStmt = $pdo->query("SHOW COLUMNS FROM `event_tombola_prizes`");
+        if ($colStmt) {
+            while ($c = $colStmt->fetch(PDO::FETCH_ASSOC)) {
+                $cols[] = strtolower($c['Field']);
+            }
+        }
+
+        $migrations = [
+            'value' => 'VARCHAR(100) NULL DEFAULT NULL',
+            'draw_rank' => "VARCHAR(100) NULL DEFAULT '1er Prix'",
+            'is_active' => 'TINYINT(1) NOT NULL DEFAULT 1',
+            'images' => 'TEXT NULL',
+            'winners_count' => 'INT NOT NULL DEFAULT 1',
+            'sort_order' => 'INT NOT NULL DEFAULT 1',
+            'drawn_count' => 'INT NOT NULL DEFAULT 0',
+            'is_drawn' => 'TINYINT(1) NOT NULL DEFAULT 0'
+        ];
+
+        foreach ($migrations as $colName => $colDef) {
+            if (!in_array(strtolower($colName), $cols)) {
+                try {
+                    $pdo->exec("ALTER TABLE `event_tombola_prizes` ADD COLUMN `$colName` $colDef");
+                } catch (Throwable $alterErr) {
+                    error_log("ALTER TABLE event_tombola_prizes ADD $colName: " . $alterErr->getMessage());
+                }
+            }
+        }
+    } catch (Throwable $e) {
+        error_log("ensure_tombola_tables prizes error: " . $e->getMessage());
+    }
+
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `event_tombola_draws` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `event_id` INT NOT NULL,
+            `prize_id` INT NOT NULL,
+            `prize_title` VARCHAR(255) NOT NULL,
+            `winner_attendee_id` INT NOT NULL,
+            `winner_name` VARCHAR(255) NOT NULL,
+            `winner_company` VARCHAR(255) NULL,
+            `winner_email` VARCHAR(255) NOT NULL,
+            `winner_ticket_code` VARCHAR(50) NOT NULL,
+            `draw_hash` VARCHAR(64) NOT NULL,
+            `drawn_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_draw_evt_prize` (`event_id`, `prize_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Throwable $e) {}
+}
+
 // Auto-initialisation résiliente des tables événementielles si absentes de la base MySQL
 function ensure_event_engine_tables(PDO $pdo, $force = false) {
-    if (!$force) {
-        try {
-            $test = $pdo->query("SELECT 1 FROM `event_attendees` LIMIT 1");
-            if ($test) return; // Tables déjà créées
-        } catch (Throwable $e) {
-            // Continuer pour créer les tables
-        }
-    }
+    ensure_tombola_tables($pdo);
 
     // 1. Colonnes sécurisées sur la table events (évite toute erreur de syntaxe IF NOT EXISTS)
     try {
@@ -1180,6 +1244,7 @@ L'équipe d'organisation MDIV Network & BNE.";
 
     // 8. TOMBOLA SÉCURISÉE & GESTION DES LOTS
     if ($action === 'get_tombola_config' || $action === 'get_tombola_prizes' || $action === 'get_tombola_history' || $action === 'get_public_tombola_prizes') {
+        ensure_tombola_tables($pdo);
         $eventId = intval($_GET['event_id'] ?? ($data['event_id'] ?? 0));
         
         if ($eventId > 0) {
@@ -1236,6 +1301,8 @@ L'équipe d'organisation MDIV Network & BNE.";
 
     // AJOUT / MODIFICATION D'UN LOT DE TOMBOLA
     if ($action === 'save_tombola_prize' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        ensure_tombola_tables($pdo);
+
         $prizeId = intval($data['id'] ?? ($data['prize_id'] ?? 0));
         $eventId = intval($data['event_id'] ?? 0);
         $title = trim($data['title'] ?? '');
@@ -1264,60 +1331,78 @@ L'équipe d'organisation MDIV Network & BNE.";
         if ($eventId <= 0) throw new Exception("L'identifiant d'événement (event_id) est requis");
         if (empty($title)) throw new Exception("Le titre du lot est requis");
 
-        if ($prizeId > 0) {
-            // Modification
-            $stmt = $pdo->prepare("UPDATE event_tombola_prizes SET 
-                event_id = ?, 
-                title = ?, 
-                description = ?, 
-                sponsor = ?, 
-                value = ?, 
-                draw_rank = ?, 
-                image_url = ?, 
-                images = ?, 
-                winners_count = ?, 
-                sort_order = ?, 
-                is_active = ? 
-                WHERE id = ?");
-            $stmt->execute([
-                $eventId,
-                $title,
-                $description,
-                $sponsor,
-                $value,
-                $drawRank,
-                $imageUrl,
-                $imagesJson,
-                $winnersCount,
-                $sortOrder,
-                $isActive,
-                $prizeId
-            ]);
-        } else {
-            // Nouveau lot
-            if ($sortOrder <= 1) {
-                $maxStmt = $pdo->prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM event_tombola_prizes WHERE event_id = ?");
-                $maxStmt->execute([$eventId]);
-                $sortOrder = intval($maxStmt->fetchColumn());
-            }
+        try {
+            if ($prizeId > 0) {
+                // Modification
+                $stmt = $pdo->prepare("UPDATE event_tombola_prizes SET 
+                    event_id = ?, 
+                    title = ?, 
+                    description = ?, 
+                    sponsor = ?, 
+                    value = ?, 
+                    draw_rank = ?, 
+                    image_url = ?, 
+                    images = ?, 
+                    winners_count = ?, 
+                    sort_order = ?, 
+                    is_active = ? 
+                    WHERE id = ?");
+                $stmt->execute([
+                    $eventId,
+                    $title,
+                    $description,
+                    $sponsor,
+                    $value,
+                    $drawRank,
+                    $imageUrl,
+                    $imagesJson,
+                    $winnersCount,
+                    $sortOrder,
+                    $isActive,
+                    $prizeId
+                ]);
+            } else {
+                // Nouveau lot
+                if ($sortOrder <= 1) {
+                    $maxStmt = $pdo->prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM event_tombola_prizes WHERE event_id = ?");
+                    $maxStmt->execute([$eventId]);
+                    $sortOrder = intval($maxStmt->fetchColumn());
+                }
 
-            $stmt = $pdo->prepare("INSERT INTO event_tombola_prizes 
-                (event_id, title, description, sponsor, value, draw_rank, image_url, images, winners_count, sort_order, is_active, drawn_count, is_drawn, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, NOW())");
-            $stmt->execute([
-                $eventId,
-                $title,
-                $description,
-                $sponsor,
-                $value,
-                $drawRank,
-                $imageUrl,
-                $imagesJson,
-                $winnersCount,
-                $sortOrder,
-                $isActive
-            ]);
-            $prizeId = intval($pdo->lastInsertId());
+                $stmt = $pdo->prepare("INSERT INTO event_tombola_prizes 
+                    (event_id, title, description, sponsor, value, draw_rank, image_url, images, winners_count, sort_order, is_active, drawn_count, is_drawn, created_at) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, NOW())");
+                $stmt->execute([
+                    $eventId,
+                    $title,
+                    $description,
+                    $sponsor,
+                    $value,
+                    $drawRank,
+                    $imageUrl,
+                    $imagesJson,
+                    $winnersCount,
+                    $sortOrder,
+                    $isActive
+                ]);
+                $prizeId = intval($pdo->lastInsertId());
+            }
+        } catch (PDOException $pdoErr) {
+            // Si erreur de colonne manquante, forcer l'ajout immédiat des colonnes et réessayer
+            ensure_tombola_tables($pdo);
+            if ($prizeId > 0) {
+                $stmt = $pdo->prepare("UPDATE event_tombola_prizes SET 
+                    event_id = ?, title = ?, description = ?, sponsor = ?, value = ?, draw_rank = ?, 
+                    image_url = ?, images = ?, winners_count = ?, sort_order = ?, is_active = ? 
+                    WHERE id = ?");
+                $stmt->execute([$eventId, $title, $description, $sponsor, $value, $drawRank, $imageUrl, $imagesJson, $winnersCount, $sortOrder, $isActive, $prizeId]);
+            } else {
+                $stmt = $pdo->prepare("INSERT INTO event_tombola_prizes 
+                    (event_id, title, description, sponsor, value, draw_rank, image_url, images, winners_count, sort_order, is_active, drawn_count, is_drawn, created_at) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, NOW())");
+                $stmt->execute([$eventId, $title, $description, $sponsor, $value, $drawRank, $imageUrl, $imagesJson, $winnersCount, $sortOrder, $isActive]);
+                $prizeId = intval($pdo->lastInsertId());
+            }
         }
 
         // Récupération de l'enregistrement frais

@@ -192,6 +192,7 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-event-tombola', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event-tombola-public', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['public-tombola-prizes'] });
       queryClient.invalidateQueries({ queryKey: ['home-tombola-prizes'] });
       setIsModalOpen(false);
       setEditingPrize(DEFAULT_PRIZE_FORM);
@@ -217,6 +218,7 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-event-tombola', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event-tombola-public', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['public-tombola-prizes'] });
       queryClient.invalidateQueries({ queryKey: ['home-tombola-prizes'] });
       toast.success('Lot supprimé de la tombola');
     },
@@ -240,6 +242,7 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-event-tombola', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event-tombola-public', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['public-tombola-prizes'] });
       queryClient.invalidateQueries({ queryKey: ['home-tombola-prizes'] });
       toast.success(variables.isActive ? 'Lot activé (visible sur le site public)' : 'Lot désactivé (masqué du site public)');
     },
@@ -263,6 +266,7 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-event-tombola', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event-tombola-public', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['public-tombola-prizes'] });
       queryClient.invalidateQueries({ queryKey: ['home-tombola-prizes'] });
       toast.success('Ordre des lots mis à jour');
     }
@@ -287,6 +291,7 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin-event-tombola', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event-tombola-public', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['public-tombola-prizes'] });
       queryClient.invalidateQueries({ queryKey: ['home-tombola-prizes'] });
       toast.success(`🎉 Gagnant tiré au sort : ${data.draw?.winner_name} (Ticket ${data.draw?.winner_ticket_code})`);
     },

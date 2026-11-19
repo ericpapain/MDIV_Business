@@ -253,9 +253,33 @@ if ($action === 'blog_article') {
 
 if ($action === 'tombola_prizes' || $action === 'tombola_public') {
     $eventId = isset($_GET['event_id']) ? intval($_GET['event_id']) : 0;
+    
+    // Auto-migration résiliente au cas où la table n'a pas encore été migrée
+    try {
+        $cols = [];
+        $res = $pdo->query("SHOW COLUMNS FROM `event_tombola_prizes`");
+        if ($res) {
+            while ($r = $res->fetch(PDO::FETCH_ASSOC)) {
+                $cols[] = strtolower($r['Field']);
+            }
+        }
+        if (!in_array('is_active', $cols)) {
+            $pdo->exec("ALTER TABLE `event_tombola_prizes` ADD COLUMN `is_active` TINYINT(1) NOT NULL DEFAULT 1");
+        }
+        if (!in_array('value', $cols)) {
+            $pdo->exec("ALTER TABLE `event_tombola_prizes` ADD COLUMN `value` VARCHAR(100) NULL DEFAULT NULL");
+        }
+        if (!in_array('draw_rank', $cols)) {
+            $pdo->exec("ALTER TABLE `event_tombola_prizes` ADD COLUMN `draw_rank` VARCHAR(100) NULL DEFAULT '1er Prix'");
+        }
+        if (!in_array('images', $cols)) {
+            $pdo->exec("ALTER TABLE `event_tombola_prizes` ADD COLUMN `images` TEXT NULL");
+        }
+    } catch (Throwable $t) {}
+
     try {
         if ($eventId > 0) {
-            $stmt = $pdo->prepare("SELECT p.*, e.title as event_title, e.date as event_date, e.lieu as event_location 
+            $stmt = $pdo->prepare("SELECT p.*, e.title as event_title, e.date as event_date, COALESCE(e.location, '') as event_location 
                                    FROM event_tombola_prizes p 
                                    LEFT JOIN events e ON e.id = p.event_id 
                                    WHERE p.event_id = ? AND (p.is_active = 1 OR p.is_active IS NULL) 
@@ -263,7 +287,7 @@ if ($action === 'tombola_prizes' || $action === 'tombola_public') {
             $stmt->execute([$eventId]);
         } else {
             // Tous les lots actifs (priorité aux événements futurs puis récents)
-            $stmt = $pdo->query("SELECT p.*, e.title as event_title, e.date as event_date, e.lieu as event_location 
+            $stmt = $pdo->query("SELECT p.*, e.title as event_title, e.date as event_date, COALESCE(e.location, '') as event_location 
                                  FROM event_tombola_prizes p 
                                  LEFT JOIN events e ON e.id = p.event_id 
                                  WHERE (p.is_active = 1 OR p.is_active IS NULL) 
@@ -289,8 +313,18 @@ if ($action === 'tombola_prizes' || $action === 'tombola_public') {
         }
         unset($pz);
         echo json_encode(['success' => true, 'data' => $prizes]);
-    } catch (PDOException $e) {
-        echo json_encode(['success' => true, 'data' => []]);
+    } catch (Throwable $e) {
+        // En cas de repli si la table n'a pas encore toutes les colonnes
+        try {
+            $fallbackStmt = $pdo->query("SELECT p.*, e.title as event_title, e.date as event_date, COALESCE(e.location, '') as event_location 
+                                         FROM event_tombola_prizes p 
+                                         LEFT JOIN events e ON e.id = p.event_id 
+                                         ORDER BY p.id ASC");
+            $fallbackPrizes = $fallbackStmt ? $fallbackStmt->fetchAll(PDO::FETCH_ASSOC) : [];
+            echo json_encode(['success' => true, 'data' => $fallbackPrizes]);
+        } catch (Throwable $t2) {
+            echo json_encode(['success' => true, 'data' => []]);
+        }
     }
     exit();
 }
