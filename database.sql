@@ -748,5 +748,94 @@ CREATE TABLE IF NOT EXISTS `event_live_states` (
   CONSTRAINT `fk_live_event` FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- =========================================================================
+-- 10. MODULE CAFÉ RENCONTRE — 30 MINUTES POUR ÉCHANGER (QR CODES & RENDEZ-VOUS)
+-- =========================================================================
+
+-- Table des Campagnes Café Rencontre (Conférences, Événements, Rencontres)
+CREATE TABLE IF NOT EXISTS `cafe_rencontre_campaigns` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `slug` VARCHAR(120) NOT NULL UNIQUE,
+  `title` VARCHAR(255) NOT NULL,
+  `description` TEXT NULL,
+  `event_date` DATE NULL,
+  `location` VARCHAR(255) NULL,
+  `image_url` VARCHAR(500) NULL,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+  `validity_type` VARCHAR(50) NOT NULL DEFAULT '12h',
+  `starts_at` DATETIME NOT NULL,
+  `expires_at` DATETIME NULL,
+  `contact_redirect_url` VARCHAR(255) NOT NULL DEFAULT '/contact',
+  `views_count` INT NOT NULL DEFAULT 0,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NULL,
+  INDEX `idx_cr_slug` (`slug`),
+  INDEX `idx_cr_status` (`is_active`, `expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table des Intervenants sélectionnés par campagne
+CREATE TABLE IF NOT EXISTS `cafe_rencontre_speakers` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `campaign_id` INT NOT NULL,
+  `attendee_id` INT NULL,
+  `display_name` VARCHAR(255) NOT NULL,
+  `job_title` VARCHAR(255) NULL,
+  `company` VARCHAR(255) NULL,
+  `photo_url` VARCHAR(500) NULL,
+  `bio` TEXT NULL,
+  `expertises` TEXT NULL,
+  `topics` TEXT NULL,
+  `location_zone` VARCHAR(255) NULL,
+  `sort_order` INT NOT NULL DEFAULT 1,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_cr_spk_camp` (`campaign_id`, `is_active`),
+  CONSTRAINT `fk_cr_spk_camp` FOREIGN KEY (`campaign_id`) REFERENCES `cafe_rencontre_campaigns`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table des Demandes de Rendez-vous
+CREATE TABLE IF NOT EXISTS `cafe_rencontre_requests` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `campaign_id` INT NOT NULL,
+  `speaker_id` INT NOT NULL,
+  `requester_name` VARCHAR(255) NOT NULL,
+  `company_name` VARCHAR(255) NOT NULL,
+  `job_title` VARCHAR(255) NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `phone` VARCHAR(50) NULL,
+  `website` VARCHAR(255) NULL,
+  `sector` VARCHAR(100) NULL,
+  `main_topic` VARCHAR(255) NOT NULL,
+  `secondary_topics` TEXT NULL,
+  `need_description` TEXT NULL,
+  `meeting_format` VARCHAR(100) NOT NULL DEFAULT 'client_premises',
+  `city` VARCHAR(150) NOT NULL,
+  `postal_code` VARCHAR(20) NULL,
+  `availability` VARCHAR(100) NULL DEFAULT 'flexible',
+  `preferred_date` VARCHAR(100) NULL,
+  `additional_comment` TEXT NULL,
+  `consent_accepted` TINYINT(1) NOT NULL DEFAULT 1,
+  `consent_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` VARCHAR(50) NOT NULL DEFAULT 'new',
+  `admin_notes` TEXT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NULL,
+  INDEX `idx_cr_req_camp` (`campaign_id`),
+  INDEX `idx_cr_req_spk` (`speaker_id`),
+  INDEX `idx_cr_req_status` (`status`),
+  CONSTRAINT `fk_cr_req_camp` FOREIGN KEY (`campaign_id`) REFERENCES `cafe_rencontre_campaigns`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table des Visites Anonymisées
+CREATE TABLE IF NOT EXISTS `cafe_rencontre_visits` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `campaign_id` INT NOT NULL,
+  `session_hash` VARCHAR(64) NOT NULL,
+  `ip_hash` VARCHAR(64) NULL,
+  `visited_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_cr_vis_camp` (`campaign_id`, `visited_at`),
+  CONSTRAINT `fk_cr_vis_camp` FOREIGN KEY (`campaign_id`) REFERENCES `cafe_rencontre_campaigns`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 
