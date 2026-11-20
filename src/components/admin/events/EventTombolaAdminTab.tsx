@@ -36,7 +36,11 @@ import {
   Loader2,
   BadgePercent,
   Coins,
-  Layers
+  Layers,
+  FileSpreadsheet,
+  Download,
+  ExternalLink,
+  Megaphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -125,6 +129,206 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
 
   const prizes: EventTombolaPrize[] = data?.prizes || [];
   const draws: EventTombolaDraw[] = data?.draws || [];
+
+  // Récupération des inscrits pour les exports CSV et le tirage Wheel of Names
+  const { data: attendeesData, isLoading: isAttendeesLoading } = useQuery<{
+    success: boolean;
+    data: any[];
+  }>({
+    queryKey: ['admin-event-attendees-for-tombola', eventId],
+    queryFn: async () => {
+      const res = await fetch(`/api/event_engine.php?action=get_attendees&event_id=${eventId}`);
+      const json = await res.json();
+      return {
+        success: json.success,
+        data: json.data || json.attendees || []
+      };
+    },
+  });
+
+  const attendeesList: any[] = useMemo(() => attendeesData?.data || [], [attendeesData]);
+
+  // Filtrer les participants ayant coché "Oui" pour la Tombola
+  const tombolaAttendees = useMemo(() => {
+    return attendeesList.filter((a: any) => {
+      const details = a.custom_answers_details || [];
+      const answers = a.custom_answers || {};
+
+      // Dans custom_answers_details
+      const inDetails = details.some((d: any) => {
+        const label = (d.label || d.field_key || '').toLowerCase();
+        if (label.includes('tombola')) {
+          const v = typeof d.value === 'string' ? d.value.trim().toLowerCase() : String(d.value || '').toLowerCase();
+          return v === 'oui' || v === 'yes' || v === '1' || v === 'true';
+        }
+        return false;
+      });
+      if (inDetails) return true;
+
+      // Dans custom_answers
+      for (const [k, v] of Object.entries(answers)) {
+        if (k.toLowerCase().includes('tombola')) {
+          const val = typeof v === 'string' ? v.trim().toLowerCase() : String(v || '').toLowerCase();
+          if (val === 'oui' || val === 'yes' || val === '1' || val === 'true') return true;
+        }
+      }
+      return false;
+    });
+  }, [attendeesList]);
+
+  // Filtrer les participants ayant coché "Oui" pour pitcher leur entreprise
+  const pitchAttendees = useMemo(() => {
+    return attendeesList.filter((a: any) => {
+      if (a.pitch_text && a.pitch_text.trim().length > 0) return true;
+
+      const details = a.custom_answers_details || [];
+      const answers = a.custom_answers || {};
+
+      const inDetails = details.some((d: any) => {
+        const label = (d.label || d.field_key || '').toLowerCase();
+        if (label.includes('pitch') || label.includes('pitcher') || label.includes('présenter')) {
+          const v = typeof d.value === 'string' ? d.value.trim().toLowerCase() : String(d.value || '').toLowerCase();
+          return v === 'oui' || v === 'yes' || v === '1' || v === 'true';
+        }
+        return false;
+      });
+      if (inDetails) return true;
+
+      for (const [k, v] of Object.entries(answers)) {
+        if (k.toLowerCase().includes('pitch')) {
+          const val = typeof v === 'string' ? v.trim().toLowerCase() : String(v || '').toLowerCase();
+          if (val === 'oui' || val === 'yes' || val === '1' || val === 'true') return true;
+        }
+      }
+      return false;
+    });
+  }, [attendeesList]);
+
+  // Export CSV 1 : Participants Tombola ayant coché "Oui"
+  const handleExportTombolaCsv = () => {
+    if (tombolaAttendees.length === 0) {
+      toast.warning("Aucun participant n'a encore coché 'Oui' pour la tombola.");
+      return;
+    }
+
+    const headers = [
+      "ID",
+      "Nom Complet",
+      "Nom",
+      "Prénom",
+      "Email",
+      "Téléphone",
+      "Entreprise",
+      "Poste / Rôle",
+      "Code Billet",
+      "Statut Émargement",
+      "Date Inscription"
+    ];
+
+    const rows = tombolaAttendees.map((a: any) => {
+      const fullName = `${a.first_name || ''} ${a.last_name || ''}`.trim() || 'Participant';
+      const statusFr = a.status === 'attended' ? 'Présent (Émargé)' : 'Confirmé';
+      return [
+        a.id,
+        `"${fullName.replace(/"/g, '""')}"`,
+        `"${(a.last_name || '').replace(/"/g, '""')}"`,
+        `"${(a.first_name || '').replace(/"/g, '""')}"`,
+        `"${(a.email || '').replace(/"/g, '""')}"`,
+        `"${(a.phone || '').replace(/"/g, '""')}"`,
+        `"${(a.company || '').replace(/"/g, '""')}"`,
+        `"${(a.job_title || '').replace(/"/g, '""')}"`,
+        `"${(a.ticket_code || '').replace(/"/g, '""')}"`,
+        `"${statusFr}"`,
+        `"${a.created_at || ''}"`
+      ].join(';');
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `participants_tombola_oui_evenement_${eventId}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(`Export CSV Tombola réussi (${tombolaAttendees.length} participants)`);
+  };
+
+  // Export CSV 2 : Noms des personnes ayant coché "Oui" pour pitcher leur entreprise
+  const handleExportPitchCsv = () => {
+    if (pitchAttendees.length === 0) {
+      toast.warning("Aucun participant n'a coché 'Oui' pour pitcher son entreprise.");
+      return;
+    }
+
+    const headers = [
+      "Nom Complet",
+      "Nom",
+      "Prénom",
+      "Entreprise",
+      "Email",
+      "Téléphone",
+      "Pitch / Présentation",
+      "Code Billet"
+    ];
+
+    const rows = pitchAttendees.map((a: any) => {
+      const fullName = `${a.first_name || ''} ${a.last_name || ''}`.trim() || 'Candidat Pitch';
+      return [
+        `"${fullName.replace(/"/g, '""')}"`,
+        `"${(a.last_name || '').replace(/"/g, '""')}"`,
+        `"${(a.first_name || '').replace(/"/g, '""')}"`,
+        `"${(a.company || '').replace(/"/g, '""')}"`,
+        `"${(a.email || '').replace(/"/g, '""')}"`,
+        `"${(a.phone || '').replace(/"/g, '""')}"`,
+        `"${(a.pitch_text || '').replace(/"/g, '""')}"`,
+        `"${(a.ticket_code || '').replace(/"/g, '""')}"`
+      ].join(';');
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `candidats_pitch_entreprises_evenement_${eventId}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(`Export CSV Pitchs réussi (${pitchAttendees.length} personnes)`);
+  };
+
+  // Lancement du tirage au sort via Wheel of Names
+  const handleLaunchWheelDraw = (prize?: EventTombolaPrize) => {
+    const eligible = tombolaAttendees.length > 0 ? tombolaAttendees : attendeesList;
+    const namesList = eligible
+      .map((a: any) => {
+        const name = `${a.first_name || ''} ${a.last_name || ''}`.trim();
+        if (!name) return '';
+        return a.company ? `${name} (${a.company})` : name;
+      })
+      .filter(Boolean);
+
+    if (namesList.length > 0) {
+      try {
+        navigator.clipboard.writeText(namesList.join('\n'));
+        const prizeTitle = prize?.title ? ` du lot "${prize.title}"` : '';
+        toast.success(
+          `🎯 ${namesList.length} participants copiés ! Collez-les (Ctrl+V) directement sur Wheel of Names pour le tirage${prizeTitle}.`,
+          { duration: 7000 }
+        );
+      } catch (e) {
+        toast.info("Ouverture de Wheel of Names pour le tirage au sort.");
+      }
+    } else {
+      toast.info("Ouverture de Wheel of Names pour le tirage au sort.");
+    }
+
+    window.open('https://wheelofnames.com/fr', '_blank', 'noopener,noreferrer');
+  };
 
   // Statistiques calculées
   const stats = useMemo(() => {
@@ -503,6 +707,42 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
+            {/* Export CSV Tombola (Ceux ayant coché Oui) */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleExportTombolaCsv}
+              className="border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 text-xs rounded-xl gap-2 h-10 font-bold shadow-sm cursor-pointer"
+              title="Télécharger le fichier CSV des inscrits ayant coché Oui pour la Tombola"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>CSV Tombola ({tombolaAttendees.length} Oui)</span>
+            </Button>
+
+            {/* Export CSV Pitch (Ceux ayant coché Oui) */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleExportPitchCsv}
+              className="border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs rounded-xl gap-2 h-10 font-bold shadow-sm cursor-pointer"
+              title="Télécharger le fichier CSV des personnes ayant coché Oui pour pitcher leur entreprise"
+            >
+              <Megaphone className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>CSV Pitchs ({pitchAttendees.length} Candidats)</span>
+            </Button>
+
+            {/* Accès direct à Wheel of Names */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleLaunchWheelDraw()}
+              className="border-slate-700 bg-slate-800 text-slate-200 hover:text-white hover:bg-slate-700 text-xs rounded-xl gap-2 h-10 cursor-pointer"
+              title="Ouvrir le site Wheel of Names avec les noms des participants copiés"
+            >
+              <ExternalLink className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>Wheel of Names</span>
+            </Button>
+
             <Button
               onClick={handleOpenAddModal}
               className="bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 text-xs font-extrabold px-4 py-2.5 rounded-xl shadow-md gap-2 cursor-pointer transition-all active:scale-95"
@@ -521,7 +761,7 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
                   }
                 }}
                 disabled={resetDrawsMutation.isPending}
-                className="border-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 text-xs rounded-xl gap-1.5 h-10"
+                className="border-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 text-xs rounded-xl gap-1.5 h-10 cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 Réinitialiser les Tirages
@@ -856,18 +1096,17 @@ export function EventTombolaAdminTab({ eventId }: EventTombolaAdminTabProps) {
 
                   <Button
                     type="button"
-                    onClick={() => executeDrawMutation.mutate(prize.id)}
-                    disabled={isFinished || !isActive || executeDrawMutation.isPending}
+                    onClick={() => handleLaunchWheelDraw(prize)}
+                    disabled={!isActive}
+                    title="Ouvrir Wheel of Names avec la liste des participants copiée dans le presse-papier"
                     className={`flex-1 text-xs font-bold rounded-xl h-9 gap-1.5 shadow-sm transition-all cursor-pointer ${
-                      isFinished
-                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                        : !isActive
+                      !isActive
                         ? 'bg-slate-800 text-slate-400 cursor-not-allowed'
                         : 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950'
                     }`}
                   >
-                    <Play size={12} className="fill-current" />
-                    <span>{isFinished ? 'Tiré' : 'Tirer au sort'}</span>
+                    <ExternalLink size={13} className="shrink-0" />
+                    <span>Tirer au sort</span>
                   </Button>
                 </div>
               </div>

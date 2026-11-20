@@ -6,31 +6,21 @@
 // - Tombola & Tirage au sort auditable
 // - Mur de Networking (Networking Wall)
 
-import { useState, useEffect } from 'react';
-import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Calendar,
   MapPin,
   Ticket,
-  Megaphone,
-  CalendarCheck,
   Gift,
-  Users,
   ArrowLeft,
   Share2,
-  Clock,
-  Sparkles,
-  Award,
-  Loader2,
-  ExternalLink
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PublicEventRegistrationModal } from '@/components/events/PublicEventRegistrationModal';
-import { EventPitchesSection } from '@/components/events/EventPitchesSection';
-import { EventPartnersMeetingsSection } from '@/components/events/EventPartnersMeetingsSection';
 import { EventTombolaAnimation } from '@/components/events/EventTombolaAnimation';
-import { EventNetworkingWall } from '@/components/events/EventNetworkingWall';
 import EventDescriptionExpandable from "@/components/events/EventDescriptionExpandable";
 import { SimpleCountdown } from '@/components/event/SimpleCountdown';
 import { toast } from 'sonner';
@@ -39,21 +29,9 @@ import { defaultEventFeatures } from '@/lib/eventFeatureCatalog';
 
 export default function EventHubPage() {
   const { id } = useParams<{ id: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();
   const eventId = Number(id);
-  const navigate = useNavigate();
 
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
-
-  // Active tab state from URL or default
-  const tabParam = searchParams.get('tab') || 'hub';
-  const [activeTab, setActiveTab] = useState<string>(tabParam);
-
-  useEffect(() => {
-    if (tabParam) {
-      setActiveTab(tabParam);
-    }
-  }, [tabParam]);
 
   // Fetch all events to find the target event
   const { data: eventsData, isLoading } = useQuery({
@@ -73,11 +51,6 @@ export default function EventHubPage() {
       ? JSON.parse(event.features_config)
       : event.features_config
     : defaultEventFeatures;
-
-  const handleTabChange = (newTab: string) => {
-    setActiveTab(newTab);
-    setSearchParams({ tab: newTab });
-  };
 
   const handleShare = async () => {
     const shareData = {
@@ -210,6 +183,23 @@ export default function EventHubPage() {
                   <Share2 className="w-3.5 h-3.5 shrink-0 text-amber-400" />
                   <span>Partager</span>
                 </Button>
+
+                {/* Bouton Tombola Officielle */}
+                {hasTombola && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const el = document.getElementById('tombola-section');
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }}
+                    className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center justify-center gap-2 bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 min-h-[48px] sm:min-h-0 cursor-pointer"
+                  >
+                    <Gift className="w-4 h-4 shrink-0 text-amber-400" />
+                    <span>Tombola Officielle</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -228,96 +218,11 @@ export default function EventHubPage() {
           </div>
         </div>
 
-        {/* Dynamic Navigation Tabs (Generated strictly according to featuresConfig) */}
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-2 mb-8 overflow-x-auto">
-          <button
-            onClick={() => handleTabChange('hub')}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'hub'
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900'
-            }`}
-          >
-            <Sparkles className="w-4 h-4" /> Vue d'ensemble
-          </button>
-
-          {hasPitches && (
-            <button
-              onClick={() => handleTabChange('pitches')}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${
-                activeTab === 'pitches'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
-              }`}
-            >
-              <Megaphone className="w-4 h-4" /> Pitchs Entreprises
-            </button>
-          )}
-
-          {hasMeetings && (
-            <button
-              onClick={() => handleTabChange('meetings')}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${
-                activeTab === 'meetings'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
-              }`}
-            >
-              <CalendarCheck className="w-4 h-4" /> Rendez-vous B2B
-            </button>
-          )}
-
-          {hasTombola && (
-            <button
-              onClick={() => handleTabChange('tombola')}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${
-                activeTab === 'tombola'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
-              }`}
-            >
-              <Gift className="w-4 h-4" /> Tombola Officielle
-            </button>
-          )}
-
-          {hasNetworking && (
-            <button
-              onClick={() => handleTabChange('networking')}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${
-                activeTab === 'networking'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
-              }`}
-            >
-              <Users className="w-4 h-4" /> Networking Wall
-            </button>
-          )}
-        </div>
-
-        {/* Tab Content Display */}
-        {activeTab === 'hub' && (
-          <div className="space-y-12">
-            {hasPitches && <EventPitchesSection eventId={eventId} />}
-            {hasMeetings && <EventPartnersMeetingsSection eventId={eventId} />}
-            {hasTombola && <EventTombolaAnimation eventId={eventId} />}
-            {hasNetworking && <EventNetworkingWall eventId={eventId} />}
+        {/* Section Tombola Officielle & Tirage au sort */}
+        {hasTombola && (
+          <div id="tombola-section" className="scroll-mt-24 mt-4">
+            <EventTombolaAnimation eventId={eventId} />
           </div>
-        )}
-
-        {activeTab === 'pitches' && hasPitches && (
-          <EventPitchesSection eventId={eventId} />
-        )}
-
-        {activeTab === 'meetings' && hasMeetings && (
-          <EventPartnersMeetingsSection eventId={eventId} />
-        )}
-
-        {activeTab === 'tombola' && hasTombola && (
-          <EventTombolaAnimation eventId={eventId} />
-        )}
-
-        {activeTab === 'networking' && hasNetworking && (
-          <EventNetworkingWall eventId={eventId} />
         )}
       </div>
 
