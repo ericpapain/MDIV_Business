@@ -1,5 +1,5 @@
 import { NavLink, Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Tag, ArrowLeft, Video, Calendar, LogOut, Loader2, Handshake, MessageSquare, Plane, Play, Menu, X, Star, TrendingUp, Cpu, Newspaper, BookOpen, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LayoutDashboard, Users, Tag, ArrowLeft, Video, Calendar, LogOut, Loader2, Handshake, MessageSquare, Plane, Play, Menu, X, Star, TrendingUp, Cpu, Newspaper, BookOpen, PanelLeftClose, PanelLeftOpen, Coffee, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -16,6 +16,8 @@ const items = [
   { to: "/admin/ambassadors", label: "Ambassadeurs", icon: Star },
   { to: "/admin/videos", label: "Vidéos", icon: Video },
   { to: "/admin/events", label: "Événements", icon: Calendar },
+  { to: "/admin/cafe-rencontre", label: "Café Rencontre", icon: Coffee },
+  { to: "/admin/cafe-rencontre/demandes", label: "Demandes RDV Café", icon: Clock },
   { to: "/admin/sejours", label: "Séjours", icon: Plane },
   { to: "/admin/reviews", label: "Avis & Témoignages", icon: MessageSquare },
   { to: "/admin/replays", label: "Replays", icon: Play },

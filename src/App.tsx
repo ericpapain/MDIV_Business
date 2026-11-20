@@ -110,6 +110,12 @@ const AdminHeroNews = lazyWithRetry(() => import("./pages/admin/AdminHeroNews"))
 const AdminBlog = lazyWithRetry(() => import("./pages/admin/AdminBlog"));
 const BlogPost = lazyWithRetry(() => import("./pages/BlogPost"));
 
+// ─── Module Café Rencontre ───────────────────────────────────────────────────
+const PublicCafeRencontrePage = lazyWithRetry(() => import("./pages/cafe-rencontre/PublicCafeRencontrePage"));
+const AdminCafeRencontreCampaigns = lazyWithRetry(() => import("./pages/admin/cafe-rencontre/AdminCafeRencontreCampaigns"));
+const AdminCafeRencontreCampaignDetail = lazyWithRetry(() => import("./pages/admin/cafe-rencontre/AdminCafeRencontreCampaignDetail"));
+const AdminCafeRencontreRequests = lazyWithRetry(() => import("./pages/admin/cafe-rencontre/AdminCafeRencontreRequests"));
+
 // ─── Loading fallback ─────────────────────────────────────────────────────────
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -234,6 +240,9 @@ const App = () => (
                       <Route path="/reserver/:token" element={<PublicClientBooking />} />
                       <Route path="/reserver" element={<PublicClientBooking />} />
 
+                      {/* Module Café Rencontre - Prise de RDV 30 min (QR Code diapositive) */}
+                      <Route path="/cafe-rencontre/:slug" element={<PublicCafeRencontrePage />} />
+
                       {/* 2. Routes protégées : Outils métier, Tableau de bord, Espace de travail */}
                       <Route element={<ProtectedRoute />}>
                         <Route path="/dashboard" element={<Dashboard />} />
@@ -256,6 +265,9 @@ const App = () => (
                         <Route path="videos" element={<AdminVideos />} />
                         <Route path="events" element={<AdminEvents />} />
                         <Route path="events/:id/regie" element={<EventRegiePage />} />
+                        <Route path="cafe-rencontre" element={<AdminCafeRencontreCampaigns />} />
+                        <Route path="cafe-rencontre/campagnes/:id" element={<AdminCafeRencontreCampaignDetail />} />
+                        <Route path="cafe-rencontre/demandes" element={<AdminCafeRencontreRequests />} />
                         <Route path="sejours" element={<AdminSejours />} />
                         <Route path="reviews" element={<AdminReviews />} />
                         <Route path="tarification" element={<AdminPricing />} />

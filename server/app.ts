@@ -17,6 +17,7 @@ import { aiGovernanceController } from './modules/ai-governance/ai-governance.co
 import { cmsController } from './modules/cms-public/cms.controller';
 import { personaController } from './modules/persona/persona.controller';
 import { eventController } from './modules/events/event.controller';
+import { cafeRencontreController } from './modules/cafe_rencontre/cafe_rencontre.controller';
 import { extractToken, verifyToken } from './shared/middleware/auth.middleware';
 
 export async function dispatchDevApi(req: http.IncomingMessage, res: http.ServerResponse): Promise<boolean> {
@@ -348,6 +349,11 @@ export async function dispatchDevApi(req: http.IncomingMessage, res: http.Server
 
   if (pathname === '/api/event_engine.php') {
     await eventController.handleEventEngine(ctx, parsed);
+    return true;
+  }
+
+  if (pathname === '/api/cafe_rencontre.php') {
+    await cafeRencontreController.handleRequest(ctx, parsed);
     return true;
   }
 
