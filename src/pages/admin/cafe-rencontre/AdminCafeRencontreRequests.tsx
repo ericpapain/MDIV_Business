@@ -25,7 +25,11 @@ import {
   Tag,
   Check,
   Loader2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ExternalLink,
+  ShieldCheck,
+  RotateCcw,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,7 +41,9 @@ export default function AdminCafeRencontreRequests() {
 
   const [search, setSearch] = useState('');
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>('all');
+  const [selectedSpeakerId, setSelectedSpeakerId] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedFormat, setSelectedFormat] = useState<string>('all');
   const [selectedCity, setSelectedCity] = useState('');
   const [activeRequestModal, setActiveRequestModal] = useState<CafeRencontreRequest | null>(null);
 
@@ -74,12 +80,32 @@ export default function AdminCafeRencontreRequests() {
     }
   });
 
-  const requests: CafeRencontreRequest[] = data?.requests || [];
+  const rawRequests: CafeRencontreRequest[] = data?.requests || [];
   const stats = data?.stats || {
     total: 0, new: 0, to_contact: 0, contact_established: 0,
     to_schedule: 0, confirmed: 0, completed: 0, closed: 0
   };
   const campaigns = campaignsData?.campaigns || [];
+
+  // Extraire la liste unique des intervenants pour le filtre
+  const uniqueSpeakers = useMemo(() => {
+    const map = new Map<number, string>();
+    rawRequests.forEach(r => {
+      if (r.speaker_id && r.speaker_name) {
+        map.set(r.speaker_id, r.speaker_name);
+      }
+    });
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [rawRequests]);
+
+  // Filtrage combiné (côté client pour réactivité instantanée)
+  const filteredRequests = useMemo(() => {
+    return rawRequests.filter(req => {
+      if (selectedSpeakerId !== 'all' && String(req.speaker_id) !== selectedSpeakerId) return false;
+      if (selectedFormat !== 'all' && req.meeting_format !== selectedFormat) return false;
+      return true;
+    });
+  }, [rawRequests, selectedSpeakerId, selectedFormat]);
 
   // Mutation mise à jour du statut et des notes internes
   const updateStatusMutation = useMutation({
@@ -114,14 +140,24 @@ export default function AdminCafeRencontreRequests() {
     setModalAdminNotes(req.admin_notes || '');
   };
 
-  // Export CSV sécurisé UTF-8 BOM
+  const handleResetFilters = () => {
+    setSearch('');
+    setSelectedCampaignId('all');
+    setSelectedSpeakerId('all');
+    setSelectedStatus('all');
+    setSelectedFormat('all');
+    setSelectedCity('');
+  };
+
+  // Export CSV complet UTF-8 BOM
   const handleExportCsv = () => {
     let url = `/api/cafe_rencontre.php?action=export_requests_csv`;
     if (selectedCampaignId !== 'all') url += `&campaign_id=${selectedCampaignId}`;
+    if (selectedSpeakerId !== 'all') url += `&speaker_id=${selectedSpeakerId}`;
     if (selectedStatus !== 'all') url += `&status=${selectedStatus}`;
     url += `&include_notes=1`;
     window.open(url, '_blank');
-    toast.success("Téléchargement du fichier CSV lancé !");
+    toast.success("Téléchargement du fichier CSV complet lancé !");
   };
 
   const statusLabels: Record<RequestStatus, { label: string; color: string }> = {
@@ -136,9 +172,15 @@ export default function AdminCafeRencontreRequests() {
   };
 
   const formatLabels: Record<string, string> = {
-    client_premises: 'Dans les locaux du client',
-    cafe_public: 'Dans un café convivial',
+    client_premises: 'Dans les locaux du client (vous vous déplacez)',
+    cafe_public: 'Dans un café ou lieu convivial',
     both: 'Les deux me conviennent'
+  };
+
+  const availabilityLabels: Record<string, string> = {
+    flexible: 'Flexible (selon convenance)',
+    morning: 'Matinée',
+    afternoon: 'Après-midi'
   };
 
   return (
@@ -160,7 +202,7 @@ export default function AdminCafeRencontreRequests() {
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Suivez les demandes des visiteurs ayant scanné vos QR codes, gérez vos prises de contact et exportez vos données.
+                Suivez les demandes des visiteurs ayant scanné vos QR codes, gérez vos prises de contact et préparez vos rendez-vous.
               </p>
             </div>
           </div>
@@ -171,10 +213,10 @@ export default function AdminCafeRencontreRequests() {
               variant="outline"
               onClick={handleExportCsv}
               className="border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs rounded-xl h-10 gap-2 cursor-pointer font-bold shadow-sm"
-              title="Exporter les demandes filtrées au format CSV Excel"
+              title="Télécharger l'ensemble des données du formulaire au format CSV pour Excel"
             >
               <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-              <span>Exporter en CSV (Excel)</span>
+              <span>Exporter en CSV (Toutes les infos)</span>
             </Button>
           </div>
         </div>
@@ -216,53 +258,92 @@ export default function AdminCafeRencontreRequests() {
         </div>
       </div>
 
-      {/* ── 2. Filtres & Recherche ── */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-          <Input
-            type="text"
-            placeholder="Rechercher par nom, entreprise, email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-slate-950 border-slate-800 text-xs text-white placeholder:text-slate-500 rounded-xl h-10"
-          />
+      {/* ── 2. Filtres & Recherche Avancés ── */}
+      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div className="flex items-center justify-between pb-1 border-b border-slate-800/60">
+          <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+            <Filter className="w-3.5 h-3.5 text-amber-400" />
+            Filtres de recherche ({filteredRequests.length} résultat{filteredRequests.length > 1 ? 's' : ''})
+          </span>
+          {(search || selectedCampaignId !== 'all' || selectedSpeakerId !== 'all' || selectedStatus !== 'all' || selectedFormat !== 'all' || selectedCity) && (
+            <button
+              onClick={handleResetFilters}
+              className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Réinitialiser tous les filtres
+            </button>
+          )}
         </div>
 
-        <div>
-          <select
-            value={selectedCampaignId}
-            onChange={(e) => setSelectedCampaignId(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none h-10"
-          >
-            <option value="all">Toutes les campagnes ({campaigns.length})</option>
-            {campaigns.map((c) => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
-          </select>
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+          {/* Recherche texte */}
+          <div className="relative lg:col-span-2">
+            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Input
+              type="text"
+              placeholder="Nom, entreprise, email, mot-clé..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 bg-slate-950 border-slate-800 text-xs text-white placeholder:text-slate-500 rounded-xl h-10"
+            />
+          </div>
 
-        <div>
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none h-10"
-          >
-            <option value="all">Tous les statuts</option>
-            {Object.entries(statusLabels).map(([k, v]) => (
-              <option key={k} value={k}>{v.label}</option>
-            ))}
-          </select>
-        </div>
+          {/* Campagne */}
+          <div>
+            <select
+              value={selectedCampaignId}
+              onChange={(e) => setSelectedCampaignId(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none h-10"
+            >
+              <option value="all">Toutes les campagnes</option>
+              {campaigns.map((c) => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
+            </select>
+          </div>
 
-        <div>
-          <Input
-            type="text"
-            placeholder="Filtrer par ville..."
-            value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
-            className="bg-slate-950 border-slate-800 text-xs text-white placeholder:text-slate-500 rounded-xl h-10"
-          />
+          {/* Intervenant */}
+          <div>
+            <select
+              value={selectedSpeakerId}
+              onChange={(e) => setSelectedSpeakerId(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none h-10"
+            >
+              <option value="all">Tous les intervenants</option>
+              {uniqueSpeakers.map((spk) => (
+                <option key={spk.id} value={String(spk.id)}>{spk.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Statut */}
+          <div>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none h-10"
+            >
+              <option value="all">Tous les statuts</option>
+              {Object.entries(statusLabels).map(([k, v]) => (
+                <option key={k} value={k}>{v.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Format RDV */}
+          <div>
+            <select
+              value={selectedFormat}
+              onChange={(e) => setSelectedFormat(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none h-10"
+            >
+              <option value="all">Tous les formats</option>
+              <option value="client_premises">Dans les locaux</option>
+              <option value="cafe_public">Au café</option>
+              <option value="both">Les deux</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -273,19 +354,19 @@ export default function AdminCafeRencontreRequests() {
             <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
             <span className="text-xs">Chargement des demandes de rendez-vous...</span>
           </div>
-        ) : requests.length === 0 ? (
+        ) : filteredRequests.length === 0 ? (
           <div className="py-20 text-center text-slate-500 space-y-2">
             <Coffee className="w-10 h-10 text-slate-600 mx-auto" />
-            <p className="text-sm font-bold text-white">Aucune demande enregistrée</p>
+            <p className="text-sm font-bold text-white">Aucune demande correspondant aux filtres</p>
             <p className="text-xs text-slate-400">
-              Les demandes soumises par vos visiteurs après scan apparaîtront automatiquement ici en temps réel.
+              Modifiez vos critères de recherche ou réinitialisez les filtres pour afficher vos demandes.
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950/80 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                <tr className="border-b border-slate-800 bg-slate-950/80 text-white font-bold uppercase tracking-wider text-[10px]">
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4">Demandeur</th>
                   <th className="py-3 px-4">Entreprise</th>
@@ -298,7 +379,7 @@ export default function AdminCafeRencontreRequests() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/80">
-                {requests.map((req) => {
+                {filteredRequests.map((req) => {
                   const st = statusLabels[req.status] || { label: req.status, color: 'bg-slate-800 text-slate-300 border-slate-700' };
 
                   return (
@@ -347,10 +428,11 @@ export default function AdminCafeRencontreRequests() {
         )}
       </div>
 
-      {/* ── 4. Modale de Fiche Détaillée & Gestion du Statut ── */}
+      {/* ── 4. Modale Complète de Fiche Détaillée (Toutes les infos du formulaire) ── */}
       {activeRequestModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+            {/* En-tête */}
             <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
@@ -373,37 +455,59 @@ export default function AdminCafeRencontreRequests() {
               </button>
             </div>
 
+            {/* Corps du dossier */}
             <div className="flex-1 overflow-y-auto p-5 space-y-5 text-xs">
-              {/* Encadré Intervenant & Demandeur */}
+              {/* SECTION A : INTERVENANT & DEMANDEUR */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Intervenant sollicité */}
                 <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl space-y-2">
                   <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
                     Intervenant Sollicité
                   </span>
                   <div className="text-sm font-bold text-white">{activeRequestModal.speaker_name}</div>
-                  <div className="text-xs text-slate-400">{activeRequestModal.speaker_company}</div>
+                  <div className="text-xs text-slate-400">{activeRequestModal.speaker_company || 'MDIV Business'}</div>
                 </div>
 
+                {/* Demandeur & Coordonnées complètes */}
                 <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl space-y-2">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
                     Demandeur
                   </span>
                   <div className="text-sm font-bold text-white">{activeRequestModal.requester_name}</div>
-                  <div className="text-xs text-slate-300">{activeRequestModal.company_name} {activeRequestModal.job_title ? `(${activeRequestModal.job_title})` : ''}</div>
-                  <div className="flex flex-col gap-1 pt-1 text-slate-400 text-[11px]">
+                  <div className="text-xs text-slate-300">
+                    {activeRequestModal.company_name} {activeRequestModal.job_title ? `(${activeRequestModal.job_title})` : ''}
+                  </div>
+                  {activeRequestModal.sector && (
+                    <div className="text-[11px] text-slate-400">
+                      Secteur : <span className="text-slate-300 font-medium">{activeRequestModal.sector}</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-1.5 pt-2 border-t border-slate-800/60 text-slate-400 text-[11px]">
                     <a href={`mailto:${activeRequestModal.email}`} className="inline-flex items-center gap-1.5 text-amber-400 hover:underline">
-                      <Mail className="w-3 h-3" /> {activeRequestModal.email}
+                      <Mail className="w-3.5 h-3.5 shrink-0" /> {activeRequestModal.email}
                     </a>
                     {activeRequestModal.phone && (
-                      <a href={`tel:${activeRequestModal.phone}`} className="inline-flex items-center gap-1.5 text-slate-300">
-                        <Phone className="w-3 h-3 text-slate-500" /> {activeRequestModal.phone}
+                      <a href={`tel:${activeRequestModal.phone}`} className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white">
+                        <Phone className="w-3.5 h-3.5 text-slate-500 shrink-0" /> {activeRequestModal.phone}
+                      </a>
+                    )}
+                    {activeRequestModal.website && (
+                      <a
+                        href={activeRequestModal.website.startsWith('http') ? activeRequestModal.website : `https://${activeRequestModal.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sky-400 hover:underline"
+                      >
+                        <Globe className="w-3.5 h-3.5 shrink-0" /> {activeRequestModal.website}
+                        <ExternalLink className="w-3 h-3 text-sky-500" />
                       </a>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Sujet & Format */}
+              {/* SECTION B : SUJET & CONTENU DE L'ÉCHANGE */}
               <div className="bg-slate-950/40 border border-slate-800/80 p-4 rounded-2xl space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
@@ -418,6 +522,40 @@ export default function AdminCafeRencontreRequests() {
                   </div>
                 </div>
 
+                {/* Sujets secondaires */}
+                {(() => {
+                  let secList: string[] = [];
+                  if (activeRequestModal.secondary_topics) {
+                    if (Array.isArray(activeRequestModal.secondary_topics)) {
+                      secList = activeRequestModal.secondary_topics;
+                    } else if (typeof activeRequestModal.secondary_topics === 'string') {
+                      try {
+                        const parsed = JSON.parse(activeRequestModal.secondary_topics);
+                        if (Array.isArray(parsed)) secList = parsed;
+                        else secList = [activeRequestModal.secondary_topics];
+                      } catch {
+                        secList = [activeRequestModal.secondary_topics];
+                      }
+                    }
+                  }
+                  if (secList.length === 0) return null;
+                  return (
+                    <div className="pt-2 border-t border-slate-800/60">
+                      <span className="text-[10px] uppercase font-bold text-slate-500 block mb-1.5">
+                        Sujets Secondaires Évoqués
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {secList.map((sec, i) => (
+                          <span key={i} className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-slate-300 text-[11px]">
+                            {sec}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Organisation pratique */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-800/60 text-slate-400">
                   <div>
                     <span className="text-[10px] uppercase font-bold text-slate-500 block">Ville & Code Postal</span>
@@ -425,36 +563,48 @@ export default function AdminCafeRencontreRequests() {
                   </div>
                   <div>
                     <span className="text-[10px] uppercase font-bold text-slate-500 block">Disponibilité</span>
-                    <span className="text-slate-200 block capitalize">{activeRequestModal.availability || 'Flexible'}</span>
+                    <span className="text-slate-200 block">{availabilityLabels[activeRequestModal.availability || 'flexible'] || activeRequestModal.availability}</span>
                   </div>
                   <div>
                     <span className="text-[10px] uppercase font-bold text-slate-500 block">Créneau Souhaité</span>
-                    <span className="text-slate-200 block">{activeRequestModal.preferred_date || 'À définir'}</span>
+                    <span className="text-slate-200 block">{activeRequestModal.preferred_date || 'À définir avec le demandeur'}</span>
                   </div>
                 </div>
 
+                {/* Description du besoin */}
                 {activeRequestModal.need_description && (
                   <div className="pt-2 border-t border-slate-800/60">
                     <span className="text-[10px] uppercase font-bold text-slate-500 block mb-1">
-                      Description du besoin par le demandeur
+                      En quelques mots (description du besoin par le demandeur) :
                     </span>
-                    <p className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-slate-300 leading-relaxed">
+                    <p className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-slate-300 leading-relaxed text-xs">
                       {activeRequestModal.need_description}
                     </p>
                   </div>
                 )}
 
+                {/* Commentaire libre */}
                 {activeRequestModal.additional_comment && (
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-500 block mb-1">Commentaire complémentaire</span>
-                    <p className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-slate-400">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block mb-1">
+                      Commentaire ou précision complémentaire :
+                    </span>
+                    <p className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-slate-300 text-xs">
                       {activeRequestModal.additional_comment}
                     </p>
                   </div>
                 )}
+
+                {/* Consentement RGPD */}
+                <div className="pt-2 border-t border-slate-800/60 flex items-center gap-2 text-[11px] text-emerald-400">
+                  <ShieldCheck className="w-4 h-4 shrink-0" />
+                  <span>
+                    Consentement RGPD accordé par le demandeur {activeRequestModal.consent_at ? `le ${new Date(activeRequestModal.consent_at).toLocaleString('fr-FR')}` : ''}
+                  </span>
+                </div>
               </div>
 
-              {/* ── Gestion Administrative du Statut & Notes Internes ── */}
+              {/* SECTION C : GESTION ADMINISTRATIVE DU STATUT & NOTES INTERNES */}
               <div className="bg-slate-950/80 border border-amber-500/30 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-amber-400" />
@@ -520,4 +670,3 @@ export default function AdminCafeRencontreRequests() {
     </div>
   );
 }
-

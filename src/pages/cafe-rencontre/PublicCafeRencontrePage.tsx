@@ -1,11 +1,10 @@
 // src/pages/cafe-rencontre/PublicCafeRencontrePage.tsx
-// Page publique Café Rencontre - Accessible sans connexion via QR Code ou lien direct
+// Page publique Café Rencontre - Synthétique, percutante & 100% optimisée mobile
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Coffee,
-  Calendar,
   MapPin,
   Clock,
   Sparkles,
@@ -14,16 +13,14 @@ import {
   AlertCircle,
   Building2,
   Briefcase,
-  Globe,
   Mail,
   Phone,
   MessageSquare,
   Lock,
-  ChevronRight,
   X,
-  ExternalLink,
   ShieldCheck,
-  UserCheck
+  UserCheck,
+  ChevronRight
 } from 'lucide-react';
 import type {
   PublicCampaignResponse,
@@ -34,13 +31,11 @@ import type {
 
 const TOPIC_OPTIONS = [
   'Développer la présence numérique de mon activité',
-  'Découvrir les possibilités de l\'intelligence artificielle',
-  'Automatiser certaines tâches et gagner du temps',
-  'Créer ou améliorer un site internet ou une application',
-  'Mieux exploiter mes données et mes indicateurs',
-  'Faire le point sur ma stratégie numérique',
-  'Améliorer l\'organisation et les processus de mon entreprise',
-  'Autre sujet / Simple échange exploratoire'
+  'Découvrir les possibilités de l\'IA et automatiser des tâches',
+  'Créer ou moderniser un site internet / application',
+  'Améliorer les processus et l\'organisation de mon entreprise',
+  'Mieux exploiter mes données et indicateurs de gestion',
+  'Échange exploratoire / Conseil stratégique'
 ];
 
 export const PublicCafeRencontrePage: React.FC = () => {
@@ -68,7 +63,7 @@ export const PublicCafeRencontrePage: React.FC = () => {
     availability: 'flexible' as AvailabilityType,
     preferred_date: '',
     additional_comment: '',
-    consent_accepted: false
+    consent_accepted: true
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -96,17 +91,6 @@ export const PublicCafeRencontrePage: React.FC = () => {
       });
   }, [slug]);
 
-  const handleToggleSecondaryTopic = (topic: string) => {
-    setFormData(prev => {
-      const exists = prev.secondary_topics.includes(topic);
-      if (exists) {
-        return { ...prev, secondary_topics: prev.secondary_topics.filter(t => t !== topic) };
-      } else {
-        return { ...prev, secondary_topics: [...prev.secondary_topics, topic] };
-      }
-    });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSpeaker || !data?.campaign) return;
@@ -116,7 +100,7 @@ export const PublicCafeRencontrePage: React.FC = () => {
       return;
     }
     if (!formData.company_name.trim()) {
-      setSubmitError('Le nom de votre entreprise ou organisation est obligatoire.');
+      setSubmitError('Le nom de votre entreprise est obligatoire.');
       return;
     }
     if (!formData.email.trim() || !formData.email.includes('@')) {
@@ -128,7 +112,7 @@ export const PublicCafeRencontrePage: React.FC = () => {
       return;
     }
     if (!formData.consent_accepted) {
-      setSubmitError('Veuillez accepter les conditions de contact pour valider votre demande.');
+      setSubmitError('Veuillez accepter les conditions de contact.');
       return;
     }
 
@@ -187,11 +171,11 @@ export const PublicCafeRencontrePage: React.FC = () => {
   // 1. ÉTAT CHARGEMENT
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6">
-        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-4 animate-pulse">
-          <Coffee className="w-8 h-8 text-amber-400 animate-spin" />
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4">
+        <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mb-3">
+          <Coffee className="w-7 h-7 text-amber-400 animate-spin" />
         </div>
-        <p className="text-slate-400 text-sm">Chargement de votre session Café Rencontre...</p>
+        <p className="text-slate-400 text-xs tracking-wide">Chargement de votre session...</p>
       </div>
     );
   }
@@ -199,18 +183,18 @@ export const PublicCafeRencontrePage: React.FC = () => {
   // 2. ÉTAT NON OUVERT (« UPCOMING »)
   if (data?.status === 'upcoming') {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6">
-        <div className="max-w-md w-full bg-slate-900/80 border border-slate-800 rounded-3xl p-8 text-center backdrop-blur-sm shadow-2xl">
-          <div className="w-16 h-16 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center mx-auto mb-6">
-            <Clock className="w-8 h-8" />
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 text-center shadow-2xl">
+          <div className="w-14 h-14 rounded-2xl bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center mx-auto mb-4">
+            <Clock className="w-7 h-7" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-4">Session bientôt disponible</h1>
-          <p className="text-slate-300 text-base leading-relaxed mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">Session bientôt disponible</h1>
+          <p className="text-slate-300 text-sm leading-relaxed mb-6">
             Cette session de prise de rendez-vous n'est pas encore ouverte. Revenez prochainement.
           </p>
           <Link
             to={data.campaign?.contact_redirect_url || data.contact_url || '/contact'}
-            className="inline-flex items-center justify-center gap-2 w-full py-3.5 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-sm transition-all border border-slate-700"
+            className="inline-flex items-center justify-center gap-2 w-full py-3 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition-colors"
           >
             Nous contacter
             <ArrowRight className="w-4 h-4" />
@@ -225,42 +209,38 @@ export const PublicCafeRencontrePage: React.FC = () => {
     const contactUrl = data?.campaign?.contact_redirect_url || data?.contact_url || '/contact';
 
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6">
-        <div className="max-w-xl w-full bg-slate-900/90 border border-slate-800/80 rounded-3xl p-8 sm:p-10 text-center backdrop-blur-md shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-500" />
-          
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto mb-6 shadow-inner">
-            <Coffee className="w-8 h-8" />
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4 sm:p-6">
+        <div className="max-w-lg w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto mb-5">
+            <Coffee className="w-7 h-7" />
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-4 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-white mb-3">
             Désolé, cette session de prise de rendez-vous est maintenant fermée.
           </h1>
 
-          <p className="text-slate-300 text-base leading-relaxed mb-6 font-normal">
+          <p className="text-slate-300 text-sm font-medium mb-3">
             La période de réservation pour cette rencontre est terminée.
           </p>
 
-          <p className="text-slate-400 text-sm leading-relaxed mb-8 max-w-lg mx-auto">
+          <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
             Vous souhaitez néanmoins échanger avec notre équipe, présenter votre projet ou obtenir davantage d'informations ?
-            <br className="hidden sm:inline" /> Nous vous invitons à nous contacter directement via notre site.
+            Nous vous invitons à nous contacter directement via notre site.
             <br />
-            <span className="text-slate-300 font-medium mt-2 inline-block">
-              Merci pour votre intérêt et à très bientôt !
-            </span>
+            <strong className="text-slate-300 block mt-2">Merci pour votre intérêt et à très bientôt !</strong>
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               to={contactUrl}
-              className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto py-3.5 px-8 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-amber-500/20 active:scale-95"
+              className="inline-flex items-center justify-center gap-2 w-full sm:w-auto py-3 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-transform active:scale-95 shadow-md shadow-amber-500/20"
             >
               Nous contacter
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               to="/"
-              className="inline-flex items-center justify-center gap-2 w-full sm:w-auto py-3.5 px-6 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-sm font-medium transition-all border border-slate-700/60"
+              className="inline-flex items-center justify-center gap-2 w-full sm:w-auto py-3 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
             >
               Retour à l'accueil
             </Link>
@@ -277,94 +257,64 @@ export const PublicCafeRencontrePage: React.FC = () => {
       format === 'client_premises'
         ? 'Dans vos locaux (nous venons à votre rencontre)'
         : format === 'cafe_public'
-        ? 'Dans un café ou lieu convivial convenu ensemble'
-        : 'Dans vos locaux ou autour d\'un café selon convenance';
+        ? 'Dans un café convivial'
+        : 'Dans vos locaux ou autour d\'un café';
 
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6">
-        <div className="max-w-xl w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-8 sm:p-10 text-center backdrop-blur-md shadow-2xl relative overflow-hidden">
-          <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/10 animate-bounce">
-            <CheckCircle2 className="w-10 h-10" />
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4 sm:p-6">
+        <div className="max-w-lg w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 text-center shadow-2xl">
+          <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-4 animate-bounce">
+            <CheckCircle2 className="w-8 h-8" />
           </div>
 
-          <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-3">
-            Demande confirmée
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+            Demande enregistrée
           </span>
 
-          <h1 className="text-3xl font-extrabold text-white mb-4">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
             Merci pour votre demande !
           </h1>
 
-          <div className="text-slate-300 text-sm sm:text-base leading-relaxed space-y-4 mb-8 text-left bg-slate-950/60 p-6 rounded-2xl border border-slate-800/80">
+          <div className="text-slate-300 text-xs sm:text-sm leading-relaxed space-y-3 mb-6 text-left bg-slate-950/70 p-4 sm:p-5 rounded-2xl border border-slate-800">
             <p>
               Votre demande de Café Rencontre a bien été enregistrée.
             </p>
             <p>
-              Nous vous remercions pour votre intérêt et reviendrons vers vous dans les meilleurs délais afin d'échanger sur vos disponibilités et de fixer ensemble un créneau de 30 minutes.
+              Nous reviendrons vers vous dans les meilleurs délais afin d'échanger sur vos disponibilités et de fixer ensemble un créneau de 30 minutes.
             </p>
-            <p>
-              Que ce soit dans vos locaux ou autour d'un café, nous serons ravis de faire votre connaissance et de discuter de vos projets.
-            </p>
-            <p className="font-semibold text-amber-400 pt-2">
+            <p className="font-bold text-amber-400">
               À très bientôt !
             </p>
           </div>
 
-          {/* Récapitulatif clair */}
-          <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 sm:p-5 text-left text-xs sm:text-sm space-y-2.5 mb-8">
-            <div className="flex items-start justify-between gap-3 pb-2 border-b border-slate-800">
-              <span className="text-slate-400">Intervenant choisi :</span>
-              <span className="text-white font-semibold text-right">
-                {speaker.display_name} {speaker.company ? `(${speaker.company})` : ''}
-              </span>
+          {/* Récapitulatif */}
+          <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 text-left text-xs space-y-2 mb-6">
+            <div className="flex justify-between gap-2 pb-1.5 border-b border-slate-800">
+              <span className="text-slate-400">Intervenant :</span>
+              <span className="text-white font-bold text-right">{speaker.display_name}</span>
             </div>
-            <div className="flex items-start justify-between gap-3 pb-2 border-b border-slate-800">
-              <span className="text-slate-400">Campagne :</span>
-              <span className="text-white font-medium text-right">{campaign.title}</span>
+            <div className="flex justify-between gap-2 pb-1.5 border-b border-slate-800">
+              <span className="text-slate-400">Format :</span>
+              <span className="text-amber-400 font-semibold text-right">{formatLabel}</span>
             </div>
-            <div className="flex items-start justify-between gap-3 pb-2 border-b border-slate-800">
-              <span className="text-slate-400">Format souhaité :</span>
-              <span className="text-amber-400 font-medium text-right">{formatLabel}</span>
-            </div>
-            <div className="flex items-center gap-2 pt-1 text-slate-400 text-xs">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Rappel : le rendez-vous sera confirmé après notre prise de contact personnalisée.</span>
+            <div className="flex items-center gap-2 pt-1 text-slate-400 text-[11px]">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>Rendez-vous confirmé personnellement par notre équipe.</span>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
-              onClick={() => {
-                setSubmittedSuccess(null);
-                setFormData({
-                  requester_name: '',
-                  company_name: '',
-                  job_title: '',
-                  email: '',
-                  phone: '',
-                  website: '',
-                  sector: '',
-                  main_topic: TOPIC_OPTIONS[0],
-                  secondary_topics: [],
-                  need_description: '',
-                  meeting_format: 'both',
-                  city: '',
-                  postal_code: '',
-                  availability: 'flexible',
-                  preferred_date: '',
-                  additional_comment: '',
-                  consent_accepted: false
-                });
-              }}
-              className="w-full sm:w-auto py-3 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition-all border border-slate-700"
+              onClick={() => setSubmittedSuccess(null)}
+              className="w-full sm:w-auto py-2.5 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
             >
-              Faire une autre demande
+              Autre demande
             </button>
             <Link
               to="/"
-              className="w-full sm:w-auto py-3 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all shadow-md shadow-amber-500/20"
+              className="w-full sm:w-auto py-2.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20"
             >
-              Découvrir le site MDIV Business
+              Découvrir MDIV Business
             </Link>
           </div>
         </div>
@@ -378,18 +328,18 @@ export const PublicCafeRencontrePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white selection:bg-amber-500/30 selection:text-amber-300">
-      {/* Barre supérieure discrète */}
-      <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 text-white hover:text-amber-400 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-amber-400 flex items-center justify-center text-slate-950 font-black text-sm">
+      {/* Header compact & sticky */}
+      <header className="border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 text-white">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-500 to-amber-400 flex items-center justify-center text-slate-950 font-black text-xs">
               M
             </div>
-            <span className="font-bold tracking-tight text-sm">MDIV Business</span>
+            <span className="font-extrabold tracking-tight text-sm">MDIV Business</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Session Ouverte
             </span>
             <Link
@@ -402,82 +352,60 @@ export const PublicCafeRencontrePage: React.FC = () => {
         </div>
       </header>
 
-      {/* HERO SECTION */}
-      <section className="relative overflow-hidden pt-12 pb-16 sm:pt-16 sm:pb-24 border-b border-slate-900">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/10 via-transparent to-transparent pointer-events-none" />
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-bold uppercase tracking-wider mb-6 shadow-sm">
-            <Coffee className="w-4 h-4" />
+      {/* HERO SECTION : SYNTHÉTIQUE, PERCUTANTE & OPTIMISÉE MOBILE */}
+      <section className="relative pt-6 pb-8 sm:pt-12 sm:pb-14 border-b border-slate-900 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-bold uppercase tracking-wider mb-3">
+            <Coffee className="w-3.5 h-3.5" />
             CAFÉ RENCONTRE — 30 MINUTES POUR ÉCHANGER
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-6 leading-tight">
+          <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight mb-3 leading-tight">
             Et si nous prenions un café ?
           </h1>
 
-          <div className="max-w-2xl mx-auto space-y-3 text-slate-300 text-base sm:text-lg leading-relaxed font-normal">
-            <p className="font-semibold text-white">
-              30 minutes pour échanger sur vos projets, vos idées et vos défis professionnels.
-            </p>
-            <p className="text-slate-400 text-sm sm:text-base">
-              Vous avez un projet, une difficulté ou simplement envie de découvrir ce que le numérique et l'intelligence artificielle peuvent apporter à votre activité ?
-            </p>
-            <p className="text-slate-300 text-sm sm:text-base">
-              Choisissez votre interlocuteur et proposez un rendez-vous gratuit, sans engagement.
-            </p>
-            <p className="text-amber-400/90 text-sm font-medium">
-              Nous pouvons venir vous rencontrer dans vos locaux ou vous retrouver autour d'un café.
-            </p>
-          </div>
+          <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-4">
+            30 minutes d'échange gratuit et sans engagement sur vos projets, vos idées ou votre stratégie numérique.
+            Dans vos locaux ou autour d'un café.
+          </p>
 
-          {/* Badges d'information sur la campagne */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-400">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-slate-200">{campaign.title}</span>
-            </div>
+          {/* Badges d'information compacts */}
+          <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] text-slate-300">
+            <span className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 font-semibold text-amber-300 flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              {campaign.title}
+            </span>
             {campaign.location && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800">
-                <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                <span>{campaign.location}</span>
-              </div>
+              <span className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-1 text-slate-400">
+                <MapPin className="w-3 h-3 text-slate-500" />
+                {campaign.location}
+              </span>
             )}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800">
-              <Clock className="w-3.5 h-3.5 text-emerald-400" />
-              <span>30 min gratuites • Sans engagement</span>
-            </div>
+            <span className="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-semibold">
+              30 min offertes • Gratuit
+            </span>
           </div>
         </div>
       </section>
 
-      {/* LISTE DES INTERVENANTS */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-              <UserCheck className="w-6 h-6 text-amber-400" />
-              Nos intervenants disponibles
-            </h2>
-            <p className="text-slate-400 text-xs sm:text-sm mt-1">
-              Sélectionnez la personne avec laquelle vous aimeriez échanger :
-            </p>
-          </div>
-          <span className="text-xs px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-400 font-mono">
+      {/* LISTE DES INTERVENANTS (RESPONSIVE CARDS) */}
+      <main className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <UserCheck className="w-5 h-5 text-amber-400" />
+            Choisissez votre interlocuteur
+          </h2>
+          <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400">
             {speakers.length} {speakers.length > 1 ? 'experts' : 'expert'}
           </span>
         </div>
 
         {speakers.length === 0 ? (
-          <div className="bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl p-12 text-center">
-            <Coffee className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-white mb-1">Aucun intervenant affiché</h3>
-            <p className="text-slate-400 text-xs max-w-md mx-auto">
-              Les intervenants pour cette session sont en cours de configuration par l'équipe organisatrice.
-            </p>
+          <div className="bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
+            Intervenants en cours de configuration.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             {speakers.map((spk) => {
               const expertisesList = Array.isArray(spk.expertises)
                 ? spk.expertises
@@ -488,36 +416,34 @@ export const PublicCafeRencontrePage: React.FC = () => {
               return (
                 <div
                   key={spk.id}
-                  className="bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-amber-500/40 rounded-3xl p-6 transition-all duration-300 flex flex-col justify-between group shadow-lg hover:shadow-amber-500/5 relative overflow-hidden"
+                  className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800/90 hover:border-amber-500/50 rounded-2xl p-5 transition-all flex flex-col justify-between shadow-lg"
                 >
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-colors pointer-events-none" />
-
                   <div>
-                    {/* Photo & Nom */}
-                    <div className="flex items-center gap-4 mb-5">
+                    {/* Photo + Infos */}
+                    <div className="flex items-center gap-3.5 mb-3.5">
                       {spk.photo_url ? (
                         <img
                           src={spk.photo_url}
                           alt={spk.display_name}
-                          className="w-16 h-16 rounded-2xl object-cover border-2 border-slate-800 group-hover:border-amber-500/40 transition-colors shadow-md shrink-0"
+                          className="w-14 h-14 rounded-2xl object-cover border-2 border-amber-500/20 shrink-0"
                         />
                       ) : (
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-slate-800 border-2 border-slate-800 flex items-center justify-center text-amber-400 font-bold text-lg shrink-0">
+                        <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center text-amber-400 font-extrabold text-base shrink-0">
                           {spk.display_name.charAt(0)}
                         </div>
                       )}
                       <div className="min-w-0">
-                        <h3 className="text-lg font-bold text-white truncate group-hover:text-amber-400 transition-colors">
+                        <h3 className="text-base font-bold text-white truncate">
                           {spk.display_name}
                         </h3>
                         {spk.job_title && (
-                          <p className="text-slate-300 text-xs font-medium truncate flex items-center gap-1.5 mt-0.5">
+                          <p className="text-slate-300 text-xs font-medium truncate flex items-center gap-1 mt-0.5">
                             <Briefcase className="w-3 h-3 text-slate-500 shrink-0" />
                             {spk.job_title}
                           </p>
                         )}
                         {spk.company && (
-                          <p className="text-slate-400 text-xs truncate flex items-center gap-1.5 mt-0.5">
+                          <p className="text-slate-400 text-[11px] truncate flex items-center gap-1 mt-0.5">
                             <Building2 className="w-3 h-3 text-slate-500 shrink-0" />
                             {spk.company}
                           </p>
@@ -525,20 +451,20 @@ export const PublicCafeRencontrePage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Présentation / Bio */}
+                    {/* Bio courte */}
                     {spk.bio && (
-                      <p className="text-slate-300 text-xs leading-relaxed line-clamp-3 mb-4 italic">
+                      <p className="text-slate-300 text-xs leading-relaxed line-clamp-2 mb-3 italic">
                         « {spk.bio} »
                       </p>
                     )}
 
-                    {/* Domaines d'expertise */}
+                    {/* Tags expertises */}
                     {expertisesList.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-6">
-                        {expertisesList.map((tag, idx) => (
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {expertisesList.slice(0, 3).map((tag, idx) => (
                           <span
                             key={idx}
-                            className="px-2.5 py-0.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300 text-[11px] font-medium"
+                            className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700/60 text-slate-300 text-[10px] font-medium"
                           >
                             {tag}
                           </span>
@@ -547,16 +473,16 @@ export const PublicCafeRencontrePage: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Bouton d'action */}
+                  {/* Bouton d'action tactile (hauteur optimale mobile 44px+) */}
                   <button
                     onClick={() => {
                       setSelectedSpeaker(spk);
                       setSubmitError(null);
                     }}
-                    className="w-full mt-4 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-amber-500/10 active:scale-95 group/btn"
+                    className="w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98] cursor-pointer"
                   >
-                    <span>Échanger avec cette personne</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                    <span>Échanger avec {spk.display_name.split(' ')[0]}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               );
@@ -564,74 +490,64 @@ export const PublicCafeRencontrePage: React.FC = () => {
           </div>
         )}
 
-        {/* Note récapitulative bas de page */}
-        <div className="mt-12 bg-slate-900/30 border border-slate-800/80 rounded-2xl p-6 text-center text-xs text-slate-400 max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4">
-          <div className="flex items-center gap-2 text-slate-300 font-medium">
-            <Lock className="w-4 h-4 text-emerald-400" />
-            Confidentialité garantie
-          </div>
-          <span className="hidden sm:inline text-slate-700">•</span>
-          <span>Vos coordonnées sont exclusivement transmises pour l'organisation de ce rendez-vous.</span>
+        <div className="mt-8 text-center text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
+          <Lock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span>Vos informations restent 100% confidentielles. Aucun démarchage abusif.</span>
         </div>
       </main>
 
-      {/* MODALE DU FORMULAIRE DE PRISE DE RENDEZ-VOUS */}
+      {/* MODALE DU FORMULAIRE MOBILE-FIRST */}
       {selectedSpeaker && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-950/80 backdrop-blur-md">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 shadow-2xl relative my-auto animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto bg-slate-950/85 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-5 sm:p-7 shadow-2xl relative">
             {/* Bouton fermer */}
             <button
               onClick={() => setSelectedSpeaker(null)}
-              className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
-            {/* En-tête avec rappel de l'intervenant sélectionné */}
-            <div className="flex items-center gap-4 pb-6 border-b border-slate-800 pr-10">
+            {/* En-tête modale */}
+            <div className="flex items-center gap-3 pb-4 border-b border-slate-800 pr-8">
               {selectedSpeaker.photo_url ? (
                 <img
                   src={selectedSpeaker.photo_url}
                   alt={selectedSpeaker.display_name}
-                  className="w-14 h-14 rounded-2xl object-cover border-2 border-amber-500/30 shadow-md shrink-0"
+                  className="w-12 h-12 rounded-xl object-cover border border-amber-500/30 shrink-0"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 text-amber-400 font-bold text-lg flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold flex items-center justify-center shrink-0">
                   {selectedSpeaker.display_name.charAt(0)}
                 </div>
               )}
-              <div>
-                <span className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">
-                  Demande de Café Rencontre (30 min)
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
+                  Demande de Café (30 min)
                 </span>
-                <h3 className="text-xl font-bold text-white">
-                  Échanger avec {selectedSpeaker.display_name}
+                <h3 className="text-base font-bold text-white truncate">
+                  Avec {selectedSpeaker.display_name}
                 </h3>
-                <p className="text-slate-400 text-xs">
-                  {selectedSpeaker.job_title ? `${selectedSpeaker.job_title} • ` : ''}
+                <p className="text-slate-400 text-[11px] truncate">
                   {selectedSpeaker.company || campaign.title}
                 </p>
               </div>
             </div>
 
             {submitError && (
-              <div className="mt-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2.5">
+              <div className="mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
                 <span>{submitError}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-              {/* SECTION 1 : VOS INFORMATIONS */}
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
-                  <UserCheck className="w-3.5 h-3.5 text-amber-400" />
-                  1. Vos coordonnées professionnelles
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-xs">
+              {/* 1. Coordonnées */}
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
-                      Nom et prénom <span className="text-amber-400">*</span>
+                    <label className="block text-slate-300 font-medium mb-1">
+                      Votre Nom & Prénom <span className="text-amber-400">*</span>
                     </label>
                     <input
                       type="text"
@@ -639,98 +555,68 @@ export const PublicCafeRencontrePage: React.FC = () => {
                       placeholder="Ex: Sarah Martin"
                       value={formData.requester_name}
                       onChange={e => setFormData({ ...formData, requester_name: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors"
+                      className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-amber-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                    <label className="block text-slate-300 font-medium mb-1">
                       Entreprise / Organisation <span className="text-amber-400">*</span>
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="Ex: Entreprise Martin & Co"
+                      placeholder="Ex: Cabinet Martin"
                       value={formData.company_name}
                       onChange={e => setFormData({ ...formData, company_name: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors"
+                      className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-amber-400"
                     />
                   </div>
+                </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
-                      Votre fonction
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ex: Dirigeante, Responsable Technique..."
-                      value={formData.job_title}
-                      onChange={e => setFormData({ ...formData, job_title: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                    <label className="block text-slate-300 font-medium mb-1">
                       Adresse e-mail <span className="text-amber-400">*</span>
                     </label>
                     <input
                       type="email"
                       required
-                      placeholder="sarah.martin@exemple.fr"
+                      placeholder="sarah@exemple.fr"
                       value={formData.email}
                       onChange={e => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors"
+                      className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-amber-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
-                      Téléphone (optionnel)
+                    <label className="block text-slate-300 font-medium mb-1">
+                      Téléphone
                     </label>
                     <input
                       type="tel"
                       placeholder="06 12 34 56 78"
                       value={formData.phone}
                       onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
-                      Secteur d'activité (optionnel)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Industrie, Commerce, Services, Artisanat..."
-                      value={formData.sector}
-                      onChange={e => setFormData({ ...formData, sector: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors"
+                      className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-amber-400"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* SECTION 2 : SUJET DE L'ÉCHANGE */}
-              <div className="pt-2 border-t border-slate-800">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
-                  <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
-                  2. Sujet de notre échange
-                </h4>
-                <p className="text-xs text-slate-300 font-medium mb-3">
-                  Quel sujet aimeriez-vous aborder lors de notre échange ? <span className="text-amber-400">*</span>
-                </p>
-
-                {/* Sujet principal */}
-                <div className="space-y-2 mb-4">
+              {/* 2. Sujet */}
+              <div className="pt-3 border-t border-slate-800">
+                <label className="block text-slate-300 font-medium mb-1.5">
+                  Quel sujet aimeriez-vous aborder ? <span className="text-amber-400">*</span>
+                </label>
+                <div className="space-y-1.5">
                   {TOPIC_OPTIONS.map((opt, i) => (
                     <label
                       key={i}
-                      className={`flex items-start gap-3 p-3 rounded-xl border text-xs cursor-pointer transition-all ${
+                      className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer transition-colors ${
                         formData.main_topic === opt
-                          ? 'bg-amber-500/10 border-amber-500/40 text-white font-medium'
-                          : 'bg-slate-950/60 border-slate-800/80 text-slate-300 hover:border-slate-700'
+                          ? 'bg-amber-500/15 border-amber-500/40 text-white font-medium'
+                          : 'bg-slate-950/50 border-slate-800 text-slate-300'
                       }`}
                     >
                       <input
@@ -739,90 +625,45 @@ export const PublicCafeRencontrePage: React.FC = () => {
                         value={opt}
                         checked={formData.main_topic === opt}
                         onChange={() => setFormData({ ...formData, main_topic: opt })}
-                        className="mt-0.5 text-amber-500 focus:ring-amber-500 bg-slate-900 border-slate-700"
+                        className="mt-0.5 text-amber-500 focus:ring-amber-500"
                       />
-                      <span>{opt}</span>
+                      <span className="leading-snug">{opt}</span>
                     </label>
                   ))}
                 </div>
-
-                {/* Sujets secondaires facultatifs */}
-                <div className="mb-4">
-                  <p className="text-[11px] text-slate-400 mb-2">
-                    Sujets secondaires que vous souhaiteriez également évoquer (facultatif) :
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {TOPIC_OPTIONS.filter(o => o !== formData.main_topic).map((opt, i) => {
-                      const isSelected = formData.secondary_topics.includes(opt);
-                      return (
-                        <button
-                          type="button"
-                          key={i}
-                          onClick={() => handleToggleSecondaryTopic(opt)}
-                          className={`px-2.5 py-1 rounded-lg text-[11px] transition-all border ${
-                            isSelected
-                              ? 'bg-slate-800 text-amber-400 border-amber-500/40 font-medium'
-                              : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white hover:border-slate-700'
-                          }`}
-                        >
-                          {isSelected ? '✓ ' : '+ '} {opt}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    En quelques mots, que souhaitez-vous discuter avec nous ?
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder="Détaillez en quelques lignes votre contexte ou vos interrogations..."
-                    value={formData.need_description}
-                    onChange={e => setFormData({ ...formData, need_description: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors"
-                  />
-                </div>
               </div>
 
-              {/* SECTION 3 : ORGANISATION DU RENDEZ-VOUS */}
-              <div className="pt-2 border-t border-slate-800">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
-                  3. Organisation du rendez-vous (30 minutes)
-                </h4>
-                
-                <p className="text-xs text-slate-300 font-medium mb-2.5">
-                  Où préférez-vous que nous nous rencontrions ? <span className="text-amber-400">*</span>
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-4">
+              {/* 3. Organisation */}
+              <div className="pt-3 border-t border-slate-800">
+                <label className="block text-slate-300 font-medium mb-2">
+                  Où préférez-vous nous rencontrer ? <span className="text-amber-400">*</span>
+                </label>
+                <div className="grid grid-cols-3 gap-2 mb-3">
                   {[
-                    { id: 'client_premises', label: 'Dans nos locaux', sub: 'Vous venez à notre rencontre' },
-                    { id: 'cafe_public', label: 'Autour d\'un café', sub: 'Dans un lieu convivial' },
-                    { id: 'both', label: 'Les deux me conviennent', sub: 'Selon vos disponibilités' }
+                    { id: 'client_premises', label: 'Dans vos locaux', sub: 'On vient chez vous' },
+                    { id: 'cafe_public', label: 'Au café', sub: 'Lieu convivial' },
+                    { id: 'both', label: 'Les deux', sub: 'Selon agenda' }
                   ].map(fmt => (
                     <button
                       type="button"
                       key={fmt.id}
                       onClick={() => setFormData({ ...formData, meeting_format: fmt.id as MeetingFormat })}
-                      className={`p-3 rounded-xl border text-left transition-all ${
+                      className={`p-2.5 rounded-xl border text-center transition-colors ${
                         formData.meeting_format === fmt.id
-                          ? 'bg-amber-500/10 border-amber-500/50 text-white shadow-sm'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                          ? 'bg-amber-500/15 border-amber-500/50 text-white font-bold'
+                          : 'bg-slate-950/50 border-slate-800 text-slate-400'
                       }`}
                     >
-                      <div className="text-xs font-bold">{fmt.label}</div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">{fmt.sub}</div>
+                      <div className="text-[11px] leading-tight">{fmt.label}</div>
+                      <div className="text-[9px] text-slate-500 mt-0.5">{fmt.sub}</div>
                     </button>
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
-                      Ville <span className="text-amber-400">*</span>
+                    <label className="block text-slate-300 font-medium mb-1">
+                      Votre Ville <span className="text-amber-400">*</span>
                     </label>
                     <input
                       type="text"
@@ -830,29 +671,17 @@ export const PublicCafeRencontrePage: React.FC = () => {
                       placeholder="Ex: Troyes"
                       value={formData.city}
                       onChange={e => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors"
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-amber-400"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
-                      Code postal
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ex: 10000"
-                      value={formData.postal_code}
-                      onChange={e => setFormData({ ...formData, postal_code: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                    <label className="block text-slate-300 font-medium mb-1">
                       Moment préféré
                     </label>
                     <select
                       value={formData.availability}
                       onChange={e => setFormData({ ...formData, availability: e.target.value as AvailabilityType })}
-                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400 transition-colors"
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-amber-400"
                     >
                       <option value="flexible">Flexible</option>
                       <option value="morning">Matinée</option>
@@ -860,24 +689,11 @@ export const PublicCafeRencontrePage: React.FC = () => {
                     </select>
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    Précisions ou commentaire complémentaire (optionnel)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Ex: plutôt les mardis ou jeudis, semaine prochaine..."
-                    value={formData.additional_comment}
-                    onChange={e => setFormData({ ...formData, additional_comment: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors"
-                  />
-                </div>
               </div>
 
-              {/* SECTION 4 : CONSENTEMENT RGPD */}
-              <div className="pt-2 border-t border-slate-800">
-                <label className="flex items-start gap-3 cursor-pointer">
+              {/* 4. Consentement RGPD */}
+              <div className="pt-2">
+                <label className="flex items-start gap-2.5 cursor-pointer">
                   <input
                     type="checkbox"
                     required
@@ -885,36 +701,24 @@ export const PublicCafeRencontrePage: React.FC = () => {
                     onChange={e => setFormData({ ...formData, consent_accepted: e.target.checked })}
                     className="mt-0.5 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500"
                   />
-                  <span className="text-xs text-slate-300 leading-relaxed">
-                    J'accepte que les informations renseignées soient utilisées pour traiter ma demande et organiser la prise de contact pour ce Café Rencontre.{' '}
-                    <span className="text-slate-400">Aucun démarchage commercial abusif.</span>
+                  <span className="text-[11px] text-slate-400 leading-tight">
+                    J'accepte d'être recontacté(e) pour fixer ce créneau de 30 minutes sans engagement.
                   </span>
                 </label>
               </div>
 
-              {/* ACTIONS */}
-              <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setSelectedSpeaker(null)}
-                  disabled={submitting}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
-                >
-                  Annuler
-                </button>
+              {/* Bouton de confirmation */}
+              <div className="pt-2">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full sm:w-auto px-7 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-amber-500/20 disabled:opacity-50"
+                  className="w-full py-3.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98] disabled:opacity-50 cursor-pointer"
                 >
                   {submitting ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                      <span>Enregistrement en cours...</span>
-                    </>
+                    <span>Enregistrement...</span>
                   ) : (
                     <>
-                      <span>Confirmer ma demande de rendez-vous</span>
+                      <span>Confirmer mon Café Rencontre (30 min)</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
@@ -929,4 +733,3 @@ export const PublicCafeRencontrePage: React.FC = () => {
 };
 
 export default PublicCafeRencontrePage;
-

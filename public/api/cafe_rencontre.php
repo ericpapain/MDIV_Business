@@ -118,10 +118,14 @@ if (empty($action) && isset($data['action'])) {
     $action = $data['action'];
 }
 
-// Fonction utilitaire de slugification
+// Fonction utilitaire de slugification robuste avec conversion des accents français
 function slugify($text) {
+    $text = str_replace(
+        ['é', 'è', 'ê', 'ë', 'à', 'â', 'ä', 'î', 'ï', 'ô', 'ö', 'ù', 'û', 'ü', 'ç', 'É', 'È', 'Ê', 'Ë', 'À', 'Â', 'Ä', 'Î', 'Ï', 'Ô', 'Ö', 'Ù', 'Û', 'Ü', 'Ç'],
+        ['e', 'e', 'e', 'e', 'a', 'a', 'a', 'i', 'i', 'o', 'o', 'u', 'u', 'u', 'c', 'e', 'e', 'e', 'e', 'a', 'a', 'a', 'i', 'i', 'o', 'o', 'u', 'u', 'u', 'c'],
+        $text
+    );
     $text = preg_replace('~[^\pL\d]+~u', '-', $text);
-    $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
     $text = preg_replace('~[^-\w]+~', '', $text);
     $text = trim($text, '-');
     $text = preg_replace('~-+~', '-', $text);
@@ -596,9 +600,15 @@ try {
         $slug = trim($_GET['slug'] ?? ($data['slug'] ?? ''));
         if (empty($slug)) throw new Exception("Identifiant de campagne manquant");
 
-        $stmt = $pdo->prepare("SELECT * FROM cafe_rencontre_campaigns WHERE slug = ?");
-        $stmt->execute([$slug]);
+        $stmt = $pdo->prepare("SELECT * FROM cafe_rencontre_campaigns WHERE slug = ? OR slug = ? OR slug = ? OR REPLACE(slug, 'e', '') = REPLACE(?, 'e', '') ORDER BY id DESC LIMIT 1");
+        $stmt->execute([$slug, str_replace('rseau', 'reseau', $slug), str_replace('reseau', 'rseau', $slug), $slug]);
         $campaign = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Fallback : si non trouvé par slug exact et une campagne active existe
+        if (!$campaign) {
+            $stmtFallback = $pdo->query("SELECT * FROM cafe_rencontre_campaigns WHERE is_active = 1 ORDER BY id DESC LIMIT 1");
+            $campaign = $stmtFallback ? $stmtFallback->fetch(PDO::FETCH_ASSOC) : null;
+        }
 
         if (!$campaign) {
             http_response_code(404);
@@ -714,8 +724,13 @@ try {
             $stmtC = $pdo->prepare("SELECT * FROM cafe_rencontre_campaigns WHERE id = ?");
             $stmtC->execute([$campaignId]);
         } elseif (!empty($campaignSlug)) {
-            $stmtC = $pdo->prepare("SELECT * FROM cafe_rencontre_campaigns WHERE slug = ?");
-            $stmtC->execute([$campaignSlug]);
+            $stmtC = $pdo->prepare("SELECT * FROM cafe_rencontre_campaigns WHERE slug = ? OR slug = ? OR slug = ? OR REPLACE(slug, 'e', '') = REPLACE(?, 'e', '') ORDER BY id DESC LIMIT 1");
+            $stmtC->execute([$campaignSlug, str_replace('rseau', 'reseau', $campaignSlug), str_replace('reseau', 'rseau', $campaignSlug), $campaignSlug]);
+            $campaign = $stmtC->fetch(PDO::FETCH_ASSOC);
+            if (!$campaign) {
+                $stmtFallback = $pdo->query("SELECT * FROM cafe_rencontre_campaigns WHERE is_active = 1 ORDER BY id DESC LIMIT 1");
+                $campaign = $stmtFallback ? $stmtFallback->fetch(PDO::FETCH_ASSOC) : null;
+            }
         } else {
             throw new Exception("Campagne non spécifiée");
         }
@@ -1046,10 +1061,10 @@ try {
         fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
 
         $headers = [
-            'ID', 'Date Soumission', 'Campagne', 'Intervenant Souhaité', 'Statut',
-            'Nom & Prénom', 'Entreprise', 'Fonction', 'Email', 'Téléphone',
-            'Secteur', 'Sujet Principal', 'Format de Rencontre', 'Ville', 'Code Postal',
-            'Disponibilités', 'Créneau Souhaité', 'Besoin Détaillé', 'Commentaire'
+            'ID', 'Date Soumission', 'Campagne', 'Intervenant Souhaité', 'Entreprise Intervenant', 'Statut',
+            'Nom & Prénom', 'Entreprise Demandeur', 'Fonction', 'Email', 'Téléphone', 'Site Web',
+            'Secteur Activité', 'Sujet Principal', 'Sujets Secondaires', 'Format de Rencontre', 'Ville', 'Code Postal',
+            'Disponibilités', 'Créneau Souhaité', 'Besoin Détaillé', 'Commentaire', 'Consentement RGPD', 'Date Consentement'
         ];
         if ($includeNotes) {
             $headers[] = 'Notes Internes CMS';
@@ -1069,28 +1084,39 @@ try {
             $formatMap = [
                 'client_premises' => 'Dans les locaux du client',
                 'cafe_public' => 'Dans un café convivial',
-                'both' => 'Les deux'
+                'both' => 'Les deux me conviennent'
             ];
+            $secondaryFormatted = '';
+            if (!empty($r['secondary_topics'])) {
+                $dec = is_string($r['secondary_topics']) ? json_decode($r['secondary_topics'], true) : $r['secondary_topics'];
+                $secondaryFormatted = is_array($dec) ? implode(', ', $dec) : strval($r['secondary_topics']);
+            }
+
             $line = [
                 $r['id'],
                 $r['created_at'],
-                $sanitize($r['campaign_title']),
-                $sanitize($r['speaker_name']),
-                $sanitize($r['status']),
-                $sanitize($r['requester_name']),
-                $sanitize($r['company_name']),
-                $sanitize($r['job_title']),
-                $sanitize($r['email']),
-                $sanitize($r['phone']),
-                $sanitize($r['sector']),
-                $sanitize($r['main_topic']),
+                $sanitize($r['campaign_title'] ?? ''),
+                $sanitize($r['speaker_name'] ?? ''),
+                $sanitize($r['speaker_company'] ?? ''),
+                $sanitize($r['status'] ?? ''),
+                $sanitize($r['requester_name'] ?? ''),
+                $sanitize($r['company_name'] ?? ''),
+                $sanitize($r['job_title'] ?? ''),
+                $sanitize($r['email'] ?? ''),
+                $sanitize($r['phone'] ?? ''),
+                $sanitize($r['website'] ?? ''),
+                $sanitize($r['sector'] ?? ''),
+                $sanitize($r['main_topic'] ?? ''),
+                $sanitize($secondaryFormatted),
                 $sanitize($formatMap[$r['meeting_format']] ?? $r['meeting_format']),
-                $sanitize($r['city']),
-                $sanitize($r['postal_code']),
-                $sanitize($r['availability']),
-                $sanitize($r['preferred_date']),
-                $sanitize($r['need_description']),
-                $sanitize($r['additional_comment'])
+                $sanitize($r['city'] ?? ''),
+                $sanitize($r['postal_code'] ?? ''),
+                $sanitize($r['availability'] ?? ''),
+                $sanitize($r['preferred_date'] ?? ''),
+                $sanitize($r['need_description'] ?? ''),
+                $sanitize($r['additional_comment'] ?? ''),
+                $r['consent_accepted'] ? 'Oui' : 'Non',
+                $sanitize($r['consent_at'] ?? $r['created_at'])
             ];
             if ($includeNotes) {
                 $line[] = $sanitize($r['admin_notes']);
