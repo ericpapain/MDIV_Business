@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Play, Quote, X, Calendar, MapPin, Users, Image a
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import EventDescriptionExpandable from "@/components/events/EventDescriptionExpandable";
 
 const DEMO_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4";
 
@@ -122,9 +123,13 @@ export default function EventReplay() {
             <span className="flex items-center gap-2"><Calendar size={14} /> {new Date(event.date).toLocaleDateString()}</span>
             <span className="flex items-center gap-2"><MapPin size={14} /> {event.location}</span>
           </div>
-          <p className="max-w-2xl mx-auto text-lg md:text-xl text-foreground/80 font-serif italic mb-10">
-            {isEn && event.description_en ? event.description_en : event.description}
-          </p>
+          <div className="max-w-3xl mx-auto mb-10 text-left bg-black/40 backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-gold/20 shadow-xl">
+            <EventDescriptionExpandable
+              description={isEn && event.description_en ? event.description_en : event.description}
+              maxLines={8}
+              isEn={isEn}
+            />
+          </div>
           <div className="flex justify-center gap-4">
             <button onClick={() => scrollToSection('apercu')} className="btn-gold px-8 py-4 text-xs uppercase tracking-[0.2em] rounded-sm flex items-center gap-3 shadow-[0_0_30px_rgba(197,160,89,0.2)]">
               {isEn ? "Relive the experience" : "Revivre l'expérience"} <ArrowRight size={14} />

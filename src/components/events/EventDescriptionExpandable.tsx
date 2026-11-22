@@ -26,22 +26,40 @@ export default function EventDescriptionExpandable({
   const cleanHtml = useMemo(() => {
     if (!description || !description.trim()) return '';
 
+    let content = description.trim();
+
+    // Décodage si le texte est sous forme d'entités HTML échappées (&lt;div...&gt;)
+    if (/&lt;\/?[a-z]/i.test(content)) {
+      if (typeof document !== 'undefined') {
+        const txt = document.createElement('textarea');
+        txt.innerHTML = content;
+        content = txt.value;
+      } else {
+        content = content
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/&amp;/g, '&');
+      }
+    }
+
     // Détection si c'est du HTML ou du texte brut
-    const hasHtmlTags = /<\/?[a-z][\s\S]*>/i.test(description);
+    const hasHtmlTags = /<\/?[a-z][\s\S]*>/i.test(content);
 
     if (hasHtmlTags) {
-      // Nettoyage sécurisé du HTML avec styles autorisés (couleurs, alignement justifié, etc.)
-      return DOMPurify.sanitize(description, {
+      // Nettoyage sécurisé du HTML avec styles autorisés (couleurs, alignement justifié, encadrés)
+      return DOMPurify.sanitize(content, {
         ALLOWED_TAGS: [
           'p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'span', 
-          'ul', 'ol', 'li', 'h3', 'h4', 'h5', 'h6', 'div', 'blockquote', 'hr'
+          'ul', 'ol', 'li', 'h3', 'h4', 'h5', 'h6', 'div', 'blockquote', 'hr', 'font', 'a'
         ],
-        ALLOWED_ATTR: ['style', 'class', 'color']
+        ALLOWED_ATTR: ['style', 'class', 'color', 'href', 'target', 'rel']
       });
     }
 
     // Si texte brut : conversion des sauts de ligne en HTML propre
-    const escaped = description
+    const escaped = content
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');

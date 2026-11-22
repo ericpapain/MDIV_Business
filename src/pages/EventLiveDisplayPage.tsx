@@ -31,6 +31,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { EventLiveState, LiveSceneType, LiveStatsData } from '@/types/eventEngine';
+import EventDescriptionExpandable from '@/components/events/EventDescriptionExpandable';
 
 export default function EventLiveDisplayPage() {
   const { id } = useParams<{ id: string }>();
@@ -247,9 +248,12 @@ export default function EventLiveDisplayPage() {
               {bundles.event?.title || "Journée Réseau & Synergies B2B"}
             </h1>
 
-            <p className="text-xl sm:text-2xl text-slate-300 max-w-4xl mx-auto font-light leading-relaxed">
-              {bundles.event?.description || "Rencontre sélective de dirigeants, investisseurs et partenaires industriels pour accélérer le développement d'affaires."}
-            </p>
+            <div className="max-w-4xl mx-auto my-2 text-left bg-slate-900/40 p-4 sm:p-6 rounded-2xl border border-slate-800/80">
+              <EventDescriptionExpandable
+                description={bundles.event?.description || "Rencontre sélective de dirigeants, investisseurs et partenaires industriels pour accélérer le développement d'affaires."}
+                maxLines={6}
+              />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 max-w-4xl mx-auto">
               <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-sm text-left space-y-2">
